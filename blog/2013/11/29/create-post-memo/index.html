@@ -89,24 +89,28 @@ source/_post/YYYY-MM-DD-title.markdownというデータが出来上がるので
 
 <p><strong>プレビュー</strong></p>
 
-<p>  rake preview</p>
+<pre><code>rake preview
+</code></pre>
 
 <p><a href="http://localhost:4000/">http://localhost:4000/</a>にアクセスすると見れる。<code>Ctrl+c</code>で終了。</p>
 
 <p><strong>記事のアップ</strong></p>
 
-<p>  rake generate
-  rake deploy</p>
+<pre><code>rake generate
+rake deploy
+</code></pre>
 
 <p>または上記２つを１つに</p>
 
-<p>  rake gen_deploy</p>
+<pre><code>rake gen_deploy
+</code></pre>
 
 <p><strong>ソースをBitbucketにバックアップ</strong></p>
 
-<p>  git add -A
-  git commit -m &ldquo;add post&rdquo;
-  git push -u bitbucket source</p>
+<pre><code>git add -A
+git commit -m "add post"
+git push -u bitbucket source
+</code></pre>
 </div>
 
 

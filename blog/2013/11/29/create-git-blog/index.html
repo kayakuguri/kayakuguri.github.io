@@ -95,8 +95,9 @@ http://tokkonopapa.github.io/blog/2011/12/30/ &hellip;">
 <p><code>bundle exec rake install</code>が実行できない。<br/>
 以下エラーが出る</p>
 
-<p>  Could not find rake-0.9.2.2 in any of the sources
-  Run <code>bundle install</code> to install missing gems.</p>
+<pre><code>Could not find rake-0.9.2.2 in any of the sources
+Run `bundle install` to install missing gems.
+</code></pre>
 
 <p>・解決策(英語)<br/>
 <a href="http://stackoverflow.com/questions/9693445/rails-3-2-1-could-not-find-rake-0-9-2-2-in-any-of-the-sources">Rails 3.2.1 &ndash; Could not find rake-0.9.2.2 in any of the sources</a></p>
@@ -114,46 +115,45 @@ http://tokkonopapa.github.io/blog/2011/12/30/ &hellip;">
 
 <p>なんかエラー出たので、指示に従って、アップデート</p>
 
-<p>  Gem::InstallError: liquid requires RubyGems version >= 1.3.7. Try &lsquo;gem update &mdash;system&rsquo; to update RubyGems itself.
-  An error occurred while installing liquid (2.3.0), and Bundler cannot continue.
-  Make sure that <code>gem install liquid -v '2.3.0'</code> succeeds before bundling.</p>
+<pre><code>Gem::InstallError: liquid requires RubyGems version &gt;= 1.3.7. Try 'gem update --system' to update RubyGems itself.
+An error occurred while installing liquid (2.3.0), and Bundler cannot continue.
+Make sure that `gem install liquid -v '2.3.0'` succeeds before bundling.
+</code></pre>
 
 <p><code>sudo gem update --system</code></p>
 
 <p>もっかい<code>sudo bundle install</code>したらいけたっぽい。<br/>
 入ったもの一覧</p>
 
-<ul>
-<li>rake (0.9.2.2)</li>
-<li>RedCloth (4.2.9)</li>
-<li>chunky_png (1.2.5)</li>
-<li>fast-stemmer (1.0.1)</li>
-<li>classifier (1.3.3)</li>
-<li>fssm (0.2.9)</li>
-<li>sass (3.2.9)</li>
-<li>compass (0.12.2)</li>
-<li>directory_watcher (1.4.1)</li>
-<li>haml (3.1.7)</li>
-<li>kramdown (0.13.8)</li>
-<li>liquid (2.3.0)</li>
-<li>syntax (1.0.0)</li>
-<li>maruku (0.6.1)</li>
-<li>posix-spawn (0.3.6)</li>
-<li>yajl-ruby (1.1.0)</li>
-<li>pygments.rb (0.3.4)</li>
-<li>jekyll (0.12.0)</li>
-<li>rack (1.5.2)</li>
-<li>rack-protection (1.5.0)</li>
-<li>rb-fsevent (0.9.1)</li>
-<li>rdiscount (2.0.7.3)</li>
-<li>rubypants (0.2.0)</li>
-<li>sass-globbing (1.0.0)</li>
-<li>tilt (1.3.7)</li>
-<li>sinatra (1.4.2)</li>
-<li>stringex (1.4.0)</li>
-<li>bundler (1.3.5)</li>
-</ul>
-
+<pre><code>rake (0.9.2.2)
+RedCloth (4.2.9)
+chunky_png (1.2.5)
+fast-stemmer (1.0.1)
+classifier (1.3.3)
+fssm (0.2.9)
+sass (3.2.9)
+compass (0.12.2)
+directory_watcher (1.4.1)
+haml (3.1.7)
+kramdown (0.13.8)
+liquid (2.3.0)
+syntax (1.0.0)
+maruku (0.6.1)
+posix-spawn (0.3.6)
+yajl-ruby (1.1.0)
+pygments.rb (0.3.4)
+jekyll (0.12.0)
+rack (1.5.2)
+rack-protection (1.5.0)
+rb-fsevent (0.9.1)
+rdiscount (2.0.7.3)
+rubypants (0.2.0)
+sass-globbing (1.0.0)
+tilt (1.3.7)
+sinatra (1.4.2)
+stringex (1.4.0)
+bundler (1.3.5)
+</code></pre>
 
 <p>そのうえでもっかいrakeをinstall。<br/>
 <code>sudo bundle exec rake install</code></p>
@@ -161,7 +161,8 @@ http://tokkonopapa.github.io/blog/2011/12/30/ &hellip;">
 <p>続いて、<code>sudo bundle exec rake setup_github_pages</code>とすると、<br/>
 <code>Repository url:</code>と聞かれたので、その上にある参考の通り、github上のリポジトリURLを入れた。</p>
 
-<p>  <a href="https://github.com/your_username/your_username.github.io">https://github.com/your_username/your_username.github.io</a></p>
+<pre><code>https://github.com/your_username/your_username.github.io
+</code></pre>
 
 <p><a href="https://bitbucket.org/">BitBucket</a>にログイン、とあったので、githubアカウントでログイン。<br/>
 あとは参考サイトの通りにBitBucketでリポジトリを作成して、githubに関連？づける。</p>
@@ -170,7 +171,8 @@ http://tokkonopapa.github.io/blog/2011/12/30/ &hellip;">
 アカウントの管理、から、SSHキー。<br/>
 すでに作成はしていたので、指示にある通り、以下のコマンドでコピー。</p>
 
-<p>  pbcopy &lt; ~/.ssh/id_rsa.pub</p>
+<pre><code>pbcopy &lt; ~/.ssh/id_rsa.pub
+</code></pre>
 
 <p>ラベルを、id_rsa.pubにしておいた。</p>
 
@@ -198,16 +200,19 @@ http://tokkonopapa.github.io/blog/2011/12/30/ &hellip;">
 <p>rubyを1.9.3にしないといけない？<br/>
 以下で？</p>
 
-<p>  rvm install ruby-1.9.3-p392</p>
+<pre><code>rvm install ruby-1.9.3-p392
+</code></pre>
 
 <p>だいぶ時間がかかったけど、アップデートできた。</p>
 
-<p>  Install of ruby-1.9.3-p484 &ndash; #complete</p>
+<pre><code>Install of ruby-1.9.3-p484 - #complete
+</code></pre>
 
 <p>次のエラー</p>
 
-<p>  Could not find RedCloth-4.2.9 in any of the sources
-  Run <code>bundle install</code> to install missing gems.</p>
+<pre><code>Could not find RedCloth-4.2.9 in any of the sources
+Run `bundle install` to install missing gems.
+</code></pre>
 
 <p>これ？<br/>
 <a href="http://kazukiyunoue-tech.hatenablog.com/entry/2012/12/28/132115">http://kazukiyunoue-tech.hatenablog.com/entry/2012/12/28/132115</a><br/>
@@ -216,47 +221,50 @@ http://tokkonopapa.github.io/blog/2011/12/30/ &hellip;">
 <p>もっかい、<code>bundle install</code>してみると、入ったっぽい。rubyのバージョンを変えたから、<br/>
 もう一回インストールし直さないといけなかったのかな？</p>
 
-<p>  Using rake (0.9.2.2)
-  Installing RedCloth (4.2.9)
-  Installing chunky_png (1.2.5)
-  Installing fast-stemmer (1.0.1)
-  Installing classifier (1.3.3)
-  Installing fssm (0.2.9)
-  Installing sass (3.2.9)
-  Installing compass (0.12.2)
-  Installing directory_watcher (1.4.1)
-  Installing haml (3.1.7)
-  Installing kramdown (0.13.8)
-  Installing liquid (2.3.0)
-  Installing syntax (1.0.0)
-  Installing maruku (0.6.1)
-  Installing posix-spawn (0.3.6)
-  Installing yajl-ruby (1.1.0)
-  Installing pygments.rb (0.3.4)
-  Installing jekyll (0.12.0)
-  Installing rack (1.5.2)
-  Installing rack-protection (1.5.0)
-  Installing rb-fsevent (0.9.1)
-  Installing rdiscount (2.0.7.3)
-  Installing rubypants (0.2.0)
-  Installing sass-globbing (1.0.0)
-  Installing tilt (1.3.7)
-  Installing sinatra (1.4.2)
-  Installing stringex (1.4.0)
-  Using bundler (1.3.5)</p>
+<pre><code>Using rake (0.9.2.2)
+Installing RedCloth (4.2.9)
+Installing chunky_png (1.2.5)
+Installing fast-stemmer (1.0.1)
+Installing classifier (1.3.3)
+Installing fssm (0.2.9)
+Installing sass (3.2.9)
+Installing compass (0.12.2)
+Installing directory_watcher (1.4.1)
+Installing haml (3.1.7)
+Installing kramdown (0.13.8)
+Installing liquid (2.3.0)
+Installing syntax (1.0.0)
+Installing maruku (0.6.1)
+Installing posix-spawn (0.3.6)
+Installing yajl-ruby (1.1.0)
+Installing pygments.rb (0.3.4)
+Installing jekyll (0.12.0)
+Installing rack (1.5.2)
+Installing rack-protection (1.5.0)
+Installing rb-fsevent (0.9.1)
+Installing rdiscount (2.0.7.3)
+Installing rubypants (0.2.0)
+Installing sass-globbing (1.0.0)
+Installing tilt (1.3.7)
+Installing sinatra (1.4.2)
+Installing stringex (1.4.0)
+Using bundler (1.3.5)
+</code></pre>
 
 <p>これでようやく、<code>rake preview</code>でエラーが出なくなった！<br/>
 なので、<a href="http://localhost:4000/">http://localhost:4000/</a>にアクセス、、するも、真っ白。<br/>
 コンソールに出てるログを見ると、404になってるっぽい。</p>
 
-<p>  &ldquo;GET / HTTP/1.1&rdquo; 404 &ndash; 0.0237</p>
+<pre><code>"GET / HTTP/1.1" 404 - 0.0237
+</code></pre>
 
 <p>どうやら権限がなくて成功してなかったっぽい。<br/>
 <code>sudo rake preview</code>で見ると、表示出来た！！</p>
 
 <p>つぎに記事をアップしてみるも、権限エラー。。</p>
 
-<p>  Could not read from remote repository.</p>
+<pre><code>Could not read from remote repository.
+</code></pre>
 
 <p>公式のSSH作成・登録方法にもとづいて、やり直してみる。<br/>
 <a href="https://help.github.com/articles/generating-ssh-keys">https://help.github.com/articles/generating-ssh-keys</a></p>
