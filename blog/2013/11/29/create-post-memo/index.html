@@ -1,121 +1,85 @@
 
-<!DOCTYPE html>
-<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
-<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
-<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<!DOCTYPE HTML>
+<html>
 <head>
-  <meta charset="utf-8">
-  <title>Gitblogに投稿するまでの手順メモ - KayaMemo</title>
-  <meta name="author" content="萱潜">
+	<meta charset="utf-8">
+	<title>Gitblogに投稿するまでの手順メモ - KayaMemo</title>
+	<meta name="author" content="萱潜">
 
-  
-  <meta name="description" content="Gitblogに投稿するまでの手順メモ 新しい記事を作成 rake new_post[&lsquo;post title&rsquo;] ※ここでのタイトルに日本語は使えない。また、ページのURLにもなる。
-source/_post/YYYY-MM-DD-title. &hellip;">
-  
-
-  <!-- http://t.co/dKP3o1e -->
-  <meta name="HandheldFriendly" content="True">
-  <meta name="MobileOptimized" content="320">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-
-  
-  <link rel="canonical" href="http://kayakuguri.github.io/blog/2013/11/29/create-post-memo">
-  <link href="/favicon.png" rel="icon">
-  <link href="/stylesheets/styles.css" media="screen, projection" rel="stylesheet" type="text/css">
-  <link href="/atom.xml" rel="alternate" title="KayaMemo" type="application/atom+xml">
-  <script src="/javascripts/modernizr-2.0.js"></script>
-  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
-  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/lib/jquery.min.js"%3E%3C/script%3E'))</script>
-  <script src="/javascripts/octopress.js" type="text/javascript"></script>
-  <script src="/javascripts/jquery.sidr.min.js"></script>
-  <script src="/javascripts/ah-blue.js"></script>
-  
-  
-
-</head> 
-
-<body   >
-  <div class="aux-container">
-    <a id="nav-toggle" href="#sidr"></a>
-    <a id="search-toggle"></a>
-</div>
-
-<header class="header-container clearfix">
-        <a href="/"><img src="/images/ah-frame.svg" onerror="this.onerror=null; this.src='ah-frame.png'"></a>
-</header>
-
-  <div class="main-container">
-    <div class="main wrapper clearfix">
-    	
-    	<aside>
-			
-			  	<div class="search-container">
-					<form action="http://google.com/search" method="get">
-						<fieldset role="search">
-							<input type="hidden" name="q" value="site:blog.alexharr.is" />
-							<input class="search-field" type="text" name="q" results="0" placeholder=""/>
-							<input class="submit" type="submit" value=""/>
-						</fieldset>
-					</form>
-				</div>
-			
-		  <div id="main-nav">
-    <nav>
-        <ul>
-        	<li>
-        		
-					<h3>Recent Posts</h3>
-<ul>
 	
-    <li>
-    	<a href="/blog/2013/11/29/sql-memo/">[メモ]mySQL 文字列処理など</a>
-    </li>
-    
-    <li>
-    	<a href="/blog/2013/11/29/create-post-memo/">Gitblogに投稿するまでの手順メモ</a>
-    </li>
-    
-    <li>
-    	<a href="/blog/2013/11/29/create-git-blog/">Githubでblogをアップするまでのメモ</a>
-    </li>
-    
+	<meta name="description" content="新しい記事を作成 rake new_post[&lsquo;post title&rsquo;] ※ここでのタイトルに日本語は使えない。また、ページのURLにもなる。
+source/_post/YYYY-MM-DD-title.markdownというデータが出来上がるので、
+中編集して記事を作成 &hellip;">
+	
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+	<link href="/atom.xml" rel="alternate" title="KayaMemo" type="application/atom+xml">
+	<link rel="canonical" href="">
+	<link href="/favicon.png" rel="shortcut icon">
+	<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+	<script async="true" src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+	
+</head>
+
+
+<body>
+	<header id="header" class="inner"><h1><a href="/">KayaMemo</a></h1>
+<nav id="main-nav"><ul class="main">
+	<li><a href="/">Blog</a></li>
+	<li><a href="/blog/archives">Archives</a></li>
 </ul>
-
-
-
-
-
-				
-        	</li>
-        	<li>
-        		<ul>
-                    <li>Projects - <a href="http://www.alexharr.is" target="_blank">alexharr.is</a>
-        			<li>Github - <a href="http://www.github.com/alexharris" target="_blank">github.com/alexharris</a></li>
-                    <li>Twitter - <a href="http://www.twitter.com/alexharris6" target="_blank">@alexharris6</a></li>
-                    <li>Email - <a href="mailto:alexharris6@gmail.com" target="_blank">alexharris6 at gmail</a></li>
-        		</ul>
-        	</li>
-        </ul>
-    </nav>
+</nav>
+<nav id="mobile-nav">
+	<div class="alignleft menu">
+		<a class="button">Menu</a>
+		<div class="container"><ul class="main">
+	<li><a href="/">Blog</a></li>
+	<li><a href="/blog/archives">Archives</a></li>
+</ul>
 </div>
-		</aside>
+	</div>
+	<div class="alignright search">
+		<a class="button"></a>
+		<div class="container">
+			<form action="http://google.com/search" method="get">
+				<input type="text" name="q" results="0">
+				<input type="hidden" name="q" value="site:kayakuguri.github.io">
+			</form>
+		</div>
+	</div>
+</nav>
+<nav id="sub-nav" class="alignright">
+	<div class="social">
 		
-      <div>
-<article>
-	<header>
-  <div class="article-tags">
-      
+		
+		
+		<a class="twitter" href="http://twitter.com/kayakuguri123" title="Twitter">Twitter</a>
+		
+		
+    
+		
+		
+		
+		
+		
+		<a class="rss" href="/atom.xml" title="RSS">RSS</a>
+		
+    
+	</div>
+	<form class="search" action="http://google.com/search" method="get">
+		<input class="alignright" type="text" name="q" results="0">
+		<input type="hidden" name="q" value="site:kayakuguri.github.io">
+	</form>
+</nav>
 
-
-  </div>
-  
-    <h1>
-      Gitblogに投稿するまでの手順メモ
-    </h1>
-  
 </header>
-<section>
-  <p><strong>新しい記事を作成</strong></p>
+	
+		
+	
+	<div id="content" class="inner"><article class="post">
+	<h2 class="title">Gitblogに投稿するまでの手順メモ</h2>
+	<div class="entry-content"><p><strong>新しい記事を作成</strong></p>
 
 <p>  rake new_post[&lsquo;post title&rsquo;]</p>
 
@@ -143,57 +107,62 @@ source/_post/YYYY-MM-DD-title. &hellip;">
 <p>  git add -A
   git commit -m &ldquo;add post&rdquo;
   git push -u bitbucket source</p>
-
-</section>
-<footer>
-  <div class="article-date">
-      
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2013-11-29T13:30:48+09:00" pubdate data-updated="true">Nov 29<span>th</span>, 2013</time>
-  </div>
-</footer>
-
-	
-</article>
 </div>
 
-    </div>
-  </div>
-  <footer class="main-footer">
-	<section class="interior-footer">
-		<span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
-	</section>
-</footer>
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
 
 
   
 
 
+<time datetime="2013-11-29T13:30:48+09:00" pubdate data-updated="true">Nov 29<span>th</span>, 2013</time></div>
+	<div class="tags">
 
 
+	<a class='category' href='/blog/categories/github-octpress/'>Github,Octpress</a>
 
 
+</div>
+	
+</div>
+</article>
+
+	<div class="share">
+	<div class="addthis_toolbox addthis_default_style ">
+		
+		
+		<a class="addthis_button_tweet"></a>
+		
+		
+		
+	</div>
+	
+</div>
 
 
-  <script type="text/javascript">
-    (function(){
-      var twitterWidgets = document.createElement('script');
-      twitterWidgets.type = 'text/javascript';
-      twitterWidgets.async = true;
-      twitterWidgets.src = '//platform.twitter.com/widgets.js';
-      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
-    })();
-  </script>
+</div>
+	<footer id="footer" class="inner">Copyright &copy; 2013
+
+    萱潜
+
+</footer>
+	<script src="/javascripts/slash.js"></script>
+<script src="/javascripts/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+	$('.fancybox').fancybox();
+})(jQuery);
+</script> <!-- Delete or comment this line to disable Fancybox -->
+
+
 
 
 

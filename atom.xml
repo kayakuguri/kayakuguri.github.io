@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2013-11-29T14:53:31+09:00</updated>
+  <updated>2013-11-29T19:46:15+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,19 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[P]Birds]]></title>
+    <link href="http://kayakuguri.github.io/blog/2013/11/29/bird-photo/"/>
+    <updated>2013-11-29T19:14:10+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2013/11/29/bird-photo</id>
+    <content type="html"><![CDATA[<br /><br />
+
+
+<p><a href="http://www.flickr.com/photos/mrlittlebig/9536224303/" title="SIGE2802 by _usk, on Flickr"><img src="http://farm6.staticflickr.com/5480/9536224303_c93650aab9.jpg" alt="SIGE2802"></a>
+<a href="http://www.flickr.com/photos/mrlittlebig/9536253167/" title="SIGE2808 by _usk, on Flickr"><img src="http://farm3.staticflickr.com/2852/9536253167_c6137c50f8.jpg" alt="SIGE2808"></a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[メモ]mySQL 文字列処理など]]></title>

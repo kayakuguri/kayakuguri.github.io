@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: mySQL | KayaMemo]]></title>
+  <link href="http://kayakuguri.github.io/blog/categories/mysql/atom.xml" rel="self"/>
+  <link href="http://kayakuguri.github.io/"/>
+  <updated>2013-11-29T19:46:15+09:00</updated>
+  <id>http://kayakuguri.github.io/</id>
+  <author>
+    <name><![CDATA[萱潜]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[[メモ]mySQL 文字列処理など]]></title>
+    <link href="http://kayakuguri.github.io/blog/2013/11/29/sql-memo/"/>
+    <updated>2013-11-29T14:34:00+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2013/11/29/sql-memo</id>
+    <content type="html"><![CDATA[<p>参考:<a href="http://homepage2.nifty.com/sak/w_sak3/doc/sysbrd/sq_kj07_2.htm">http://homepage2.nifty.com/sak/w_sak3/doc/sysbrd/sq_kj07_2.htm</a></p>
+
+<p><strong>文字列連結</strong></p>
+
+<p>concat(&ldquo;a&rdquo;,&ldquo;b&rdquo;)で文字列連結。</p>
+
+<p><strong>0埋め</strong></p>
+
+<p>lpad()で左側の0埋めが出来る。</p>
+
+<p>例：
+1 →01 としたい時
+param=1とする。
+[クエリ]
+lpad(param,2,&lsquo;0&rsquo;)
+[結果]
+01</p>
+
+<p><strong>文字列を数値に変換</strong>
+to_number()がSQLにはあるけれど、mySQLにはない</p>
+
+<p>以下の方法でいける。
+[クエリ]
+cast(&ldquo;001&rdquo; as SIGNED)
+[結果]
+1</p>
+
+<p>参考:<a href="http://hetare-engineer.blogspot.jp/2011/03/mysql.html">http://hetare-engineer.blogspot.jp/2011/03/mysql.html</a></p>
+]]></content>
+  </entry>
+  
+</feed>
