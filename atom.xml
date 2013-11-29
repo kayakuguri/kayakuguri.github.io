@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[My Octopress Blog]]></title>
+  <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
+  <link href="http://kayakuguri.github.io/"/>
+  <updated>2013-11-29T13:07:52+09:00</updated>
+  <id>http://kayakuguri.github.io/</id>
+  <author>
+    <name><![CDATA[Your Name]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[create-git-blog]]></title>
+    <link href="http://kayakuguri.github.io/blog/2013/11/29/create-git-blog/"/>
+    <updated>2013-11-29T13:05:27+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2013/11/29/create-git-blog</id>
+    <content type="html"><![CDATA[<p>my first git post.</p>
+]]></content>
+  </entry>
+  
+</feed>
