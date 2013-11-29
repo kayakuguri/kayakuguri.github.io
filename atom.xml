@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2013-11-29T13:33:53+09:00</updated>
+  <updated>2013-11-29T13:38:52+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -44,7 +44,7 @@
 <p><strong>ソースをBitbucketにバックアップ</strong></p>
 
 <p>  git add -A
-  git commit &ldquo;add post&rdquo;
+  git commit -m &ldquo;add post&rdquo;
   git push -u bitbucket source</p>
 ]]></content>
   </entry>
