@@ -2,10 +2,10 @@
 #      Main Configs       #
 # ----------------------- #
 
-url: http://yoursite.com
-title: My Octopress Blog
-subtitle: A blogging framework for hackers.
-author: Your Name
+url: http://kayakuguri.github.io
+title: KayaMemo
+subtitle: Tech memo.
+author: 萱潜
 simple_search: http://google.com/search
 description:
 
