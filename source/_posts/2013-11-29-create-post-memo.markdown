@@ -32,7 +32,7 @@ categories:
 **ソースをBitbucketにバックアップ**
 
   git add -A
-  git commit "add post"
+  git commit -m "add post"
   git push -u bitbucket source
 
 
