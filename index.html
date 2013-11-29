@@ -9,8 +9,7 @@
   <meta name="author" content="萱潜">
 
   
-  <meta name="description" content="Gitblogに投稿するまでの手順メモ 新しい記事を作成 rake new_post[&lsquo;post title&rsquo;] ※ここでのタイトルに日本語は使えない。また、ページのURLにもなる。
-source/_post/YYYY-MM-DD-title. &hellip;">
+  <meta name="description" content="[メモ]mySQL 文字列処理など 参考:http://homepage2.nifty.com/sak/w_sak3/doc/sysbrd/sq_kj07_2.htm 文字列連結 concat(&ldquo;a&rdquo;,&ldquo;b&rdquo;)で文字列連結。 0埋め lpad() &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -68,6 +67,10 @@ source/_post/YYYY-MM-DD-title. &hellip;">
 <ul>
 	
     <li>
+    	<a href="/blog/2013/11/29/sql-memo/">[メモ]mySQL 文字列処理など</a>
+    </li>
+    
+    <li>
     	<a href="/blog/2013/11/29/create-post-memo/">Gitblogに投稿するまでの手順メモ</a>
     </li>
     
@@ -97,6 +100,71 @@ source/_post/YYYY-MM-DD-title. &hellip;">
 		</aside>
 		
       
+
+
+<article>
+	<header>
+  <div class="article-tags">
+      
+
+
+  </div>
+  
+    <h1><a href="/blog/2013/11/29/sql-memo/">
+      [メモ]mySQL 文字列処理など
+    </a></h1>
+  
+</header>
+<section>
+  <p>参考:<a href="http://homepage2.nifty.com/sak/w_sak3/doc/sysbrd/sq_kj07_2.htm">http://homepage2.nifty.com/sak/w_sak3/doc/sysbrd/sq_kj07_2.htm</a></p>
+
+<p><strong>文字列連結</strong></p>
+
+<p>concat(&ldquo;a&rdquo;,&ldquo;b&rdquo;)で文字列連結。</p>
+
+<p><strong>0埋め</strong></p>
+
+<p>lpad()で左側の0埋めが出来る。</p>
+
+<p>例：
+1 →01 としたい時
+param=1とする。
+[クエリ]
+lpad(param,2,&lsquo;0&rsquo;)
+[結果]
+01</p>
+
+<p><strong>文字列を数値に変換</strong>
+to_number()がSQLにはあるけれど、mySQLにはない</p>
+
+<p>以下の方法でいける。
+[クエリ]
+cast(&ldquo;001&rdquo; as SIGNED)
+[結果]
+1</p>
+
+<p>参考:<a href="http://hetare-engineer.blogspot.jp/2011/03/mysql.html">http://hetare-engineer.blogspot.jp/2011/03/mysql.html</a></p>
+
+</section>
+<footer>
+  <div class="article-date">
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-11-29T14:34:00+09:00" pubdate data-updated="true">Nov 29<span>th</span>, 2013</time>
+  </div>
+</footer>
+
+</article>
 
 
 <article>
