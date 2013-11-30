@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: PHP | KayaMemo]]></title>
+  <link href="http://kayakuguri.github.io/blog/categories/php/atom.xml" rel="self"/>
+  <link href="http://kayakuguri.github.io/"/>
+  <updated>2013-11-30T14:16:37+09:00</updated>
+  <id>http://kayakuguri.github.io/</id>
+  <author>
+    <name><![CDATA[萱潜]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[PHPでCSVファイルを読み込んだ時に日本語が消える]]></title>
+    <link href="http://kayakuguri.github.io/blog/2013/11/30/php-csv/"/>
+    <updated>2013-11-30T14:10:49+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2013/11/30/php-csv</id>
+    <content type="html"><![CDATA[<p>PHPで文字コードがUTF-8のCSVファイルを読み込んだ際、<br/>
+何故か日本語が消える、という現象が。</p>
+
+<p>文字化け、ではなく、消える。<br/>
+また、ローカルのXAMPP環境では消えなかったのに、<br/>
+サーバにアップすると消えた。</p>
+
+<p>どうやら、PHP5の問題、のようで、<br/>
+<code>fgetcsv</code>を使用している時に起こる現象のよう。<br/>
+以下のように文字コードの指定をしてやるだけで解決した。</p>
+
+<pre><code>setlocale(LC_ALL, 'ja_JP.UTF-8');
+</code></pre>
+
+<p>参考：<a href="http://pentan.info/php/fgetcsv_char.html">fgetcsv関数を文字化け対応 setlocaleの文字コード指定</a></p>
+]]></content>
+  </entry>
+  
+</feed>

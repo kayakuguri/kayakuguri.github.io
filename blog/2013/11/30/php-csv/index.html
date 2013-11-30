@@ -3,11 +3,14 @@
 <html>
 <head>
 	<meta charset="utf-8">
-	<title>Blog Archives - KayaMemo</title>
+	<title>PHPでCSVファイルを読み込んだ時に日本語が消える - KayaMemo</title>
 	<meta name="author" content="萱潜">
 
 	
-	<meta name="description" content="2013 PHPでCSVファイルを読み込んだ時に日本語が消える Nov 30 PHP [P]Birds Nov 29 photo [メモ]mySQL 文字列処理など Nov 29 SQL Gitblogに投稿するまでの手順メモ Nov 29 octopress &hellip;">
+	<meta name="description" content="PHPで文字コードがUTF-8のCSVファイルを読み込んだ際、
+何故か日本語が消える、という現象が。 文字化け、ではなく、消える。
+また、ローカルのXAMPP環境では消えなかったのに、
+サーバにアップすると消えた。 どうやら、PHP5の問題、のようで、 &hellip;">
 	
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
@@ -75,107 +78,64 @@
 	
 		
 	
-	<div id="content" class="inner">
-	
+	<div id="content" class="inner"><article class="post">
+	<h2 class="title">PHPでCSVファイルを読み込んだ時に日本語が消える</h2>
+	<div class="entry-content"><p>PHPで文字コードがUTF-8のCSVファイルを読み込んだ際、<br/>
+何故か日本語が消える、という現象が。</p>
+
+<p>文字化け、ではなく、消える。<br/>
+また、ローカルのXAMPP環境では消えなかったのに、<br/>
+サーバにアップすると消えた。</p>
+
+<p>どうやら、PHP5の問題、のようで、<br/>
+<code>fgetcsv</code>を使用している時に起こる現象のよう。<br/>
+以下のように文字コードの指定をしてやるだけで解決した。</p>
+
+<pre><code>setlocale(LC_ALL, 'ja_JP.UTF-8');
+</code></pre>
+
+<p>参考：<a href="http://pentan.info/php/fgetcsv_char.html">fgetcsv関数を文字化け対応 setlocaleの文字コード指定</a></p>
+</div>
 
 
-	
-	
-	<section class="archives"><h1 class="year">2013</h1>
+<div class="meta">
+	<div class="date">
 
-<article>
-	<h2 class="title"><a href="/blog/2013/11/30/php-csv/">PHPでCSVファイルを読み込んだ時に日本語が消える</a></h2>
-	<div class="meta">
-		<div class="date">Nov 30</div>
-		<div class="tags">
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-11-30T14:10:49+09:00" pubdate data-updated="true">Nov 30<span>th</span>, 2013</time></div>
+	<div class="tags">
 
 
 	<a class='category' href='/blog/categories/php/'>PHP</a>
 
 
 </div>
-	    
-	</div>
-</article>
 	
-
-	
-
-
-<article>
-	<h2 class="title"><a href="/blog/2013/11/29/bird-photo/">[P]Birds</a></h2>
-	<div class="meta">
-		<div class="date">Nov 29</div>
-		<div class="tags">
-
-
-	<a class='category' href='/blog/categories/photo/'>photo</a>
-
-
 </div>
-	    
-	</div>
 </article>
+
+	<div class="share">
+	<div class="addthis_toolbox addthis_default_style ">
+		
+		
+		<a class="addthis_button_tweet"></a>
+		
+		
+		
+	</div>
 	
-
-	
-
-
-<article>
-	<h2 class="title"><a href="/blog/2013/11/29/sql-memo/">[メモ]mySQL 文字列処理など</a></h2>
-	<div class="meta">
-		<div class="date">Nov 29</div>
-		<div class="tags">
-
-
-	<a class='category' href='/blog/categories/sql/'>SQL</a>
-
-
 </div>
-	    
-	</div>
-</article>
-	
-
-	
 
 
-<article>
-	<h2 class="title"><a href="/blog/2013/11/29/create-post-memo/">Gitblogに投稿するまでの手順メモ</a></h2>
-	<div class="meta">
-		<div class="date">Nov 29</div>
-		<div class="tags">
-
-
-	<a class='category' href='/blog/categories/octopress/'>octopress</a>
-
-
-</div>
-	    
-	</div>
-</article>
-	
-
-	
-
-
-<article>
-	<h2 class="title"><a href="/blog/2013/11/29/create-git-blog/">Githubでblogをアップするまでのメモ</a></h2>
-	<div class="meta">
-		<div class="date">Nov 29</div>
-		<div class="tags">
-
-
-	<a class='category' href='/blog/categories/octopress/'>octopress</a>
-
-
-</div>
-	    
-	</div>
-</article>
-	
-	</section>
-	
 </div>
 	<footer id="footer" class="inner">Copyright &copy; 2013
 
