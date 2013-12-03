@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2013-12-03T16:08:56+09:00</updated>
+  <updated>2013-12-03T18:36:13+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -28,6 +28,13 @@
 
 <pre><code>![alt](/images/hoge.jpg)
 </code></pre>
+
+<br /><br />
+
+
+<h4>OctopressでのOGP設定</h4>
+
+<p><a href="http://komasaru.github.io/blog/2012/12/31/octopress-facebook-ogp/">Octopress &ndash; Facebook OGP 設定！</a></p>
 ]]></content>
   </entry>
   
