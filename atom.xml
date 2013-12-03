@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2013-11-30T14:16:37+09:00</updated>
+  <updated>2013-12-03T16:08:56+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,24 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[メモ]]></title>
+    <link href="http://kayakuguri.github.io/blog/2013/12/03/memo/"/>
+    <updated>2013-12-03T16:04:23+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2013/12/03/memo</id>
+    <content type="html"><![CDATA[<h4>Octopressでの画像の扱い方</h4>
+
+<p>Octopressで画像を取扱ときにどうすればいいのかわからなかったので、ググった結果のメモ。</p>
+
+<p><a href="http://toshikaz55.github.io/blog/blog/2013/04/04/octopress-image-dir/">Octopressで画像を貼るときのディレクトリ指定の仕方</a></p>
+
+<p>ディレクトリは、<code>octopress/source/images</code>で、以下の指定。</p>
+
+<pre><code>![alt](/images/hoge.jpg)
+</code></pre>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[PHPでCSVファイルを読み込んだ時に日本語が消える]]></title>
