@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: ec-cube | KayaMemo]]></title>
+  <link href="http://kayakuguri.github.io/blog/categories/ec-cube/atom.xml" rel="self"/>
+  <link href="http://kayakuguri.github.io/"/>
+  <updated>2013-12-04T20:16:28+09:00</updated>
+  <id>http://kayakuguri.github.io/</id>
+  <author>
+    <name><![CDATA[萱潜]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[EC-Cubeでフォーム別にメールのタイトルを変更する]]></title>
+    <link href="http://kayakuguri.github.io/blog/2013/12/04/ec-cube-mailtitle/"/>
+    <updated>2013-12-04T20:07:49+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2013/12/04/ec-cube-mailtitle</id>
+    <content type="html"><![CDATA[<p>参考：<a href="http://ratorin.jugem.jp/?eid=2">返信メールテンプレートの追加＆編集　EC-CUBE　2.11.2</a></p>
+
+<p><code>Smarty/templates/default/mail_templates/</code>以下にメールのテンプレートを新たに作成する</p>
+
+<p><code>システム設定&gt;マスターデータ管理</code>から、<br/>
+テンプレートのID設定、動的データのパス設定などを行う。<br/>
+上記で作成したパスを設定する。<br/>
+で、<code>基本情報管理</code>&ndash;><code>メール設定</code>から、静的部分の編集が出来る。</p>
+
+<p>しかし、<strong>これだとメールのタイトル部分を動的に出来ない</strong></p>
+
+<p><code>mail_title.tpl</code>がメールのタイトルのテンプレートになっているよう。<br/>
+デフォルトでは以下になってる。</p>
+
+<pre><code>【&lt;!--{$tpl_shopname}--&gt;】 &lt;!--{$tpl_mailtitle}--&gt;
+</code></pre>
+
+<p>この<code>&lt;!--{$tpl_mailtitle}--&gt;</code>は、管理画面の<code>基本情報管理＞メール設定</code>から設定したタイトルになるよう。<br/>
+ここで動的にメールタイトルを変更は可能だけど、色々なパターンに対応、は出来ない。。</p>
+
+<p>もし<code>mail_title.tpl</code>に例えば以下のような設定をしたとする。<br/>
+<code>item.value</code>は表示したい商品名だとする。</p>
+
+<pre><code>[&lt;!--{$arrForm.item.value}--&gt;] &lt;!--{$tpl_mailtitle}--&gt;
+</code></pre>
+
+<p>これだと、商品名を表示したいメールの場合はうまくいくと思うけれど、<br/>
+その他のテンプレートを使用したメールでも同じタイトルが使われるので、商品名がないものの場合、おかしくなってしまう。<br/>
+例えば、お問い合わせ受付、というタイトルのメールだとすると、以下のように商品名が抜けて、カッコのみになってしまうはず。</p>
+
+<pre><code>[]お問い合わせ受付
+</code></pre>
+
+<p>参考：<a href="http://www.tokihouse.com/ec-cube/mail/mail_title.html">http://www.tokihouse.com/ec-cube/mail/mail_title.html</a></p>
+
+<p>そうなると、やっぱり直接関数を触らないといけない、のかも。</p>
+
+<p><a href="http://www.tailtension.com/eccube/198/">(EC-CUBE2.11.4)お問い合わせメールの件名に名前を入れる</a></p>
+
+<p><code>/data/class/helper/SC_Helper_Mail.php</code>を修正</p>
+
+<p>テンプレートから静的部分だけを取ってきて表示する、方法がわからなかったので、<br/>
+<code>$tmp_subject</code>に直接入れた。<br/>
+動的にしたかった商品名は引数で渡した。</p>
+
+<p>この<code>SC_Helper_Mail.php</code>の<code>sfMakeSubject</code>関数の中で、タイトルにテンプレートを渡す処理をしているので、<br/>
+その部分を独自のものに変更すれば、テンプレートから変更、も出来るようになるかもしれない。</p>
+
+<pre><code>$subject = $objMailView-&gt;fetch('mail_templates/mail_title.tpl');
+</code></pre>
+]]></content>
+  </entry>
+  
+</feed>
