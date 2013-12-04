@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: JavaScript | KayaMemo]]></title>
+  <link href="http://kayakuguri.github.io/blog/categories/javascript/atom.xml" rel="self"/>
+  <link href="http://kayakuguri.github.io/"/>
+  <updated>2013-12-04T10:56:27+09:00</updated>
+  <id>http://kayakuguri.github.io/</id>
+  <author>
+    <name><![CDATA[萱潜]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[TypescriptとかCoffeescriptとか]]></title>
+    <link href="http://kayakuguri.github.io/blog/2013/12/04/typescript-coffeescript/"/>
+    <updated>2013-12-04T10:47:06+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2013/12/04/typescript-coffeescript</id>
+    <content type="html"><![CDATA[<h4>CoffeeScriptとTypeScriptについて</h4>
+
+<p><a href="http://qiita.com/yuch_i/items/17e22b77ce4ad9d1b7e9">JavaScript上位言語の比較表</a><br/>
+※コメントが参考になる</p>
+
+<blockquote><p>機能の列挙にはあまり意味がありません。この串刺し比較では言語そのものの書き味や開発環境、再利用性の情報が欠損しています。</p></blockquote>
+
+<p><a href="http://qiita.com/fnobi/items/8bd24c0994a2015ffbeb">Coffeeか、Typeか。 〜比較しながらの入門編〜</a><br/>
+<a href="http://terurou.hateblo.jp/entry/2012/10/17/031013">Haxe使いから見たTypeScript雑感</a></p>
+
+<blockquote><p>TypeScriptが世に出てきてしまった以上、CoffeeScriptは「型付けのできないTypeScriptの出来損ない」みたいな存在になってしまったかなぁと。<br/>
+これからCoffeeScriptを学習するメリットはほぼゼロに近いと思います。</p></blockquote>
+
+<p><strong>クラスで比較</strong></p>
+
+<p>CoffeeScript</p>
+
+<pre><code>class Human
+    constructor: (@name) -&gt;
+
+    hello: -&gt;
+        console.log("My name is #{@name}.")
+</code></pre>
+
+<p>TypeScript</p>
+
+<pre><code>class Human {
+    name: string;
+
+    constructor (name: string) {
+        this.name = name;
+    }
+
+    hello () {
+        console.log('My name is %s.', this.name);
+    }
+}
+</code></pre>
+
+<p>TypeScriptの方が圧倒的に見やすい。CoffeeScriptはphp的というか、癖がある感じ。<br/>
+TypeScriptの方が後発でMicroSoftが出しているので、modern Appとか作るときの標準とかにしたいのかもしれない。</p>
+
+<hr />
+
+<h4>Haxe</h4>
+
+<p>参考：<a href="http://jinjor-labo.hatenablog.com/entry/2013/05/24/211019">HaxeとTypeScriptを両方使ってみた感想</a></p>
+
+<blockquote><p>JavaScriptターゲットで今から始めるならTypeScriptかなーという気がします。<br/>
+特に、既にJavaScriptに慣れ親しんでいる人にとっては、今まで普通に出来ていたことは普通に出来て欲しいと思うので、Haxeは少々ストレスかなと。</p></blockquote>
+
+<p>TypeScriptの方がよさげ？</p>
+
+<p><a href="http://www.slideshare.net/bleistift/jsx-haxe-typescript">JSX / Haxe / TypeScript</a></p>
+
+<hr />
+
+<p><a href="http://www.atmarkit.co.jp/ait/articles/1301/18/news087.html">アンダース氏が設計した新言語による次世代JavaScript開発とは？ (1/3)</a><br/>
+PhpStromだと標準でTypeScriptをサポートしているよう。(newでTypeScriptファイルの作成があった)</p>
+
+<p><a href="http://448.jp/blog/article/1458/">WebStorm &amp; PhpStorm Blog日本語訳：WebStorm 6におけるTypeScriptのサポート</a><br/>
+<a href="http://bulblub.com/tag/typescript/">TypeScript+PHPStorm+homebrewの設定</a></p>
+
+<p>ブラウザ上でTypeScriptを書く<br/>
+<a href="http://www.typescriptlang.org/Playground/">PlayGround</a></p>
+
+<hr />
+
+<h4>インストール</h4>
+
+<p><a href="http://www.xn--web-k69dj4k.net/d/24/40266.html">WebStormでTypeScriptを使おう</a></p>
+
+<pre><code>npm install -g typescript
+</code></pre>
+
+<p>npmがない。<br/>
+<a href="http://d.hatena.ne.jp/replication/20120303/1331649269">Mac OS X Lionにnpm(Node Package Manager)をインストールする</a></p>
+
+<pre><code>curl https://npmjs.org/install.sh | sudo sh
+</code></pre>
+
+<p>http<strong>s</strong>に変更になっていた。<br/>
+実行すると、先にnode.jsをインストールしろって怒られた。</p>
+
+<blockquote><p>npm cannot be installed without nodejs.<br/>
+Install node first, and then try again.<br/>
+　<br/>
+Maybe node is installed, but not in the PATH?<br/>
+Note that running as sudo can change envs.</p></blockquote>
+
+<p>node.jsをインストールする。<br/>
+<a href="http://sasaplus1.com/slide-first-time-node.js/">はじめてのnode.js</a></p>
+
+<p>・nodebrewをインストール</p>
+
+<pre><code>$ curl -L git.io/nodebrew | perl - setup
+
+$ echo 'export PATH=$HOME/.nodebrew/current/bin:$PATH' &gt;&gt; \~/.bash_profile
+$ source ~/.bash_profile
+</code></pre>
+
+<p>・node.jsとnpmをインストール</p>
+
+<pre><code>$ nodebrew install-binary 0.10
+$ nodebrew use 0.10
+</code></pre>
+
+<p>で、最初のTypeScriptをインストールする。</p>
+
+<pre><code>$ npm install -g typescript
+</code></pre>
+
+<p>Programsのパスはnodeを入れた時に表示されるパスを入れる。<br/>
+<a href="http://448.jp/blog/article/1459/">IntelliJ IDEAのFile Watchers機能でTypeScriptコンパイラ（tsc）にパスを通す方法</a></p>
+
+<p>エラーが出た。</p>
+
+<pre><code>env: node: No such file or directory
+</code></pre>
+
+<p>以下で解決した。</p>
+
+<p><a href="http://bulblub.com/2013/06/21/typescript_setting_phpstorm_homebrew/">TypeScript+PHPStorm+homebrewの設定</a></p>
+
+<p><code>$ env</code>で吐き出すPATHを全部突っ込んだらOKだった。</p>
+]]></content>
+  </entry>
+  
+</feed>

@@ -1,0 +1,327 @@
+
+<!DOCTYPE HTML>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>TypescriptとかCoffeescriptとか - KayaMemo</title>
+
+	
+	<meta name="description" content="CoffeeScriptとTypeScriptについて JavaScript上位言語の比較表
+※コメントが参考になる 機能の列挙にはあまり意味がありません。この串刺し比較では言語そのものの書き味や開発環境、再利用性の情報が欠損しています。 Coffeeか、Typeか。 〜比較しながらの入門編〜 &hellip;">
+	
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+	<link href="/atom.xml" rel="alternate" title="KayaMemo" type="application/atom+xml">
+	<link rel="canonical" href="">
+	<link href="/favicon.png" rel="shortcut icon">
+	<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+	<script async="true" src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+	
+<meta property="og:title" content="TypescriptとかCoffeescriptとか - KayaMemo" />
+<meta property="og:type" content="article" />
+<meta property="og:description" content="CoffeeScriptとTypeScriptについて JavaScript上位言語の比較表
+※コメントが参考になる 機能の列挙にはあまり意味がありません。この串刺し比較では言語そのものの書き味や開発環境、再利用性の情報が欠損しています。 Coffeeか、Typeか。 〜比較しながらの入門編〜 &hellip;" />
+
+<meta property="og:url" content="" />
+<meta property="og:image" content="http://kayakuguri.github.io/images/about_me.jpg" />
+<meta property="og:author" content="kayakuguri" />
+<meta property="og:site_name" content="KayaMemo" />
+<meta property="og:locale" content="ja_JP" />
+<meta property="fb:app_id" content="509051419202319" />
+</head>
+
+
+<body>
+	<header id="header" class="inner"><h1><a href="/">KayaMemo</a></h1>
+<nav id="main-nav"><ul class="main">
+	<li><a href="/">Blog</a></li>
+	<li><a href="/blog/archives">Archives</a></li>
+</ul>
+</nav>
+<nav id="mobile-nav">
+	<div class="alignleft menu">
+		<a class="button">Menu</a>
+		<div class="container"><ul class="main">
+	<li><a href="/">Blog</a></li>
+	<li><a href="/blog/archives">Archives</a></li>
+</ul>
+</div>
+	</div>
+	<div class="alignright search">
+		<a class="button"></a>
+		<div class="container">
+			<form action="http://google.com/search" method="get">
+				<input type="text" name="q" results="0">
+				<input type="hidden" name="q" value="site:kayakuguri.github.io">
+			</form>
+		</div>
+	</div>
+</nav>
+<nav id="sub-nav" class="alignright">
+	<div class="social">
+		
+		
+		
+		<a class="twitter" href="http://twitter.com/kayakuguri123" title="Twitter">Twitter</a>
+		
+		
+    
+		
+		
+		
+		
+		
+		<a class="rss" href="/atom.xml" title="RSS">RSS</a>
+		
+    
+	</div>
+	<form class="search" action="http://google.com/search" method="get">
+		<input class="alignright" type="text" name="q" results="0">
+		<input type="hidden" name="q" value="site:kayakuguri.github.io">
+	</form>
+</nav>
+
+</header>
+	
+		
+	
+	<div id="content" class="inner"><article class="post">
+	<h2 class="title">TypescriptとかCoffeescriptとか</h2>
+	<div class="entry-content"><h4>CoffeeScriptとTypeScriptについて</h4>
+
+<p><a href="http://qiita.com/yuch_i/items/17e22b77ce4ad9d1b7e9">JavaScript上位言語の比較表</a><br/>
+※コメントが参考になる</p>
+
+<blockquote><p>機能の列挙にはあまり意味がありません。この串刺し比較では言語そのものの書き味や開発環境、再利用性の情報が欠損しています。</p></blockquote>
+
+<p><a href="http://qiita.com/fnobi/items/8bd24c0994a2015ffbeb">Coffeeか、Typeか。 〜比較しながらの入門編〜</a><br/>
+<a href="http://terurou.hateblo.jp/entry/2012/10/17/031013">Haxe使いから見たTypeScript雑感</a></p>
+
+<blockquote><p>TypeScriptが世に出てきてしまった以上、CoffeeScriptは「型付けのできないTypeScriptの出来損ない」みたいな存在になってしまったかなぁと。<br/>
+これからCoffeeScriptを学習するメリットはほぼゼロに近いと思います。</p></blockquote>
+
+<p><strong>クラスで比較</strong></p>
+
+<p>CoffeeScript</p>
+
+<pre><code>class Human
+    constructor: (@name) -&gt;
+
+    hello: -&gt;
+        console.log("My name is #{@name}.")
+</code></pre>
+
+<p>TypeScript</p>
+
+<pre><code>class Human {
+    name: string;
+
+    constructor (name: string) {
+        this.name = name;
+    }
+
+    hello () {
+        console.log('My name is %s.', this.name);
+    }
+}
+</code></pre>
+
+<p>TypeScriptの方が圧倒的に見やすい。CoffeeScriptはphp的というか、癖がある感じ。<br/>
+TypeScriptの方が後発でMicroSoftが出しているので、modern Appとか作るときの標準とかにしたいのかもしれない。</p>
+
+<hr />
+
+<h4>Haxe</h4>
+
+<p>参考：<a href="http://jinjor-labo.hatenablog.com/entry/2013/05/24/211019">HaxeとTypeScriptを両方使ってみた感想</a></p>
+
+<blockquote><p>JavaScriptターゲットで今から始めるならTypeScriptかなーという気がします。<br/>
+特に、既にJavaScriptに慣れ親しんでいる人にとっては、今まで普通に出来ていたことは普通に出来て欲しいと思うので、Haxeは少々ストレスかなと。</p></blockquote>
+
+<p>TypeScriptの方がよさげ？</p>
+
+<p><a href="http://www.slideshare.net/bleistift/jsx-haxe-typescript">JSX / Haxe / TypeScript</a></p>
+
+<hr />
+
+<p><a href="http://www.atmarkit.co.jp/ait/articles/1301/18/news087.html">アンダース氏が設計した新言語による次世代JavaScript開発とは？ (1/3)</a><br/>
+PhpStromだと標準でTypeScriptをサポートしているよう。(newでTypeScriptファイルの作成があった)</p>
+
+<p><a href="http://448.jp/blog/article/1458/">WebStorm &amp; PhpStorm Blog日本語訳：WebStorm 6におけるTypeScriptのサポート</a><br/>
+<a href="http://bulblub.com/tag/typescript/">TypeScript+PHPStorm+homebrewの設定</a></p>
+
+<p>ブラウザ上でTypeScriptを書く<br/>
+<a href="http://www.typescriptlang.org/Playground/">PlayGround</a></p>
+
+<hr />
+
+<h4>インストール</h4>
+
+<p><a href="http://www.xn--web-k69dj4k.net/d/24/40266.html">WebStormでTypeScriptを使おう</a></p>
+
+<pre><code>npm install -g typescript
+</code></pre>
+
+<p>npmがない。<br/>
+<a href="http://d.hatena.ne.jp/replication/20120303/1331649269">Mac OS X Lionにnpm(Node Package Manager)をインストールする</a></p>
+
+<pre><code>curl https://npmjs.org/install.sh | sudo sh
+</code></pre>
+
+<p>http<strong>s</strong>に変更になっていた。<br/>
+実行すると、先にnode.jsをインストールしろって怒られた。</p>
+
+<blockquote><p>npm cannot be installed without nodejs.<br/>
+Install node first, and then try again.<br/>
+　<br/>
+Maybe node is installed, but not in the PATH?<br/>
+Note that running as sudo can change envs.</p></blockquote>
+
+<p>node.jsをインストールする。<br/>
+<a href="http://sasaplus1.com/slide-first-time-node.js/">はじめてのnode.js</a></p>
+
+<p>・nodebrewをインストール</p>
+
+<pre><code>$ curl -L git.io/nodebrew | perl - setup
+
+$ echo 'export PATH=$HOME/.nodebrew/current/bin:$PATH' &gt;&gt; \~/.bash_profile
+$ source ~/.bash_profile
+</code></pre>
+
+<p>・node.jsとnpmをインストール</p>
+
+<pre><code>$ nodebrew install-binary 0.10
+$ nodebrew use 0.10
+</code></pre>
+
+<p>で、最初のTypeScriptをインストールする。</p>
+
+<pre><code>$ npm install -g typescript
+</code></pre>
+
+<p>Programsのパスはnodeを入れた時に表示されるパスを入れる。<br/>
+<a href="http://448.jp/blog/article/1459/">IntelliJ IDEAのFile Watchers機能でTypeScriptコンパイラ（tsc）にパスを通す方法</a></p>
+
+<p>エラーが出た。</p>
+
+<pre><code>env: node: No such file or directory
+</code></pre>
+
+<p>以下で解決した。</p>
+
+<p><a href="http://bulblub.com/2013/06/21/typescript_setting_phpstorm_homebrew/">TypeScript+PHPStorm+homebrewの設定</a></p>
+
+<p><code>$ env</code>で吐き出すPATHを全部突っ込んだらOKだった。</p>
+</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-12-04T10:47:06+09:00" pubdate data-updated="true">Dec 4<span>th</span>, 2013</time></div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/javascript/'>JavaScript</a>
+
+
+</div>
+	
+</div>
+</article>
+
+	<div class="share">
+	<div class="addthis_toolbox addthis_default_style ">
+		
+        <div id="fb-root"></div>
+<script>(function(d, s, id) {
+    var js, fjs = d.getElementsByTagName(s)[0];
+    if (d.getElementById(id)) return;
+    js = d.createElement(s); js.id = id;
+    js.src = "//connect.facebook.net/ja_JP/all.js#xfbml=1&appId=509051419202319";
+    fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+        <div class="fb-like" data-href="http://kayakuguri.github.io/blog/2013/12/04/typescript-coffeescript/" data-layout="button_count" data-action="like" data-show-faces="true" data-share="false"></div>
+		
+		
+        &nbsp;&nbsp;<a href="https://twitter.com/share" class="twitter-share-button" data-via="kayakuguri123" data-lang="ja" data-count="none">ツイート</a>
+<script>
+  !function(d,s,id){
+      var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';
+      if(!d.getElementById(id)){
+          js=d.createElement(s);
+          js.id=id;js.src=p+'://platform.twitter.com/widgets.js';
+          fjs.parentNode.insertBefore(js,fjs);
+      }
+  }(document, 'script', 'twitter-wjs');
+</script>
+		
+		
+		<a class="addthis_button_google_plusone" g:plusone:size="medium"></a>
+		
+		
+        
+        <a href="http://b.hatena.ne.jp/entry/http://kayakuguri.github.io/blog/2013/12/04/typescript-coffeescript/" class="hatena-bookmark-button" data-hatena-bookmark-title="TypescriptとかCoffeescriptとか - KayaMemo" data-hatena-bookmark-layout="standard-noballoon" data-hatena-bookmark-lang="ja" title="このエントリーをはてなブックマークに追加">
+<img src="http://b.st-hatena.com/images/entry-button/button-only@2x.png" alt="このエントリーをはてなブックマークに追加" width="20" height="20" style="border: none;" /></a>
+<script type="text/javascript" src="http://b.st-hatena.com/js/bookmark_button.js" charset="utf-8" async="async"></script>
+        
+	</div>
+	
+</div>
+
+
+<div class="share">
+    <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+    <!-- kayakuguri git -->
+    <ins class="adsbygoogle"
+         style="display:inline-block;width:336px;height:280px"
+         data-ad-client="ca-pub-0887267957680144"
+         data-ad-slot="2041160274"></ins>
+    <script>
+        (adsbygoogle = window.adsbygoogle || []).push({});
+    </script>
+</div>
+</div>
+	<footer id="footer" class="inner">Copyright &copy; 2013
+
+    萱潜
+
+</footer>
+	<script src="/javascripts/slash.js"></script>
+<script src="/javascripts/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+	$('.fancybox').fancybox();
+})(jQuery);
+</script> <!-- Delete or comment this line to disable Fancybox -->
+
+
+
+
+	<script type="text/javascript">
+		var _gaq = _gaq || [];
+		_gaq.push(['_setAccount', 'UA-3730932-4']);
+		_gaq.push(['_trackPageview']);
+
+		(function() {
+			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+		})();
+	</script>
+
+
+
+</body>
+</html>
