@@ -4,7 +4,7 @@
   <title><![CDATA[Category: ec-cube | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/ec-cube/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2013-12-04T20:16:28+09:00</updated>
+  <updated>2013-12-04T20:17:42+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -28,6 +28,9 @@
 で、<code>基本情報管理</code>&ndash;><code>メール設定</code>から、静的部分の編集が出来る。</p>
 
 <p>しかし、<strong>これだとメールのタイトル部分を動的に出来ない</strong></p>
+
+<!-- more -->
+
 
 <p><code>mail_title.tpl</code>がメールのタイトルのテンプレートになっているよう。<br/>
 デフォルトでは以下になってる。</p>
