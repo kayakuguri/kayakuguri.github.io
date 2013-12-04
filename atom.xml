@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2013-12-04T13:21:24+09:00</updated>
+  <updated>2013-12-04T16:36:54+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,45 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Php StormでのFTPの設定]]></title>
+    <link href="http://kayakuguri.github.io/blog/2013/12/04/php-storm-ftp/"/>
+    <updated>2013-12-04T16:16:32+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2013/12/04/php-storm-ftp</id>
+    <content type="html"><![CDATA[<p>PhpStormからFTPにアップロードするための設定方法のメモ。</p>
+
+<p>１）メニューから、Tools→Deployment→Configuration、を選択</p>
+
+<p><img src="http://kayakuguri.github.io/images/2013/12/phpstorm1.jpg" alt="Configuration" /></p>
+
+<p>２）Connectionタブ内で以下を設定する。</p>
+
+<ul>
+<li> FTP host  :FTPのホスト名</li>
+<li> Port  :ポート</li>
+<li> Root path  :サーバ上のルートパス</li>
+<li> User name  :接続するユーザー名</li>
+<li> Password   :パスワード</li>
+<li> Web server root URL  :サイトのURL</li>
+</ul>
+
+
+<p><img src="http://kayakuguri.github.io/images/2013/12/phpstorm2.jpg" alt="Connection" /></p>
+
+<p>３）Mappingsタブ内で以下を設定する。</p>
+
+<ul>
+<li> Local pash  :アップロードしたいローカルパス</li>
+<li> Deployment path on server &lsquo;hogehoge.com&rsquo;  :サーバー上でアップロードする場所(ルートの場合は<code>/</code>で)</li>
+</ul>
+
+
+<p><img src="http://kayakuguri.github.io/images/2013/12/phpstorm3.jpg" alt="Mappings" /></p>
+
+<p>４）プロジェクトツリーからファイル名を右クリックして、Upload to&hellip;を選択し、設定したサイトを選択。</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[TypescriptとかCoffeescriptとか]]></title>
