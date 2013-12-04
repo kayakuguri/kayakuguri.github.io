@@ -4,7 +4,7 @@
   <title><![CDATA[Category: octopress | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/octopress/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2013-12-04T16:41:19+09:00</updated>
+  <updated>2013-12-04T16:56:47+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -73,6 +73,9 @@ git push -u bitbucket source
 
 <p><code>bundle exec rake install</code>が実行できない。<br/>
 以下エラーが出る</p>
+
+<!-- more -->
+
 
 <pre><code>Could not find rake-0.9.2.2 in any of the sources
 Run `bundle install` to install missing gems.

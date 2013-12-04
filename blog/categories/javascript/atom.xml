@@ -4,7 +4,7 @@
   <title><![CDATA[Category: JavaScript | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/javascript/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2013-12-04T16:41:19+09:00</updated>
+  <updated>2013-12-04T16:56:47+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -32,6 +32,9 @@
 これからCoffeeScriptを学習するメリットはほぼゼロに近いと思います。</p></blockquote>
 
 <p><strong>クラスで比較</strong></p>
+
+<!-- more -->
+
 
 <p>CoffeeScript</p>
 

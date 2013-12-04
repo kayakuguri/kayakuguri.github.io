@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Editor | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/editor/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2013-12-04T16:41:19+09:00</updated>
+  <updated>2013-12-04T16:56:47+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -25,6 +25,9 @@
 <p><img src="/images/2013/12/phpstorm1.jpg" alt="Configuration" /></p>
 
 <p>２）Connectionタブ内で以下を設定する。</p>
+
+<!-- more -->
+
 
 <ul>
 <li> FTP host  :FTPのホスト名</li>

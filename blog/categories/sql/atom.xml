@@ -4,7 +4,7 @@
   <title><![CDATA[Category: SQL | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/sql/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2013-12-04T16:41:19+09:00</updated>
+  <updated>2013-12-04T16:56:47+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -25,6 +25,9 @@
 <p>concat(&ldquo;a&rdquo;,&ldquo;b&rdquo;)で文字列連結。</p>
 
 <p><strong>0埋め</strong></p>
+
+<!-- more -->
+
 
 <p>lpad()で左側の0埋めが出来る。</p>
 
