@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: salesforce | KayaMemo]]></title>
+  <link href="http://kayakuguri.github.io/blog/categories/salesforce/atom.xml" rel="self"/>
+  <link href="http://kayakuguri.github.io/"/>
+  <updated>2013-12-05T13:20:00+09:00</updated>
+  <id>http://kayakuguri.github.io/</id>
+  <author>
+    <name><![CDATA[萱潜]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Force.comのREST APIを使ってデータをインサートする]]></title>
+    <link href="http://kayakuguri.github.io/blog/2013/12/05/sf-rest-api/"/>
+    <updated>2013-12-05T13:13:07+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2013/12/05/sf-rest-api</id>
+    <content type="html"><![CDATA[<p>参考ページ：<br/>
+<a href="http://www.nkjmkzk.net/?p=2328">新しくなったForce.com OAuth Toolkit for phpの使い方</a><br/>
+<a href="https://help.salesforce.com/apex/HTViewHelpDoc?id=remoteaccess_oauth_web_server_flow.htm&amp;language=ja">OAuth 2.0 Web サーバ認証フロー</a></p>
+
+<p>接続するためには、facebookなどと同じように、sf側でアプリを作成しなければならない。<br/>
+そのアプリが、アクセストークンを発行する形。<br/>
+そのアプリは、以前までは、<code>リモートアクセス</code>と呼ばれるものだったけど、仕様変更で、<br/>
+<code>接続アプリケーション</code>に、変わったよう。</p>
+
+<!-- more -->
+
+
+<p>リダイレクトのURLはhttpsでないとダメ。</p>
+
+<p>不特定多数からの接続を受け付ける場合は、<br/>
+<code>$oauth-&gt;auth_with_code();</code>ではなくて、<code>$oauth-&gt;auth_with_password(USERNAME, PASSWORD);</code>を使わないといけない。</p>
+
+<p>さらに、不特定の外部からアクセスする場合にはパスワードにセキュリティトークンをつけないといけない。<br/>
+<a href="http://vaindespair.blogspot.jp/search?q=rest">Force.com　：　REST API 開発　ユーザ名パスワード OAuth 認証</a></p>
+
+<ul>
+<li> 不特定多数からのアクセスを受け付ける場合(たいていこっち)は、パスワード＋セキュリティトークンで認証が必要</li>
+<li> 特定のIPからの接続だけ、の場合は、IPを指定することでセキュリティトークンなしで認証が出来る。</li>
+</ul>
+
+
+<h4>インサートのサンプル</h4>
+
+<p><a href="http://developer.force.com/cookbook/recipe/interact-with-the-forcecom-rest-api-from-php">Interact with the Force.com REST API from PHP</a></p>
+
+<p>リードにインサートしようとしたところ、バージョンが20では無理だった。<br/>
+バージョンを24にしたらいけた。</p>
+
+<pre><code>$instance_url/services/data/v24.0/sobjects/Lead/
+</code></pre>
+
+<p>チェックボック型のデータは、boolean型。なので、true/falseで入れる。<br/>
+日付型は、yyyy-mm-dd、とハイフンを入れる。<br/>
+<a href="http://d.hatena.ne.jp/mizolog/20110620/1308552542">セールスフォースのデータローダで日付型を使う場合の注意</a></p>
+
+<p>Leadでは<code>Company</code>は必須項目。</p>
+
+<p>複数選択のチェックボックスを送信する場合、配列、にするのではなく、<code>;</code>区切りの文字列にして渡す。</p>
+
+<pre><code>{"where_you_use__c":"work;other;home"}
+</code></pre>
+]]></content>
+  </entry>
+  
+</feed>
