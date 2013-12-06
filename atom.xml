@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2013-12-05T13:20:00+09:00</updated>
+  <updated>2013-12-06T10:54:44+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,25 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Googleスプレッドシートで￥の小数点を消す方法]]></title>
+    <link href="http://kayakuguri.github.io/blog/2013/12/06/google-spreadsheet/"/>
+    <updated>2013-12-06T10:49:52+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2013/12/06/google-spreadsheet</id>
+    <content type="html"><![CDATA[<p>タイトルそのままです。</p>
+
+<p><code>ファイル → スプレッドシートの設定 → 地域と言</code>から、<br/>
+<code>日本語</code>を選択。<br/>
+(ついでに時間も東京にしておいた方がいいでしょう）</p>
+
+<p>するとデフォルトで通貨は、小数点なしの￥になる。</p>
+
+<p>また、<code>表示形式 → 数字</code>から、<code>￥1000</code>と<code>￥1000.12</code>のどちらかを選べる。</p>
+
+<p>(小数点つきの分は、単位が千円、の時、とかの想定なのかな。。。？）</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Force.comのREST APIを使ってデータをインサートする]]></title>
