@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2013-12-13T13:44:52+09:00</updated>
+  <updated>2013-12-13T19:50:31+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,40 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[jQuery Migrate Pluginとか]]></title>
+    <link href="http://kayakuguri.github.io/blog/2013/12/13/jquery-migrate/"/>
+    <updated>2013-12-13T19:42:22+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2013/12/13/jquery-migrate</id>
+    <content type="html"><![CDATA[<p><a href="http://b.hatena.ne.jp/hotentry">はてなブックマークのホッテントリ</a>を見てたら、<br/>
+<a href="https://gist.github.com/mala/7939659">セキュリティについての記事</a>が入ってて、<br/>
+それを読んでみると、どうやら、jQuery Migrate Pluginをディスる記事だったよう。</p>
+
+<!-- more -->
+
+
+<p>で、Migrate Pluginってのを知らなかったのでちょっと調べてみた。</p>
+
+<p><a href="http://c-brains.jp/blog/wsg/13/11/14-142300.php">jQuery Migrate pluginを使ってみる。</a></p>
+
+<p>要するに、アップデートされたjQueryを使用すると、今までのコードが動かなくなっちゃう問題に対して、<br/>
+ここが互換性ないよと警告してくれたりとか、<br/>
+最新版だとサポートされてないものを復活サポートしてくれたりするもの、らしい。</p>
+
+<p>で、この<strong>復活</strong>が問題になっているよう。</p>
+
+<p><a href="http://t-ashula.hateblo.jp/entry/2013/11/19/120903">jQuery Migrate Plugin なんてなかった件</a></p>
+
+<blockquote><p>いくつかのサイトで実際に遭遇してますが，jQueyr 1.6.3 で解決( jQuery Bug #9521 )したはずの $(&ldquo;a[href=&rdquo; + hash + &ldquo;]&rdquo;) タイプの XSS が （ 2013/11/18 現在 1.2.1 を含む全ての） jQuery Migrate Plugin で復活します．</p></blockquote>
+
+<p>これが、冒頭の記事の、</p>
+
+<blockquote><p>紆余曲折を経て変更されたはずが何故かMigrate Pluginなどというもので復活してしまうことだ。jQueryやめろ。</p></blockquote>
+
+<p>ということのよう。</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[iPhoneでのパスワード自動生成機能]]></title>
