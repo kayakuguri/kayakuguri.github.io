@@ -4,7 +4,7 @@
   <title><![CDATA[Category: octopress | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/octopress/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2013-12-13T13:43:16+09:00</updated>
+  <updated>2013-12-13T13:44:52+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -45,7 +45,8 @@
     <id>http://kayakuguri.github.io/blog/2013/11/29/create-post-memo</id>
     <content type="html"><![CDATA[<p><strong>新しい記事を作成</strong></p>
 
-<p>  rake new_post[&lsquo;post title&rsquo;]</p>
+<pre><code>rake new_post['post title']
+</code></pre>
 
 <p>※ここでのタイトルに日本語は使えない。また、ページのURLにもなる。<br/>
 <code>source/_post/YYYY-MM-DD-title.markdown</code>というデータが出来上がるので、<br/>
