@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: topics | KayaMemo]]></title>
+  <link href="http://kayakuguri.github.io/blog/categories/topics/atom.xml" rel="self"/>
+  <link href="http://kayakuguri.github.io/"/>
+  <updated>2013-12-13T13:43:16+09:00</updated>
+  <id>http://kayakuguri.github.io/</id>
+  <author>
+    <name><![CDATA[萱潜]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[iPhoneでのパスワード自動生成機能]]></title>
+    <link href="http://kayakuguri.github.io/blog/2013/12/13/icoud-keychane/"/>
+    <updated>2013-12-13T13:23:51+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2013/12/13/icoud-keychane</id>
+    <content type="html"><![CDATA[<p>パシフィック・リム、買いました。</p>
+
+<iframe src="http://rcm-fe.amazon-adsystem.com/e/cm?t=mrlittlebig01-22&o=9&p=8&l=as1&asins=B00F3WXFIE&ref=tf_til&fc1=666666&IS2=1&lt1=_blank&m=amazon&lc1=258FB8&bc1=DDDDDD&bg1=DDDDDD&f=ifr" style="width:120px;height:240px;" scrolling="no" marginwidth="0" marginheight="0" frameborder="0"></iframe>
+
+
+<p>で、購入した商品にはデジタルデータをダウンロード出来る、という特典が封入されていました。</p>
+
+<!-- more -->
+
+
+<p>それが、<a href="http://support.dcplus.flixster.com/link/portal/15025/15280/Article/3944/">Flixsterのデジタルコピー</a>というもの、でした。</p>
+
+<p>で、さっそくダウンロードすべく、サイトへ。<br/>
+会員登録が必要、とのことで登録。</p>
+
+<p>するとその際、パスワードを入力しようとすると、<strong>「パスワード候補を表示」</strong>なる文言が。</p>
+
+<p><img src="/images/2013/12/icoud-keychane-1.jpg" alt="パスワード候補を表示" /></p>
+
+<p>このサイトではそんな機能を実装しているのか！<br/>
+すごい！！！</p>
+
+<p>と、一瞬思ったのですが、これは、iOS7.0.3から搭載された<strong>iCloudキーチェーン</strong>というものでした。</p>
+
+<p>詳しくは以下で紹介されています。</p>
+
+<p><a href="http://sbapp.net/appnews/upinfo/icloudkey-6882">【iOS7】iOS7.0.3で追加されたiCloudキーチェーンとは？使い方も紹介！</a></p>
+
+<p>これによると、このキーチェーンを使うことで、<br/>
+同じiCloudアカウントｄログインしてるiOSデバイス間なら自動で同期され、<br/>
+パスワードを簡単に管理できるよ、というもののよう。<br/>
+iOS公式の<a href="https://agilebits.com/onepassword">1Password</a>みたいなもののよう。</p>
+
+<p>いつの間にかそんな便利なものが搭載されていたとは知りませんでした。</p>
+
+<p>それはともかく、上記のFlixsterはワーナーが運営する（買収した）映画SNSらしく、<br/>
+結構面白そう。英語ですが。。</p>
+
+<p>参考：<a href="http://bizna.jp/labblog/?p=2942">23億件の映画レビューがついた「Flixster」の秘密</a></p>
+]]></content>
+  </entry>
+  
+</feed>
