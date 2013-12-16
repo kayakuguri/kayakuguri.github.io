@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2013-12-13T19:50:31+09:00</updated>
+  <updated>2013-12-16T21:47:29+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,86 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[セミナーログ]OWASP Night 9th 2013 Year End Special 大阪サテライト]]></title>
+    <link href="http://kayakuguri.github.io/blog/2013/12/16/owasp-night-9th-2013-year-end-special/"/>
+    <updated>2013-12-16T21:37:51+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2013/12/16/owasp-night-9th-2013-year-end-special</id>
+    <content type="html"><![CDATA[<p>OWASP Nightの大阪サテライト、というものに参加させてもらいました。<br/>
+参加、というか、端っこで聞かせてもらっただけ、ですが。</p>
+
+<p>東京で開催されているOWASP nightを大阪から中継で見よう、という、<br/>
+パブリックビューイング的なイベント。</p>
+
+<!-- more -->
+
+
+<p><a href="http://atnd.org/events/46285">http://atnd.org/events/46285</a></p>
+
+<p>本イベント<br/>
+<a href="http://atnd.org/events/46176">http://atnd.org/events/46176</a></p>
+
+<blockquote><p>東京・六本木で開催されるOWASP Night 9th 2013 Year End Special (a.k.a. 忘ナイト)の中継を大阪で楽しむためのサテライト会場です。</p>
+
+<p>OWASP Meeting/Night – OWASP Japanローカルチャプターミーティングは、セミナーや持ち込みのライトニングトークの形で行われる、Webセキュリティに関心のある方が集う、楽しくカジュアルな勉強会です。</p></blockquote>
+
+<p><a href="https://www.owasp.org/index.php/Japan">OWASP Japan</a></p>
+
+<p>以下、全然内容わかってないですが、<br/>
+かるーく、メモです。</p>
+
+<hr />
+
+<p><strong>OWASP Top 10 2013版を日本語訳してみた</strong></p>
+
+<p><a href="http://scan.netsecurity.ne.jp/article/2013/10/24/32779.html">「OWASP Top 10 for 2013」の日本語版を公開</a></p>
+
+<blockquote><p>1：インジェクション（2013-A1）<br/>
+2：認証とセッション管理の不備（2013-A2）<br/>
+3：クロスサイトスクリプティング（XSS）（2013-A3）<br/>
+4：安全でないオブジェクト直接参照（2013-A4）<br/>
+5：セキュリティ設定のミス（2013-A5） <br/>
+6：機密データの露出（2013-A6）<br/>
+7：機能レベルアクセス制御の欠落（2013-A7）<br/>
+8：クロスサイトリクエストフォージェリ（CSRF）（2013-A8）<br/>
+9：既知の脆弱性を持つコンポーネントの使用（2013-A9）<br/>
+10：未検証のリダイレクトとフォワード（2013-A10）</p></blockquote>
+
+<hr />
+
+<p><strong>今夜わかるCVE</strong></p>
+
+<p>CVEとは、共通脆弱性識別子<br/>
+<a href="http://itpro.nikkeibp.co.jp/word/page/10004314/">CVEとは？</a></p>
+
+<blockquote><p>ぜい弱性やセキュリティにかかわる事象を説明するための名前や用語を標準化し，辞書を作成するプロジェクト。</p></blockquote>
+
+<p>MITREというところが採番をしている。<br/>
+米国政府機関の下請け企業<br/>
+NISTの下請けで取りまとめしてる。</p>
+
+<p>来年から番号が変わる。<br/>
+今まで4桁だったのが、足らなくなりそう？なので、5桁になる。</p>
+
+<p>CVE番号だけではない！<br/>
+MITER社がフォーマットに沿って、清書している。</p>
+
+<p>CVEは、SCAPの一つ。<br/>
+NISTが定めた標準規格。<br/>
+セキュリティ情報をプログラムから自動で扱える侵入検知システムで活躍。</p>
+
+<p><a href="http://jvndb.jvn.jp/">JVN iPedia</a><br/>
+JVNブランドの脆弱性対策情報データベース。</p>
+
+<p>MyJVN API利用例<br/>
+<a href="http://secf.keyman.or.jp/">リクルート社 SEfeed</a></p>
+
+<hr />
+
+<p>他にもライトニングトークなど、がありました。</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[jQuery Migrate Pluginとか]]></title>
