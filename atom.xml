@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2013-12-17T17:30:11+09:00</updated>
+  <updated>2013-12-17T20:33:13+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,115 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[phpPgAdminでのテーブルやカラムの操作メモ]]></title>
+    <link href="http://kayakuguri.github.io/blog/2013/12/18/phppgadmin-memo/"/>
+    <updated>2013-12-18T20:24:38+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2013/12/18/phppgadmin-memo</id>
+    <content type="html"><![CDATA[<p>phpPgAdminを使用してDBにテーブルやカラムを作る際にわからない事だらけだったのでメモ。</p>
+
+<p>■<strong>オプション（WITHOUT OIDS)</strong></p>
+
+<!-- more -->
+
+
+<p>参考：<a href="http://www.mikawaban.com/tera/070430003807.html">PostgreSQLについて</a></p>
+
+<blockquote><p>CREATE TABLEでは，デフォルトではOIDが作成されます．OIDを生成しない<br/>
+テーブルを作るには，キーワード &ldquo;WITHOUT OIDS&rdquo; を使用します．</p></blockquote>
+
+<p>OIDって？</p>
+
+<blockquote><p>オブジェクト識別子(OID)はPostgreSQLの内部で様々なシステムテーブルの
+プライマリキーとして使用されます。また、テーブルの作成時にWITHOUT OIDS
+が指定されていない場合やdefault_with_oids設定変数が偽に設定されている
+場合を除き、OIDシステム列がユーザ作成のテーブルに追加されます。
+oidデータ型は現在、符号無し4バイト整数として実装されています。
+これは、大規模なデータベースの全体にわたって一意とするには十分では
+ありません。
+大規模な個別のテーブル内においても十分ではないかもしれません。
+そのため、ユーザ作成テーブルのOID列をプライマリキーとして使用するのは
+お勧めできません。
+OIDの使用は、システムテーブルへの参照の場合にのみ推奨されます。</p></blockquote>
+
+<p>つまり、</p>
+
+<blockquote><p>小規模DB内で識別する為に「OID」を使用しても良いという位の意味</p></blockquote>
+
+<p>らしい。<br/>
+普段は、使わない、でいいのかな。</p>
+
+<p>参考サイト内にあったまとめ。</p>
+
+<blockquote><p>■テーブル作成方法<br/>
+１）phpPgAdminにて「テーブル作成」を選択<br/>
+２）テーブル名（英数字）を入力<br/>
+３）フィールド数を入力<br/>
+４）次画面へ移り、各フィールド入力（英数字）</p>
+
+<p>※フィールドの属性以外は、後からでも変更可能<br/>
+※フィールドの追加・挿入・削除も可能</p>
+
+<p>■PostgreSQLへの接続　→　pg_connect命令<br/>
+■SQL文の実行　→　pg_exec　又は　pg_query命令</p></blockquote>
+
+<p>■<strong>プライマリキー</strong></p>
+
+<p><a href="http://e-words.jp/w/E4B8BBE382ADE383BC.html">主キー 【 primary key 】 プライマリキー</a></p>
+
+<blockquote><p>データベースの中から、ある一組のデータセット(レコード)を一意に識別するための情報。<br/>
+主キーは必ずしも一つの項目とは限らず、複数の項目を組み合わせて主キーとして用いる場合もある。<br/>
+一般的には個々の要素に通し番号などを割り振ってこれを主キーに設定する場合が多い。</p></blockquote>
+
+<p>■<strong>データ型</strong></p>
+
+<p><a href="http://www.postgresql.jp/document/9.1/html/datatype.html">データ型一覧</a></p>
+
+<p>■<strong>列の型で配列</strong></p>
+
+<p>各型で配列を作る事が出来るよう。<br/>
+phpPgAdminでは、<code>データ型</code>の横のセレクトボックスで、<code>[]</code>を選択しておけば配列になるもよう。<br/>
+ただし、配列にするとちょっと面倒があるよう。<br/>
+使わない方が無難？</p>
+
+<blockquote><p>ただ、配列に入れるために中カッコでくくったカンマ区切りの文字列を作らないといけないので、若干面倒です。また、バージョン7.4から配列の要素内にある特定の値を検索する事ができるようにはなりましたが、LIKE句が使えなかったりと、色々不便な所があります。 <br/>
+<a href="http://software.aufheben.info/kouza/senior/kouza_pg.html">http://software.aufheben.info/kouza/senior/kouza_pg.html</a></p></blockquote>
+
+<p>■<strong>intかbigintか</strong></p>
+
+<p>整数型や連番型、ともに、bigがある。</p>
+
+<p><code>integer</code> : 4バイト符号付き整数<br/>
+<code>bigint</code> : 8バイト符号付き整数</p>
+
+<p>どう違う？どっちを使うべき？<br/>
+参考：<a href="http://hamamuratakuo.blog61.fc2.com/blog-entry-648.html">時代はBIGINT</a></p>
+
+<blockquote><p>MySQLのINT型の最小値と最大値は、-2147483648～2147483647です。<br/>
+「2147483647」は、「２１億」<br/>
+インド人と中国人の全員が会員登録しようとすると、INT型では足りないということです。</p></blockquote>
+
+<p>しかし、</p>
+
+<blockquote><p>オートインクリメントのカラムだけのテーブルで、限界までデータを詰め込むと、<br/>
+・INT型 → 約43ギガバイト<br/>
+・BIGINT型 → 約326エクサバイト</p></blockquote>
+
+<p>よっぽどの事がない限り、int型でよさそう。</p>
+
+<p>■<strong>テーブルの破棄</strong></p>
+
+<p>テーブルを破棄しようとすると、<br/>
+<code>カスケード</code>なるチェックボックスが。</p>
+
+<blockquote><p>カスケード規則は、データベースがある操作が起こることを許可し、ほかのテーブルまたは行を最初の操作と同期をとるように変更することによって RI を確実にする規則です。たとえば、カスケード削除規則が定義されていると、主キー テーブルでのレコードの削除により、データベースは削除された行の主キーと同じ値の外部キーを持つデータベース中のすべての行を検索して削除します。<br/>
+<a href="http://www.agtech.co.jp/html/v9manuals/advops/advops-07-2.html">http://www.agtech.co.jp/html/v9manuals/advops/advops-07-2.html</a></p></blockquote>
+
+<p>要は、プライマリキーに設定された値と同じ外部キーを持つデータ、をまとめて削除してくれる、<br/>
+関連データも一緒に消していい？というチェックボックスのよう。たぶん。</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[PostgreSQLでプレースホルダーを使ってSELECT文を発行する方法]]></title>
