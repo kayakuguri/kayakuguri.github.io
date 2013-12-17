@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2013-12-16T21:47:29+09:00</updated>
+  <updated>2013-12-17T17:30:11+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,52 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[PostgreSQLでプレースホルダーを使ってSELECT文を発行する方法]]></title>
+    <link href="http://kayakuguri.github.io/blog/2013/12/17/postgresql-select/"/>
+    <updated>2013-12-17T17:25:36+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2013/12/17/postgresql-select</id>
+    <content type="html"><![CDATA[<p>接続の参考：PostgreSQLへ接続](<a href="http://www.phpbook.jp/tutorial/postgresql/index3.html">http://www.phpbook.jp/tutorial/postgresql/index3.html</a>)</p>
+
+<p>プレースホルダーでの発行は以下を参考<br/>
+<a href="http://lets.postgresql.jp/documents/tutorial/with_php/against_sql_injection/placeholder">PHPでのSQLインジェクション対策 &ndash; プレースホルダ編</a><br/>
+<a href="http://php.net/manual/ja/function.pg-execute.php">pg_execute</a></p>
+
+<!-- more -->
+
+
+<p>SELECT文の例</p>
+
+<pre><code>$dbconn = pg_connect("host=".DB_SERVER." dbname=".DB." user=".DB_USER." password=".DB_PW);
+$result = pg_prepare($dbconn, "", 'SELECT * FROM dtb_order WHERE order_id = $1');
+$result = pg_execute($dbconn, "", array($oid));
+</code></pre>
+
+<p>こうすると、$resultには、resource型の値が入ってくる。<br/>
+そこから実際のデータを取得するためには、<code>pg_fetch_array</code>を使用する。</p>
+
+<p>第３引数に<code>PGSQL_NUM</code>を指定すると、数字の配列で、<br/>
+<code>PGSQL_ASSOC</code>を指定すると、連想配列の形式で取得出来る。</p>
+
+<p>そして、全ての行にアクセスするには、<code>pg_num_rows</code>を使用して何行返ってきたかを取得する。<br/>
+その数字をカウントとして使用して、for文で回すことで全件取得する事が出来る。</p>
+
+<pre><code>for ($i = 0 ; $i &lt; pg_num_rows($result) ; $i++){
+    $rows = pg_fetch_array($result, NULL, PGSQL_ASSOC);
+    var_dump($rows);
+}
+</code></pre>
+
+<p>接続の切断は以下。</p>
+
+<pre><code>$close_flag = pg_close($dbconn);
+if($close_flag) echo "切断成功";
+</code></pre>
+
+<p>参考：<a href="http://www.phpbook.jp/tutorial/postgresql/index5.html">データの取得(SELECT)</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[セミナーログ]OWASP Night 9th 2013 Year End Special 大阪サテライト]]></title>
