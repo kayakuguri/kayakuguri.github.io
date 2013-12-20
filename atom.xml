@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2013-12-17T20:33:13+09:00</updated>
+  <updated>2013-12-20T18:37:47+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,58 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[INNER JOINとLEFT JOIN]]></title>
+    <link href="http://kayakuguri.github.io/blog/2013/12/20/inner-left-join/"/>
+    <updated>2013-12-20T18:19:51+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2013/12/20/inner-left-join</id>
+    <content type="html"><![CDATA[<p><a href="http://okwave.jp/qa/q746515.html">http://okwave.jp/qa/q746515.html</a></p>
+
+<blockquote><p>対応させるべきはinner joinとouter joinなんですけど、<br/>
+left join は left outer join と同等です。</p></blockquote>
+
+<!-- more -->
+
+
+<p>実際に実行して確認していたけれど、<br/>
+<code>INNER JOIN</code>の場合、比較したテーブルそれぞれに値がある場合のみ、<br/>
+結果を返してくれる。条件としても使えそう。<br/>
+(そのテーブル同士で同じIDを持つものだけを抽出、的な)</p>
+
+<p>で、<code>OUTER JOIN</code>は、比較した際に値がなければ、<code>NULL</code>で返す。<br/>
+要するに、値がなくても結果を返してくれる。</p>
+
+<p>値が必須かどうか、みたいな感じぽい。</p>
+
+<blockquote><p>innter joinは結合する相手のテーブルに対応するデータが<br/>
+ある場合のみ結果を返しますが、outer joinは相手の<br/>
+テーブルに対応するデータが無い場合、そのカラムを<br/>
+NULLとして返します。</p></blockquote>
+
+<p><code>OUTER JOIN</code>には、</p>
+
+<pre><code>*  LEFT OUTER JOIN
+*  RIGHT OUTER JOIN
+*  FULL OUTER JOIN
+</code></pre>
+
+<p>の３つがあるよう。</p>
+
+<blockquote><p>LEFT JOINではFROMの後に書かれたテーブルのデータだけを取得します。RIGHT JOINではJOINの後に書かれたテーブルのデータだけを取得します。<br/>
+<a href="http://www.dbonline.jp/mysql/select/index15.html">http://www.dbonline.jp/mysql/select/index15.html</a></p></blockquote>
+
+<p>実際に試してみると、<br/>
+<code>LEFT JOIN</code>の場合は、<code>FROM</code>の後に書かれたテーブルを基準に返す。<br/>
+<code>RIGHT JOIN</code>の場合は、<code>JOIN</code>の後に書かれたテーブルを基準に返す。</p>
+
+<p>あと、<code>USING</code>を使えば少し短く出来る。</p>
+
+<blockquote><p>結合するカラムの名前が同じ場合にはONの代わりにUSINGを使用して次のように記述することもできます。<br/>
+「USING (col_name)」というのは「ON tbl_name1.col_name = tbl_name2.col_name」と同じことです。<br/>
+<a href="http://www.dbonline.jp/mysql/select/index15.html">http://www.dbonline.jp/mysql/select/index15.html</a></p></blockquote>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[phpPgAdminでのテーブルやカラムの操作メモ]]></title>
