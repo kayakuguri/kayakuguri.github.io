@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: flash | KayaMemo]]></title>
+  <link href="http://kayakuguri.github.io/blog/categories/flash/atom.xml" rel="self"/>
+  <link href="http://kayakuguri.github.io/"/>
+  <updated>2013-12-27T17:17:28+09:00</updated>
+  <id>http://kayakuguri.github.io/</id>
+  <author>
+    <name><![CDATA[萱潜]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[AS3にて全画面で動画を再生させる際の注意点]]></title>
+    <link href="http://kayakuguri.github.io/blog/2013/12/27/as3-fullscreen-video/"/>
+    <updated>2013-12-27T17:06:04+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2013/12/27/as3-fullscreen-video</id>
+    <content type="html"><![CDATA[<p>Flashでフルスクリーンで動画を表示したい場合、<br/>
+動画の再生に、<code>FLVPlayback</code>を使っているか<code>Video</code>を使っているか、によって挙動が変わってくるようです。</p>
+
+<h3>■まず、<code>FLVPlayback</code>を使っている場合、</h3>
+
+<!-- more -->
+
+
+<p>ステージに表示している動画は問答無用で画面にフィットしたフルスクリーンで表示されます。<br/>
+一応、<code>stage</code>のプロパティである、<code>stageFocusRect</code>を使うことで表示する位置を調整できたりしますが、<br/>
+動画のサイズは強制的にモニタのサイズになってしまうようなので、まず使い物にならないです。</p>
+
+<p>で、画面いっぱいに動画が表示されてしまうと、その他のコンテンツは動画の下に隠れてしまいます。<br/>
+なので、自前で再生バーなどをつけていても見えなくなってしまいます。</p>
+
+<p>というわけで、この場合は標準のスキンを使用する必要があります。<br/>
+<code>FLVPlayback</code>のプロパティで<code>skin</code>があるので、それを使って、</p>
+
+<pre><code>video.skin = "MinimaFlatCustomColorPlayBackSeekCounterVolMuteFull.swf";
+</code></pre>
+
+<p>などと指定します。<br/>
+すると、フルスクリーンになっても、その動画の下にコントローラーがくっつく形となります。</p>
+
+<p>この拡大は、<code>stage</code>の<code>scaleMode</code>プロパティは関係なく、<br/>
+また、<code>FLVPlayback</code>の<code>scaleMode</code>プロパティも関係ありません。<br/>
+(<code>FLVPlayback</code>の<code>scaleMode</code>プロパティは、動画枠内で実際の動画を拡大縮小するか、を決めるもの）</p>
+
+<h3>■次に、<code>Video</code>の場合。</h3>
+
+<p>こちらの場合は、動画部分はその他の部分と同じように拡大縮小されます。<br/>
+拡大するかどうかは、<code>stage</code>の<code>scaleMode</code>のプロパティで指定した仕様に準じます。</p>
+
+<p>この場合、コントローラーは標準のものは使用できないので、自前で用意する必要があります。</p>
+
+<h3>■まとめ</h3>
+
+<p>単純に動画だけを大きくしたいのであれば、<code>FLVPlayback</code>を使ったほうが楽だと思われます。<br/>
+ですが、コントローラーをカスタマイズしたい、など、自由度が高いものは、<code>Video</code>になります。</p>
+
+<p>今回使用した検証コードは以下です。</p>
+
+<p><code>FLVPlayback</code></p>
+
+<pre><code>var video:FLVPlayback = new FLVPlayback();
+video.skin = "MinimaFlatCustomColorPlayBackSeekCounterVolMuteFull.swf";
+video.width = 480;
+video.height = 270;
+this.addChild(video);
+</code></pre>
+
+<p><code>Video</code></p>
+
+<pre><code>private var _connect :NetConnection;
+private function setVideo():void{
+  _connect = new NetConnection();
+  _connect.addEventListener(NetStatusEvent.NET_STATUS, netStatusHandler);
+  _connect.connect(null);
+}
+private function netStatusHandler(e:NetStatusEvent):void {
+  var stream:NetStream = new NetStream(_connect);
+  var video:Video = new Video();
+  video.width = 480;
+  video.height = 270;
+  video.attachNetStream(stream);
+  stream.play("sample.f4v");
+  this.addChild(video);
+}
+</code></pre>
+]]></content>
+  </entry>
+  
+</feed>
