@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2013-12-27T17:17:28+09:00</updated>
+  <updated>2014-01-08T15:03:28+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,42 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[JSPについて]]></title>
+    <link href="http://kayakuguri.github.io/blog/2014/01/08/jsp/"/>
+    <updated>2014-01-08T14:34:13+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2014/01/08/jsp</id>
+    <content type="html"><![CDATA[<p>JSP、というファイル形式を初めて知った。<br/>
+<strong>Java サーバー ページ</strong>の、略、らしい。</p>
+
+<!-- more -->
+
+
+<p>SSIのようにインクルード目的で使用する、のかと思ったけど、<br/>
+どちらかというと、CGIの代わり、のよう。</p>
+
+<p>参考：<a href="http://homepage2.nifty.com/takaaki024/tips/programs/java/jsp.html">http://homepage2.nifty.com/takaaki024/tips/programs/java/jsp.html</a></p>
+
+<blockquote><p>CGIとJSPの違い<br/>
+　・CGIはアクセスがあるたびにサーバが新しいプロセスを起動する<br/>
+　　オーバーヘッドとリソースの消費によるパフォーマンスの低下が避けられない<br/>
+　・JSPはJSPコンテナと呼ばれるJSP実行プログラムが一度起動されていれば、<br/>
+　　その内部で実行されるので、リソースの消費が少なく効率的だ</p></blockquote>
+
+<p>インクルードの方法は２つ。</p>
+
+<pre><code>&lt;%@ include file="date_disp3.jsp" %&gt;
+&lt;jsp:include page="date_disp3.jsp" flush="true" /&gt;
+</code></pre>
+
+<p>ただし、実行にはサーバーの設定が必要?<br/>
+この辺？ <a href="http://www.atmarkit.co.jp/ait/articles/0105/30/news002.html">http://www.atmarkit.co.jp/ait/articles/0105/30/news002.html</a></p>
+
+<p>参考：<br/>
+<a href="http://mail2.nara-edu.ac.jp/~asait/java/j2ee/part3.htm">http://mail2.nara-edu.ac.jp/~asait/java/j2ee/part3.htm</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[AS3にて全画面で動画を再生させる際の注意点]]></title>
