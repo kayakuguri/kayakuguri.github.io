@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2014-01-08T15:03:28+09:00</updated>
+  <updated>2014-01-08T17:26:48+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,48 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Tera Termでのテンキーの利用]]></title>
+    <link href="http://kayakuguri.github.io/blog/2014/01/08/teraterm/"/>
+    <updated>2014-01-08T17:19:01+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2014/01/08/teraterm</id>
+    <content type="html"><![CDATA[<p>Tera Termでssh接続をしていて、viでファイルを編集中に、いつものくせでテンキーのエンターキーを押して改行をしていると、<br/>
+何故か<code>M</code>と入力されてしまっていた。<br/>
+それに気付かず保存してしまってえらい目にあったことがある。</p>
+
+<!-- more -->
+
+
+<p>これはテンキーが使えないのか、viがおかしいのか、と思ってググってみると、TeraTerm側の問題だったよう。</p>
+
+<p><a href="http://server-setting.info/blog/teraterm-tenkey.html">TeraTermでテンキー(数値キーパッド)(/,*,&ndash;,+)の動きが変なので対応してみた</a></p>
+
+<p><code>M</code>の件は書いてないけど、デフォルトの対応表によれば、<code>6</code>が<code>M</code>っぽい。間違って押したかな。<br/>
+今後おかしくなると困るので、正常に動くようにしておいた。</p>
+
+<pre><code>[VT numeric keypad]
+Num0=off
+Num1=off
+Num2=off
+Num3=off
+Num4=off
+Num5=off
+Num6=off
+Num7=off
+Num8=off
+Num9=off
+NumMinus=off
+NumComma=off
+NumPeriod=off
+NumEnter=off
+PF1=off
+PF2=off
+PF3=off
+PF4=off
+</code></pre>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[JSPについて]]></title>
@@ -969,224 +1011,6 @@ rake deploy
 git commit -m "add post"
 git push -u bitbucket source
 </code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Githubでblogをアップするまでのメモ]]></title>
-    <link href="http://kayakuguri.github.io/blog/2013/11/29/create-git-blog/"/>
-    <updated>2013-11-29T13:05:27+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2013/11/29/create-git-blog</id>
-    <content type="html"><![CDATA[<p>ここの流れで作成させて頂きました。<br/>
-<a href="http://morizyun.github.io/blog/octopress-gitpage-minimum-install-guide/">http://morizyun.github.io/blog/octopress-gitpage-minimum-install-guide/</a></p>
-
-<p>もう一つ参考。<br/>
-<a href="http://tokkonopapa.github.io/blog/2011/12/30/octopress-on-github-and-bitbucket/">http://tokkonopapa.github.io/blog/2011/12/30/octopress-on-github-and-bitbucket/</a></p>
-
-<p>githubでリポジトリ作成。<br/>
-ファーストコミットをgithubの通りに。</p>
-
-<p>そのフォルダに移動して、Octopressの最新版をpull</p>
-
-<p><code>bundle install</code>は、sudoで。</p>
-
-<p><code>bundle exec rake install</code>が実行できない。<br/>
-以下エラーが出る</p>
-
-<!-- more -->
-
-
-<pre><code>Could not find rake-0.9.2.2 in any of the sources
-Run `bundle install` to install missing gems.
-</code></pre>
-
-<p>・解決策(英語)<br/>
-<a href="http://stackoverflow.com/questions/9693445/rails-3-2-1-could-not-find-rake-0-9-2-2-in-any-of-the-sources">Rails 3.2.1 &ndash; Could not find rake-0.9.2.2 in any of the sources</a></p>
-
-<p><strong>rvm install 1.9.3</strong>らしい。</p>
-
-<p>■RVMをインストール</p>
-
-<p><a href="http://www.slowlydays.net/wordpress/?p=718">Mac book air (Lion) にRVMをインストールする</a><br/>
-この方法だと、<code>rvm 1.24.4</code>になってる。<br/>
-新しすぎてダメ？</p>
-
-<p>RVMを入れてから、もっかいbundle install。<br/>
-<code>sudo bundle install</code></p>
-
-<p>なんかエラー出たので、指示に従って、アップデート</p>
-
-<pre><code>Gem::InstallError: liquid requires RubyGems version &gt;= 1.3.7. Try 'gem update --system' to update RubyGems itself.
-An error occurred while installing liquid (2.3.0), and Bundler cannot continue.
-Make sure that `gem install liquid -v '2.3.0'` succeeds before bundling.
-</code></pre>
-
-<p><code>sudo gem update --system</code></p>
-
-<p>もっかい<code>sudo bundle install</code>したらいけたっぽい。<br/>
-入ったもの一覧</p>
-
-<pre><code>rake (0.9.2.2)
-RedCloth (4.2.9)
-chunky_png (1.2.5)
-fast-stemmer (1.0.1)
-classifier (1.3.3)
-fssm (0.2.9)
-sass (3.2.9)
-compass (0.12.2)
-directory_watcher (1.4.1)
-haml (3.1.7)
-kramdown (0.13.8)
-liquid (2.3.0)
-syntax (1.0.0)
-maruku (0.6.1)
-posix-spawn (0.3.6)
-yajl-ruby (1.1.0)
-pygments.rb (0.3.4)
-jekyll (0.12.0)
-rack (1.5.2)
-rack-protection (1.5.0)
-rb-fsevent (0.9.1)
-rdiscount (2.0.7.3)
-rubypants (0.2.0)
-sass-globbing (1.0.0)
-tilt (1.3.7)
-sinatra (1.4.2)
-stringex (1.4.0)
-bundler (1.3.5)
-</code></pre>
-
-<p>そのうえでもっかいrakeをinstall。<br/>
-<code>sudo bundle exec rake install</code></p>
-
-<p>続いて、<code>sudo bundle exec rake setup_github_pages</code>とすると、<br/>
-<code>Repository url:</code>と聞かれたので、その上にある参考の通り、github上のリポジトリURLを入れた。</p>
-
-<pre><code>https://github.com/your_username/your_username.github.io
-</code></pre>
-
-<p><a href="https://bitbucket.org/">BitBucket</a>にログイン、とあったので、githubアカウントでログイン。<br/>
-あとは参考サイトの通りにBitBucketでリポジトリを作成して、githubに関連？づける。</p>
-
-<p>BitBucketでsshキーを登録しておく。<br/>
-アカウントの管理、から、SSHキー。<br/>
-すでに作成はしていたので、指示にある通り、以下のコマンドでコピー。</p>
-
-<pre><code>pbcopy &lt; ~/.ssh/id_rsa.pub
-</code></pre>
-
-<p>ラベルを、id_rsa.pubにしておいた。</p>
-
-<p>で、記事を作ってみて、そのファイルを編集したい、、んだけど、読み取り専用で開いてしまう。<br/>
-権限がない。<br/>
-いちいちパーミッション変更してたらキリがない。ので、ルート権限でファイルを開く。<br/>
-そのプラグイン。<br/>
-<a href="http://sanrinsha.lolipop.jp/blog/2012/01/sudo-vim.html">sudo.vim</a></p>
-
-<p>最初、<code>git push -u bitbucket source</code>をすると、上手く反映されなかったけど、<br/>
-上記、SSHキーを登録した後に再度試すと上手くいった。</p>
-
-<hr />
-
-<p><code>sudo rake gen_deploy</code>を実行するも反映されてないっぽい？</p>
-
-<p><a href="http://kayakuguri.github.io/">http://kayakuguri.github.io/</a></p>
-
-<p><code>rake preview</code>しても反映されない。<br/>
-<code>rake aborted!</code>って出てる。</p>
-
-<p>これ？<br/>
-<a href="http://stackoverflow.com/questions/13778858/octopress-errors-rake-preview-watch-or-generate">http://stackoverflow.com/questions/13778858/octopress-errors-rake-preview-watch-or-generate</a></p>
-
-<p>rubyを1.9.3にしないといけない？<br/>
-以下で？</p>
-
-<pre><code>rvm install ruby-1.9.3-p392
-</code></pre>
-
-<p>だいぶ時間がかかったけど、アップデートできた。</p>
-
-<pre><code>Install of ruby-1.9.3-p484 - #complete
-</code></pre>
-
-<p>次のエラー</p>
-
-<pre><code>Could not find RedCloth-4.2.9 in any of the sources
-Run `bundle install` to install missing gems.
-</code></pre>
-
-<p>これ？<br/>
-<a href="http://kazukiyunoue-tech.hatenablog.com/entry/2012/12/28/132115">http://kazukiyunoue-tech.hatenablog.com/entry/2012/12/28/132115</a><br/>
-違った。。</p>
-
-<p>もっかい、<code>bundle install</code>してみると、入ったっぽい。rubyのバージョンを変えたから、<br/>
-もう一回インストールし直さないといけなかったのかな？</p>
-
-<pre><code>Using rake (0.9.2.2)
-Installing RedCloth (4.2.9)
-Installing chunky_png (1.2.5)
-Installing fast-stemmer (1.0.1)
-Installing classifier (1.3.3)
-Installing fssm (0.2.9)
-Installing sass (3.2.9)
-Installing compass (0.12.2)
-Installing directory_watcher (1.4.1)
-Installing haml (3.1.7)
-Installing kramdown (0.13.8)
-Installing liquid (2.3.0)
-Installing syntax (1.0.0)
-Installing maruku (0.6.1)
-Installing posix-spawn (0.3.6)
-Installing yajl-ruby (1.1.0)
-Installing pygments.rb (0.3.4)
-Installing jekyll (0.12.0)
-Installing rack (1.5.2)
-Installing rack-protection (1.5.0)
-Installing rb-fsevent (0.9.1)
-Installing rdiscount (2.0.7.3)
-Installing rubypants (0.2.0)
-Installing sass-globbing (1.0.0)
-Installing tilt (1.3.7)
-Installing sinatra (1.4.2)
-Installing stringex (1.4.0)
-Using bundler (1.3.5)
-</code></pre>
-
-<p>これでようやく、<code>rake preview</code>でエラーが出なくなった！<br/>
-なので、<a href="http://localhost:4000/">http://localhost:4000/</a>にアクセス、、するも、真っ白。<br/>
-コンソールに出てるログを見ると、404になってるっぽい。</p>
-
-<pre><code>"GET / HTTP/1.1" 404 - 0.0237
-</code></pre>
-
-<p>どうやら権限がなくて成功してなかったっぽい。<br/>
-<code>sudo rake preview</code>で見ると、表示出来た！！</p>
-
-<p>つぎに記事をアップしてみるも、権限エラー。。</p>
-
-<pre><code>Could not read from remote repository.
-</code></pre>
-
-<p>公式のSSH作成・登録方法にもとづいて、やり直してみる。<br/>
-<a href="https://help.github.com/articles/generating-ssh-keys">https://help.github.com/articles/generating-ssh-keys</a></p>
-
-<p>手順にある、<code>ssh -T git@github.com</code>でのテストが上手くいかなかった。<br/>
-これは、<a href="http://dev.classmethod.jp/tool/github-ssh-sub-account-setting/">複数のアカウントでGithubに接続</a>、の記事にあった方法を使用しているのだけれど、<br/>
-このconfigファイル内の設定で、hostの名前が、<code>github.com</code>になってたので、それを<code>git@github.com</code>に変更したところ、上手くつながった。</p>
-
-<hr />
-
-<p>何故かどうしても上手くいかないので、<br/>
-冒頭のサイトの手順をもう一度やり直した。<br/>
-もしかしたら、リポジトリ作った後の最初のプッシュがだめなのかも。。。</p>
-
-<p>どうやらやっぱり、最初のプッシュがダメだったよう。<br/>
-そことコンフリクトしていたようで、やり直してみると、上手く通ったっぽい。<br/>
-githubにもソース一式がプッシュされた。</p>
-
-<p>しばらくすると反映された！！</p>
-
-<p>やり直しの時には、権限も解消されていたのか、<code>sudo</code>もつけずにいけた。</p>
 ]]></content>
   </entry>
   

@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Editor | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/editor/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2014-01-08T15:03:28+09:00</updated>
+  <updated>2014-01-08T17:26:48+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,48 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Tera Termでのテンキーの利用]]></title>
+    <link href="http://kayakuguri.github.io/blog/2014/01/08/teraterm/"/>
+    <updated>2014-01-08T17:19:01+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2014/01/08/teraterm</id>
+    <content type="html"><![CDATA[<p>Tera Termでssh接続をしていて、viでファイルを編集中に、いつものくせでテンキーのエンターキーを押して改行をしていると、<br/>
+何故か<code>M</code>と入力されてしまっていた。<br/>
+それに気付かず保存してしまってえらい目にあったことがある。</p>
+
+<!-- more -->
+
+
+<p>これはテンキーが使えないのか、viがおかしいのか、と思ってググってみると、TeraTerm側の問題だったよう。</p>
+
+<p><a href="http://server-setting.info/blog/teraterm-tenkey.html">TeraTermでテンキー(数値キーパッド)(/,*,&ndash;,+)の動きが変なので対応してみた</a></p>
+
+<p><code>M</code>の件は書いてないけど、デフォルトの対応表によれば、<code>6</code>が<code>M</code>っぽい。間違って押したかな。<br/>
+今後おかしくなると困るので、正常に動くようにしておいた。</p>
+
+<pre><code>[VT numeric keypad]
+Num0=off
+Num1=off
+Num2=off
+Num3=off
+Num4=off
+Num5=off
+Num6=off
+Num7=off
+Num8=off
+Num9=off
+NumMinus=off
+NumComma=off
+NumPeriod=off
+NumEnter=off
+PF1=off
+PF2=off
+PF3=off
+PF4=off
+</code></pre>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Php StormでのFTPの設定]]></title>
