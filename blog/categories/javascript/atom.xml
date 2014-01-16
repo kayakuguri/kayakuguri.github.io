@@ -4,7 +4,7 @@
   <title><![CDATA[Category: JavaScript | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/javascript/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2014-01-08T17:26:48+09:00</updated>
+  <updated>2014-01-16T18:41:29+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,37 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[ajaxzip3で、郵便番号から住所の自動入力をする際に、Shift-JISを使用する]]></title>
+    <link href="http://kayakuguri.github.io/blog/2014/01/16/ajaxzip3-shiftjis/"/>
+    <updated>2014-01-16T18:35:42+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2014/01/16/ajaxzip3-shiftjis</id>
+    <content type="html"><![CDATA[<p>ajaxzip3を使って郵便番号から住所を自動入力させる際、<br/>
+Shift-JISを使用したい場合、<a href="https://code.google.com/p/ajaxzip3/">ライブラリのページ</a>には以下のように書かれている。</p>
+
+<!-- more -->
+
+
+<pre><code>&lt;head&gt;
+&lt;meta http-equiv="Content-Type" content="text/html; charset=Shift_JIS"&gt;
+&lt;title&gt;サンプル&lt;/title&gt;
+&lt;script src="http://ajaxzip3.googlecode.com/svn/trunk/ajaxzip3/ajaxzip3.js" charset="UTF-8"&gt;&lt;/script&gt;
+&lt;/head&gt;
+</code></pre>
+
+<p>しかし、これだと<strong>IEのみ</strong>文字化けしてしまう。</p>
+
+<p>それを回避するには、<code>charset</code>を先に書くようにすればいい、らしい。</p>
+
+<pre><code>&lt;script type="text/javascript" src="hoge.js" charset="UTF=8"&gt;&lt;/script&gt; 
+↓
+&lt;script type="text/javascript" charset="UTF=8" src="hoge.js"&gt;&lt;/script&gt; 
+</code></pre>
+
+<p>参考：<a href="http://ksk1015.hatenablog.com/entry/2012/02/21/120938">ajaxzip3のIEでの文字化け対策 &ndash; ksk1015のブログ</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[jQuery Migrate Pluginとか]]></title>
