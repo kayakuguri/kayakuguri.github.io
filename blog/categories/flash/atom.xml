@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
 
-  <title><![CDATA[Category: flash | KayaMemo]]></title>
+  <title><![CDATA[Category: Flash | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/flash/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2014-01-16T18:41:29+09:00</updated>
+  <updated>2014-01-20T15:51:09+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -14,79 +14,39 @@
 
   
   <entry>
-    <title type="html"><![CDATA[AS3にて全画面で動画を再生させる際の注意点]]></title>
-    <link href="http://kayakuguri.github.io/blog/2013/12/27/as3-fullscreen-video/"/>
-    <updated>2013-12-27T17:06:04+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2013/12/27/as3-fullscreen-video</id>
-    <content type="html"><![CDATA[<p>Flashでフルスクリーンで動画を表示したい場合、<br/>
-動画の再生に、<code>FLVPlayback</code>を使っているか<code>Video</code>を使っているか、によって挙動が変わってくるようです。</p>
-
-<h3>■まず、<code>FLVPlayback</code>を使っている場合、</h3>
+    <title type="html"><![CDATA[Flashのみで表示中のページの読み込み状況を取得したい]]></title>
+    <link href="http://kayakuguri.github.io/blog/2014/01/20/jsloadedcheck-on-flash/"/>
+    <updated>2014-01-20T15:46:08+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2014/01/20/jsloadedcheck-on-flash</id>
+    <content type="html"><![CDATA[<p>HTML側にJSなどを埋め込んだりせずに<br/>
+Flash側のみでHTMLページ全体の読み込み状況を知りたい、となって、<br/>
+調べてみたところ、以下の方法が使用できた。</p>
 
 <!-- more -->
 
 
-<p>ステージに表示している動画は問答無用で画面にフィットしたフルスクリーンで表示されます。<br/>
-一応、<code>stage</code>のプロパティである、<code>stageFocusRect</code>を使うことで表示する位置を調整できたりしますが、<br/>
-動画のサイズは強制的にモニタのサイズになってしまうようなので、まず使い物にならないです。</p>
+<p><a href="http://hakuhin.jp/js/document.html#DOCUMENT_03">現在のページの読み込み状況を取得する &ndash; JavaScriptプログラミング講座</a></p>
 
-<p>で、画面いっぱいに動画が表示されてしまうと、その他のコンテンツは動画の下に隠れてしまいます。<br/>
-なので、自前で再生バーなどをつけていても見えなくなってしまいます。</p>
+<blockquote><p>現在閲覧中のページの読み込み状況を調べるには、document.readyState プロパティを使用します。<br/>
+以下の文字列が得られます。</p></blockquote>
 
-<p>というわけで、この場合は標準のスキンを使用する必要があります。<br/>
-<code>FLVPlayback</code>のプロパティで<code>skin</code>があるので、それを使って、</p>
+<ul>
+<li>uninitialized &ndash; 初期化されていません。ロードが開始されていません。</li>
+<li>loading &ndash; ロード中です。</li>
+<li>interactive &ndash; DOM オブジェクトの構築は完了しています。画像データなどの読み込みはまだ完了していません。</li>
+<li>complete &ndash; すべての読み込みが完了しています。</li>
+</ul>
 
-<pre><code>video.skin = "MinimaFlatCustomColorPlayBackSeekCounterVolMuteFull.swf";
+
+<p>なので、Flash側からこのプロパティを呼び出せばわかる、となります。</p>
+
+<p>しかし<code>ExternalInterface</code>は関数を呼び出すものなので、<br/>
+プロパティを直接呼び出すことはできません。なので、関数にくるんで返すようにします。</p>
+
+<pre><code>var state:String = ExternalInterface.call("function(){return document.readyState;}");
 </code></pre>
 
-<p>などと指定します。<br/>
-すると、フルスクリーンになっても、その動画の下にコントローラーがくっつく形となります。</p>
-
-<p>この拡大は、<code>stage</code>の<code>scaleMode</code>プロパティは関係なく、<br/>
-また、<code>FLVPlayback</code>の<code>scaleMode</code>プロパティも関係ありません。<br/>
-(<code>FLVPlayback</code>の<code>scaleMode</code>プロパティは、動画枠内で実際の動画を拡大縮小するか、を決めるもの）</p>
-
-<h3>■次に、<code>Video</code>の場合。</h3>
-
-<p>こちらの場合は、動画部分はその他の部分と同じように拡大縮小されます。<br/>
-拡大するかどうかは、<code>stage</code>の<code>scaleMode</code>のプロパティで指定した仕様に準じます。</p>
-
-<p>この場合、コントローラーは標準のものは使用できないので、自前で用意する必要があります。</p>
-
-<h3>■まとめ</h3>
-
-<p>単純に動画だけを大きくしたいのであれば、<code>FLVPlayback</code>を使ったほうが楽だと思われます。<br/>
-ですが、コントローラーをカスタマイズしたい、など、自由度が高いものは、<code>Video</code>になります。</p>
-
-<p>今回使用した検証コードは以下です。</p>
-
-<p><code>FLVPlayback</code></p>
-
-<pre><code>var video:FLVPlayback = new FLVPlayback();
-video.skin = "MinimaFlatCustomColorPlayBackSeekCounterVolMuteFull.swf";
-video.width = 480;
-video.height = 270;
-this.addChild(video);
-</code></pre>
-
-<p><code>Video</code></p>
-
-<pre><code>private var _connect :NetConnection;
-private function setVideo():void{
-  _connect = new NetConnection();
-  _connect.addEventListener(NetStatusEvent.NET_STATUS, netStatusHandler);
-  _connect.connect(null);
-}
-private function netStatusHandler(e:NetStatusEvent):void {
-  var stream:NetStream = new NetStream(_connect);
-  var video:Video = new Video();
-  video.width = 480;
-  video.height = 270;
-  video.attachNetStream(stream);
-  stream.play("sample.f4v");
-  this.addChild(video);
-}
-</code></pre>
+<p>これでFlash側からHTMLの読み込み状況を（ある程度）知る事ができます。</p>
 ]]></content>
   </entry>
   

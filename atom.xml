@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2014-01-16T18:41:29+09:00</updated>
+  <updated>2014-01-20T15:51:09+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,43 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Flashのみで表示中のページの読み込み状況を取得したい]]></title>
+    <link href="http://kayakuguri.github.io/blog/2014/01/20/jsloadedcheck-on-flash/"/>
+    <updated>2014-01-20T15:46:08+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2014/01/20/jsloadedcheck-on-flash</id>
+    <content type="html"><![CDATA[<p>HTML側にJSなどを埋め込んだりせずに<br/>
+Flash側のみでHTMLページ全体の読み込み状況を知りたい、となって、<br/>
+調べてみたところ、以下の方法が使用できた。</p>
+
+<!-- more -->
+
+
+<p><a href="http://hakuhin.jp/js/document.html#DOCUMENT_03">現在のページの読み込み状況を取得する &ndash; JavaScriptプログラミング講座</a></p>
+
+<blockquote><p>現在閲覧中のページの読み込み状況を調べるには、document.readyState プロパティを使用します。<br/>
+以下の文字列が得られます。</p></blockquote>
+
+<ul>
+<li>uninitialized &ndash; 初期化されていません。ロードが開始されていません。</li>
+<li>loading &ndash; ロード中です。</li>
+<li>interactive &ndash; DOM オブジェクトの構築は完了しています。画像データなどの読み込みはまだ完了していません。</li>
+<li>complete &ndash; すべての読み込みが完了しています。</li>
+</ul>
+
+
+<p>なので、Flash側からこのプロパティを呼び出せばわかる、となります。</p>
+
+<p>しかし<code>ExternalInterface</code>は関数を呼び出すものなので、<br/>
+プロパティを直接呼び出すことはできません。なので、関数にくるんで返すようにします。</p>
+
+<pre><code>var state:String = ExternalInterface.call("function(){return document.readyState;}");
+</code></pre>
+
+<p>これでFlash側からHTMLの読み込み状況を（ある程度）知る事ができます。</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[ajaxzip3で、郵便番号から住所の自動入力をする際に、Shift-JISを使用する]]></title>
@@ -962,45 +999,6 @@ $ nodebrew use 0.10
     <id>http://kayakuguri.github.io/blog/2013/11/29/bird-photo</id>
     <content type="html"><![CDATA[<p><a href="http://www.flickr.com/photos/mrlittlebig/9536224303/" title="SIGE2802 by _usk, on Flickr"><img src="http://farm6.staticflickr.com/5480/9536224303_c93650aab9.jpg" alt="SIGE2802"></a>
 <a href="http://www.flickr.com/photos/mrlittlebig/9536253167/" title="SIGE2808 by _usk, on Flickr"><img src="http://farm3.staticflickr.com/2852/9536253167_c6137c50f8.jpg" alt="SIGE2808"></a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[メモ]mySQL 文字列処理など]]></title>
-    <link href="http://kayakuguri.github.io/blog/2013/11/29/sql-memo/"/>
-    <updated>2013-11-29T14:34:00+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2013/11/29/sql-memo</id>
-    <content type="html"><![CDATA[<p>参考:<a href="http://homepage2.nifty.com/sak/w_sak3/doc/sysbrd/sq_kj07_2.htm">http://homepage2.nifty.com/sak/w_sak3/doc/sysbrd/sq_kj07_2.htm</a></p>
-
-<p><strong>文字列連結</strong></p>
-
-<p>concat(&ldquo;a&rdquo;,&ldquo;b&rdquo;)で文字列連結。</p>
-
-<p><strong>0埋め</strong></p>
-
-<!-- more -->
-
-
-<p>lpad()で左側の0埋めが出来る。</p>
-
-<p>例：
-1 →01 としたい時
-param=1とする。
-[クエリ]
-lpad(param,2,&lsquo;0&rsquo;)
-[結果]
-01</p>
-
-<p><strong>文字列を数値に変換</strong>
-to_number()がSQLにはあるけれど、mySQLにはない</p>
-
-<p>以下の方法でいける。
-[クエリ]
-cast(&ldquo;001&rdquo; as SIGNED)
-[結果]
-1</p>
-
-<p>参考:<a href="http://hetare-engineer.blogspot.jp/2011/03/mysql.html">http://hetare-engineer.blogspot.jp/2011/03/mysql.html</a></p>
 ]]></content>
   </entry>
   
