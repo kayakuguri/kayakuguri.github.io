@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2014-01-20T15:51:09+09:00</updated>
+  <updated>2014-01-24T16:50:25+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,28 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[FLVPlaybackのスムージング]]></title>
+    <link href="http://kayakuguri.github.io/blog/2014/01/24/flvplayback-smoothing/"/>
+    <updated>2014-01-24T16:47:11+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2014/01/24/flvplayback-smoothing</id>
+    <content type="html"><![CDATA[<p>Videoクラスにはそのものズバリの名前の、<code>sommthing</code>プロパティがあるのだけれど、<br/>
+FLVPlaybackにはない。<br/>
+なので、スムージングはかけられないのかと思っていたけれど、あった。</p>
+
+<!-- more -->
+
+
+<pre><code>player.getVideoPlayer(player.activeVideoPlayerIndex).smoothing = true;
+</code></pre>
+
+<p>これでいい、らしい。<br/>
+知らなかったのでメモメモ。</p>
+
+<p>情報：<a href="http://un-q.net/2008/06/flvplayback_smoothing_video_as3.html">http://un-q.net/2008/06/flvplayback_smoothing_video_as3.html</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Flashのみで表示中のページの読み込み状況を取得したい]]></title>
@@ -989,16 +1011,6 @@ $ nodebrew use 0.10
 </code></pre>
 
 <p>参考：<a href="http://pentan.info/php/fgetcsv_char.html">fgetcsv関数を文字化け対応 setlocaleの文字コード指定</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[Photo]Birds]]></title>
-    <link href="http://kayakuguri.github.io/blog/2013/11/29/bird-photo/"/>
-    <updated>2013-11-29T19:14:10+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2013/11/29/bird-photo</id>
-    <content type="html"><![CDATA[<p><a href="http://www.flickr.com/photos/mrlittlebig/9536224303/" title="SIGE2802 by _usk, on Flickr"><img src="http://farm6.staticflickr.com/5480/9536224303_c93650aab9.jpg" alt="SIGE2802"></a>
-<a href="http://www.flickr.com/photos/mrlittlebig/9536253167/" title="SIGE2808 by _usk, on Flickr"><img src="http://farm3.staticflickr.com/2852/9536253167_c6137c50f8.jpg" alt="SIGE2808"></a></p>
 ]]></content>
   </entry>
   
