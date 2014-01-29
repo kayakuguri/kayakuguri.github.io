@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2014-01-24T16:50:25+09:00</updated>
+  <updated>2014-01-29T17:17:12+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,106 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[CodenvyとherokuでブラウザのみでRailsアプリを作成する その1]]></title>
+    <link href="http://kayakuguri.github.io/blog/2014/01/29/railsapp-on-codenvy-and-heroku/"/>
+    <updated>2014-01-29T16:33:01+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2014/01/29/railsapp-on-codenvy-and-heroku</id>
+    <content type="html"><![CDATA[<p>herokuがRailsを全面サポートしている事や、phpは公式にはサポートしていないこともあって、<br/>
+Ruby、Railsを勉強してみよう、と思い立つ。</p>
+
+<p>開発環境はローカルに構築するつもり(というか当然そうなると思っていた)のだけれど、<br/>
+すこし調べてみると今はクラウド開発環境なるものがある、とのことで、どうせならそちらを使用してみることにする。<br/>
+(そちらのほうが楽そうだし)<br/>
+というわけでそれらのメモ。</p>
+
+<!-- more -->
+
+
+<p>参考にさせてもらったページ<br/>
+<a href="http://libro.tuyano.com/index3?id=780003&amp;page=6">Herokuではじめる 初心者のためのRuby on Rails3入門</a></p>
+
+<p>クラウド開発環境は有名どころでは、<a href="https://c9.io/">cloud9</a>と、<a href="https://codenvy.com/">Codenvy</a>があるようだけれど、<br/>
+標準でherokuに対応している、という点で、Codenvyをチョイス。</p>
+
+<p>セットアップしていく。</p>
+
+<h4>herokuのアカウント作成</h4>
+
+<p><a href="https://www.heroku.com">heroku</a></p>
+
+<p>まずは、<code>Sing up for free</code>からアカウント作成。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2014/01/heroku01.jpg" alt="Sing up for free" /></p>
+
+<p>開いた先でメールアドレスを入れて、メールを待つ。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2014/01/heroku02.jpg" alt="Sing up for free" /></p>
+
+<p>メール内に記載されているアドレスをクリックして、パスワードを設定。<br/>
+以上でアカウントの作成は終了。</p>
+
+<h4>Codenvyのアカウント作成</h4>
+
+<p><a href="https://codenvy.com/">Codenvy</a></p>
+
+<p>まずは、<code>FREE SIGN UP</code>からアカウントを作成。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2014/01/codenvy01.jpg" alt="FREE SIGN UP" /></p>
+
+<p>開いたモーダルウインドウで、メールとユーザー名(ワークスペースネーム)を入力して<code>GO</code>。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2014/01/codenvy02.jpg" alt="FREE SIGN UP" /></p>
+
+<p>メール確認してね、と出るので、メールをチェック。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2014/01/codenvy03.jpg" alt="THANK YOU SINGING UP" /></p>
+
+<p>メール本文中の、<code>confirm</code>をクリック、するとアカウントが作成、、されると思ったら以下の画面が。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2014/01/codenvy04.jpg" alt="unable to account" /></p>
+
+<p>どうやらユーザー名が不適切(被ってるとかおかしいとか)でエラーが出ているよう。<br/>
+メール送る前に事前に言ってくれないのね。。。</p>
+
+<p>気を取り直して、再度違う名前で送信。<br/>
+無事、作成出来ました。</p>
+
+<p>パスワードを設定し、ログインするとプロジェクト作成の画面に。<br/>
+サービスはもちろん、<code>Ruby on Rails</code>で<code>Heroku</code>を選択。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2014/01/codenvy06.jpg" alt="create project" /></p>
+
+<p><code>next</code>をクリックして進むと、heroku側のプロジェクト名？を入力するダイアログが出てくる。<br/>
+(多分、その前にherokuのアカウントを聞かれた気がするけど、どのタイミングで聞かれたか忘れてしまった。<br/>
+聞かれたら、メールアドレスとパスワードを入力して連携させておく。)</p>
+
+<p><img src="http://kayakuguri.github.io/images/2014/01/codenvy07.jpg" alt="deploy heroku project" /></p>
+
+<p>今回はCodenvy側でプロジェクト名を<code>RubyProject001</code>とつけていたので、herokuのプロジェクト名も同じにしておいた。<br/>
+すると、１文字目は小文字にしなさい、と怒られてしまった。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2014/01/codenvy08.jpg" alt="warning" /></p>
+
+<p>とにかく、これでプロジェクトが作成出来た。<br/>
+IDEはこのような画面が表示された。<br/>
+左側はファイルツリーで、右側がエディタ、とおなじみの構成。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2014/01/codenvy05.jpg" alt="warning" /></p>
+
+<p>heroku側はどうなっているかというと、上記の小文字エラーが出たからなのか、<br/>
+プロジェクト名は連番のような形になってしまっていた。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2014/01/heroku03.jpg" alt="myproject" /></p>
+
+<p>このプロジェクト名を、<code>testrubyproject1</code>で、作成してみると、herokuのアプリ名も同じ名前で作成された。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2014/01/codenvy09.jpg" alt="myproject" /></p>
+
+<p>これで開発環境は整った。と思われる。</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[FLVPlaybackのスムージング]]></title>
@@ -988,29 +1088,6 @@ $ nodebrew use 0.10
 <h4>OctopressでのOGP設定</h4>
 
 <p><a href="http://komasaru.github.io/blog/2012/12/31/octopress-facebook-ogp/">Octopress &ndash; Facebook OGP 設定！</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[PHPでCSVファイルを読み込んだ時に日本語が消える]]></title>
-    <link href="http://kayakuguri.github.io/blog/2013/11/30/php-csv/"/>
-    <updated>2013-11-30T14:10:49+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2013/11/30/php-csv</id>
-    <content type="html"><![CDATA[<p>PHPで文字コードがUTF-8のCSVファイルを読み込んだ際、<br/>
-何故か日本語が消える、という現象が。</p>
-
-<p>文字化け、ではなく、消える。<br/>
-また、ローカルのXAMPP環境では消えなかったのに、<br/>
-サーバにアップすると消えた。</p>
-
-<p>どうやら、PHP5の問題、のようで、<br/>
-<code>fgetcsv</code>を使用している時に起こる現象のよう。<br/>
-以下のように文字コードの指定をしてやるだけで解決した。</p>
-
-<pre><code>setlocale(LC_ALL, 'ja_JP.UTF-8');
-</code></pre>
-
-<p>参考：<a href="http://pentan.info/php/fgetcsv_char.html">fgetcsv関数を文字化け対応 setlocaleの文字コード指定</a></p>
 ]]></content>
   </entry>
   
