@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2014-01-31T13:24:29+09:00</updated>
+  <updated>2014-01-31T13:26:10+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -264,9 +264,9 @@ $ lime test html5
 
 <h4>参考</h4>
 
-<p>冒頭で上げた<a href="https://plus.google.com/102594170131511973965/posts">池田さん</a>のインストール動画は以下。</p>
+<p>冒頭で上げた<a href="https://plus.google.com/102594170131511973965/pos]ts">池田さん</a>のインストール動画は以下。</p>
 
-<iframe width="100%" src="http://kayakuguri.github.io//www.youtube.com/embed/MYHFJICUzzI" frameborder="0" allowfullscreen></iframe>
+<iframe width="100%" height="315" src="http://kayakuguri.github.io//www.youtube.com/embed/MYHFJICUzzI" frameborder="0" allowfullscreen></iframe>
 
 ]]></content>
   </entry>
