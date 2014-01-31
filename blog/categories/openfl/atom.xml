@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: openfl | KayaMemo]]></title>
+  <link href="http://kayakuguri.github.io/blog/categories/openfl/atom.xml" rel="self"/>
+  <link href="http://kayakuguri.github.io/"/>
+  <updated>2014-01-31T10:57:52+09:00</updated>
+  <id>http://kayakuguri.github.io/</id>
+  <author>
+    <name><![CDATA[萱潜]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[OpenFL？]]></title>
+    <link href="http://kayakuguri.github.io/blog/2014/01/31/openfl-search/"/>
+    <updated>2014-01-31T10:39:01+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2014/01/31/openfl-search</id>
+    <content type="html"><![CDATA[<p><strong><a href="http://www.openfl.org/">OpenFL</a></strong></p>
+
+<p>OpenFLの記事が話題になっており、今回初めて知ったので、<br/>
+ツイートベースに検索したメモ。</p>
+
+<!-- more -->
+
+
+<p>元は、<code>NME</code>という名前だったものが<code>OpenFL</code>に名前を変えたよう。<br/>
+結構前からあるっぽい。<br/>
+Haxe自体がワンソース・マルチユース的なものなのに、<br/>
+そのHaxeを使ってOpenFLで開発、ってのはどいうこと？？<br/>
+さらに便利に拡張したもの、とかなのかしら。</p>
+
+<p>違う、Haxeライクな言語、であって、Haxeとは別ものっぽい。<br/>
+とはいえ、Haxeのインストールも必要、っぽい。</p>
+
+<hr />
+
+<h4>参考サイト</h4>
+
+<p><a href="http://ics-web.jp/lab/archives/1329">クロスプラットフォーム開発の大本命!? HTML5もアプリもFlashも開発できる「OpenFL」とは？</a></p>
+
+<p><a href="http://www.dango-itimi.com/blog/archives/2013/001188.html">Haxe OpenFL 調査</a></p>
+
+<p><a href="http://d.hatena.ne.jp/wordi/20131107/p1">OpenFLで使えるGUIライブラリ</a></p>
+
+<p><a href="http://bao-bao.info/blog/archive/2013/08/28/openfl_install/">OpenFLインストール</a></p>
+
+<hr />
+
+<h4>気になったツイートまとめ</h4>
+
+<blockquote class="twitter-tweet" lang="ja"><p>Haxe（とOpenFL）は結局のところ、ワンソース・マルチユースではなく、ワンスタディ・マルチクリエイト、みたいなものなので、本当に厳密なところでは同一挙動でなくてもいいと思っているのではないかなー。</p>&mdash; 尾野（しっぽ） (@tail_y) <a href="https://twitter.com/tail_y/statuses/428926391619313664">2014, 1月 30</a></blockquote>
+
+
+<script async src="http://kayakuguri.github.io//platform.twitter.com/widgets.js" charset="utf-8"></script>
+
+
+
+
+<blockquote class="twitter-tweet" lang="ja"><p>FlashCCを使い素材管理し、JSFL経由でHaxeからOpenFLとCreateJSをを切り替えて利用するという、とんでもないワークフローは既に白玉さんが確立しているのです <a href="https://t.co/speVyDSv9x">https://t.co/speVyDSv9x</a> <a href="http://t.co/FG3dgktJB0">pic.twitter.com/FG3dgktJB0</a></p>&mdash; 尾野（しっぽ） (@tail_y) <a href="https://twitter.com/tail_y/statuses/428930765254979584">2014, 1月 30</a></blockquote>
+
+
+<script async src="http://kayakuguri.github.io//platform.twitter.com/widgets.js" charset="utf-8"></script>
+
+
+
+
+<blockquote class="twitter-tweet" lang="ja"><p>OpenFL の SWF Library(Free)ドキュメントページを閲覧するには Add cart にて支払い設定(住所入力)等を行う必要あり。ユーザ登録だけでは認証に弾かれます。 <a href="http://t.co/xYhqayB6CG">http://t.co/xYhqayB6CG</a></p>&mdash; siratama (@dango_itimi) <a href="https://twitter.com/dango_itimi/statuses/426696977712050177">2014, 1月 24</a></blockquote>
+
+
+<script async src="http://kayakuguri.github.io//platform.twitter.com/widgets.js" charset="utf-8"></script>
+
+
+
+
+<blockquote class="twitter-tweet" lang="ja"><p>あとOpenFLも低レベル層がLimeというのに分離してたり、h3dもHeapsという名前に変わる？とかいろいろ複雑ｗ　落ちついたら面白そう。</p>&mdash; こりん (@k0rin) <a href="https://twitter.com/k0rin/statuses/426576961721233408">2014, 1月 24</a></blockquote>
+
+
+<script async src="http://kayakuguri.github.io//platform.twitter.com/widgets.js" charset="utf-8"></script>
+
+
+
+
+<blockquote class="twitter-tweet" lang="ja"><p>OpenFL、人に勧めるにはまだ早い感してる。特にHTML5のバックエンドがDOMベースで速度出ないので。Haxe作者のh3d（Evolandに使われてる）に期待かなあ。</p>&mdash; こりん (@k0rin) <a href="https://twitter.com/k0rin/statuses/426574886643855361">2014, 1月 24</a></blockquote>
+
+
+<script async src="http://kayakuguri.github.io//platform.twitter.com/widgets.js" charset="utf-8"></script>
+
+
+
+
+<blockquote class="twitter-tweet" lang="ja"><p>OpenFLの続き。ちなみにWindowsネイティブアプリの出力にすると最もパフォーマンスが良い感じ。FlashやHTML5の6倍ほどのパフォーマンスが出ています。ちなみにNekoもなかなかパフォーマンスが良いです。 <a href="https://twitter.com/search?q=%23Haxe&amp;src=hash">#Haxe</a> <a href="http://t.co/x5wnV7BhZp">http://t.co/x5wnV7BhZp</a></p>&mdash; 池田 泰延 Yasunobu Ikeda (@clockmaker) <a href="https://twitter.com/clockmaker/statuses/425673916028170240">2014, 1月 21</a></blockquote>
+
+
+<script async src="http://kayakuguri.github.io//platform.twitter.com/widgets.js" charset="utf-8"></script>
+
+
+
+
+<blockquote class="twitter-tweet" lang="ja"><p><a href="https://twitter.com/iphone_dev_jp">@iphone_dev_jp</a> Haxe OpenFL(NME)を使って落ち物パズルゲームを作りました <a href="http://t.co/YjY12G6JY8">http://t.co/YjY12G6JY8</a></p>&mdash; Androwk (@Androwk) <a href="https://twitter.com/Androwk/statuses/362866716004454400">2013, 8月 1</a></blockquote>
+
+
+<script async src="http://kayakuguri.github.io//platform.twitter.com/widgets.js" charset="utf-8"></script>
+
+
+
+
+<blockquote class="twitter-tweet" lang="ja"><p>この間 OpenFL を試したら TextField を BitmapData に draw するところで何も描画されないって問題があった。詳しくは調べてない</p>&mdash; 馬鹿全903 (@bkzen) <a href="https://twitter.com/bkzen/statuses/353097125619437568">2013, 7月 5</a></blockquote>
+
+
+<script async src="http://kayakuguri.github.io//platform.twitter.com/widgets.js" charset="utf-8"></script>
+
+]]></content>
+  </entry>
+  
+</feed>
