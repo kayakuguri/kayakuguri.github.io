@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2014-01-31T13:26:10+09:00</updated>
+  <updated>2014-02-06T12:59:47+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,49 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[CodenvyとherokuでブラウザのみでRailsアプリを作成する その2]]></title>
+    <link href="http://kayakuguri.github.io/blog/2014/02/04/railsapp-on-codenvy-and-heroku-2/"/>
+    <updated>2014-02-04T11:40:08+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2014/02/04/railsapp-on-codenvy-and-heroku-2</id>
+    <content type="html"><![CDATA[<p>まずはそのままの状態でherokuにcommit、pushしてみる。</p>
+
+<!-- more -->
+
+
+<p>コミットして、、</p>
+
+<p><img src="http://kayakuguri.github.io/images/2014/02/IDE1.jpg" alt="commit" /><br/>
+<img src="http://kayakuguri.github.io/images/2014/02/IDE2.jpg" alt="commit" /></p>
+
+<p>プッシュして。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2014/02/IDE3.jpg" alt="push" /><br/>
+<img src="http://kayakuguri.github.io/images/2014/02/IDE4.jpg" alt="push" /></p>
+
+<p>プッシュ先とユーザー名は複数ある場合は選べる。<br/>
+現状は一つしかないので、そのまま。</p>
+
+<p>少し待つと成功したので、heroku側でログを確認。<br/>
+すると以下のような表示。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2014/02/heroku1.jpg" alt="heroku log" /></p>
+
+<p>rubyアプリを使う準備がプッシュしたことによって構築されたみたい。<br/>
+トップでの表示はこんな感じ。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2014/02/heroku2.jpg" alt="heroku top" /></p>
+
+<p>現状、ページにアクセスすると以下のような表示になっている。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2014/02/ruby_site.jpg" alt="heroku page" /></p>
+
+<blockquote><p>ただし、デフォルトではこれらのものはすべてセットで用意しないと動きません。<br/>
+Controllerだけ作ればいいや、とはいかないのです。全部を用意して動かすのがRailsの基本なのです。<br/>
+<a href="http://libro.tuyano.com/index3?id=790003">http://libro.tuyano.com/index3?id=790003</a></p></blockquote>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[OpenFLをインストールしてみる]]></title>
@@ -1249,48 +1292,6 @@ iOS公式の<a href="https://agilebits.com/onepassword">1Password</a>みたい�
 
 <pre><code>$subject = $objMailView-&gt;fetch('mail_templates/mail_title.tpl');
 </code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Php StormでのFTPの設定]]></title>
-    <link href="http://kayakuguri.github.io/blog/2013/12/04/php-storm-ftp/"/>
-    <updated>2013-12-04T16:16:32+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2013/12/04/php-storm-ftp</id>
-    <content type="html"><![CDATA[<p>PhpStormからFTPにアップロードするための設定方法のメモ。</p>
-
-<p>１）メニューから、Tools→Deployment→Configuration、を選択</p>
-
-<p><img src="http://kayakuguri.github.io/images/2013/12/phpstorm1.jpg" alt="Configuration" /></p>
-
-<p>２）Connectionタブ内で以下を設定する。</p>
-
-<!-- more -->
-
-
-<ul>
-<li> FTP host  :FTPのホスト名</li>
-<li> Port  :ポート</li>
-<li> Root path  :サーバ上のルートパス</li>
-<li> User name  :接続するユーザー名</li>
-<li> Password   :パスワード</li>
-<li> Web server root URL  :サイトのURL</li>
-</ul>
-
-
-<p><img src="http://kayakuguri.github.io/images/2013/12/phpstorm2.jpg" alt="Connection" /></p>
-
-<p>３）Mappingsタブ内で以下を設定する。</p>
-
-<ul>
-<li> Local pash  :アップロードしたいローカルパス</li>
-<li> Deployment path on server &lsquo;hogehoge.com&rsquo;  :サーバー上でアップロードする場所(ルートの場合は<code>/</code>で)</li>
-</ul>
-
-
-<p><img src="http://kayakuguri.github.io/images/2013/12/phpstorm3.jpg" alt="Mappings" /></p>
-
-<p>４）プロジェクトツリーからファイル名を右クリックして、Upload to&hellip;を選択し、設定したサイトを選択。</p>
 ]]></content>
   </entry>
   

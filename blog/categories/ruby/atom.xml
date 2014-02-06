@@ -4,7 +4,7 @@
   <title><![CDATA[Category: ruby | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/ruby/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2014-01-31T13:26:10+09:00</updated>
+  <updated>2014-02-06T12:59:47+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,49 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[CodenvyとherokuでブラウザのみでRailsアプリを作成する その2]]></title>
+    <link href="http://kayakuguri.github.io/blog/2014/02/04/railsapp-on-codenvy-and-heroku-2/"/>
+    <updated>2014-02-04T11:40:08+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2014/02/04/railsapp-on-codenvy-and-heroku-2</id>
+    <content type="html"><![CDATA[<p>まずはそのままの状態でherokuにcommit、pushしてみる。</p>
+
+<!-- more -->
+
+
+<p>コミットして、、</p>
+
+<p><img src="/images/2014/02/IDE1.jpg" alt="commit" /><br/>
+<img src="/images/2014/02/IDE2.jpg" alt="commit" /></p>
+
+<p>プッシュして。</p>
+
+<p><img src="/images/2014/02/IDE3.jpg" alt="push" /><br/>
+<img src="/images/2014/02/IDE4.jpg" alt="push" /></p>
+
+<p>プッシュ先とユーザー名は複数ある場合は選べる。<br/>
+現状は一つしかないので、そのまま。</p>
+
+<p>少し待つと成功したので、heroku側でログを確認。<br/>
+すると以下のような表示。</p>
+
+<p><img src="/images/2014/02/heroku1.jpg" alt="heroku log" /></p>
+
+<p>rubyアプリを使う準備がプッシュしたことによって構築されたみたい。<br/>
+トップでの表示はこんな感じ。</p>
+
+<p><img src="/images/2014/02/heroku2.jpg" alt="heroku top" /></p>
+
+<p>現状、ページにアクセスすると以下のような表示になっている。</p>
+
+<p><img src="/images/2014/02/ruby_site.jpg" alt="heroku page" /></p>
+
+<blockquote><p>ただし、デフォルトではこれらのものはすべてセットで用意しないと動きません。<br/>
+Controllerだけ作ればいいや、とはいかないのです。全部を用意して動かすのがRailsの基本なのです。<br/>
+<a href="http://libro.tuyano.com/index3?id=790003">http://libro.tuyano.com/index3?id=790003</a></p></blockquote>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[CodenvyとherokuでブラウザのみでRailsアプリを作成する その1]]></title>
