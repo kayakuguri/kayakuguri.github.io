@@ -4,7 +4,7 @@
   <title><![CDATA[Category: salesforce | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/salesforce/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2014-02-06T12:59:47+09:00</updated>
+  <updated>2014-02-06T13:12:02+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,51 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Visualforceページでカスタムコントローラーを指定する]]></title>
+    <link href="http://kayakuguri.github.io/blog/2014/02/06/apex-page/"/>
+    <updated>2014-02-06T13:00:31+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2014/02/06/apex-page</id>
+    <content type="html"><![CDATA[<p>タイトルの通りだけのメモ。</p>
+
+<!-- more -->
+
+
+<p>visualforceのページ内の冒頭、<code>&lt;apex:page&gt;</code>内で、<br/>
+<code>extensions="RemindController"</code>という風に指定する。</p>
+
+<pre><code>&lt;apex:page standardController="Lead" extensions="CustomController" &gt;
+</code></pre>
+
+<p>この指定をしておくことで、<code>action</code>内で参照する関数は、指定したクラス内から呼び出されるようになる。</p>
+
+<p>また、VisualForce内の冒頭、<code>apex:page</code>タグ内で、<code>action</code>を指定して、そこで関数を実行するようにする。<br/>
+すると、ページアクセス時にまず呼び出されるようになる。</p>
+
+<p>[VisualForce]</p>
+
+<pre><code>&lt;apex:page standardController="Lead" action="{!checkKey}" &gt;
+</code></pre>
+
+<p>[apexクラス]</p>
+
+<pre><code>public Pagereference checkKey(){
+    if(/*処理*/){
+        reutrn Page.xx;
+    }else{
+        return null;
+    }
+}
+</code></pre>
+
+<p>参考：<a href="http://www.kokyakukanri.info/salesforce/blog/2010/11/urlkey.html">ページを開いた段階でURLに含まれるKeyなどが不足している場合に、 別ページに遷移させる方法。</a></p>
+
+<p>注意点としては、エラーページに遷移しなくていい場合には、<br/>
+自身のページを指定してしまうと、無限ループに入って、内部サーバーエラー、となってしまう。<br/>
+なので、遷移しなくていい場合は、<code>null</code>を返しておくと大丈夫なよう。</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Force.comのREST APIを使ってデータをインサートする]]></title>
