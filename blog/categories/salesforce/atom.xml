@@ -4,7 +4,7 @@
   <title><![CDATA[Category: salesforce | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/salesforce/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2014-02-12T19:49:23+09:00</updated>
+  <updated>2014-02-12T19:53:47+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -48,6 +48,8 @@ function check(){
 </code></pre>
 
 <p>これで、連打しても大丈夫。</p>
+
+<p>参考：<a href="http://blog.livedoor.jp/volvic_beer/archives/52301425.html">http://blog.livedoor.jp/volvic_beer/archives/52301425.html</a></p>
 ]]></content>
   </entry>
   
