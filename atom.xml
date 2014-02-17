@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2014-02-12T19:53:47+09:00</updated>
+  <updated>2014-02-17T11:49:48+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,73 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[PHPでMailgunを使ってherokuでメール送信する]]></title>
+    <link href="http://kayakuguri.github.io/blog/2014/02/17/send-mail-from-heroku-with-mailgun/"/>
+    <updated>2014-02-17T11:31:07+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2014/02/17/send-mail-from-heroku-with-mailgun</id>
+    <content type="html"><![CDATA[<p>herokuのphp環境でMailgunを使ってメール送信をしてみました。<br/>
+ただし、日本語環境は入れなかったので、英語環境のみ。</p>
+
+<!-- more -->
+
+
+<p>まず、herokuにプラグインをインストールするためには、<br/>
+クレジットカードの登録が必要なので、登録しておく。<br/>
+(無料範囲内でのみでの利用でも必要)</p>
+
+<p><a href="https://addons.heroku.com/#email-sms">Mail/SNSアドオン一覧</a></p>
+
+<p>Mailgunの場合は、無料だと<code>300通/日</code>送れるよう。</p>
+
+<p><a href="https://addons.heroku.com/mailgun">Mailgun</a></p>
+
+<p>で、インストールすると、環境変数にSMTP情報が格納されるので、<br/>
+そちらを利用して、メールを送れるようになる。<br/>
+(<code>sendmail</code>関数は使えない。)</p>
+
+<pre><code>$_ENV['MAILGUN_SMTP_SERVER'] = host
+$_ENV['MAILGUN_SMTP_PORT'] = port
+$_ENV['MAILGUN_SMTP_LOGIN'] = user
+$_ENV['MAILGUN_SMTP_PASSWORD'] = password
+
+$_ENV['MAILGUN_API_KEY'] = key
+</code></pre>
+
+<p>日本語環境だと、<code>Qdmail</code>というものが有名だそう。</p>
+
+<p>参考：<a href="http://qiita.com/tsunet111/items/0ba0e8fc61882c3905c0">php から確実にメール送信（Qdmail使用、SMTP経由）</a></p>
+
+<p>ただし、今回は<code>mbstring</code>環境を入れてないので、エラーが出てしまった。<br/>
+なので、英語の解説ページを参考に、<code>phpmailer</code>を使ってみた。</p>
+
+<pre><code>$mail = new PHPMailer;
+$mail-&gt;isSMTP();
+$mail-&gt;Host = $_ENV['MAILGUN_SMTP_SERVER'];
+$mail-&gt;SMTPAuth = true;
+$mail-&gt;Username = $_ENV['MAILGUN_SMTP_LOGIN'];
+$mail-&gt;Password = $_ENV['MAILGUN_SMTP_PASSWORD'];
+$mail-&gt;Port     = $_ENV['MAILGUN_SMTP_PORT'];
+$mail-&gt;SMTPSecure = 'tls';
+$mail-&gt;From = MAIL_FROM;
+$mail-&gt;FromName = MAIL_FROM_NAME;
+
+$mail-&gt;addAddress("hoge@exsample.jp");
+$mail-&gt;addAddress("huga@exsample.com");
+
+$mail-&gt;Subject = MAIL_SUBJECT;
+$mail-&gt;Body    = MAIL_MSG1 . $body . MAIL_MSG2;
+if(!$mail-&gt;send()){
+    //falseが返ってくる場合はエラー。
+    //送信完了の場合は、1が返ってくる。
+}
+</code></pre>
+
+<p>ただし、もちろんだけど、日本語で送信すると文字化けする。<br/>
+(Gmailの場合はなぜか本文は正しく表示出来た。件名は文字化けする)</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Visual Forceでの送信ボタン2度押し防止策]]></title>
@@ -1243,25 +1310,6 @@ iOS公式の<a href="https://agilebits.com/onepassword">1Password</a>みたい�
 <a href="http://ja.wikipedia.org/wiki/%E3%83%9F%E3%82%B7%E3%82%A7%E3%83%AB%E3%83%BB%E3%82%A6%E3%82%A8%E3%83%AB%E3%83%99%E3%83%83%E3%82%AF">-Wikipedia</a></p></blockquote>
 
 <p>無事読み終わったら感想を追記する予定。</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Googleスプレッドシートで￥の小数点を消す方法]]></title>
-    <link href="http://kayakuguri.github.io/blog/2013/12/06/google-spreadsheet/"/>
-    <updated>2013-12-06T10:49:52+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2013/12/06/google-spreadsheet</id>
-    <content type="html"><![CDATA[<p>タイトルそのままです。</p>
-
-<p><code>ファイル → スプレッドシートの設定 → 地域と言</code>から、<br/>
-<code>日本語</code>を選択。<br/>
-(ついでに時間も東京にしておいた方がいいでしょう）</p>
-
-<p>するとデフォルトで通貨は、小数点なしの￥になる。</p>
-
-<p>また、<code>表示形式 → 数字</code>から、<code>￥1000</code>と<code>￥1000.12</code>のどちらかを選べる。</p>
-
-<p>(小数点つきの分は、単位が千円、の時、とかの想定なのかな。。。？）</p>
 ]]></content>
   </entry>
   
