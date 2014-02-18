@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2014-02-18T10:54:08+09:00</updated>
+  <updated>2014-02-18T11:11:00+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,64 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[herokuでmb-string付きのPHP環境を作る]]></title>
+    <link href="http://kayakuguri.github.io/blog/2014/02/18/create-php-heroku-mbstring/"/>
+    <updated>2014-02-18T10:57:30+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2014/02/18/create-php-heroku-mbstring</id>
+    <content type="html"><![CDATA[<p>順番が前後しますが、mbstring付きのphp環境を作る方法をメモしておきます。</p>
+
+<!-- more -->
+
+
+<p>前提条件としては、heorkuのアカウントを持っていて、herokuコマンドが有効になっていて、<br/>
+gitも使える状態、です。<br/>
+<a href="http://devcenter.heroku.com/articles/heroku-command">Heroku Toolbelt</a>とかをインストールしておけば、herokuコマンドが使えるようになります。</p>
+
+<p>参考：<a href="http://blog.infinity-dimensions.com/2012/01/heroku-toolbelt-install.html">Herokuコマンドを使えるようにするHeroku Toolbeltをインストール</a></p>
+
+<hr />
+
+<p>まずは、ディレクトリを作成しておき、そのディレクトリ内にgitを作成。<br/>
+phpinfo()などだけ書いたテストのindex.phpを作成し、commitしておきます。</p>
+
+<pre><code>$ mkdir myapp
+$ cd myapp
+$ git init
+$ echo '&lt;?php phpinfo();' &gt; index.php
+$ git add .
+$ git commit -m 'initial commit'
+</code></pre>
+
+<p>で、herokuコマンドを使用して、phpをherokuで動かすためのプラグインである、&#8217;buildpack&#8217;をインストール。</p>
+
+<pre><code>$ heroku create -s cedar -b git://github.com/iphoting/heroku-buildpack-php-tyler.git#php/5.4.9
+</code></pre>
+
+<p>ただし、このまま作成すると、heroku側で勝手に決められたアプリ名になってしまう。<br/>
+後から名前を変更することは出来るが、リポジトリのURLを変更しないといけなかったりして、ちょっと面倒。<br/>
+最初から名前を指定した上で作成するには、<code>heroku create myapp</code>とすればよい。<br/>
+(名前は他のユーザーと被っているとダメ。また、アルファベットの大文字を使用しても怒られた。)<br/>
+なので上記の分を名前指定で作成すると、以下。</p>
+
+<pre><code>$ heroku create myapp -s cedar -b git://github.com/iphoting/heroku-buildpack-php-tyler.git#php/5.4.9
+</code></pre>
+
+<p>で、herokuにpush。<br/>
+pushすると自動的にdeployもされるので、成功すればこれでmbstring付きのphp環境の作成は環境。</p>
+
+<pre><code>$ git push heroku master
+</code></pre>
+
+<p>openするとページが表示される。</p>
+
+<pre><code>$ heroku open
+</code></pre>
+
+<p>参考：<a href="http://d.hatena.ne.jp/hnw/20120603">HerokuのBuildpackを利用してmbstringが有効なPHPサーバを立ててみた</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[PHP]herokuで添付ファイル付きメールを送る]]></title>
@@ -1320,53 +1378,6 @@ JVNブランドの脆弱性対策情報データベース。</p>
 <blockquote><p>紆余曲折を経て変更されたはずが何故かMigrate Pluginなどというもので復活してしまうことだ。jQueryやめろ。</p></blockquote>
 
 <p>ということのよう。</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[iPhoneでのパスワード自動生成機能]]></title>
-    <link href="http://kayakuguri.github.io/blog/2013/12/13/icoud-keychane/"/>
-    <updated>2013-12-13T13:23:51+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2013/12/13/icoud-keychane</id>
-    <content type="html"><![CDATA[<p>パシフィック・リム、買いました。</p>
-
-<iframe src="http://rcm-fe.amazon-adsystem.com/e/cm?t=mrlittlebig01-22&o=9&p=8&l=as1&asins=B00F3WXFIE&ref=tf_til&fc1=666666&IS2=1&lt1=_blank&m=amazon&lc1=258FB8&bc1=DDDDDD&bg1=DDDDDD&f=ifr" style="width:120px;height:240px;" scrolling="no" marginwidth="0" marginheight="0" frameborder="0"></iframe>
-
-
-<p>で、購入した商品にはデジタルデータをダウンロード出来る、という特典が封入されていました。</p>
-
-<!-- more -->
-
-
-<p>それが、<a href="http://support.dcplus.flixster.com/link/portal/15025/15280/Article/3944/">Flixsterのデジタルコピー</a>というもの、でした。</p>
-
-<p>で、さっそくダウンロードすべく、サイトへ。<br/>
-会員登録が必要、とのことで登録。</p>
-
-<p>するとその際、パスワードを入力しようとすると、<strong>「パスワード候補を表示」</strong>なる文言が。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2013/12/icoud-keychane-1.jpg" alt="パスワード候補を表示" /></p>
-
-<p>このサイトではそんな機能を実装しているのか！<br/>
-すごい！！！</p>
-
-<p>と、一瞬思ったのですが、これは、iOS7.0.3から搭載された<strong>iCloudキーチェーン</strong>というものでした。</p>
-
-<p>詳しくは以下で紹介されています。</p>
-
-<p><a href="http://sbapp.net/appnews/upinfo/icloudkey-6882">【iOS7】iOS7.0.3で追加されたiCloudキーチェーンとは？使い方も紹介！</a></p>
-
-<p>これによると、このキーチェーンを使うことで、<br/>
-同じiCloudアカウントｄログインしてるiOSデバイス間なら自動で同期され、<br/>
-パスワードを簡単に管理できるよ、というもののよう。<br/>
-iOS公式の<a href="https://agilebits.com/onepassword">1Password</a>みたいなもののよう。</p>
-
-<p>いつの間にかそんな便利なものが搭載されていたとは知りませんでした。</p>
-
-<p>それはともかく、上記のFlixsterはワーナーが運営する（買収した）映画SNSらしく、<br/>
-結構面白そう。英語ですが。。</p>
-
-<p>参考：<a href="http://bizna.jp/labblog/?p=2942">23億件の映画レビューがついた「Flixster」の秘密</a></p>
 ]]></content>
   </entry>
   
