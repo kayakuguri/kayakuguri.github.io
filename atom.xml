@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2014-02-18T11:11:00+09:00</updated>
+  <updated>2014-02-18T17:11:06+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,48 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[PHP][heroku]upload_max_filesizeを変更する]]></title>
+    <link href="http://kayakuguri.github.io/blog/2014/02/18/change-max-filesize/"/>
+    <updated>2014-02-18T17:02:20+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2014/02/18/change-max-filesize</id>
+    <content type="html"><![CDATA[<p>herokuにて、<code>upload_max_filesize</code>を変更してみた。</p>
+
+<!-- more -->
+
+
+<p>初め、<code>ini_set</code>で変更しようとしてみたところ、<br/>
+変更出来なかった。</p>
+
+<pre><code>ini_set('upload_max_filesize', '6M');
+</code></pre>
+
+<p>参考：<a href="http://d.hatena.ne.jp/knowledgetree/20110217/1297939617">php.iniの設定を変えてもファイルをアップロードできないケース</a></p>
+
+<p>調べてみると、変更出来るもの、出来ないものがあるらしく、<br/>
+<code>upload_max_filesize</code>は、<code>ini_set()</code>では変更出来ないよう。</p>
+
+<p><code>upload_max_filesize</code>は、<code>PHP_INI_PERDIR</code>となっていて、<br/>
+php.ini、.htaccess、httpd.conf あるいは .user.ini (PHP 5.3 以降の場合) で設定可能なエントリ<br/>
+となっている。<br/>
+<a href="http://jp2.php.net/manual/ja/configuration.changes.modes.php">http://jp2.php.net/manual/ja/configuration.changes.modes.php</a></p>
+
+<p>参考：PHP/ini_set()で変更できない値<br/>
+<a href="http://hodade.adam.ne.jp/itmemo/index.php?PHP%2Fini_set()%A4%C7%CA%D1%B9%B9%A4%C7%A4%AD%A4%CA%A4%A4%C3%CD">http://hodade.adam.ne.jp/itmemo/index.php?PHP%2Fini_set()%A4%C7%CA%D1%B9%B9%A4%C7%A4%AD%A4%CA%A4%A4%C3%CD</a></p>
+
+<p>herokuでは(たぶん).htaccessが使えない。<br/>
+代わりに、<code>.user.ini</code>を試してみるとそちらで変更出来た。</p>
+
+<p><code>.user.ini</code>ファイルを作成して、(たぶん)設置したディレクトリ以下だと有効になると思われる。<br/>
+[内容]</p>
+
+<pre><code>upload_max_filesize = 6M
+</code></pre>
+
+<p>参考：<a href="http://yamanxworld.blogspot.jp/2009/12/php-53-htaccess-userini.html">PHP 5.3 の新機能: .htaccess の代わりになる .user.ini</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[herokuでmb-string付きのPHP環境を作る]]></title>
@@ -1344,40 +1386,6 @@ JVNブランドの脆弱性対策情報データベース。</p>
 <hr />
 
 <p>他にもライトニングトークなど、がありました。</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[jQuery Migrate Pluginとか]]></title>
-    <link href="http://kayakuguri.github.io/blog/2013/12/13/jquery-migrate/"/>
-    <updated>2013-12-13T19:42:22+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2013/12/13/jquery-migrate</id>
-    <content type="html"><![CDATA[<p><a href="http://b.hatena.ne.jp/hotentry">はてなブックマークのホッテントリ</a>を見てたら、<br/>
-<a href="https://gist.github.com/mala/7939659">セキュリティについての記事</a>が入ってて、<br/>
-それを読んでみると、どうやら、jQuery Migrate Pluginをディスる記事だったよう。</p>
-
-<!-- more -->
-
-
-<p>で、Migrate Pluginってのを知らなかったのでちょっと調べてみた。</p>
-
-<p><a href="http://c-brains.jp/blog/wsg/13/11/14-142300.php">jQuery Migrate pluginを使ってみる。</a></p>
-
-<p>要するに、アップデートされたjQueryを使用すると、今までのコードが動かなくなっちゃう問題に対して、<br/>
-ここが互換性ないよと警告してくれたりとか、<br/>
-最新版だとサポートされてないものを復活サポートしてくれたりするもの、らしい。</p>
-
-<p>で、この<strong>復活</strong>が問題になっているよう。</p>
-
-<p><a href="http://t-ashula.hateblo.jp/entry/2013/11/19/120903">jQuery Migrate Plugin なんてなかった件</a></p>
-
-<blockquote><p>いくつかのサイトで実際に遭遇してますが，jQueyr 1.6.3 で解決( jQuery Bug #9521 )したはずの $(&ldquo;a[href=&rdquo; + hash + &ldquo;]&rdquo;) タイプの XSS が （ 2013/11/18 現在 1.2.1 を含む全ての） jQuery Migrate Plugin で復活します．</p></blockquote>
-
-<p>これが、冒頭の記事の、</p>
-
-<blockquote><p>紆余曲折を経て変更されたはずが何故かMigrate Pluginなどというもので復活してしまうことだ。jQueryやめろ。</p></blockquote>
-
-<p>ということのよう。</p>
 ]]></content>
   </entry>
   

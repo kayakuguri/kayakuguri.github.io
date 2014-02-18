@@ -4,7 +4,7 @@
   <title><![CDATA[Category: heroku | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/heroku/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2014-02-18T11:11:00+09:00</updated>
+  <updated>2014-02-18T17:11:06+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,48 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[PHP][heroku]upload_max_filesizeを変更する]]></title>
+    <link href="http://kayakuguri.github.io/blog/2014/02/18/change-max-filesize/"/>
+    <updated>2014-02-18T17:02:20+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2014/02/18/change-max-filesize</id>
+    <content type="html"><![CDATA[<p>herokuにて、<code>upload_max_filesize</code>を変更してみた。</p>
+
+<!-- more -->
+
+
+<p>初め、<code>ini_set</code>で変更しようとしてみたところ、<br/>
+変更出来なかった。</p>
+
+<pre><code>ini_set('upload_max_filesize', '6M');
+</code></pre>
+
+<p>参考：<a href="http://d.hatena.ne.jp/knowledgetree/20110217/1297939617">php.iniの設定を変えてもファイルをアップロードできないケース</a></p>
+
+<p>調べてみると、変更出来るもの、出来ないものがあるらしく、<br/>
+<code>upload_max_filesize</code>は、<code>ini_set()</code>では変更出来ないよう。</p>
+
+<p><code>upload_max_filesize</code>は、<code>PHP_INI_PERDIR</code>となっていて、<br/>
+php.ini、.htaccess、httpd.conf あるいは .user.ini (PHP 5.3 以降の場合) で設定可能なエントリ<br/>
+となっている。<br/>
+<a href="http://jp2.php.net/manual/ja/configuration.changes.modes.php">http://jp2.php.net/manual/ja/configuration.changes.modes.php</a></p>
+
+<p>参考：PHP/ini_set()で変更できない値<br/>
+<a href="http://hodade.adam.ne.jp/itmemo/index.php?PHP%2Fini_set()%A4%C7%CA%D1%B9%B9%A4%C7%A4%AD%A4%CA%A4%A4%C3%CD">http://hodade.adam.ne.jp/itmemo/index.php?PHP%2Fini_set()%A4%C7%CA%D1%B9%B9%A4%C7%A4%AD%A4%CA%A4%A4%C3%CD</a></p>
+
+<p>herokuでは(たぶん).htaccessが使えない。<br/>
+代わりに、<code>.user.ini</code>を試してみるとそちらで変更出来た。</p>
+
+<p><code>.user.ini</code>ファイルを作成して、(たぶん)設置したディレクトリ以下だと有効になると思われる。<br/>
+[内容]</p>
+
+<pre><code>upload_max_filesize = 6M
+</code></pre>
+
+<p>参考：<a href="http://yamanxworld.blogspot.jp/2009/12/php-53-htaccess-userini.html">PHP 5.3 の新機能: .htaccess の代わりになる .user.ini</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[herokuでmb-string付きのPHP環境を作る]]></title>
