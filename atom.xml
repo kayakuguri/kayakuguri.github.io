@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2014-02-18T17:11:06+09:00</updated>
+  <updated>2014-02-18T17:15:33+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -45,8 +45,10 @@ php.ini、.htaccess、httpd.conf あるいは .user.ini (PHP 5.3 以降の場合
 <p>herokuでは(たぶん).htaccessが使えない。<br/>
 代わりに、<code>.user.ini</code>を試してみるとそちらで変更出来た。</p>
 
-<p><code>.user.ini</code>ファイルを作成して、(たぶん)設置したディレクトリ以下だと有効になると思われる。<br/>
-[内容]</p>
+<p><code>.user.ini</code>ファイルを作成して、アップロード。<br/>
+<strong>設置したディレクトリ内でのみ</strong>、有効になる。</p>
+
+<p>[内容]</p>
 
 <pre><code>upload_max_filesize = 6M
 </code></pre>
