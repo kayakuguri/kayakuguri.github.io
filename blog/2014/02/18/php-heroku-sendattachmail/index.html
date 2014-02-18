@@ -145,6 +145,59 @@ $mail -&gt;send();
 
 <p>参考：<a href="http://hal456.net/qdmail/oopattach"> 添付ファイルの指定(OOP)</a></p>
 
+<hr />
+
+<p><strong>追記</strong></p>
+
+<p>上記の方法を取ったけれど、pnp.iniの設定ファイルを読み込ませる方法があった。<br/>
+今回herokuにインストールしたbuildpackは、confというディレクトリ以下に設定ファイルを置けば<br/>
+自動で認識されるような作りになっていたようです。</p>
+
+<p>なので、conf以下に<code>php.ini</code>ファイルを置けば、いちいち各ディレクトリに設定ファイルを置かないでも大丈夫。</p>
+
+<p>さらに、このbuildpackの環境は以下になっています。</p>
+
+<ul>
+<li>PHP 5.4.9（mbstring, mysql, pgsql, phpredis, mcryptなどなど）</li>
+<li>nginx + php-fpm</li>
+</ul>
+
+
+<p>この、<code>nginx</code>というphpサーバはデフォルトではPOST出来るサイズが<code>1MB</code>になっているよう。<br/>
+ここも変更しておかないとエラーになってしまう。</p>
+
+<p><a href="http://qiita.com/notanota/items/4816ad71b90a9967fa18">nginxで&#8221;client intended to send too large body&#8221;が発生した時の対策方法</a></p>
+
+<p>このnginxの設定ファイルは、<code>nginx.conf.erb</code>になるので、これも置いておく。<br/>
+デフォルトの設定ファイルはそれぞれ以下にある。</p>
+
+<ul>
+<li><a href="https://raw.github.com/iphoting/heroku-buildpack-php-tyler/master/conf/php.ini">php.ini</a></li>
+<li><a href="https://raw.github.com/iphoting/heroku-buildpack-php-tyler/master/conf/nginx.conf.erb">nginx.conf.erb</a></li>
+</ul>
+
+
+<p>php.iniの設定</p>
+
+<pre><code>post_max_size = 8M
+upload_max_filesize = 8M
+</code></pre>
+
+<p>nginxの設定</p>
+
+<pre><code>http {
+    client_max_body_size 1048576; # default 1M
+
+    server {
+        client_max_body_size 8M;
+    }
+}
+</code></pre>
+
+<p>参考：<a href="http://tkyk.name/blog/2012/11/28/php-on-heroku/">Heroku上に最新のPHP5.4 + Nginx環境を30秒で構築する</a></p>
+
+<hr />
+
 <p>　
 　</p>
 
