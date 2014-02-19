@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
 
-  <title><![CDATA[Category: PHP | KayaMemo]]></title>
+  <title><![CDATA[Category: php | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/php/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2014-02-18T18:43:51+09:00</updated>
+  <updated>2014-02-19T18:05:05+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -14,232 +14,413 @@
 
   
   <entry>
-    <title type="html"><![CDATA[INNER JOINとLEFT JOIN]]></title>
-    <link href="http://kayakuguri.github.io/blog/2013/12/20/inner-left-join/"/>
-    <updated>2013-12-20T18:19:51+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2013/12/20/inner-left-join</id>
-    <content type="html"><![CDATA[<p><a href="http://okwave.jp/qa/q746515.html">http://okwave.jp/qa/q746515.html</a></p>
-
-<blockquote><p>対応させるべきはinner joinとouter joinなんですけど、<br/>
-left join は left outer join と同等です。</p></blockquote>
+    <title type="html"><![CDATA[[PHP][heroku]Mailgun APIを使って添付ファイルを送る]]></title>
+    <link href="http://kayakuguri.github.io/blog/2014/02/19/attachment-use-mailgunapi/"/>
+    <updated>2014-02-19T17:37:48+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2014/02/19/attachment-use-mailgunapi</id>
+    <content type="html"><![CDATA[<p>以前に、<a href="http://kayakuguri.github.io/blog/2014/02/18/php-heroku-sendattachmail/">mailgunで添付ファイル付きメールを送る方法</a>を書いたが、<br/>
+そちらは、<code>SMTP</code>バージョンで、今回はそのMailgun APIバージョン。</p>
 
 <!-- more -->
 
 
-<p>実際に実行して確認していたけれど、<br/>
-<code>INNER JOIN</code>の場合、比較したテーブルそれぞれに値がある場合のみ、<br/>
-結果を返してくれる。条件としても使えそう。<br/>
-(そのテーブル同士で同じIDを持つものだけを抽出、的な)</p>
+<p>以下のファイルをダウンロードして一式アップしておく。<br/>
+(readmeファイルなどいらないものが大量にあるが、とりあえず全部あげておく)</p>
 
-<p>で、<code>OUTER JOIN</code>は、比較した際に値がなければ、<code>NULL</code>で返す。<br/>
-要するに、値がなくても結果を返してくれる。</p>
+<p><a href="https://9f67cbbd1116d8afb399-7760483f5d1e5f28c2d253278a2a5045.ssl.cf2.rackcdn.com/mailgun-php-1.7.zip">Library Download</a> (zip直リンク)</p>
 
-<p>値が必須かどうか、みたいな感じぽい。</p>
+<p>基本の送信方法は以下。<br/>
+<a href="http://documentation.mailgun.com/quickstart.html#sending-messages">Sending Messages</a></p>
 
-<blockquote><p>innter joinは結合する相手のテーブルに対応するデータが<br/>
-ある場合のみ結果を返しますが、outer joinは相手の<br/>
-テーブルに対応するデータが無い場合、そのカラムを<br/>
-NULLとして返します。</p></blockquote>
+<pre><code># Include the Autoloader (see "Libraries" for install instructions)
+require 'vendor/autoload.php';
+use Mailgun\Mailgun;
 
-<p><code>OUTER JOIN</code>には、</p>
+# Instantiate the client.
+$mgClient = new Mailgun('key-3ax6xnjp29jd6fds4gc373sgvjxteol0');
+$domain = "samples.mailgun.org";
 
-<pre><code>*  LEFT OUTER JOIN
-*  RIGHT OUTER JOIN
-*  FULL OUTER JOIN
+# Make the call to the client.
+$result = $mgClient-&gt;sendMessage("$domain",
+              array('from'    =&gt; 'Excited User &lt;me@samples.mailgun.org&gt;',
+                    'to'      =&gt; 'Baz &lt;baz@example.com&gt;',
+                    'subject' =&gt; 'Hello',
+                    'text'    =&gt; 'Testing some Mailgun awesomness!'));
 </code></pre>
 
-<p>の３つがあるよう。</p>
+<p>添付ファイルを送る方法は、<code>attachment</code>を使って、その中にファイル名を書く。<br/>
+ファイル名を指定する方法が紹介されていた。<br/>
+<a href="https://github.com/mailgun/mailgun-php/issues/35">https://github.com/mailgun/mailgun-php/issues/35</a></p>
 
-<blockquote><p>LEFT JOINではFROMの後に書かれたテーブルのデータだけを取得します。RIGHT JOINではJOINの後に書かれたテーブルのデータだけを取得します。<br/>
-<a href="http://www.dbonline.jp/mysql/select/index15.html">http://www.dbonline.jp/mysql/select/index15.html</a></p></blockquote>
+<pre><code>array(
+    'attachment' =&gt; array(
+        'filePath' =&gt; './' . $attach['name'],
+        'remoteName' =&gt; $attach['name']
+    )
+)
+</code></pre>
 
-<p>実際に試してみると、<br/>
-<code>LEFT JOIN</code>の場合は、<code>FROM</code>の後に書かれたテーブルを基準に返す。<br/>
-<code>RIGHT JOIN</code>の場合は、<code>JOIN</code>の後に書かれたテーブルを基準に返す。</p>
+<p>この方法で実装したところ、一時ファイルから添付ファイルにしての送信、が出来なかった。<br/>
+(ファイルがないと怒られる)</p>
 
-<p>あと、<code>USING</code>を使えば少し短く出来る。</p>
+<p>試しに、heroku内で<code>move_uploaded_file</code>を使ってみると、エラーもなく保存出来た。<br/>
+そのままそのファイルを添付して送ったところ、無事、送信完了。<br/>
+ただしファイル自体は直接アクセスしようとすると<code>404</code>が表示されるので、<br/>
+そのスクリプト内でのみ有効、のよう。</p>
 
-<blockquote><p>結合するカラムの名前が同じ場合にはONの代わりにUSINGを使用して次のように記述することもできます。<br/>
-「USING (col_name)」というのは「ON tbl_name1.col_name = tbl_name2.col_name」と同じことです。<br/>
-<a href="http://www.dbonline.jp/mysql/select/index15.html">http://www.dbonline.jp/mysql/select/index15.html</a></p></blockquote>
+<p>あと、上記の添付例のまま送信すると、2つ添付された。<br/>
+どうやらファイル名を指定する箇所が効いておらず、書かれているファイル名が添付されたよう。<br/>
+試しに、<code>'remoteName' =&gt; $attach['name']</code>の行を削除しても送信出来た。</p>
+
+<p>その部分を考慮して、最終的に出来たコードが以下。</p>
+
+<p>・1ファイルを1つの宛先に送信する場合<br/>
+・送信先や内容などはPOSTで受け取る想定</p>
+
+<pre><code>require '../vendor/autoload.php';
+use Mailgun\Mailgun;
+$mgClient = new Mailgun('key-xxx');
+$domain = "appxxx.mailgun.org";
+
+$attach = $_FILES["attach"]; //添付ファイル
+
+//ファイル保存
+try{
+    $result = move_uploaded_file($attach['tmp_name'], './'.$attach['name']);
+} catch (Exception $e) {
+    var_dump($e-&gt;getMessage());
+}
+
+//メール送信
+try {
+    $result = $mgClient-&gt;sendMessage("$domain",
+        array(
+            'from'    =&gt; $_POST['fromname'].' &lt;'.$_POST['fromaddress'].'&gt;',
+            'to'      =&gt; $_POST['toname'].' &lt;'.$_POST['to'].'&gt;',
+            'subject' =&gt; $_POST['subject'],
+            'text'    =&gt; $_POST['body']
+        ),
+        array(
+            'attachment' =&gt; array(
+                './' . $attach['name']
+            )
+        )
+    );
+    var_dump($result);
+
+} catch (Exception $e) {
+    var_dump($e-&gt;getMessage());
+}               
+</code></pre>
+
+<p>結局、一度保存してからの送信、となるので、SMTPを使った方が処理が速いかも。(未検証)</p>
 ]]></content>
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[phpPgAdminでのテーブルやカラムの操作メモ]]></title>
-    <link href="http://kayakuguri.github.io/blog/2013/12/18/phppgadmin-memo/"/>
-    <updated>2013-12-18T20:24:38+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2013/12/18/phppgadmin-memo</id>
-    <content type="html"><![CDATA[<p>phpPgAdminを使用してDBにテーブルやカラムを作る際にわからない事だらけだったのでメモ。</p>
-
-<p>■<strong>オプション（WITHOUT OIDS)</strong></p>
+    <title type="html"><![CDATA[[PHP][heroku]upload_max_filesizeを変更する]]></title>
+    <link href="http://kayakuguri.github.io/blog/2014/02/18/change-max-filesize/"/>
+    <updated>2014-02-18T17:02:20+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2014/02/18/change-max-filesize</id>
+    <content type="html"><![CDATA[<p>herokuにて、<code>upload_max_filesize</code>を変更してみた。</p>
 
 <!-- more -->
 
 
-<p>参考：<a href="http://www.mikawaban.com/tera/070430003807.html">PostgreSQLについて</a></p>
+<p>初め、<code>ini_set</code>で変更しようとしてみたところ、<br/>
+変更出来なかった。</p>
 
-<blockquote><p>CREATE TABLEでは，デフォルトではOIDが作成されます．OIDを生成しない<br/>
-テーブルを作るには，キーワード &ldquo;WITHOUT OIDS&rdquo; を使用します．</p></blockquote>
-
-<p>OIDって？</p>
-
-<blockquote><p>オブジェクト識別子(OID)はPostgreSQLの内部で様々なシステムテーブルの
-プライマリキーとして使用されます。また、テーブルの作成時にWITHOUT OIDS
-が指定されていない場合やdefault_with_oids設定変数が偽に設定されている
-場合を除き、OIDシステム列がユーザ作成のテーブルに追加されます。
-oidデータ型は現在、符号無し4バイト整数として実装されています。
-これは、大規模なデータベースの全体にわたって一意とするには十分では
-ありません。
-大規模な個別のテーブル内においても十分ではないかもしれません。
-そのため、ユーザ作成テーブルのOID列をプライマリキーとして使用するのは
-お勧めできません。
-OIDの使用は、システムテーブルへの参照の場合にのみ推奨されます。</p></blockquote>
-
-<p>つまり、</p>
-
-<blockquote><p>小規模DB内で識別する為に「OID」を使用しても良いという位の意味</p></blockquote>
-
-<p>らしい。<br/>
-普段は、使わない、でいいのかな。</p>
-
-<p>参考サイト内にあったまとめ。</p>
-
-<blockquote><p>■テーブル作成方法<br/>
-１）phpPgAdminにて「テーブル作成」を選択<br/>
-２）テーブル名（英数字）を入力<br/>
-３）フィールド数を入力<br/>
-４）次画面へ移り、各フィールド入力（英数字）</p>
-
-<p>※フィールドの属性以外は、後からでも変更可能<br/>
-※フィールドの追加・挿入・削除も可能</p>
-
-<p>■PostgreSQLへの接続　→　pg_connect命令<br/>
-■SQL文の実行　→　pg_exec　又は　pg_query命令</p></blockquote>
-
-<p>■<strong>プライマリキー</strong></p>
-
-<p><a href="http://e-words.jp/w/E4B8BBE382ADE383BC.html">主キー 【 primary key 】 プライマリキー</a></p>
-
-<blockquote><p>データベースの中から、ある一組のデータセット(レコード)を一意に識別するための情報。<br/>
-主キーは必ずしも一つの項目とは限らず、複数の項目を組み合わせて主キーとして用いる場合もある。<br/>
-一般的には個々の要素に通し番号などを割り振ってこれを主キーに設定する場合が多い。</p></blockquote>
-
-<p>■<strong>データ型</strong></p>
-
-<p><a href="http://www.postgresql.jp/document/9.1/html/datatype.html">データ型一覧</a></p>
-
-<p>■<strong>列の型で配列</strong></p>
-
-<p>各型で配列を作る事が出来るよう。<br/>
-phpPgAdminでは、<code>データ型</code>の横のセレクトボックスで、<code>[]</code>を選択しておけば配列になるもよう。<br/>
-ただし、配列にするとちょっと面倒があるよう。<br/>
-使わない方が無難？</p>
-
-<blockquote><p>ただ、配列に入れるために中カッコでくくったカンマ区切りの文字列を作らないといけないので、若干面倒です。また、バージョン7.4から配列の要素内にある特定の値を検索する事ができるようにはなりましたが、LIKE句が使えなかったりと、色々不便な所があります。 <br/>
-<a href="http://software.aufheben.info/kouza/senior/kouza_pg.html">http://software.aufheben.info/kouza/senior/kouza_pg.html</a></p></blockquote>
-
-<p>■<strong>intかbigintか</strong></p>
-
-<p>整数型や連番型、ともに、bigがある。</p>
-
-<p><code>integer</code> : 4バイト符号付き整数<br/>
-<code>bigint</code> : 8バイト符号付き整数</p>
-
-<p>どう違う？どっちを使うべき？<br/>
-参考：<a href="http://hamamuratakuo.blog61.fc2.com/blog-entry-648.html">時代はBIGINT</a></p>
-
-<blockquote><p>MySQLのINT型の最小値と最大値は、-2147483648～2147483647です。<br/>
-「2147483647」は、「２１億」<br/>
-インド人と中国人の全員が会員登録しようとすると、INT型では足りないということです。</p></blockquote>
-
-<p>しかし、</p>
-
-<blockquote><p>オートインクリメントのカラムだけのテーブルで、限界までデータを詰め込むと、<br/>
-・INT型 → 約43ギガバイト<br/>
-・BIGINT型 → 約326エクサバイト</p></blockquote>
-
-<p>よっぽどの事がない限り、int型でよさそう。</p>
-
-<p>■<strong>テーブルの破棄</strong></p>
-
-<p>テーブルを破棄しようとすると、<br/>
-<code>カスケード</code>なるチェックボックスが。</p>
-
-<blockquote><p>カスケード規則は、データベースがある操作が起こることを許可し、ほかのテーブルまたは行を最初の操作と同期をとるように変更することによって RI を確実にする規則です。たとえば、カスケード削除規則が定義されていると、主キー テーブルでのレコードの削除により、データベースは削除された行の主キーと同じ値の外部キーを持つデータベース中のすべての行を検索して削除します。<br/>
-<a href="http://www.agtech.co.jp/html/v9manuals/advops/advops-07-2.html">http://www.agtech.co.jp/html/v9manuals/advops/advops-07-2.html</a></p></blockquote>
-
-<p>要は、プライマリキーに設定された値と同じ外部キーを持つデータ、をまとめて削除してくれる、<br/>
-関連データも一緒に消していい？というチェックボックスのよう。たぶん。</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[PostgreSQLでプレースホルダーを使ってSELECT文を発行する方法]]></title>
-    <link href="http://kayakuguri.github.io/blog/2013/12/17/postgresql-select/"/>
-    <updated>2013-12-17T17:25:36+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2013/12/17/postgresql-select</id>
-    <content type="html"><![CDATA[<p>接続の参考：PostgreSQLへ接続](<a href="http://www.phpbook.jp/tutorial/postgresql/index3.html">http://www.phpbook.jp/tutorial/postgresql/index3.html</a>)</p>
-
-<p>プレースホルダーでの発行は以下を参考<br/>
-<a href="http://lets.postgresql.jp/documents/tutorial/with_php/against_sql_injection/placeholder">PHPでのSQLインジェクション対策 &ndash; プレースホルダ編</a><br/>
-<a href="http://php.net/manual/ja/function.pg-execute.php">pg_execute</a></p>
-
-<!-- more -->
-
-
-<p>SELECT文の例</p>
-
-<pre><code>$dbconn = pg_connect("host=".DB_SERVER." dbname=".DB." user=".DB_USER." password=".DB_PW);
-$result = pg_prepare($dbconn, "", 'SELECT * FROM dtb_order WHERE order_id = $1');
-$result = pg_execute($dbconn, "", array($oid));
+<pre><code>ini_set('upload_max_filesize', '6M');
 </code></pre>
 
-<p>こうすると、$resultには、resource型の値が入ってくる。<br/>
-そこから実際のデータを取得するためには、<code>pg_fetch_array</code>を使用する。</p>
+<p>参考：<a href="http://d.hatena.ne.jp/knowledgetree/20110217/1297939617">php.iniの設定を変えてもファイルをアップロードできないケース</a></p>
 
-<p>第３引数に<code>PGSQL_NUM</code>を指定すると、数字の配列で、<br/>
-<code>PGSQL_ASSOC</code>を指定すると、連想配列の形式で取得出来る。</p>
+<p>調べてみると、変更出来るもの、出来ないものがあるらしく、<br/>
+<code>upload_max_filesize</code>は、<code>ini_set()</code>では変更出来ないよう。</p>
 
-<p>そして、全ての行にアクセスするには、<code>pg_num_rows</code>を使用して何行返ってきたかを取得する。<br/>
-その数字をカウントとして使用して、for文で回すことで全件取得する事が出来る。</p>
+<p><code>upload_max_filesize</code>は、<code>PHP_INI_PERDIR</code>となっていて、<br/>
+php.ini、.htaccess、httpd.conf あるいは .user.ini (PHP 5.3 以降の場合) で設定可能なエントリ<br/>
+となっている。<br/>
+<a href="http://jp2.php.net/manual/ja/configuration.changes.modes.php">http://jp2.php.net/manual/ja/configuration.changes.modes.php</a></p>
 
-<pre><code>for ($i = 0 ; $i &lt; pg_num_rows($result) ; $i++){
-    $rows = pg_fetch_array($result, NULL, PGSQL_ASSOC);
-    var_dump($rows);
+<p>参考：PHP/ini_set()で変更できない値<br/>
+<a href="http://hodade.adam.ne.jp/itmemo/index.php?PHP%2Fini_set()%A4%C7%CA%D1%B9%B9%A4%C7%A4%AD%A4%CA%A4%A4%C3%CD">http://hodade.adam.ne.jp/itmemo/index.php?PHP%2Fini_set()%A4%C7%CA%D1%B9%B9%A4%C7%A4%AD%A4%CA%A4%A4%C3%CD</a></p>
+
+<p>herokuでは(たぶん).htaccessが使えない。<br/>
+代わりに、<code>.user.ini</code>を試してみるとそちらで変更出来た。</p>
+
+<p><code>.user.ini</code>ファイルを作成して、アップロード。<br/>
+<strong>設置したディレクトリ内でのみ</strong>、有効になる。</p>
+
+<p>[内容]</p>
+
+<pre><code>upload_max_filesize = 6M
+</code></pre>
+
+<p>参考：<a href="http://yamanxworld.blogspot.jp/2009/12/php-53-htaccess-userini.html">PHP 5.3 の新機能: .htaccess の代わりになる .user.ini</a></p>
+
+<hr />
+
+<p><strong>追記</strong></p>
+
+<p>上記の方法を取ったけれど、pnp.iniの設定ファイルを読み込ませる方法があった。<br/>
+今回herokuにインストールしたbuildpackは、confというディレクトリ以下に設定ファイルを置けば<br/>
+自動で認識されるような作りになっていたようです。</p>
+
+<p>なので、conf以下に<code>php.ini</code>ファイルを置けば、いちいち各ディレクトリに設定ファイルを置かないでも大丈夫。</p>
+
+<p>さらに、このbuildpackの環境は以下になっています。</p>
+
+<ul>
+<li>PHP 5.4.9（mbstring, mysql, pgsql, phpredis, mcryptなどなど）</li>
+<li>nginx + php-fpm</li>
+</ul>
+
+
+<p>この、<code>nginx</code>というphpサーバはデフォルトではPOST出来るサイズが<code>1MB</code>になっているよう。<br/>
+ここも変更しておかないとエラーになってしまう。</p>
+
+<p><a href="http://qiita.com/notanota/items/4816ad71b90a9967fa18">nginxで"client intended to send too large body"が発生した時の対策方法</a></p>
+
+<p>このnginxの設定ファイルは、<code>nginx.conf.erb</code>になるので、これも置いておく。<br/>
+デフォルトの設定ファイルはそれぞれ以下にある。</p>
+
+<ul>
+<li><a href="https://raw.github.com/iphoting/heroku-buildpack-php-tyler/master/conf/php.ini">php.ini</a></li>
+<li><a href="https://raw.github.com/iphoting/heroku-buildpack-php-tyler/master/conf/nginx.conf.erb">nginx.conf.erb</a></li>
+</ul>
+
+
+<p>php.iniの設定</p>
+
+<pre><code>post_max_size = 8M
+upload_max_filesize = 8M
+</code></pre>
+
+<p>nginxの設定</p>
+
+<pre><code>http {
+    client_max_body_size 1048576; # default 1M
+
+    server {
+        client_max_body_size 8M;
+    }
 }
 </code></pre>
 
-<p>接続の切断は以下。</p>
-
-<pre><code>$close_flag = pg_close($dbconn);
-if($close_flag) echo "切断成功";
-</code></pre>
-
-<p>参考：<a href="http://www.phpbook.jp/tutorial/postgresql/index5.html">データの取得(SELECT)</a></p>
+<p>参考：<a href="http://tkyk.name/blog/2012/11/28/php-on-heroku/">Heroku上に最新のPHP5.4 + Nginx環境を30秒で構築する</a></p>
 ]]></content>
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[PHPでCSVファイルを読み込んだ時に日本語が消える]]></title>
-    <link href="http://kayakuguri.github.io/blog/2013/11/30/php-csv/"/>
-    <updated>2013-11-30T14:10:49+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2013/11/30/php-csv</id>
-    <content type="html"><![CDATA[<p>PHPで文字コードがUTF-8のCSVファイルを読み込んだ際、<br/>
-何故か日本語が消える、という現象が。</p>
+    <title type="html"><![CDATA[herokuでmb-string付きのPHP環境を作る]]></title>
+    <link href="http://kayakuguri.github.io/blog/2014/02/18/create-php-heroku-mbstring/"/>
+    <updated>2014-02-18T10:57:30+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2014/02/18/create-php-heroku-mbstring</id>
+    <content type="html"><![CDATA[<p>順番が前後しますが、mbstring付きのphp環境を作る方法をメモしておきます。</p>
 
-<p>文字化け、ではなく、消える。<br/>
-また、ローカルのXAMPP環境では消えなかったのに、<br/>
-サーバにアップすると消えた。</p>
+<!-- more -->
 
-<p>どうやら、PHP5の問題、のようで、<br/>
-<code>fgetcsv</code>を使用している時に起こる現象のよう。<br/>
-以下のように文字コードの指定をしてやるだけで解決した。</p>
 
-<pre><code>setlocale(LC_ALL, 'ja_JP.UTF-8');
+<p>前提条件としては、heorkuのアカウントを持っていて、herokuコマンドが有効になっていて、<br/>
+gitも使える状態、です。<br/>
+<a href="http://devcenter.heroku.com/articles/heroku-command">Heroku Toolbelt</a>とかをインストールしておけば、herokuコマンドが使えるようになります。</p>
+
+<p>参考：<a href="http://blog.infinity-dimensions.com/2012/01/heroku-toolbelt-install.html">Herokuコマンドを使えるようにするHeroku Toolbeltをインストール</a></p>
+
+<hr />
+
+<p>まずは、ディレクトリを作成しておき、そのディレクトリ内にgitを作成。<br/>
+phpinfo()などだけ書いたテストのindex.phpを作成し、commitしておきます。</p>
+
+<pre><code>$ mkdir myapp
+$ cd myapp
+$ git init
+$ echo '&lt;?php phpinfo();' &gt; index.php
+$ git add .
+$ git commit -m 'initial commit'
 </code></pre>
 
-<p>参考：<a href="http://pentan.info/php/fgetcsv_char.html">fgetcsv関数を文字化け対応 setlocaleの文字コード指定</a></p>
+<p>で、herokuコマンドを使用して、phpをherokuで動かすためのプラグインである、'buildpack'をインストール。</p>
+
+<pre><code>$ heroku create -s cedar -b git://github.com/iphoting/heroku-buildpack-php-tyler.git#php/5.4.9
+</code></pre>
+
+<p>ただし、このまま作成すると、heroku側で勝手に決められたアプリ名になってしまう。<br/>
+後から名前を変更することは出来るが、リポジトリのURLを変更しないといけなかったりして、ちょっと面倒。<br/>
+最初から名前を指定した上で作成するには、<code>heroku create myapp</code>とすればよい。<br/>
+(名前は他のユーザーと被っているとダメ。また、アルファベットの大文字を使用しても怒られた。)<br/>
+なので上記の分を名前指定で作成すると、以下。</p>
+
+<pre><code>$ heroku create myapp -s cedar -b git://github.com/iphoting/heroku-buildpack-php-tyler.git#php/5.4.9
+</code></pre>
+
+<p>で、herokuにpush。<br/>
+pushすると自動的にdeployもされるので、成功すればこれでmbstring付きのphp環境の作成は環境。</p>
+
+<pre><code>$ git push heroku master
+</code></pre>
+
+<p>openするとページが表示される。</p>
+
+<pre><code>$ heroku open
+</code></pre>
+
+<p>参考：<a href="http://d.hatena.ne.jp/hnw/20120603">HerokuのBuildpackを利用してmbstringが有効なPHPサーバを立ててみた</a></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[PHP]herokuで添付ファイル付きメールを送る]]></title>
+    <link href="http://kayakuguri.github.io/blog/2014/02/18/php-heroku-sendattachmail/"/>
+    <updated>2014-02-18T10:38:12+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2014/02/18/php-heroku-sendattachmail</id>
+    <content type="html"><![CDATA[<p>herokuで、POSTされたファイルを添付してメールを送信してみた。</p>
+
+<!-- more -->
+
+
+<p>環境は、PHPのmbstring環境。<br/>
+メールは、Mailgun。</p>
+
+<p>SMTPメールを送るためのライブラリは、QBMailを使用。<br/>
+<a href="http://qiita.com/tsunet111/items/0ba0e8fc61882c3905c0">php から確実にメール送信（Qdmail使用、SMTP経由）</a></p>
+
+<p>POSTから送信されたファイルは、<code>$_FILES</code>に保存される。<br/>
+herokuでは、<a href="http://gihyo.jp/dev/serial/01/heroku/0011">ファイルの保存が出来ない</a>ので、<br/>
+一時ファイルから添付することで実現する。</p>
+
+<p>送信された一時ファイル : <code>$_FILES['xxx']['tmp_name']</code><br/>
+ファイル名 : <code>$_FILES['xxx']['name']</code></p>
+
+<p>以下、送信部分のソース。</p>
+
+<pre><code>[HTML]
+&lt;input type="file" name="upfile" /&gt;
+
+[PHP]
+$mail = new Qdmail();
+$mail -&gt; smtp(true);
+$param = array(
+    'host'=&gt; $_ENV['MAILGUN_SMTP_SERVER'],
+    'port'=&gt; $_ENV['MAILGUN_SMTP_PORT'],
+    'from'=&gt; 'test@hoge.jp',
+    'protocol'=&gt;'SMTP_AUTH',
+    'user'=&gt; $_ENV['MAILGUN_SMTP_LOGIN'],
+    'pass' =&gt; $_ENV['MAILGUN_SMTP_PASSWORD'],
+);
+$mail -&gt;attach(array($_FILES["upfile"]["tmp_name"], $_FILES["upfile"]['name'])); //添付ファイル
+$mail -&gt;smtpServer($param);
+$mail -&gt;to('送信先アドレス');
+$mail -&gt;subject('件名');
+$mail -&gt;from('送信元アドレス','送信元名');
+$mail -&gt;text('本文');
+$mail -&gt;send();
+</code></pre>
+
+<p>参考：<a href="http://hal456.net/qdmail/oopattach"> 添付ファイルの指定(OOP)</a></p>
+
+<hr />
+
+<p>　
+　</p>
+
+<p>以下、余談。</p>
+
+<p>ファイルを送信する場合は、htmlのformタグに、<code>enctype="multipart/form-data"</code>をつけないといけない。</p>
+
+<pre><code>&lt;form method="post" action="example.php" enctype="multipart/form-data"&gt;
+</code></pre>
+
+<p>jqueryを使ってajaxで実現したい場合は、enctypeは必要なく、<code>FormData</code>でまとめたデータを送信するようにし、<br/>
+<code>contentType</code>と<code>processData</code>を<code>false</code>にする必要がある。</p>
+
+<pre><code>var $form = $("form");
+var fd = new FormData($form[0]);
+// 送信
+$.ajax({
+    url: $form.attr('action'),
+    type: $form.attr('method'),
+    data: fd,
+    contentType : false,
+    processData : false,
+    success: function(result) {
+        console.log(result);
+    },
+    error: function(xhr, textStatus, error) {}
+}
+</code></pre>
+
+<p>参考：<br/>
+<a href="http://ginpen.com/2013/05/07/jquery-ajax-form/">jQueryでフォームをAjax送信する際の基本パターンのチュートリアル。二重送信の防御とか。</a><br/>
+<a href="http://yokano-jp.blogspot.jp/2013/07/jqueryajax.html">jQuery.ajax() でファイルを送る</a></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[PHPでMailgunを使ってherokuでメール送信する]]></title>
+    <link href="http://kayakuguri.github.io/blog/2014/02/17/send-mail-from-heroku-with-mailgun/"/>
+    <updated>2014-02-17T11:31:07+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2014/02/17/send-mail-from-heroku-with-mailgun</id>
+    <content type="html"><![CDATA[<p>herokuのphp環境でMailgunを使ってメール送信をしてみました。<br/>
+ただし、日本語環境は入れなかったので、英語環境のみ。</p>
+
+<!-- more -->
+
+
+<p>まず、herokuにプラグインをインストールするためには、<br/>
+クレジットカードの登録が必要なので、登録しておく。<br/>
+(無料範囲内でのみでの利用でも必要)</p>
+
+<p><a href="https://addons.heroku.com/#email-sms">Mail/SNSアドオン一覧</a></p>
+
+<p>Mailgunの場合は、無料だと<code>300通/日</code>送れるよう。</p>
+
+<p><a href="https://addons.heroku.com/mailgun">Mailgun</a></p>
+
+<p>で、インストールすると、環境変数にSMTP情報が格納されるので、<br/>
+そちらを利用して、メールを送れるようになる。<br/>
+(<code>sendmail</code>関数は使えない。)</p>
+
+<pre><code>$_ENV['MAILGUN_SMTP_SERVER'] = host
+$_ENV['MAILGUN_SMTP_PORT'] = port
+$_ENV['MAILGUN_SMTP_LOGIN'] = user
+$_ENV['MAILGUN_SMTP_PASSWORD'] = password
+
+$_ENV['MAILGUN_API_KEY'] = key
+</code></pre>
+
+<p>日本語環境だと、<code>Qdmail</code>というものが有名だそう。</p>
+
+<p>参考：<a href="http://qiita.com/tsunet111/items/0ba0e8fc61882c3905c0">php から確実にメール送信（Qdmail使用、SMTP経由）</a></p>
+
+<p>ただし、今回は<code>mbstring</code>環境を入れてないので、エラーが出てしまった。<br/>
+なので、英語の解説ページを参考に、<code>phpmailer</code>を使ってみた。</p>
+
+<pre><code>$mail = new PHPMailer;
+$mail-&gt;isSMTP();
+$mail-&gt;Host = $_ENV['MAILGUN_SMTP_SERVER'];
+$mail-&gt;SMTPAuth = true;
+$mail-&gt;Username = $_ENV['MAILGUN_SMTP_LOGIN'];
+$mail-&gt;Password = $_ENV['MAILGUN_SMTP_PASSWORD'];
+$mail-&gt;Port     = $_ENV['MAILGUN_SMTP_PORT'];
+$mail-&gt;SMTPSecure = 'tls';
+$mail-&gt;From = MAIL_FROM;
+$mail-&gt;FromName = MAIL_FROM_NAME;
+
+$mail-&gt;addAddress("hoge@exsample.jp");
+$mail-&gt;addAddress("huga@exsample.com");
+
+$mail-&gt;Subject = MAIL_SUBJECT;
+$mail-&gt;Body    = MAIL_MSG1 . $body . MAIL_MSG2;
+if(!$mail-&gt;send()){
+    //falseが返ってくる場合はエラー。
+    //送信完了の場合は、1が返ってくる。
+}
+</code></pre>
+
+<p>ただし、もちろんだけど、日本語で送信すると文字化けする。<br/>
+(Gmailの場合はなぜか本文は正しく表示出来た。件名は文字化けする)</p>
 ]]></content>
   </entry>
   

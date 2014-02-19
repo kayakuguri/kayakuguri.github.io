@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2014-02-18T18:43:51+09:00</updated>
+  <updated>2014-02-19T18:05:05+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,110 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[PHP][heroku]Mailgun APIを使って添付ファイルを送る]]></title>
+    <link href="http://kayakuguri.github.io/blog/2014/02/19/attachment-use-mailgunapi/"/>
+    <updated>2014-02-19T17:37:48+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2014/02/19/attachment-use-mailgunapi</id>
+    <content type="html"><![CDATA[<p>以前に、<a href="http://kayakuguri.github.io/blog/2014/02/18/php-heroku-sendattachmail/">mailgunで添付ファイル付きメールを送る方法</a>を書いたが、<br/>
+そちらは、<code>SMTP</code>バージョンで、今回はそのMailgun APIバージョン。</p>
+
+<!-- more -->
+
+
+<p>以下のファイルをダウンロードして一式アップしておく。<br/>
+(readmeファイルなどいらないものが大量にあるが、とりあえず全部あげておく)</p>
+
+<p><a href="https://9f67cbbd1116d8afb399-7760483f5d1e5f28c2d253278a2a5045.ssl.cf2.rackcdn.com/mailgun-php-1.7.zip">Library Download</a> (zip直リンク)</p>
+
+<p>基本の送信方法は以下。<br/>
+<a href="http://documentation.mailgun.com/quickstart.html#sending-messages">Sending Messages</a></p>
+
+<pre><code># Include the Autoloader (see "Libraries" for install instructions)
+require 'vendor/autoload.php';
+use Mailgun\Mailgun;
+
+# Instantiate the client.
+$mgClient = new Mailgun('key-3ax6xnjp29jd6fds4gc373sgvjxteol0');
+$domain = "samples.mailgun.org";
+
+# Make the call to the client.
+$result = $mgClient-&gt;sendMessage("$domain",
+              array('from'    =&gt; 'Excited User &lt;me@samples.mailgun.org&gt;',
+                    'to'      =&gt; 'Baz &lt;baz@example.com&gt;',
+                    'subject' =&gt; 'Hello',
+                    'text'    =&gt; 'Testing some Mailgun awesomness!'));
+</code></pre>
+
+<p>添付ファイルを送る方法は、<code>attachment</code>を使って、その中にファイル名を書く。<br/>
+ファイル名を指定する方法が紹介されていた。<br/>
+<a href="https://github.com/mailgun/mailgun-php/issues/35">https://github.com/mailgun/mailgun-php/issues/35</a></p>
+
+<pre><code>array(
+    'attachment' =&gt; array(
+        'filePath' =&gt; './' . $attach['name'],
+        'remoteName' =&gt; $attach['name']
+    )
+)
+</code></pre>
+
+<p>この方法で実装したところ、一時ファイルから添付ファイルにしての送信、が出来なかった。<br/>
+(ファイルがないと怒られる)</p>
+
+<p>試しに、heroku内で<code>move_uploaded_file</code>を使ってみると、エラーもなく保存出来た。<br/>
+そのままそのファイルを添付して送ったところ、無事、送信完了。<br/>
+ただしファイル自体は直接アクセスしようとすると<code>404</code>が表示されるので、<br/>
+そのスクリプト内でのみ有効、のよう。</p>
+
+<p>あと、上記の添付例のまま送信すると、2つ添付された。<br/>
+どうやらファイル名を指定する箇所が効いておらず、書かれているファイル名が添付されたよう。<br/>
+試しに、<code>'remoteName' =&gt; $attach['name']</code>の行を削除しても送信出来た。</p>
+
+<p>その部分を考慮して、最終的に出来たコードが以下。</p>
+
+<p>・1ファイルを1つの宛先に送信する場合<br/>
+・送信先や内容などはPOSTで受け取る想定</p>
+
+<pre><code>require '../vendor/autoload.php';
+use Mailgun\Mailgun;
+$mgClient = new Mailgun('key-xxx');
+$domain = "appxxx.mailgun.org";
+
+$attach = $_FILES["attach"]; //添付ファイル
+
+//ファイル保存
+try{
+    $result = move_uploaded_file($attach['tmp_name'], './'.$attach['name']);
+} catch (Exception $e) {
+    var_dump($e-&gt;getMessage());
+}
+
+//メール送信
+try {
+    $result = $mgClient-&gt;sendMessage("$domain",
+        array(
+            'from'    =&gt; $_POST['fromname'].' &lt;'.$_POST['fromaddress'].'&gt;',
+            'to'      =&gt; $_POST['toname'].' &lt;'.$_POST['to'].'&gt;',
+            'subject' =&gt; $_POST['subject'],
+            'text'    =&gt; $_POST['body']
+        ),
+        array(
+            'attachment' =&gt; array(
+                './' . $attach['name']
+            )
+        )
+    );
+    var_dump($result);
+
+} catch (Exception $e) {
+    var_dump($e-&gt;getMessage());
+}               
+</code></pre>
+
+<p>結局、一度保存してからの送信、となるので、SMTPを使った方が処理が速いかも。(未検証)</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[PHP][heroku]upload_max_filesizeを変更する]]></title>
@@ -1361,86 +1465,6 @@ if($close_flag) echo "切断成功";
 </code></pre>
 
 <p>参考：<a href="http://www.phpbook.jp/tutorial/postgresql/index5.html">データの取得(SELECT)</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[セミナーログ]OWASP Night 9th 2013 Year End Special 大阪サテライト]]></title>
-    <link href="http://kayakuguri.github.io/blog/2013/12/16/owasp-night-9th-2013-year-end-special/"/>
-    <updated>2013-12-16T21:37:51+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2013/12/16/owasp-night-9th-2013-year-end-special</id>
-    <content type="html"><![CDATA[<p>OWASP Nightの大阪サテライト、というものに参加させてもらいました。<br/>
-参加、というか、端っこで聞かせてもらっただけ、ですが。</p>
-
-<p>東京で開催されているOWASP nightを大阪から中継で見よう、という、<br/>
-パブリックビューイング的なイベント。</p>
-
-<!-- more -->
-
-
-<p><a href="http://atnd.org/events/46285">http://atnd.org/events/46285</a></p>
-
-<p>本イベント<br/>
-<a href="http://atnd.org/events/46176">http://atnd.org/events/46176</a></p>
-
-<blockquote><p>東京・六本木で開催されるOWASP Night 9th 2013 Year End Special (a.k.a. 忘ナイト)の中継を大阪で楽しむためのサテライト会場です。</p>
-
-<p>OWASP Meeting/Night – OWASP Japanローカルチャプターミーティングは、セミナーや持ち込みのライトニングトークの形で行われる、Webセキュリティに関心のある方が集う、楽しくカジュアルな勉強会です。</p></blockquote>
-
-<p><a href="https://www.owasp.org/index.php/Japan">OWASP Japan</a></p>
-
-<p>以下、全然内容わかってないですが、<br/>
-かるーく、メモです。</p>
-
-<hr />
-
-<p><strong>OWASP Top 10 2013版を日本語訳してみた</strong></p>
-
-<p><a href="http://scan.netsecurity.ne.jp/article/2013/10/24/32779.html">「OWASP Top 10 for 2013」の日本語版を公開</a></p>
-
-<blockquote><p>1：インジェクション（2013-A1）<br/>
-2：認証とセッション管理の不備（2013-A2）<br/>
-3：クロスサイトスクリプティング（XSS）（2013-A3）<br/>
-4：安全でないオブジェクト直接参照（2013-A4）<br/>
-5：セキュリティ設定のミス（2013-A5） <br/>
-6：機密データの露出（2013-A6）<br/>
-7：機能レベルアクセス制御の欠落（2013-A7）<br/>
-8：クロスサイトリクエストフォージェリ（CSRF）（2013-A8）<br/>
-9：既知の脆弱性を持つコンポーネントの使用（2013-A9）<br/>
-10：未検証のリダイレクトとフォワード（2013-A10）</p></blockquote>
-
-<hr />
-
-<p><strong>今夜わかるCVE</strong></p>
-
-<p>CVEとは、共通脆弱性識別子<br/>
-<a href="http://itpro.nikkeibp.co.jp/word/page/10004314/">CVEとは？</a></p>
-
-<blockquote><p>ぜい弱性やセキュリティにかかわる事象を説明するための名前や用語を標準化し，辞書を作成するプロジェクト。</p></blockquote>
-
-<p>MITREというところが採番をしている。<br/>
-米国政府機関の下請け企業<br/>
-NISTの下請けで取りまとめしてる。</p>
-
-<p>来年から番号が変わる。<br/>
-今まで4桁だったのが、足らなくなりそう？なので、5桁になる。</p>
-
-<p>CVE番号だけではない！<br/>
-MITER社がフォーマットに沿って、清書している。</p>
-
-<p>CVEは、SCAPの一つ。<br/>
-NISTが定めた標準規格。<br/>
-セキュリティ情報をプログラムから自動で扱える侵入検知システムで活躍。</p>
-
-<p><a href="http://jvndb.jvn.jp/">JVN iPedia</a><br/>
-JVNブランドの脆弱性対策情報データベース。</p>
-
-<p>MyJVN API利用例<br/>
-<a href="http://secf.keyman.or.jp/">リクルート社 SEfeed</a></p>
-
-<hr />
-
-<p>他にもライトニングトークなど、がありました。</p>
 ]]></content>
   </entry>
   

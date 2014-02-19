@@ -3,7 +3,7 @@
 <html>
 <head>
 	<meta charset="utf-8">
-	<title>Php StormでのFTPの設定 - KayaMemo</title>
+	<title>[PHP][heroku]Mailgun APIを使って添付ファイルを送る - KayaMemo</title>
 
 	
 	<meta name="description" content="<!-- google_ad_client = "ca-pub-0887267957680144"; /* kayakuguri top */ google_ad_slot = "1210228675"; google_ad_width = 468; google_ad_height = 60 &hellip;">
@@ -17,7 +17,7 @@
 	<!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
 	<script async="true" src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
 	
-<meta property="og:title" content="Php StormでのFTPの設定 - KayaMemo" />
+<meta property="og:title" content="[PHP][heroku]Mailgun APIを使って添付ファイルを送る - KayaMemo" />
 <meta property="og:type" content="article" />
 <meta property="og:description" content="<!-- google_ad_client = "ca-pub-0887267957680144"; /* kayakuguri top */ google_ad_slot = "1210228675"; google_ad_width = 468; google_ad_height = 60 &hellip;" />
 
@@ -85,7 +85,7 @@
 		
 	
 	<div id="content" class="inner"><article class="post">
-	<h2 class="title">Php StormでのFTPの設定</h2>
+	<h2 class="title">[PHP][heroku]Mailgun APIを使って添付ファイルを送る</h2>
 	<div class="entry-content">
         <div class="adArea">
     <script type="text/javascript"><!--
@@ -100,40 +100,102 @@
             src="//pagead2.googlesyndication.com/pagead/show_ads.js">
     </script>
 </div>
-        <p>PhpStormからFTPにアップロードするための設定方法のメモ。</p>
-
-<p>１）メニューから、Tools→Deployment→Configuration、を選択</p>
-
-<p><img src="/images/2013/12/phpstorm1.jpg" alt="Configuration" /></p>
-
-<p>２）Connectionタブ内で以下を設定する。</p>
+        <p>以前に、<a href="http://kayakuguri.github.io/blog/2014/02/18/php-heroku-sendattachmail/">mailgunで添付ファイル付きメールを送る方法</a>を書いたが、<br/>
+そちらは、<code>SMTP</code>バージョンで、今回はそのMailgun APIバージョン。</p>
 
 <!-- more -->
 
 
-<ul>
-<li> FTP host  :FTPのホスト名</li>
-<li> Port  :ポート</li>
-<li> Root path  :サーバ上のルートパス</li>
-<li> User name  :接続するユーザー名</li>
-<li> Password   :パスワード</li>
-<li> Web server root URL  :サイトのURL</li>
-</ul>
+<p>以下のファイルをダウンロードして一式アップしておく。<br/>
+(readmeファイルなどいらないものが大量にあるが、とりあえず全部あげておく)</p>
 
+<p><a href="https://9f67cbbd1116d8afb399-7760483f5d1e5f28c2d253278a2a5045.ssl.cf2.rackcdn.com/mailgun-php-1.7.zip">Library Download</a> (zip直リンク)</p>
 
-<p><img src="/images/2013/12/phpstorm2.jpg" alt="Connection" /></p>
+<p>基本の送信方法は以下。<br/>
+<a href="http://documentation.mailgun.com/quickstart.html#sending-messages">Sending Messages</a></p>
 
-<p>３）Mappingsタブ内で以下を設定する。</p>
+<pre><code># Include the Autoloader (see "Libraries" for install instructions)
+require 'vendor/autoload.php';
+use Mailgun\Mailgun;
 
-<ul>
-<li> Local pash  :アップロードしたいローカルパス</li>
-<li> Deployment path on server &lsquo;hogehoge.com&rsquo;  :サーバー上でアップロードする場所(ルートの場合は<code>/</code>で)</li>
-</ul>
+# Instantiate the client.
+$mgClient = new Mailgun('key-3ax6xnjp29jd6fds4gc373sgvjxteol0');
+$domain = "samples.mailgun.org";
 
+# Make the call to the client.
+$result = $mgClient-&gt;sendMessage("$domain",
+              array('from'    =&gt; 'Excited User &lt;me@samples.mailgun.org&gt;',
+                    'to'      =&gt; 'Baz &lt;baz@example.com&gt;',
+                    'subject' =&gt; 'Hello',
+                    'text'    =&gt; 'Testing some Mailgun awesomness!'));
+</code></pre>
 
-<p><img src="/images/2013/12/phpstorm3.jpg" alt="Mappings" /></p>
+<p>添付ファイルを送る方法は、<code>attachment</code>を使って、その中にファイル名を書く。<br/>
+ファイル名を指定する方法が紹介されていた。<br/>
+<a href="https://github.com/mailgun/mailgun-php/issues/35">https://github.com/mailgun/mailgun-php/issues/35</a></p>
 
-<p>４）プロジェクトツリーからファイル名を右クリックして、Upload to&hellip;を選択し、設定したサイトを選択。</p>
+<pre><code>array(
+    'attachment' =&gt; array(
+        'filePath' =&gt; './' . $attach['name'],
+        'remoteName' =&gt; $attach['name']
+    )
+)
+</code></pre>
+
+<p>この方法で実装したところ、一時ファイルから添付ファイルにしての送信、が出来なかった。<br/>
+(ファイルがないと怒られる)</p>
+
+<p>試しに、heroku内で<code>move_uploaded_file</code>を使ってみると、エラーもなく保存出来た。<br/>
+そのままそのファイルを添付して送ったところ、無事、送信完了。<br/>
+ただしファイル自体は直接アクセスしようとすると<code>404</code>が表示されるので、<br/>
+そのスクリプト内でのみ有効、のよう。</p>
+
+<p>あと、上記の添付例のまま送信すると、2つ添付された。<br/>
+どうやらファイル名を指定する箇所が効いておらず、書かれているファイル名が添付されたよう。<br/>
+試しに、<code>'remoteName' =&gt; $attach['name']</code>の行を削除しても送信出来た。</p>
+
+<p>その部分を考慮して、最終的に出来たコードが以下。</p>
+
+<p>・1ファイルを1つの宛先に送信する場合<br/>
+・送信先や内容などはPOSTで受け取る想定</p>
+
+<pre><code>require '../vendor/autoload.php';
+use Mailgun\Mailgun;
+$mgClient = new Mailgun('key-xxx');
+$domain = "appxxx.mailgun.org";
+
+$attach = $_FILES["attach"]; //添付ファイル
+
+//ファイル保存
+try{
+    $result = move_uploaded_file($attach['tmp_name'], './'.$attach['name']);
+} catch (Exception $e) {
+    var_dump($e-&gt;getMessage());
+}
+
+//メール送信
+try {
+    $result = $mgClient-&gt;sendMessage("$domain",
+        array(
+            'from'    =&gt; $_POST['fromname'].' &lt;'.$_POST['fromaddress'].'&gt;',
+            'to'      =&gt; $_POST['toname'].' &lt;'.$_POST['to'].'&gt;',
+            'subject' =&gt; $_POST['subject'],
+            'text'    =&gt; $_POST['body']
+        ),
+        array(
+            'attachment' =&gt; array(
+                './' . $attach['name']
+            )
+        )
+    );
+    var_dump($result);
+
+} catch (Exception $e) {
+    var_dump($e-&gt;getMessage());
+}               
+</code></pre>
+
+<p>結局、一度保存してからの送信、となるので、SMTPを使った方が処理が速いかも。(未検証)</p>
 
     </div>
 
@@ -151,11 +213,11 @@
   
 
 
-<time datetime="2013-12-04T16:16:32+09:00" pubdate data-updated="true">Dec 4<span>th</span>, 2013</time></div>
+<time datetime="2014-02-19T17:37:48+09:00" pubdate data-updated="true">Feb 19<span>th</span>, 2014</time></div>
 	<div class="tags">
 
 
-	<a class='category' href='/blog/categories/editor/'>editor</a>
+	<a class='category' href='/blog/categories/heroku/'>heroku</a>, <a class='category' href='/blog/categories/php/'>php</a>
 
 
 </div>
@@ -174,7 +236,7 @@
     js.src = "//connect.facebook.net/ja_JP/all.js#xfbml=1&appId=509051419202319";
     fjs.parentNode.insertBefore(js, fjs);
 }(document, 'script', 'facebook-jssdk'));</script>
-        <div class="fb-like" data-href="http://kayakuguri.github.io/blog/2013/12/04/php-storm-ftp/" data-layout="button_count" data-action="like" data-show-faces="true" data-share="false"></div>
+        <div class="fb-like" data-href="http://kayakuguri.github.io/blog/2014/02/19/attachment-use-mailgunapi/" data-layout="button_count" data-action="like" data-show-faces="true" data-share="false"></div>
 		
 		
         &nbsp;&nbsp;<a href="https://twitter.com/share" class="twitter-share-button" data-via="kayakuguri123" data-lang="ja" data-count="none">ツイート</a>
@@ -194,7 +256,7 @@
 		
 		
         
-        <a href="http://b.hatena.ne.jp/entry/http://kayakuguri.github.io/blog/2013/12/04/php-storm-ftp/" class="hatena-bookmark-button" data-hatena-bookmark-title="Php StormでのFTPの設定 - KayaMemo" data-hatena-bookmark-layout="standard-noballoon" data-hatena-bookmark-lang="ja" title="このエントリーをはてなブックマークに追加">
+        <a href="http://b.hatena.ne.jp/entry/http://kayakuguri.github.io/blog/2014/02/19/attachment-use-mailgunapi/" class="hatena-bookmark-button" data-hatena-bookmark-title="[PHP][heroku]Mailgun APIを使って添付ファイルを送る - KayaMemo" data-hatena-bookmark-layout="standard-noballoon" data-hatena-bookmark-lang="ja" title="このエントリーをはてなブックマークに追加">
 <img src="http://b.st-hatena.com/images/entry-button/button-only@2x.png" alt="このエントリーをはてなブックマークに追加" width="20" height="20" style="border: none;" /></a>
 <script type="text/javascript" src="http://b.st-hatena.com/js/bookmark_button.js" charset="utf-8" async="async"></script>
         
