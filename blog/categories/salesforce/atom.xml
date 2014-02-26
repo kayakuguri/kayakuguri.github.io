@@ -4,7 +4,7 @@
   <title><![CDATA[Category: salesforce | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/salesforce/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2014-02-26T18:11:21+09:00</updated>
+  <updated>2014-02-26T19:49:30+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -23,6 +23,10 @@
 
 <!-- more -->
 
+
+<p><strong>※追記</strong><br/>
+実際にこの内容で送信してみると、壊れたファイルが送信されてしまいます。<br/>
+原因を調査中です。</p>
 
 <h2>基本的なPOST送信の方法</h2>
 
@@ -197,7 +201,7 @@ array(1) {
 ($_FILES)
 array(1) { 
     ["data"]=&gt; array(5) { 
-        ["name"]=&gt; string(8) "img.jpg" 
+        ["name"]=&gt; string(8) "test.txt" 
         ["type"]=&gt; string(24) "application/octet-stream" 
         ["tmp_name"]=&gt; string(14) "/tmp/phpcEwVr6" 
         ["error"]=&gt; int(0) 
