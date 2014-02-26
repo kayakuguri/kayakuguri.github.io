@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2014-02-19T18:05:05+09:00</updated>
+  <updated>2014-02-26T18:11:21+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,201 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[ApexからコールアウトでPOST送信する]]></title>
+    <link href="http://kayakuguri.github.io/blog/2014/02/26/submit-callout-with-multipart/"/>
+    <updated>2014-02-26T17:25:51+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2014/02/26/submit-callout-with-multipart</id>
+    <content type="html"><![CDATA[<p>apexクラスからコールアウトを使って外部APIにPOST送信してみた。<br/>
+ファイルも一緒に送信する。</p>
+
+<!-- more -->
+
+
+<h2>基本的なPOST送信の方法</h2>
+
+<p>コールアウトで外部にHTTP送信する場合、<br/>
+ヘッダーやボディの中身を順番に設定していき、送信、となる。<br/>
+(この基本的な内容がわかっていなくて苦労した)</p>
+
+<p>POSTやGETで送信されるデータの基本的な内容は以下。<br/>
+<a href="http://www.yoheim.net/blog.php?q=20120611">[Web] HTTPリクエストの中身を学んでみた。GETやPOSTの違いなど</a></p>
+
+<p>送信内容例はこんな感じ。(上記サイト内から引用)</p>
+
+<pre><code>POST /www.hoge.com/test.php HTTP/1.1
+Host: localhost:8080
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7_4) AppleWebKit/536.5 (KHTML, like Gecko) Chrome/19.0.1084.54 Safari/536.5
+Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+Accept-Language: ja,en-us;q=0.7,en;q=0.3
+Accept-Encoding: gzip,deflate
+Accept-Charset: Shift_JIS,utf-8;q=0.7,*;q=0.7
+Keep-Alive: 300
+Connection: keep-alive
+Content-Type: text/plain
+Content-Length: 23
+
+key1=value1&amp;key2=value2
+</code></pre>
+
+<p>apexからの基本的なPOST送信の方法は以下。<br/>
+<a href="http://ameblo.jp/hayapu/entry-11431469756.html">[Salesforce][Force.com]外部サイトにHTTPアクセス（Callout）する</a><br/>
+(上記サイトから引用、編集)</p>
+
+<pre><code>HttpRequest request = new HttpRequest();
+request.setEndpoint('http://****アクセスしたいAPIのURLだよ！****');
+request.setMethod('POSTとかGETとか！');
+request.setHeader('Accept','text/plain, */*');
+request.setHeader('Accept-Charset','Shift_JIS,utf-8;q=0.7,*;q=0.3');
+request.setHeader('Accept-Encoding','gzip,deflate,sdch');
+request.setHeader('Accept-Language','ja,en-US;q=0.8,en;q=0.6');
+request.setHeader('Connection','keep-alive');
+request.setHeader('Content-Type','text/xml; charset=UTF-8 ');
+String prams = 'key1=value1&amp;key2=value2';
+request.setBody(prams);
+
+Http http = new Http();
+HttpResponse response = http.send(request);
+String responseBody = response..getBody();
+</code></pre>
+
+<p>最初に上げた送信内容のボディ部分に、getパラメータのようにつなげて書かれている。<br/>
+なので、そのようにボディ部分に書いてやればいい。<br/>
+<a href="http://www.kokyakukanri.info/salesforce/blog/2010/12/apexpost.html">[Apex]WebコールアウトでPOST送信する場合のパラメータの設定方法は？</a></p>
+
+<p>注意点としては、コールアウトするURLは事前にドメインを指定しておく必要があるよう。<br/>
+指定してないと、<code>Unauthorized endpoint, please check Setup-&gt;Security-&gt;Remote site settings.</code>とエラーが出る。</p>
+
+<pre><code>設定 -&gt; セキュリティのコントロール -&gt; リモートサイトの設定
+</code></pre>
+
+<p>さらに、接続するURLはSSLでないとエラーが返されてしまう。<br/>
+<code>The requested URL could not be retrieved</code></p>
+
+<p>ちなみに、配列で送信する場合は以下。</p>
+
+<pre><code>params = 'hoge[]=huga&amp;hoge[]=fuge';
+request.setBody(params);
+</code></pre>
+
+<h2>POSTでファイルを送信する</h2>
+
+<p>参考：<a href="http://salesforceafondo.wordpress.com/2013/01/08/post-multipartform-data-out-of-salesforce-com-with-apex/">Post ‘multipart/form-data’ out of Salesforce.com with APEX</a><br/>
+スペイン語なので読めないけど、コード部分は読める。</p>
+
+<p>そのまま送信すると、送信先のPHP側で、<code>$_FILES</code>にデータが入っていた。</p>
+
+<p>この方法で、ファイルと一緒にパラメータも送信するには、<br/>
+POST送信する際のボディ内容を再現すればいいよう。</p>
+
+<p><a href="http://d.hatena.ne.jp/satox/20110726/1311665904">いまさら聞けないHTTPマルチパートフォームデータ送信</a><br/>
+(上記内容から引用)</p>
+
+<pre><code>POST test.php HTTP/1.1\r\n
+Host: satoxpochi.com\r\n
+Content-Type: multipart/form-data; boundary=---------------------------102852708831426\r\n
+Content-Length: 「ボディ部のサイズ」\r\n
+\r\n
+-----------------------------102852708831426\r\n
+Content-Disposition: form-data; name="password"\r\n
+\r\n
+ponpoko\r\n
+-----------------------------102852708831426\r\n
+Content-Disposition: form-data; name="level"\r\n
+\r\n
+high\r\n
+-----------------------------102852708831426\r\n
+Content-Disposition: form-data; name="filename"; filename="text.txt"\r\n
+Content-Type: application/octet-stream\r\n
+Content-Transfer-Encoding: binary\r\n
+\r\n
+abcd
+-----------------------------102852708831426--\r\n
+</code></pre>
+
+<p>このように、送りたい情報分だけ区切り線でつないでいけばいい。<br/>
+(１つのパラメータで区切り１つ分！)</p>
+
+<p>また、visualforceのinputでfileを送信するには以下のようにする。</p>
+
+<pre><code>[apexクラス]
+public String FileName { get; set; }
+public Blob FileBody { get; set; }
+
+[visualforceページ]
+&lt;apex:inputFile value="{!FileBody}" filename="{!FileName}"/&gt;
+</code></pre>
+
+<p>これで、<code>FileName</code>にファイル名、<code>FileBody</code>にファイルが入る。</p>
+
+<p>これらを踏まえて、最終的な送信部分のソースは以下。<br/>
+POSTでデータとファイルをコールアウトで送信する。</p>
+
+<p>[Visualforceページ]</p>
+
+<pre><code>メールアドレス1:&lt;apex:input value="{!Email1}" /&gt;&lt;br /&gt;
+メールアドレス2:&lt;apex:input value="{!Email2}" /&gt;&lt;br /&gt;
+&lt;br /&gt;
+添付ファイル : &lt;apex:inputFile value="{!FileBody}" filename="{!FileName}"/&gt;
+</code></pre>
+
+<p>[apexクラス]</p>
+
+<pre><code>HttpRequest request = new HttpRequest();
+request.setEndpoint('https://送信先アドレス.php');
+request.setMethod('POST');
+request.setHeader('Accept-Language', 'ja');
+
+String boundary = String.valueOf(DateTime.now().getTime());
+String body = '';
+body+='------------' + boundary + '\r\n';
+body+='Content-Disposition: form-data; name="to[]"\r\n';
+body+='\r\n';
+body+=Email1 + '\r\n';
+body+='------------' + boundary + '\r\n';
+body+='Content-Disposition: form-data; name="to[]"\r\n';
+body+='\r\n';
+body+=Email2 + '\r\n';
+body+='------------' + boundary + '\r\n';
+body+='Content-Disposition: form-data; name="data"; filename="' + FileName + '"\r\n';
+body+='Content-Transfer-Encoding: base64\r\n';
+String contentType = 'application/octet-stream';
+body+='Content-Type: ' + contentType + '\r\n\r\n';
+body+=EncodingUtil.base64Encode(FileBody);
+body+='\r\n------------' + boundary + '--';
+request.setHeader('Content-Type', 'multipart/form-data; boundary=----------' + boundary);
+request.setHeader('Content-Length',String.valueof(body.length()));
+request.setBody(body);
+
+Http http = new Http();
+HttpResponse response = http.send(request);
+ResResult = response.getBody();
+</code></pre>
+
+<p>送信先のPHPでの受信内容は以下。</p>
+
+<pre><code>($_POST)
+array(1) { 
+    ["to"]=&gt; array(2) { 
+        [0]=&gt; string(14) "mail1@hoge.com" 
+        [1]=&gt; string(14) "mail2@huga.com"
+    }
+}
+
+($_FILES)
+array(1) { 
+    ["data"]=&gt; array(5) { 
+        ["name"]=&gt; string(8) "img.jpg" 
+        ["type"]=&gt; string(24) "application/octet-stream" 
+        ["tmp_name"]=&gt; string(14) "/tmp/phpcEwVr6" 
+        ["error"]=&gt; int(0) 
+        ["size"]=&gt; int(309276) 
+    }
+}
+</code></pre>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[PHP][heroku]Mailgun APIを使って添付ファイルを送る]]></title>
@@ -1419,52 +1614,6 @@ phpPgAdminでは、<code>データ型</code>の横のセレクトボックスで
 
 <p>要は、プライマリキーに設定された値と同じ外部キーを持つデータ、をまとめて削除してくれる、<br/>
 関連データも一緒に消していい？というチェックボックスのよう。たぶん。</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[PostgreSQLでプレースホルダーを使ってSELECT文を発行する方法]]></title>
-    <link href="http://kayakuguri.github.io/blog/2013/12/17/postgresql-select/"/>
-    <updated>2013-12-17T17:25:36+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2013/12/17/postgresql-select</id>
-    <content type="html"><![CDATA[<p>接続の参考：PostgreSQLへ接続](<a href="http://www.phpbook.jp/tutorial/postgresql/index3.html">http://www.phpbook.jp/tutorial/postgresql/index3.html</a>)</p>
-
-<p>プレースホルダーでの発行は以下を参考<br/>
-<a href="http://lets.postgresql.jp/documents/tutorial/with_php/against_sql_injection/placeholder">PHPでのSQLインジェクション対策 &ndash; プレースホルダ編</a><br/>
-<a href="http://php.net/manual/ja/function.pg-execute.php">pg_execute</a></p>
-
-<!-- more -->
-
-
-<p>SELECT文の例</p>
-
-<pre><code>$dbconn = pg_connect("host=".DB_SERVER." dbname=".DB." user=".DB_USER." password=".DB_PW);
-$result = pg_prepare($dbconn, "", 'SELECT * FROM dtb_order WHERE order_id = $1');
-$result = pg_execute($dbconn, "", array($oid));
-</code></pre>
-
-<p>こうすると、$resultには、resource型の値が入ってくる。<br/>
-そこから実際のデータを取得するためには、<code>pg_fetch_array</code>を使用する。</p>
-
-<p>第３引数に<code>PGSQL_NUM</code>を指定すると、数字の配列で、<br/>
-<code>PGSQL_ASSOC</code>を指定すると、連想配列の形式で取得出来る。</p>
-
-<p>そして、全ての行にアクセスするには、<code>pg_num_rows</code>を使用して何行返ってきたかを取得する。<br/>
-その数字をカウントとして使用して、for文で回すことで全件取得する事が出来る。</p>
-
-<pre><code>for ($i = 0 ; $i &lt; pg_num_rows($result) ; $i++){
-    $rows = pg_fetch_array($result, NULL, PGSQL_ASSOC);
-    var_dump($rows);
-}
-</code></pre>
-
-<p>接続の切断は以下。</p>
-
-<pre><code>$close_flag = pg_close($dbconn);
-if($close_flag) echo "切断成功";
-</code></pre>
-
-<p>参考：<a href="http://www.phpbook.jp/tutorial/postgresql/index5.html">データの取得(SELECT)</a></p>
 ]]></content>
   </entry>
   
