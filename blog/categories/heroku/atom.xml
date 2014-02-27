@@ -4,7 +4,7 @@
   <title><![CDATA[Category: heroku | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/heroku/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2014-02-26T19:49:30+09:00</updated>
+  <updated>2014-02-27T16:18:30+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,135 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[apexからPOSTでファイルを送信する 改訂版]]></title>
+    <link href="http://kayakuguri.github.io/blog/2014/02/27/submit-base64/"/>
+    <updated>2014-02-27T13:41:16+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2014/02/27/submit-base64</id>
+    <content type="html"><![CDATA[<p><a href="http://kayakuguri.github.io/blog/2014/02/26/submit-callout-with-multipart/">前回のファイル送信</a>の動作確認版。</p>
+
+<!-- more -->
+
+
+<p>まず、やりたいこととして、<br/>
+saleseforceで作成したページからファイルをherokuで作成したapiに送信して、<br/>
+herokuのapiからそのファイルを添付で送信したかった。</p>
+
+<p>結論としては以下の手順で動作した。</p>
+
+<ol>
+<li>visualforceで<code>apex:inputFile</code>を使用してファイルをアプロード</li>
+<li>apexでファイルを受け取り、そのファイルを<code>base64エンコード</code>。</li>
+<li>base64エンコードした文字列をPOSTのパラメータとして送信</li>
+<li>herokuにアップしているphpでPOSTデータを受け取る</li>
+<li>受け取ったbase64データをデコードして保存(一時的)</li>
+<li>保存されたファイルからQdmailを使用してメールを送信</li>
+</ol>
+
+
+<hr />
+
+<p>1) visualforceで<code>apex:inputFile</code>を使用してファイルをアプロード<br/>
+visualforceページでのinputの書き方</p>
+
+<pre><code>&lt;apex:input value="{!Email}" /&gt;
+&lt;apex:inputFile value="{!FileBody}" filename="{!FileName}"/&gt;
+</code></pre>
+
+<p>2) apexでファイルを受け取り、そのファイルを<code>base64エンコード</code>。<br/>
+3) base64エンコードした文字列をPOSTのパラメータとして送信<br/>
+apex側で受け取る</p>
+
+<pre><code>public String FileName { get; set; }
+public Blob FileBody { get; set; }
+public String Email { get; set; }
+
+public Pagereference submit() {
+    HttpRequest request = new HttpRequest();
+    request.setEndpoint('送信先のphp');
+    request.setMethod('POST');
+    request.setHeader('Accept-Language', 'ja');
+    //パラメータ
+    Map&lt;String, String&gt; params = new Map&lt;String, String&gt;();
+    params.put('to', Email);  //送信先
+    params.put('attachName', FileName); //ファイル名
+    params.put('attach', EncodingUtil.base64Encode(FileBody)); //ファイル内容
+    Set&lt;String&gt; keys = params.keySet();
+    String r = '';
+    for(String key : keys) {
+        //body用にパラメータを整形 to=xx&amp;attach=xx のように
+        String val = params.get(key);
+        r += key + '=';
+        if(val != null) r += val;
+        r += '&amp;';
+    }
+    r = r.removeEnd('&amp;');
+    request.setBody(r);
+
+    //送信
+    Http http = new Http();
+    HttpResponse response = http.send(request);
+    ResResult = response.getBody(); //結果を受け取る
+}
+</code></pre>
+
+<p>4) herokuにアップしているphpでPOSTデータを受け取る<br/>
+5) 受け取ったbase64データをデコードして保存(一時的)<br/>
+6) 保存されたファイルからQdmailを使用してメールを送信</p>
+
+<p><a href="http://kayakuguri.github.io/blog/2014/02/18/php-heroku-sendattachmail/">Qdmailでの送信方法は以前の投稿を参照。</a></p>
+
+<pre><code>require_once('../lib/qdmail.php');
+require_once('../lib/qdsmtp.php');
+
+//送信内容
+$to          = $_POST['to'];
+$subject     = '件名';
+$body        = '本文';
+$fromname    = '送り先名';
+$fromaddress = '送り先アドレス';
+$attachname  = $_POST['attachName'];
+$attach      = $_POST['attach'];
+
+$mail = new Qdmail();
+$mail -&gt; smtp(true);
+$param = array(
+    'host'=&gt; $_ENV['MAILGUN_SMTP_SERVER'],
+    'port'=&gt; $_ENV['MAILGUN_SMTP_PORT'],
+    'from'=&gt; $fromaddress,
+    'protocol'=&gt;'SMTP_AUTH',
+    'user'=&gt; $_ENV['MAILGUN_SMTP_LOGIN'],
+    'pass' =&gt; $_ENV['MAILGUN_SMTP_PASSWORD']
+);
+$mail -&gt;smtpServer($param);
+$mail -&gt;to($to);
+$mail -&gt;subject($subject);
+$mail -&gt;from($fromaddress,$fromname);
+$mail -&gt;text($body);
+
+//添付ファイル
+$bin = base64_decode(str_replace(' ', '+', $_POST['attach'][0])); //注意
+$fp = fopen( "./" . $_POST['attachName'][0], "w" );
+fwrite( $fp, $bin );
+fclose( $fp );
+$attach = array();
+$attach[] = array( "./" . $_POST['attachName'][0] , $_POST['attachName'][0] );
+
+//送信
+echo $mail -&gt;send(); //成功の場合は「1」が返ってくる
+</code></pre>
+
+<p>Base64デコードしてファイルに保存する方法は以下を参考にしました。<br/>
+<a href="http://blog.nipx.jp/archives/4137">Flashからアップロードする方法いろいろ</a><br/>
+ただし、そのままではエラーになることがあるよう。</p>
+
+<blockquote><p>どうやら、POSTでデータを渡すと、Base64の「+」記号が勝手にスペースに変換されてしまうらしい。<br/>
+<a href="http://pontago.hatenablog.com/entry/20091028/1256743421">http://pontago.hatenablog.com/entry/20091028/1256743421</a></p></blockquote>
+
+<p>(ヘッダ分を差し引く、の部分は無視しても問題なかった)</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[PHP][heroku]Mailgun APIを使って添付ファイルを送る]]></title>
@@ -354,73 +483,6 @@ $.ajax({
 <p>参考：<br/>
 <a href="http://ginpen.com/2013/05/07/jquery-ajax-form/">jQueryでフォームをAjax送信する際の基本パターンのチュートリアル。二重送信の防御とか。</a><br/>
 <a href="http://yokano-jp.blogspot.jp/2013/07/jqueryajax.html">jQuery.ajax() でファイルを送る</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[PHPでMailgunを使ってherokuでメール送信する]]></title>
-    <link href="http://kayakuguri.github.io/blog/2014/02/17/send-mail-from-heroku-with-mailgun/"/>
-    <updated>2014-02-17T11:31:07+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2014/02/17/send-mail-from-heroku-with-mailgun</id>
-    <content type="html"><![CDATA[<p>herokuのphp環境でMailgunを使ってメール送信をしてみました。<br/>
-ただし、日本語環境は入れなかったので、英語環境のみ。</p>
-
-<!-- more -->
-
-
-<p>まず、herokuにプラグインをインストールするためには、<br/>
-クレジットカードの登録が必要なので、登録しておく。<br/>
-(無料範囲内でのみでの利用でも必要)</p>
-
-<p><a href="https://addons.heroku.com/#email-sms">Mail/SNSアドオン一覧</a></p>
-
-<p>Mailgunの場合は、無料だと<code>300通/日</code>送れるよう。</p>
-
-<p><a href="https://addons.heroku.com/mailgun">Mailgun</a></p>
-
-<p>で、インストールすると、環境変数にSMTP情報が格納されるので、<br/>
-そちらを利用して、メールを送れるようになる。<br/>
-(<code>sendmail</code>関数は使えない。)</p>
-
-<pre><code>$_ENV['MAILGUN_SMTP_SERVER'] = host
-$_ENV['MAILGUN_SMTP_PORT'] = port
-$_ENV['MAILGUN_SMTP_LOGIN'] = user
-$_ENV['MAILGUN_SMTP_PASSWORD'] = password
-
-$_ENV['MAILGUN_API_KEY'] = key
-</code></pre>
-
-<p>日本語環境だと、<code>Qdmail</code>というものが有名だそう。</p>
-
-<p>参考：<a href="http://qiita.com/tsunet111/items/0ba0e8fc61882c3905c0">php から確実にメール送信（Qdmail使用、SMTP経由）</a></p>
-
-<p>ただし、今回は<code>mbstring</code>環境を入れてないので、エラーが出てしまった。<br/>
-なので、英語の解説ページを参考に、<code>phpmailer</code>を使ってみた。</p>
-
-<pre><code>$mail = new PHPMailer;
-$mail-&gt;isSMTP();
-$mail-&gt;Host = $_ENV['MAILGUN_SMTP_SERVER'];
-$mail-&gt;SMTPAuth = true;
-$mail-&gt;Username = $_ENV['MAILGUN_SMTP_LOGIN'];
-$mail-&gt;Password = $_ENV['MAILGUN_SMTP_PASSWORD'];
-$mail-&gt;Port     = $_ENV['MAILGUN_SMTP_PORT'];
-$mail-&gt;SMTPSecure = 'tls';
-$mail-&gt;From = MAIL_FROM;
-$mail-&gt;FromName = MAIL_FROM_NAME;
-
-$mail-&gt;addAddress("hoge@exsample.jp");
-$mail-&gt;addAddress("huga@exsample.com");
-
-$mail-&gt;Subject = MAIL_SUBJECT;
-$mail-&gt;Body    = MAIL_MSG1 . $body . MAIL_MSG2;
-if(!$mail-&gt;send()){
-    //falseが返ってくる場合はエラー。
-    //送信完了の場合は、1が返ってくる。
-}
-</code></pre>
-
-<p>ただし、もちろんだけど、日本語で送信すると文字化けする。<br/>
-(Gmailの場合はなぜか本文は正しく表示出来た。件名は文字化けする)</p>
 ]]></content>
   </entry>
   
