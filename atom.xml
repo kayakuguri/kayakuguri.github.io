@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2014-02-27T16:18:30+09:00</updated>
+  <updated>2014-03-05T17:54:01+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,174 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[HTTP Live StreamingをFFmpegを作成する]]></title>
+    <link href="http://kayakuguri.github.io/blog/2014/03/05/http-live-streaming/"/>
+    <updated>2014-03-05T17:18:13+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2014/03/05/http-live-streaming</id>
+    <content type="html"><![CDATA[<p>iOSで端末で動画をストリーミング再生させるべく、<br/>
+HTTP Live Streamingを作成してみた。</p>
+
+<!-- more -->
+
+
+<blockquote><p>HTTP Live Streaming(HLS)は動画ファイルを約10秒程度の短時間に分割しMPEG-TSコンテナに入れたものをひたすら生成しつつm3u8形式のリストファイルにそのファイルを逐次追加していくことで、HTTPのみで擬似的にLive Streamingを実現する方法です。<br/>
+Appleが提唱したらしく、iOSが最も安定して再生できるのですが一応Androidでも対応します。
+(手元のNexus7で試した所、Androidだとシークが出来なくなる)
+<a href="http://qiita.com/joker1007/items/def9d58ddb00fafc936d">http://qiita.com/joker1007/items/def9d58ddb00fafc936d</a></p></blockquote>
+
+<p>作成するには、<a href="http://www.ffmpeg.org/">FFmpeg</a>を使うのが楽、とのことで、FFmpegをインストール。<br/>
+新しめのFFmpegには分割するためのsegmenterも入っているようなので、FFmpegを入れるだけでOK。</p>
+
+<p>インストール環境は、<code>Mac OS X 10.8.5</code></p>
+
+<p>以下のページを参考にしてインストールした。</p>
+
+<p><a href="http://kujirahand.com/blog/index.php?Mac+OS+X%E3%81%A7FFmpeg%E3%81%AE%E3%82%A4%E3%83%B3%E3%82%B9%E3%83%88%E3%83%BC%E3%83%AB%E3%81%A8WebM%E5%8B%95%E7%94%BB%E3%81%AE%E4%BD%9C%E3%82%8A%E6%96%B9">Mac OS XでFFmpegのインストールとWebM動画の作り方</a></p>
+
+<p>インストールには、<a href="http://brew.sh/">Homebrew</a>を使用。<br/>
+必要なプラグインをbrewを使用して入れていく。<br/>
+(以下は1行)</p>
+
+<pre><code>brew install automake celt faac fdk-aac git lame libass libtool
+ libvorbis libvpx libvo-aacenc opencore-amr openjpeg opus sdl
+ schroedinger shtool speex texi2html theora wget x264 xvid yasm
+</code></pre>
+
+<p>Xcodeが最新版でないとWarningが出るので、アップデートしておく。<br/>
+(すでにインストール済みのものがある場合もwarningが出る。)</p>
+
+<p>で、FFmpegをオプションつきでインストールする。<br/>
+(以下も1行)</p>
+
+<pre><code>brew install ffmpeg 
+ --with-fdk-aac --with-libvo-aacenc 
+ --with-libvorbis --with-libvpx --with-openjpeg 
+ --with-theora --with-opencore-amr
+</code></pre>
+
+<p>これで準備は完了。</p>
+
+<hr />
+
+<p>以下を参考に変換、分割作業。</p>
+
+<p><a href="http://qiita.com/joker1007/items/def9d58ddb00fafc936d">HTML5のvideoタグで利用するmp4の動画を作る時のTips</a><br/>
+(以下は1行)</p>
+
+<pre><code>ffmpeg -i test.mp4 -vcodec libx264
+ -b:v 768k -s 640x360 -acodec libfaac
+ -b:a 96k -ar 44100 -flags +loop-global_heade 
+ -map 0 -bsf h264_mp4toannexb -f segment 
+ -segment_format mpegts -segment_time 10 
+ -segment_list index.m3u8 test%03d.ts
+</code></pre>
+
+<p>オプションの説明</p>
+
+<table>
+<thead>
+<tr>
+<th>コマンド </th>
+<th> 値 </th>
+<th> 説明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>-i </td>
+<td> test.mp4 </td>
+<td> 入力ファイル</td>
+</tr>
+<tr>
+<td>-vcodec </td>
+<td> libx264 </td>
+<td> ビデオコーデック。h264</td>
+</tr>
+<tr>
+<td>-b:v </td>
+<td> 768k </td>
+<td> ビデオビットレート</td>
+</tr>
+<tr>
+<td>-acodec </td>
+<td> libfaac </td>
+<td> オーディオ・コーデック。AAC</td>
+</tr>
+<tr>
+<td>-b:a </td>
+<td> 96k </td>
+<td> オーディオビットレート</td>
+</tr>
+<tr>
+<td>-ar </td>
+<td> 44100 </td>
+<td> オーディオサンプリングレート</td>
+</tr>
+<tr>
+<td>-flags </td>
+<td> +loop-global_header </td>
+<td> </td>
+</tr>
+<tr>
+<td>-map </td>
+<td> 0 </td>
+<td> </td>
+</tr>
+<tr>
+<td>-bsf </td>
+<td> h264_mp4toannexb ※1 </td>
+<td> ビデオフィルター</td>
+</tr>
+<tr>
+<td>-f </td>
+<td> segment </td>
+<td> コマンドの指定</td>
+</tr>
+<tr>
+<td>-segment_format </td>
+<td> mpegts </td>
+<td> 分割フォーマット</td>
+</tr>
+<tr>
+<td>-segment_time </td>
+<td> 10 </td>
+<td> 分割秒数</td>
+</tr>
+<tr>
+<td>-segment_list </td>
+<td> index.m3u8 </td>
+<td> リストファイル</td>
+</tr>
+</tbody>
+</table>
+
+
+<p>最後に出力ファイル名を記述。<code>%03d</code>は３桁の連番。<br/>
+-flagsと-mapは詳細不明。</p>
+
+<p>※1 <code>mpegts</code>形式にする場合、必要なフィルターのよう。</p>
+
+<blockquote><p>h264_mp4toannexb :<br/>
+Convert an H.264 bitstream from length prefixed mode to start code prefixed mode (as defined in the Annex B of the ITU-T H.264 specification).<br/>
+This is required by some streaming formats, typically the MPEG-2 transport stream format (&ldquo;mpegts&rdquo;).<br/>
+<a href="http://www.ffmpeg.org/ffmpeg-bitstream-filters.html">http://www.ffmpeg.org/ffmpeg-bitstream-filters.html</a></p></blockquote>
+
+<p>HTMLにはこの場合、inde.m3u8を読みこめば表示出来る。</p>
+
+<pre><code>&lt;video controls poster="hoge.jpg" preload="none" onclick="this.play();" width="640" height="320" id="stageVideo"&gt;   &lt;source src="index.m3u8"&gt;   &lt;img src="hoge.jpg" alt="代替" width="640" height="320" /&gt;    &lt;/video&gt;---
+</code></pre>
+
+<p>参考サイト：<br/>
+<a href="http://do-gugan.com/~furuta/archives/2013/03/http_live_strea.html">HTTP Live Streaming覚え書き</a><br/>
+<a href="https://developer.apple.com/jp/devcenter/ios/library/documentation/StreamingMediaGuide.pdf">HTTP Live Streamingの概要(PDF)</a><br/>
+<a href="http://blog.fumiz.me/2008/10/19/ffmpeg%E3%81%A7%E5%8B%95%E7%94%BB%E3%81%8B%E3%82%89%E7%94%BB%E5%83%8F%E3%82%92%E5%88%87%E3%82%8A%E5%87%BA%E3%81%99/">ffmpegで動画から画像を切り出す</a><br/>
+<a href="http://yosilove.blogspot.jp/2011/04/mac-ffmpeg.html">[Mac] ffmpegをコンパイル</a><br/>
+<a href="http://venture-blog.blogspot.jp/2012/05/http-live-streaming.html">HTTP Live Streamingを使ったサーバ構築</a><br/>
+<a href="http://qiita.com/joker1007/items/def9d58ddb00fafc936d">HTML5のvideoタグで利用するmp4の動画を作る時のTips</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[apexからPOSTでファイルを送信する 改訂版]]></title>
@@ -1588,58 +1756,6 @@ private function netStatusHandler(e:NetStatusEvent):void {
   this.addChild(video);
 }
 </code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[INNER JOINとLEFT JOIN]]></title>
-    <link href="http://kayakuguri.github.io/blog/2013/12/20/inner-left-join/"/>
-    <updated>2013-12-20T18:19:51+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2013/12/20/inner-left-join</id>
-    <content type="html"><![CDATA[<p><a href="http://okwave.jp/qa/q746515.html">http://okwave.jp/qa/q746515.html</a></p>
-
-<blockquote><p>対応させるべきはinner joinとouter joinなんですけど、<br/>
-left join は left outer join と同等です。</p></blockquote>
-
-<!-- more -->
-
-
-<p>実際に実行して確認していたけれど、<br/>
-<code>INNER JOIN</code>の場合、比較したテーブルそれぞれに値がある場合のみ、<br/>
-結果を返してくれる。条件としても使えそう。<br/>
-(そのテーブル同士で同じIDを持つものだけを抽出、的な)</p>
-
-<p>で、<code>OUTER JOIN</code>は、比較した際に値がなければ、<code>NULL</code>で返す。<br/>
-要するに、値がなくても結果を返してくれる。</p>
-
-<p>値が必須かどうか、みたいな感じぽい。</p>
-
-<blockquote><p>innter joinは結合する相手のテーブルに対応するデータが<br/>
-ある場合のみ結果を返しますが、outer joinは相手の<br/>
-テーブルに対応するデータが無い場合、そのカラムを<br/>
-NULLとして返します。</p></blockquote>
-
-<p><code>OUTER JOIN</code>には、</p>
-
-<pre><code>*  LEFT OUTER JOIN
-*  RIGHT OUTER JOIN
-*  FULL OUTER JOIN
-</code></pre>
-
-<p>の３つがあるよう。</p>
-
-<blockquote><p>LEFT JOINではFROMの後に書かれたテーブルのデータだけを取得します。RIGHT JOINではJOINの後に書かれたテーブルのデータだけを取得します。<br/>
-<a href="http://www.dbonline.jp/mysql/select/index15.html">http://www.dbonline.jp/mysql/select/index15.html</a></p></blockquote>
-
-<p>実際に試してみると、<br/>
-<code>LEFT JOIN</code>の場合は、<code>FROM</code>の後に書かれたテーブルを基準に返す。<br/>
-<code>RIGHT JOIN</code>の場合は、<code>JOIN</code>の後に書かれたテーブルを基準に返す。</p>
-
-<p>あと、<code>USING</code>を使えば少し短く出来る。</p>
-
-<blockquote><p>結合するカラムの名前が同じ場合にはONの代わりにUSINGを使用して次のように記述することもできます。<br/>
-「USING (col_name)」というのは「ON tbl_name1.col_name = tbl_name2.col_name」と同じことです。<br/>
-<a href="http://www.dbonline.jp/mysql/select/index15.html">http://www.dbonline.jp/mysql/select/index15.html</a></p></blockquote>
 ]]></content>
   </entry>
   

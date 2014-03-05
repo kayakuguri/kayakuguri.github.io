@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
 
-  <title><![CDATA[Category: html | KayaMemo]]></title>
-  <link href="http://kayakuguri.github.io/blog/categories/html/atom.xml" rel="self"/>
+  <title><![CDATA[Category: mobile | KayaMemo]]></title>
+  <link href="http://kayakuguri.github.io/blog/categories/mobile/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
   <updated>2014-03-05T17:54:01+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
@@ -178,42 +178,6 @@ This is required by some streaming formats, typically the MPEG-2 transport strea
 <a href="http://yosilove.blogspot.jp/2011/04/mac-ffmpeg.html">[Mac] ffmpegをコンパイル</a><br/>
 <a href="http://venture-blog.blogspot.jp/2012/05/http-live-streaming.html">HTTP Live Streamingを使ったサーバ構築</a><br/>
 <a href="http://qiita.com/joker1007/items/def9d58ddb00fafc936d">HTML5のvideoタグで利用するmp4の動画を作る時のTips</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[JSPについて]]></title>
-    <link href="http://kayakuguri.github.io/blog/2014/01/08/jsp/"/>
-    <updated>2014-01-08T14:34:13+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2014/01/08/jsp</id>
-    <content type="html"><![CDATA[<p>JSP、というファイル形式を初めて知った。<br/>
-<strong>Java サーバー ページ</strong>の、略、らしい。</p>
-
-<!-- more -->
-
-
-<p>SSIのようにインクルード目的で使用する、のかと思ったけど、<br/>
-どちらかというと、CGIの代わり、のよう。</p>
-
-<p>参考：<a href="http://homepage2.nifty.com/takaaki024/tips/programs/java/jsp.html">http://homepage2.nifty.com/takaaki024/tips/programs/java/jsp.html</a></p>
-
-<blockquote><p>CGIとJSPの違い<br/>
-　・CGIはアクセスがあるたびにサーバが新しいプロセスを起動する<br/>
-　　オーバーヘッドとリソースの消費によるパフォーマンスの低下が避けられない<br/>
-　・JSPはJSPコンテナと呼ばれるJSP実行プログラムが一度起動されていれば、<br/>
-　　その内部で実行されるので、リソースの消費が少なく効率的だ</p></blockquote>
-
-<p>インクルードの方法は２つ。</p>
-
-<pre><code>&lt;%@ include file="date_disp3.jsp" %&gt;
-&lt;jsp:include page="date_disp3.jsp" flush="true" /&gt;
-</code></pre>
-
-<p>ただし、実行にはサーバーの設定が必要?<br/>
-この辺？ <a href="http://www.atmarkit.co.jp/ait/articles/0105/30/news002.html">http://www.atmarkit.co.jp/ait/articles/0105/30/news002.html</a></p>
-
-<p>参考：<br/>
-<a href="http://mail2.nara-edu.ac.jp/~asait/java/j2ee/part3.htm">http://mail2.nara-edu.ac.jp/~asait/java/j2ee/part3.htm</a></p>
 ]]></content>
   </entry>
   
