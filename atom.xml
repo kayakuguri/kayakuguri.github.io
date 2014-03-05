@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2014-03-05T17:55:45+09:00</updated>
+  <updated>2014-03-05T17:58:29+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -166,10 +166,15 @@ Convert an H.264 bitstream from length prefixed mode to start code prefixed mode
 This is required by some streaming formats, typically the MPEG-2 transport stream format (&ldquo;mpegts&rdquo;).<br/>
 <a href="http://www.ffmpeg.org/ffmpeg-bitstream-filters.html">http://www.ffmpeg.org/ffmpeg-bitstream-filters.html</a></p></blockquote>
 
-<p>HTMLにはこの場合、inde.m3u8を読みこめば表示出来る。</p>
+<p>HTMLにはこの場合、index.m3u8を読みこめば表示出来る。</p>
 
-<pre><code>&lt;video controls poster="hoge.jpg" preload="none" onclick="this.play();" width="640" height="320" id="stageVideo"&gt;   &lt;source src="index.m3u8"&gt;   &lt;img src="hoge.jpg" alt="代替" width="640" height="320" /&gt;    &lt;/video&gt;---
+<pre><code>&lt;video controls poster="hoge.jpg" preload="none" onclick="this.play();" width="640" height="320" id="stageVideo"&gt;
+    &lt;source src="index.m3u8"&gt;
+    &lt;img src="hoge.jpg" alt="代替" width="640" height="320" /&gt;
+&lt;/video&gt;
 </code></pre>
+
+<hr />
 
 <p>参考サイト：<br/>
 <a href="http://do-gugan.com/~furuta/archives/2013/03/http_live_strea.html">HTTP Live Streaming覚え書き</a><br/>
