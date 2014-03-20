@@ -4,7 +4,7 @@
   <title><![CDATA[Category: salesforce | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/salesforce/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2014-03-05T17:58:29+09:00</updated>
+  <updated>2014-03-20T11:31:23+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,65 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Visual Forceでのブラウザバック対策]]></title>
+    <link href="http://kayakuguri.github.io/blog/2014/03/20/sf-browser-back/"/>
+    <updated>2014-03-20T10:50:36+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2014/03/20/sf-browser-back</id>
+    <content type="html"><![CDATA[<p>salseforceでフォームを作成している際、<br/>
+完了画面を表示させた後にブラウザで戻るボタンを押すと、<br/>
+フォームや確認画面に戻ってしまい、更に入力した内容が表示されてしまう。</p>
+
+<p>このまま何も対策を取っていないと、二重送信されてしまうおそれがあるので、<br/>
+対策を考えてみた。</p>
+
+<!-- more -->
+
+
+<p>基本的な考え方は以下の通り。</p>
+
+<p><a href="http://piyopiyocs.blog115.fc2.com/blog-entry-6.html">セッションとhistory.back()とブラウザの戻るボタン。</a></p>
+
+<p>まずは、上記と同じように、一度送信が完了した段階で、<br/>
+それとわかるフラグを立てておきます。<br/>
+再度入力画面を表示させようとすると、このフラグが立った状態だとエラー画面へ遷移するように設定しておきます。</p>
+
+<p>しかし、salseforceでデフォルトの設定のまま(?)作業すると、<br/>
+戻るボタンを押した際には、キャッシュされたページが表示されます。<br/>
+(入力された値も含めて)</p>
+
+<p>なので、キャッシュを無効にして、ページが無条件で表示されないようにします。<br/>
+入力ページの冒頭に以下の設定を入れます。</p>
+
+<pre><code>&lt;apex:page . . .  cache="false" &gt;
+</code></pre>
+
+<p>こうすると、完了画面に遷移後、この入力ページへ戻ってくると、<br/>
+「フォーム内容を再送信して下さい。」のような画面が表示され、リロードせざる得なくなります。<br/>
+そうすることで、フラグを判定してエラーページへ遷移させることが出来ました。</p>
+
+<hr />
+
+<p>この事を調査している時に知ったのですが、<br/>
+(基本的な事のようですが、)<br/>
+<code>setRedirect</code>を利用すると、値を引き継ぐか、URLを変更するか、が選べるようです。</p>
+
+<blockquote><p>画面遷移する際にPageReferenceのsetRedirect(false)を使用することで変数の値を引き継ぐことができます。<br/>
+&ndash; <a href="http://tyoshikawa1106.hatenablog.com/entry/2013/05/03/234647">SFDC：2つのVFページと同一コントローラ</a></p></blockquote>
+
+<p>デフォルトではfalseに設定されているようです。<br/>
+なので、確認画面への遷移などでは、URLは変わらず、同一コントローラー内の値も引き継がれます。<br/>
+しかし、完了画面への遷移の際は値は必要なく、URLも変わって欲しいので、上記をtrueで遷移させた方が良さそうです。</p>
+
+<pre><code>//apexクラスの関数内で
+return Page.FormComplete.setRedirect(true);
+</code></pre>
+
+<p>しかしこれをしてしまうと、最初に書いた判定用のフラグの値も引き継がれないので、<br/>
+逆に値がなければエラー、という流れで作ったほうがいいかもしれません。</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[apexからPOSTでファイルを送信する 改訂版]]></title>
@@ -425,60 +484,6 @@ function check(){
 <p>注意点としては、エラーページに遷移しなくていい場合には、<br/>
 自身のページを指定してしまうと、無限ループに入って、内部サーバーエラー、となってしまう。<br/>
 なので、遷移しなくていい場合は、<code>null</code>を返しておくと大丈夫なよう。</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Force.comのREST APIを使ってデータをインサートする]]></title>
-    <link href="http://kayakuguri.github.io/blog/2013/12/05/sf-rest-api/"/>
-    <updated>2013-12-05T13:13:07+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2013/12/05/sf-rest-api</id>
-    <content type="html"><![CDATA[<p>参考ページ：<br/>
-<a href="http://www.nkjmkzk.net/?p=2328">新しくなったForce.com OAuth Toolkit for phpの使い方</a><br/>
-<a href="https://help.salesforce.com/apex/HTViewHelpDoc?id=remoteaccess_oauth_web_server_flow.htm&amp;language=ja">OAuth 2.0 Web サーバ認証フロー</a></p>
-
-<p>接続するためには、facebookなどと同じように、sf側でアプリを作成しなければならない。<br/>
-そのアプリが、アクセストークンを発行する形。<br/>
-そのアプリは、以前までは、<code>リモートアクセス</code>と呼ばれるものだったけど、仕様変更で、<br/>
-<code>接続アプリケーション</code>に、変わったよう。</p>
-
-<!-- more -->
-
-
-<p>リダイレクトのURLはhttpsでないとダメ。</p>
-
-<p>不特定多数からの接続を受け付ける場合は、<br/>
-<code>$oauth-&gt;auth_with_code();</code>ではなくて、<code>$oauth-&gt;auth_with_password(USERNAME, PASSWORD);</code>を使わないといけない。</p>
-
-<p>さらに、不特定の外部からアクセスする場合にはパスワードにセキュリティトークンをつけないといけない。<br/>
-<a href="http://vaindespair.blogspot.jp/search?q=rest">Force.com　：　REST API 開発　ユーザ名パスワード OAuth 認証</a></p>
-
-<ul>
-<li> 不特定多数からのアクセスを受け付ける場合(たいていこっち)は、パスワード＋セキュリティトークンで認証が必要</li>
-<li> 特定のIPからの接続だけ、の場合は、IPを指定することでセキュリティトークンなしで認証が出来る。</li>
-</ul>
-
-
-<h4>インサートのサンプル</h4>
-
-<p><a href="http://developer.force.com/cookbook/recipe/interact-with-the-forcecom-rest-api-from-php">Interact with the Force.com REST API from PHP</a></p>
-
-<p>リードにインサートしようとしたところ、バージョンが20では無理だった。<br/>
-バージョンを24にしたらいけた。</p>
-
-<pre><code>$instance_url/services/data/v24.0/sobjects/Lead/
-</code></pre>
-
-<p>チェックボック型のデータは、boolean型。なので、true/falseで入れる。<br/>
-日付型は、yyyy-mm-dd、とハイフンを入れる。<br/>
-<a href="http://d.hatena.ne.jp/mizolog/20110620/1308552542">セールスフォースのデータローダで日付型を使う場合の注意</a></p>
-
-<p>Leadでは<code>Company</code>は必須項目。</p>
-
-<p>複数選択のチェックボックスを送信する場合、配列、にするのではなく、<code>;</code>区切りの文字列にして渡す。</p>
-
-<pre><code>{"where_you_use__c":"work;other;home"}
-</code></pre>
 ]]></content>
   </entry>
   

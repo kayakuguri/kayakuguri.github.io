@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2014-03-05T17:58:29+09:00</updated>
+  <updated>2014-03-20T11:31:23+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,65 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Visual Forceでのブラウザバック対策]]></title>
+    <link href="http://kayakuguri.github.io/blog/2014/03/20/sf-browser-back/"/>
+    <updated>2014-03-20T10:50:36+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2014/03/20/sf-browser-back</id>
+    <content type="html"><![CDATA[<p>salseforceでフォームを作成している際、<br/>
+完了画面を表示させた後にブラウザで戻るボタンを押すと、<br/>
+フォームや確認画面に戻ってしまい、更に入力した内容が表示されてしまう。</p>
+
+<p>このまま何も対策を取っていないと、二重送信されてしまうおそれがあるので、<br/>
+対策を考えてみた。</p>
+
+<!-- more -->
+
+
+<p>基本的な考え方は以下の通り。</p>
+
+<p><a href="http://piyopiyocs.blog115.fc2.com/blog-entry-6.html">セッションとhistory.back()とブラウザの戻るボタン。</a></p>
+
+<p>まずは、上記と同じように、一度送信が完了した段階で、<br/>
+それとわかるフラグを立てておきます。<br/>
+再度入力画面を表示させようとすると、このフラグが立った状態だとエラー画面へ遷移するように設定しておきます。</p>
+
+<p>しかし、salseforceでデフォルトの設定のまま(?)作業すると、<br/>
+戻るボタンを押した際には、キャッシュされたページが表示されます。<br/>
+(入力された値も含めて)</p>
+
+<p>なので、キャッシュを無効にして、ページが無条件で表示されないようにします。<br/>
+入力ページの冒頭に以下の設定を入れます。</p>
+
+<pre><code>&lt;apex:page . . .  cache="false" &gt;
+</code></pre>
+
+<p>こうすると、完了画面に遷移後、この入力ページへ戻ってくると、<br/>
+「フォーム内容を再送信して下さい。」のような画面が表示され、リロードせざる得なくなります。<br/>
+そうすることで、フラグを判定してエラーページへ遷移させることが出来ました。</p>
+
+<hr />
+
+<p>この事を調査している時に知ったのですが、<br/>
+(基本的な事のようですが、)<br/>
+<code>setRedirect</code>を利用すると、値を引き継ぐか、URLを変更するか、が選べるようです。</p>
+
+<blockquote><p>画面遷移する際にPageReferenceのsetRedirect(false)を使用することで変数の値を引き継ぐことができます。<br/>
+&ndash; <a href="http://tyoshikawa1106.hatenablog.com/entry/2013/05/03/234647">SFDC：2つのVFページと同一コントローラ</a></p></blockquote>
+
+<p>デフォルトではfalseに設定されているようです。<br/>
+なので、確認画面への遷移などでは、URLは変わらず、同一コントローラー内の値も引き継がれます。<br/>
+しかし、完了画面への遷移の際は値は必要なく、URLも変わって欲しいので、上記をtrueで遷移させた方が良さそうです。</p>
+
+<pre><code>//apexクラスの関数内で
+return Page.FormComplete.setRedirect(true);
+</code></pre>
+
+<p>しかしこれをしてしまうと、最初に書いた判定用のフラグの値も引き継がれないので、<br/>
+逆に値がなければエラー、という流れで作ったほうがいいかもしれません。</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[HTTP Live StreamingをFFmpegで作成する]]></title>
@@ -1684,83 +1743,6 @@ PF4=off
 
 <p>参考：<br/>
 <a href="http://mail2.nara-edu.ac.jp/~asait/java/j2ee/part3.htm">http://mail2.nara-edu.ac.jp/~asait/java/j2ee/part3.htm</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[AS3にて全画面で動画を再生させる際の注意点]]></title>
-    <link href="http://kayakuguri.github.io/blog/2013/12/27/as3-fullscreen-video/"/>
-    <updated>2013-12-27T17:06:04+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2013/12/27/as3-fullscreen-video</id>
-    <content type="html"><![CDATA[<p>Flashでフルスクリーンで動画を表示したい場合、<br/>
-動画の再生に、<code>FLVPlayback</code>を使っているか<code>Video</code>を使っているか、によって挙動が変わってくるようです。</p>
-
-<h3>■まず、<code>FLVPlayback</code>を使っている場合、</h3>
-
-<!-- more -->
-
-
-<p>ステージに表示している動画は問答無用で画面にフィットしたフルスクリーンで表示されます。<br/>
-一応、<code>stage</code>のプロパティである、<code>stageFocusRect</code>を使うことで表示する位置を調整できたりしますが、<br/>
-動画のサイズは強制的にモニタのサイズになってしまうようなので、まず使い物にならないです。</p>
-
-<p>で、画面いっぱいに動画が表示されてしまうと、その他のコンテンツは動画の下に隠れてしまいます。<br/>
-なので、自前で再生バーなどをつけていても見えなくなってしまいます。</p>
-
-<p>というわけで、この場合は標準のスキンを使用する必要があります。<br/>
-<code>FLVPlayback</code>のプロパティで<code>skin</code>があるので、それを使って、</p>
-
-<pre><code>video.skin = "MinimaFlatCustomColorPlayBackSeekCounterVolMuteFull.swf";
-</code></pre>
-
-<p>などと指定します。<br/>
-すると、フルスクリーンになっても、その動画の下にコントローラーがくっつく形となります。</p>
-
-<p>この拡大は、<code>stage</code>の<code>scaleMode</code>プロパティは関係なく、<br/>
-また、<code>FLVPlayback</code>の<code>scaleMode</code>プロパティも関係ありません。<br/>
-(<code>FLVPlayback</code>の<code>scaleMode</code>プロパティは、動画枠内で実際の動画を拡大縮小するか、を決めるもの）</p>
-
-<h3>■次に、<code>Video</code>の場合。</h3>
-
-<p>こちらの場合は、動画部分はその他の部分と同じように拡大縮小されます。<br/>
-拡大するかどうかは、<code>stage</code>の<code>scaleMode</code>のプロパティで指定した仕様に準じます。</p>
-
-<p>この場合、コントローラーは標準のものは使用できないので、自前で用意する必要があります。</p>
-
-<h3>■まとめ</h3>
-
-<p>単純に動画だけを大きくしたいのであれば、<code>FLVPlayback</code>を使ったほうが楽だと思われます。<br/>
-ですが、コントローラーをカスタマイズしたい、など、自由度が高いものは、<code>Video</code>になります。</p>
-
-<p>今回使用した検証コードは以下です。</p>
-
-<p><code>FLVPlayback</code></p>
-
-<pre><code>var video:FLVPlayback = new FLVPlayback();
-video.skin = "MinimaFlatCustomColorPlayBackSeekCounterVolMuteFull.swf";
-video.width = 480;
-video.height = 270;
-this.addChild(video);
-</code></pre>
-
-<p><code>Video</code></p>
-
-<pre><code>private var _connect :NetConnection;
-private function setVideo():void{
-  _connect = new NetConnection();
-  _connect.addEventListener(NetStatusEvent.NET_STATUS, netStatusHandler);
-  _connect.connect(null);
-}
-private function netStatusHandler(e:NetStatusEvent):void {
-  var stream:NetStream = new NetStream(_connect);
-  var video:Video = new Video();
-  video.width = 480;
-  video.height = 270;
-  video.attachNetStream(stream);
-  stream.play("sample.f4v");
-  this.addChild(video);
-}
-</code></pre>
 ]]></content>
   </entry>
   
