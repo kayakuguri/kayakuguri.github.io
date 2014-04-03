@@ -4,7 +4,7 @@
   <title><![CDATA[Category: editor | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/editor/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2014-03-26T10:41:16+09:00</updated>
+  <updated>2014-04-03T18:16:45+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,55 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Sublimetext3をWindows7で日本語化する]]></title>
+    <link href="http://kayakuguri.github.io/blog/2014/04/03/sublimetext3-japanese/"/>
+    <updated>2014-04-03T17:24:05+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2014/04/03/sublimetext3-japanese</id>
+    <content type="html"><![CDATA[<p>諸事情があってwindows7にて作業しなくちゃならなくなったので、<br/>
+sublimetext3をインストール、日本語した。<br/>
+けど、設定ファイルの場所がわからなったので、そのメモ。</p>
+
+<!-- more -->
+
+
+<p>基本はここの通り。<br/>
+<a href="http://luna-plate.com/archives/4637">http://luna-plate.com/archives/4637</a></p>
+
+<p>まずは、<a href="http://www.sublimetext.com/3">公式サイト</a>からインストール。<br/>
+今回は64bitのwindows7なので、<br/>
+<code>Windows 64 bit</code>を使用した。</p>
+
+<p>で、手順通り、<a href="https://sublime.wbond.net/installation">package controlをインストール</a>。<br/>
+その後、日本語化パッチをインストールして、手順にしたがってファイルを移動、リネーム。</p>
+
+<p>この時の手順に表示されていた、</p>
+
+<blockquote><ol>
+<li>C:\Users\ユーザー名\AppData\Roaming\Sublime Text 3\Packages\Japanizeにインストールされている*.jpファイルを、</li>
+</ol>
+</blockquote>
+
+<p>このディレクトリがどこにあるのかわからなかった。<br/>
+結論を言うと、フォルダオプションで、隠しファイルなどを表示指定なかったことがそもそもの原因だった。</p>
+
+<p><a href="http://detail.chiebukuro.yahoo.co.jp/qa/question_detail/q1361716208">AppDataの場所が見つけられません. windows7でコントロールパネル→デスクトップの…</a></p>
+
+<ol>
+<li>フォルダを開いた状態で、左上の「整理」メニューから、「フォルダーと検索のオプション」を開く。</li>
+<li>「表示」タブの、「ファイルとフォルダーの表示」にある、「隠しファイル、隠しフォルダー、および隠しドライブを表示する」を選択して適用。</li>
+<li>で、知恵袋にある通り、OS(C:) > ユーザー > (ユーザー名）> に行けばある。</li>
+</ol>
+
+
+<p>無事、手順どおりファイルを移動、リネームしたら、全メニューの日本語化が完了。</p>
+
+<p>最後にShift-JISファイルを文字化けさせないように、package controlで<code>ConvertToUTF8</code>をインストールしておく。</p>
+
+<p>(とはいえ、これでも日本語を使用すると高確率で文字化け状態で保存されてしまうけれど。。(sublimetextでは正しく表示できる))</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[phpstormで、ローカルファイルの差分]]></title>

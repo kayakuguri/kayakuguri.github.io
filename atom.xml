@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2014-03-26T10:41:16+09:00</updated>
+  <updated>2014-04-03T18:16:45+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,264 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[バッチファイルでのFTPアップロード]]></title>
+    <link href="http://kayakuguri.github.io/blog/2014/04/03/ftp-upload-bat/"/>
+    <updated>2014-04-03T17:41:46+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2014/04/03/ftp-upload-bat</id>
+    <content type="html"><![CDATA[<p>バッチファイルでFTPに接続して何かをする場合、<br/>
+バッチファイルとは別に、接続先や作業内容などを記述したコマンドファイルが必要になる。<br/>
+それを、バッチファイルから呼び出す形。</p>
+
+<!-- more -->
+
+
+<p>とはいえ、このコマンドファイルも実行するバッチファイル内で作成してしまい、<br/>
+それを保存、実行、削除、してしまえば、ファイルが一つで動作できるようになる。</p>
+
+<ol>
+<li>コマンドファイルを、tmpファイルとしてまず作成し、</li>
+<li>それをバッチで実行し、</li>
+<li>tmpファイルを削除</li>
+</ol>
+
+
+<p>コマンドファイルは中身がテキストであればなんでも大丈夫なよう。</p>
+
+<p>実行するコマンドファイルは一つだけれど、<br/>
+便宜上、３つのファイルを作成し、それらを合体させて一つのファイルにするフローにした。</p>
+
+<p>作成されるファイル</p>
+
+<ol>
+<li>ftp_login.tmp</li>
+<li>ftp_up.tmp</li>
+<li>ftp_loguot.tmp</li>
+<li>ftp_bat.tmp</li>
+</ol>
+
+
+<p>1) ftpのログイン情報</p>
+
+<pre><code>open [サーバー名]
+[ユーザー名]
+[パスワード]
+bin
+prompt
+</code></pre>
+
+<p><code>bin</code>以降に処理を書く。<br/>
+<code>prompt</code>、は複数のファイルをアップロードやダウンロードする際に、確認を求められるのでそれを回避するために入れている。</p>
+
+<p>2) アップロード情報</p>
+
+<pre><code>cd /home/hoge
+mput *.html
+</code></pre>
+
+<p>アップするディレクトに移動して、アップロード。<br/>
+<code>put</code>がアップロード、で、<code>m</code>をつけると複数ファイルの処理になる。<br/>
+(<code>m</code>をつけた場合のみ確認が出るので、それを出さないために<code>prompt</code>を入れている)</p>
+
+<p>3) ログアウト情報</p>
+
+<pre><code>bye
+close
+</code></pre>
+
+<p><code>bye</code> : FTP終了<br/>
+<code>close</code> : 接続を切断</p>
+
+<p>4) 1〜3の内容をまとめて一つにする。</p>
+
+<p>実行方法</p>
+
+<pre><code>ftp -s:ftp_bat.tmp
+</code></pre>
+
+<p>ログを残す場合は以下。</p>
+
+<pre><code>ftp -s:ftp_bat.tmp&gt;&gt;upload.log
+</code></pre>
+
+<hr />
+
+<p>今回調べた(全然知らなかったので)コマンドは以下。</p>
+
+<table>
+<thead>
+<tr>
+<th>コマンド </th>
+<th> 説明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>@echo off </td>
+<td> 以降の実行するコマンドを画面に表示させないようにする</td>
+</tr>
+<tr>
+<td>set </td>
+<td> 変数を定義</td>
+</tr>
+<tr>
+<td>rem </td>
+<td> コメント</td>
+</tr>
+<tr>
+<td>% </td>
+<td> 変数を参照 <code>%file%</code>、<code>%TEMP%</code>など</td>
+</tr>
+<tr>
+<td>%cd% </td>
+<td> 現在のディレクトリ</td>
+</tr>
+<tr>
+<td>:[ラベル] </td>
+<td> ラベルを設定</td>
+</tr>
+<tr>
+<td>goto [ラベル] </td>
+<td> 指定したラベルへ移動</td>
+</tr>
+<tr>
+<td>> </td>
+<td> 左側に書いたものを右側のファイルへ書き込む(新規 もしくは 上書き)</td>
+</tr>
+<tr>
+<td>>> </td>
+<td> 左側に書いたものを右側のファイルへ追記</td>
+</tr>
+<tr>
+<td>type </td>
+<td> テキストファイルの中身をそのまま画面に出力</td>
+</tr>
+<tr>
+<td>cscript </td>
+<td> 指定したスクリプトの実行</td>
+</tr>
+</tbody>
+</table>
+
+
+<p>ファイルへの書き込み方法は、以下。</p>
+
+<pre><code>//直接記入
+echo hoge&gt; test.txt
+--内容
+hoge
+//直接追記
+echo fuga&gt;&gt; test.txt
+--内容
+hoge
+fuga
+//ファイル内容を記入
+type test.txt&gt; sample.txt
+--内容
+hoge
+fuga
+//ファイル内容を追記
+type test.txt&gt;&gt; sample.txt
+--内容
+hoge
+fuga
+hoge
+fuga
+</code></pre>
+
+<hr />
+
+<p>全体は以下のような形。<br/>
+指定したサーバーに、同階層にあるhtml拡張子のファイルをアップロードする。<br/>
+ログは、同階層に、<code>upload.log</code>に記録。</p>
+
+<pre><code>@echo off
+set path_local=%cd%
+set path_remote=/home/uploadset
+server=[ホスト名]
+set user=[ユーザー名]
+set password=[パスワード]
+
+set ftplogin=ftp_login.tmp
+set ftplogout=ftp_logout.tmp
+set ftpupload=ftp_up.tmp
+set ftpbat=ftp_bat.tmp
+
+echo %user%&gt; %ftplogin%
+echo %password%&gt;&gt; %ftplogin%
+echo bin&gt;&gt; %ftplogin%
+echo prompt&gt;&gt; %ftplogin%
+
+echo cd %path_remote%&gt;&gt; %ftpupload%
+echo mput *.html&gt;&gt; %ftpupload%
+
+echo bye&gt; %ftplogout%
+echo close&gt;&gt; %ftplogout%
+
+echo open %server%&gt;%ftpbat%
+type %ftplogin%&gt;&gt;%ftpbat%
+type %ftpupload%&gt;&gt;%ftpbat%
+type %ftplogout%&gt;&gt;%ftpbat%
+
+ftp -s:%ftpbat% &gt;upload.log
+
+del %ftplogin%
+del %ftplogout%
+del %ftpupload%
+del %ftpbat%
+</code></pre>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Sublimetext3をWindows7で日本語化する]]></title>
+    <link href="http://kayakuguri.github.io/blog/2014/04/03/sublimetext3-japanese/"/>
+    <updated>2014-04-03T17:24:05+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2014/04/03/sublimetext3-japanese</id>
+    <content type="html"><![CDATA[<p>諸事情があってwindows7にて作業しなくちゃならなくなったので、<br/>
+sublimetext3をインストール、日本語した。<br/>
+けど、設定ファイルの場所がわからなったので、そのメモ。</p>
+
+<!-- more -->
+
+
+<p>基本はここの通り。<br/>
+<a href="http://luna-plate.com/archives/4637">http://luna-plate.com/archives/4637</a></p>
+
+<p>まずは、<a href="http://www.sublimetext.com/3">公式サイト</a>からインストール。<br/>
+今回は64bitのwindows7なので、<br/>
+<code>Windows 64 bit</code>を使用した。</p>
+
+<p>で、手順通り、<a href="https://sublime.wbond.net/installation">package controlをインストール</a>。<br/>
+その後、日本語化パッチをインストールして、手順にしたがってファイルを移動、リネーム。</p>
+
+<p>この時の手順に表示されていた、</p>
+
+<blockquote><ol>
+<li>C:\Users\ユーザー名\AppData\Roaming\Sublime Text 3\Packages\Japanizeにインストールされている*.jpファイルを、</li>
+</ol>
+</blockquote>
+
+<p>このディレクトリがどこにあるのかわからなかった。<br/>
+結論を言うと、フォルダオプションで、隠しファイルなどを表示指定なかったことがそもそもの原因だった。</p>
+
+<p><a href="http://detail.chiebukuro.yahoo.co.jp/qa/question_detail/q1361716208">AppDataの場所が見つけられません. windows7でコントロールパネル→デスクトップの…</a></p>
+
+<ol>
+<li>フォルダを開いた状態で、左上の「整理」メニューから、「フォルダーと検索のオプション」を開く。</li>
+<li>「表示」タブの、「ファイルとフォルダーの表示」にある、「隠しファイル、隠しフォルダー、および隠しドライブを表示する」を選択して適用。</li>
+<li>で、知恵袋にある通り、OS(C:) > ユーザー > (ユーザー名）> に行けばある。</li>
+</ol>
+
+
+<p>無事、手順どおりファイルを移動、リネームしたら、全メニューの日本語化が完了。</p>
+
+<p>最後にShift-JISファイルを文字化けさせないように、package controlで<code>ConvertToUTF8</code>をインストールしておく。</p>
+
+<p>(とはいえ、これでも日本語を使用すると高確率で文字化け状態で保存されてしまうけれど。。(sublimetextでは正しく表示できる))</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[phpstormで、ローカルファイルの差分]]></title>
@@ -1663,79 +1921,6 @@ Flash側のみでHTMLページ全体の読み込み状況を知りたい、と�
 </code></pre>
 
 <p>これでFlash側からHTMLの読み込み状況を（ある程度）知る事ができます。</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[ajaxzip3で、郵便番号から住所の自動入力をする際に、Shift-JISを使用する]]></title>
-    <link href="http://kayakuguri.github.io/blog/2014/01/16/ajaxzip3-shiftjis/"/>
-    <updated>2014-01-16T18:35:42+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2014/01/16/ajaxzip3-shiftjis</id>
-    <content type="html"><![CDATA[<p>ajaxzip3を使って郵便番号から住所を自動入力させる際、<br/>
-Shift-JISを使用したい場合、<a href="https://code.google.com/p/ajaxzip3/">ライブラリのページ</a>には以下のように書かれている。</p>
-
-<!-- more -->
-
-
-<pre><code>&lt;head&gt;
-&lt;meta http-equiv="Content-Type" content="text/html; charset=Shift_JIS"&gt;
-&lt;title&gt;サンプル&lt;/title&gt;
-&lt;script src="http://ajaxzip3.googlecode.com/svn/trunk/ajaxzip3/ajaxzip3.js" charset="UTF-8"&gt;&lt;/script&gt;
-&lt;/head&gt;
-</code></pre>
-
-<p>しかし、これだと<strong>IEのみ</strong>文字化けしてしまう。</p>
-
-<p>それを回避するには、<code>charset</code>を先に書くようにすればいい、らしい。</p>
-
-<pre><code>&lt;script type="text/javascript" src="hoge.js" charset="UTF=8"&gt;&lt;/script&gt; 
-↓
-&lt;script type="text/javascript" charset="UTF=8" src="hoge.js"&gt;&lt;/script&gt; 
-</code></pre>
-
-<p>参考：<a href="http://ksk1015.hatenablog.com/entry/2012/02/21/120938">ajaxzip3のIEでの文字化け対策 &ndash; ksk1015のブログ</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Tera Termでのテンキーの利用]]></title>
-    <link href="http://kayakuguri.github.io/blog/2014/01/08/teraterm/"/>
-    <updated>2014-01-08T17:19:01+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2014/01/08/teraterm</id>
-    <content type="html"><![CDATA[<p>Tera Termでssh接続をしていて、viでファイルを編集中に、いつものくせでテンキーのエンターキーを押して改行をしていると、<br/>
-何故か<code>M</code>と入力されてしまっていた。<br/>
-それに気付かず保存してしまってえらい目にあったことがある。</p>
-
-<!-- more -->
-
-
-<p>これはテンキーが使えないのか、viがおかしいのか、と思ってググってみると、TeraTerm側の問題だったよう。</p>
-
-<p><a href="http://server-setting.info/blog/teraterm-tenkey.html">TeraTermでテンキー(数値キーパッド)(/,*,&ndash;,+)の動きが変なので対応してみた</a></p>
-
-<p><code>M</code>の件は書いてないけど、デフォルトの対応表によれば、<code>6</code>が<code>M</code>っぽい。間違って押したかな。<br/>
-今後おかしくなると困るので、正常に動くようにしておいた。</p>
-
-<pre><code>[VT numeric keypad]
-Num0=off
-Num1=off
-Num2=off
-Num3=off
-Num4=off
-Num5=off
-Num6=off
-Num7=off
-Num8=off
-Num9=off
-NumMinus=off
-NumComma=off
-NumPeriod=off
-NumEnter=off
-PF1=off
-PF2=off
-PF3=off
-PF4=off
-</code></pre>
 ]]></content>
   </entry>
   
