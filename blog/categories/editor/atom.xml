@@ -4,7 +4,7 @@
   <title><![CDATA[Category: editor | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/editor/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2014-04-03T18:16:45+09:00</updated>
+  <updated>2014-04-04T13:49:44+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,65 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[PhpstormでRubyファイルにシンタックスハイライトを適用]]></title>
+    <link href="http://kayakuguri.github.io/blog/2014/04/04/phpstorm-ruby/"/>
+    <updated>2014-04-04T13:39:21+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2014/04/04/phpstorm-ruby</id>
+    <content type="html"><![CDATA[<p>シンタックスハイライトや補完なんかはやっぱりphpstormでは無理なよう。<br/>
+通常は、<code>IntelliJ IDEA Ultimate</code>使え、と。<br/>
+とはいえ、基本的なシンタックスハイライトくらいは適応させる方法がある、とのこと。</p>
+
+<!-- more -->
+
+
+<p><a href="http://stackoverflow.com/questions/16451359/is-it-possible-to-get-ruby-syntax-highlighting-in-phpstorm">Is it possible to get Ruby syntax highlighting in PHPStorm?</a></p>
+
+<p>基本は上記の訳。</p>
+
+<p>1) <a href="https://github.com/drnic/ruby-tmbundle">ruby-tmbundle</a>を適当なディレクトリにクローン。</p>
+
+<pre><code>$ git clone https://github.com/drnic/ruby-tmbundle.git
+</code></pre>
+
+<p>2) <code>Phpsotrm -&gt; Preference</code>を開く<br/>
+<code>IDE Settings</code>以下にある、<code>TextMate Bundles</code>に1)のディレクトリを追加。</p>
+
+<p><img src="/images/2014/04/phpstorm-ruby1.jpg" alt="TextMate Bundles" /></p>
+
+<p>3) 諸々の理由で、このバンドルはrubyの<code>rb</code>ファイルをサポートしていないらしい。<br/>
+なので、サポートするように修正する。<br/>
+1)のディレクトリ内の、<code>ruby-tmbundle/Syntaxes/Ruby.plist</code>を開く。<br/>
+その中で、<code>&lt;key&gt;fileTypes&lt;/key&gt;</code>以下にある、<code>&lt;array&gt;</code>タグの中に<code>&lt;string&gt;rb&lt;/string&gt;</code>を追加する。</p>
+
+<pre><code>...
+&lt;key&gt;fileTypes&lt;/key&gt;
+&lt;array&gt;
+    &lt;string&gt;rb&lt;/string&gt; ←追加
+    &lt;string&gt;rbx&lt;/string&gt;
+    &lt;string&gt;Rakefile&lt;/string&gt;
+    &lt;string&gt;rake&lt;/string&gt;
+    &lt;string&gt;sake&lt;/string&gt;
+    &lt;string&gt;cgi&lt;/string&gt;
+    &lt;string&gt;fcgi&lt;/string&gt;
+    &lt;string&gt;gemspec&lt;/string&gt;
+    &lt;string&gt;irbrc&lt;/string&gt;
+    &lt;string&gt;capfile&lt;/string&gt;
+&lt;/array&gt;
+&lt;key&gt;firstLineMatch&lt;/key&gt;
+…
+</code></pre>
+
+<p>4) <code>Preference</code>で、<code>File Types</code>で、<code>*.rb</code>を追加が追加されていることを確認する。</p>
+
+<p><img src="/images/2014/04/phpstorm-ruby2.jpg" alt="File Types" /></p>
+
+<p>完了。</p>
+
+<p><img src="/images/2014/04/phpstorm-ruby3.jpg" alt="Ruby syntax highlight" /></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Sublimetext3をWindows7で日本語化する]]></title>

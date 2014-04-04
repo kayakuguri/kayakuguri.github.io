@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2014-04-03T18:16:45+09:00</updated>
+  <updated>2014-04-04T13:49:44+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,65 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[PhpstormでRubyファイルにシンタックスハイライトを適用]]></title>
+    <link href="http://kayakuguri.github.io/blog/2014/04/04/phpstorm-ruby/"/>
+    <updated>2014-04-04T13:39:21+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2014/04/04/phpstorm-ruby</id>
+    <content type="html"><![CDATA[<p>シンタックスハイライトや補完なんかはやっぱりphpstormでは無理なよう。<br/>
+通常は、<code>IntelliJ IDEA Ultimate</code>使え、と。<br/>
+とはいえ、基本的なシンタックスハイライトくらいは適応させる方法がある、とのこと。</p>
+
+<!-- more -->
+
+
+<p><a href="http://stackoverflow.com/questions/16451359/is-it-possible-to-get-ruby-syntax-highlighting-in-phpstorm">Is it possible to get Ruby syntax highlighting in PHPStorm?</a></p>
+
+<p>基本は上記の訳。</p>
+
+<p>1) <a href="https://github.com/drnic/ruby-tmbundle">ruby-tmbundle</a>を適当なディレクトリにクローン。</p>
+
+<pre><code>$ git clone https://github.com/drnic/ruby-tmbundle.git
+</code></pre>
+
+<p>2) <code>Phpsotrm -&gt; Preference</code>を開く<br/>
+<code>IDE Settings</code>以下にある、<code>TextMate Bundles</code>に1)のディレクトリを追加。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2014/04/phpstorm-ruby1.jpg" alt="TextMate Bundles" /></p>
+
+<p>3) 諸々の理由で、このバンドルはrubyの<code>rb</code>ファイルをサポートしていないらしい。<br/>
+なので、サポートするように修正する。<br/>
+1)のディレクトリ内の、<code>ruby-tmbundle/Syntaxes/Ruby.plist</code>を開く。<br/>
+その中で、<code>&lt;key&gt;fileTypes&lt;/key&gt;</code>以下にある、<code>&lt;array&gt;</code>タグの中に<code>&lt;string&gt;rb&lt;/string&gt;</code>を追加する。</p>
+
+<pre><code>...
+&lt;key&gt;fileTypes&lt;/key&gt;
+&lt;array&gt;
+    &lt;string&gt;rb&lt;/string&gt; ←追加
+    &lt;string&gt;rbx&lt;/string&gt;
+    &lt;string&gt;Rakefile&lt;/string&gt;
+    &lt;string&gt;rake&lt;/string&gt;
+    &lt;string&gt;sake&lt;/string&gt;
+    &lt;string&gt;cgi&lt;/string&gt;
+    &lt;string&gt;fcgi&lt;/string&gt;
+    &lt;string&gt;gemspec&lt;/string&gt;
+    &lt;string&gt;irbrc&lt;/string&gt;
+    &lt;string&gt;capfile&lt;/string&gt;
+&lt;/array&gt;
+&lt;key&gt;firstLineMatch&lt;/key&gt;
+…
+</code></pre>
+
+<p>4) <code>Preference</code>で、<code>File Types</code>で、<code>*.rb</code>を追加が追加されていることを確認する。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2014/04/phpstorm-ruby2.jpg" alt="File Types" /></p>
+
+<p>完了。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2014/04/phpstorm-ruby3.jpg" alt="Ruby syntax highlight" /></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[バッチファイルでのFTPアップロード]]></title>
@@ -1884,43 +1943,6 @@ FLVPlaybackにはない。<br/>
 知らなかったのでメモメモ。</p>
 
 <p>情報：<a href="http://un-q.net/2008/06/flvplayback_smoothing_video_as3.html">http://un-q.net/2008/06/flvplayback_smoothing_video_as3.html</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Flashのみで表示中のページの読み込み状況を取得したい]]></title>
-    <link href="http://kayakuguri.github.io/blog/2014/01/20/jsloadedcheck-on-flash/"/>
-    <updated>2014-01-20T15:46:08+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2014/01/20/jsloadedcheck-on-flash</id>
-    <content type="html"><![CDATA[<p>HTML側にJSなどを埋め込んだりせずに<br/>
-Flash側のみでHTMLページ全体の読み込み状況を知りたい、となって、<br/>
-調べてみたところ、以下の方法が使用できた。</p>
-
-<!-- more -->
-
-
-<p><a href="http://hakuhin.jp/js/document.html#DOCUMENT_03">現在のページの読み込み状況を取得する &ndash; JavaScriptプログラミング講座</a></p>
-
-<blockquote><p>現在閲覧中のページの読み込み状況を調べるには、document.readyState プロパティを使用します。<br/>
-以下の文字列が得られます。</p></blockquote>
-
-<ul>
-<li>uninitialized &ndash; 初期化されていません。ロードが開始されていません。</li>
-<li>loading &ndash; ロード中です。</li>
-<li>interactive &ndash; DOM オブジェクトの構築は完了しています。画像データなどの読み込みはまだ完了していません。</li>
-<li>complete &ndash; すべての読み込みが完了しています。</li>
-</ul>
-
-
-<p>なので、Flash側からこのプロパティを呼び出せばわかる、となります。</p>
-
-<p>しかし<code>ExternalInterface</code>は関数を呼び出すものなので、<br/>
-プロパティを直接呼び出すことはできません。なので、関数にくるんで返すようにします。</p>
-
-<pre><code>var state:String = ExternalInterface.call("function(){return document.readyState;}");
-</code></pre>
-
-<p>これでFlash側からHTMLの読み込み状況を（ある程度）知る事ができます。</p>
 ]]></content>
   </entry>
   
