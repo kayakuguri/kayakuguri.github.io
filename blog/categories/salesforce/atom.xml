@@ -4,7 +4,7 @@
   <title><![CDATA[Category: salesforce | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/salesforce/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2014-04-23T16:23:41+09:00</updated>
+  <updated>2014-04-23T16:49:44+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,159 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[SalesForce]メールテンプレートの項目一覧]]></title>
+    <link href="http://kayakuguri.github.io/blog/2014/04/23/sf-mailtemplate/"/>
+    <updated>2014-04-23T16:39:55+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2014/04/23/sf-mailtemplate</id>
+    <content type="html"><![CDATA[<p>メールテンプレートは、<code>SOQL</code>を使用して、<code>EmailTemplate</code>でとってこれる。</p>
+
+<!-- more -->
+
+
+<p>参考：<a href="https://developer.salesforce.com/forums?id=906F00000009BOlIAM">https://developer.salesforce.com/forums?id=906F00000009BOlIAM</a></p>
+
+<p>取得した<code>EmailTemplate</code>の一覧<br/>
+(内容は間違っている可能性があります)</p>
+
+<table>
+<thead>
+<tr>
+<th>項目名 </th>
+<th> 内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>body </td>
+<td> 本文</td>
+</tr>
+<tr>
+<td>markup </td>
+<td> </td>
+</tr>
+<tr>
+<td>folderid </td>
+<td> フォルダーのID</td>
+</tr>
+<tr>
+<td>subject </td>
+<td> 件名</td>
+</tr>
+<tr>
+<td>developername </td>
+<td> 作成者</td>
+</tr>
+<tr>
+<td>timesused </td>
+<td> 使用回数</td>
+</tr>
+<tr>
+<td>createddate </td>
+<td> 作成日</td>
+</tr>
+<tr>
+<td>ownerid </td>
+<td> オーナーのID</td>
+</tr>
+<tr>
+<td>apiversion </td>
+<td> </td>
+</tr>
+<tr>
+<td>createdbyid </td>
+<td> 作成者のID</td>
+</tr>
+<tr>
+<td>lastmodifieddate </td>
+<td> 更新日</td>
+</tr>
+<tr>
+<td>id </td>
+<td> ID</td>
+</tr>
+<tr>
+<td>brandtemplateid </td>
+<td> </td>
+</tr>
+<tr>
+<td>lastuseddate </td>
+<td> 最終使用日</td>
+</tr>
+<tr>
+<td>templatestyle </td>
+<td> </td>
+</tr>
+<tr>
+<td>isactive </td>
+<td> 有効か</td>
+</tr>
+<tr>
+<td>namespaceprefix </td>
+<td> </td>
+</tr>
+<tr>
+<td>description </td>
+<td> テンプレートの説明</td>
+</tr>
+<tr>
+<td>name </td>
+<td> テンプレートの一意の名前</td>
+</tr>
+<tr>
+<td>templatetype </td>
+<td> テンプレートのタイプ</td>
+</tr>
+<tr>
+<td>encoding </td>
+<td> 文字コード</td>
+</tr>
+<tr>
+<td>systemmodstamp </td>
+<td> </td>
+</tr>
+<tr>
+<td>lastmodifiedbyid </td>
+<td> 更新者のID</td>
+</tr>
+<tr>
+<td>htmlvalue </td>
+<td> HTMLテンプレートの場合の本文</td>
+</tr>
+</tbody>
+</table>
+
+
+<hr />
+
+<p>以下の方法でオブジェクトの項目一覧を取得出来る。</p>
+
+<p>参考：<br/>
+<a href="http://techblog.appirio.co.jp/2012/07/forcecom-apexdescribe.html">http://techblog.appirio.co.jp/2012/07/forcecom-apexdescribe.html</a><br/>
+<a href="http://www30304u.sakura.ne.jp/blog/?p=188">http://www30304u.sakura.ne.jp/blog/?p=188</a><br/>
+<a href="http://vaindespair.blogspot.jp/2012/04/blog-post_04.html">http://vaindespair.blogspot.jp/2012/04/blog-post_04.html</a></p>
+
+<p>実際に取得したapexコード</p>
+
+<pre><code>public Pagereference getList() {
+    sObject newObj = (sObject)Type.forName('EmailTemplate').newInstance();
+    Schema.DescribeSObjectResult descResult = newObj.getsObjectType().getDescribe();
+    String keys = concatSet(descResult.fields.getMap().keySet(), ', ');
+
+    System.debug('***** EmailTemplate keys: ' + keys);
+}
+
+private static String concatSet(Set&lt;String&gt; strSet, String sep) {
+    String retStr;
+    for (String str : strSet) {
+        retStr = retStr == null ? str : retStr + sep + str;
+    }
+    return retStr == null ? '' : retStr;
+}
+</code></pre>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[SaleseForce]匿名ブロックでの実行テスト]]></title>
@@ -443,46 +596,6 @@ array(1) {
     }
 }
 </code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Visual Forceでの送信ボタン2度押し防止策]]></title>
-    <link href="http://kayakuguri.github.io/blog/2014/02/12/vf-doubleclick-check/"/>
-    <updated>2014-02-12T19:47:53+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2014/02/12/vf-doubleclick-check</id>
-    <content type="html"><![CDATA[<p>salesforceでvisualforceの<code>commandButton</code>で、ボタンを連打すると、<br/>
-送信が完了してページが遷移するまでに何度でもデータが送信されてしまう。</p>
-
-<p>単純に、apexクラス内で２度目はinsertしない、とかにしてればいいのだけど、<br/>
-それをvisualforceで完結させることが出来たので、メモ。</p>
-
-<!-- more -->
-
-
-<p><code>apex:commandButton</code>内で、<code>onclick</code>を使って、JSを呼んで、<br/>
-１度目だと<code>true</code>、2度目だと<code>false</code>を返すようにする。<br/>
-<code>true</code>が返って来た時だけ、<code>action</code>内の関数が実行される。</p>
-
-<pre><code>//JS
-&lt;script type="text/javascript"&gt;
-var isSave = false;
-function check(){
-    if (!isSave) {
-        isSave = true;
-        return true;
-    }
-    return false;
-}
-&lt;/script&gt;
-
-//HTML
-&lt;apex:commandButton action="{!save}" onclick="return check();" image="{!URLFOR($Resource.remind, 'images/btn_send.gif')}" alt="OK" /&gt;
-</code></pre>
-
-<p>これで、連打しても大丈夫。</p>
-
-<p>参考：<a href="http://blog.livedoor.jp/volvic_beer/archives/52301425.html">http://blog.livedoor.jp/volvic_beer/archives/52301425.html</a></p>
 ]]></content>
   </entry>
   

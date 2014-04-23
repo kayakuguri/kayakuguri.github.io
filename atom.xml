@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2014-04-23T16:23:41+09:00</updated>
+  <updated>2014-04-23T16:49:44+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,159 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[SalesForce]メールテンプレートの項目一覧]]></title>
+    <link href="http://kayakuguri.github.io/blog/2014/04/23/sf-mailtemplate/"/>
+    <updated>2014-04-23T16:39:55+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2014/04/23/sf-mailtemplate</id>
+    <content type="html"><![CDATA[<p>メールテンプレートは、<code>SOQL</code>を使用して、<code>EmailTemplate</code>でとってこれる。</p>
+
+<!-- more -->
+
+
+<p>参考：<a href="https://developer.salesforce.com/forums?id=906F00000009BOlIAM">https://developer.salesforce.com/forums?id=906F00000009BOlIAM</a></p>
+
+<p>取得した<code>EmailTemplate</code>の一覧<br/>
+(内容は間違っている可能性があります)</p>
+
+<table>
+<thead>
+<tr>
+<th>項目名 </th>
+<th> 内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>body </td>
+<td> 本文</td>
+</tr>
+<tr>
+<td>markup </td>
+<td> </td>
+</tr>
+<tr>
+<td>folderid </td>
+<td> フォルダーのID</td>
+</tr>
+<tr>
+<td>subject </td>
+<td> 件名</td>
+</tr>
+<tr>
+<td>developername </td>
+<td> 作成者</td>
+</tr>
+<tr>
+<td>timesused </td>
+<td> 使用回数</td>
+</tr>
+<tr>
+<td>createddate </td>
+<td> 作成日</td>
+</tr>
+<tr>
+<td>ownerid </td>
+<td> オーナーのID</td>
+</tr>
+<tr>
+<td>apiversion </td>
+<td> </td>
+</tr>
+<tr>
+<td>createdbyid </td>
+<td> 作成者のID</td>
+</tr>
+<tr>
+<td>lastmodifieddate </td>
+<td> 更新日</td>
+</tr>
+<tr>
+<td>id </td>
+<td> ID</td>
+</tr>
+<tr>
+<td>brandtemplateid </td>
+<td> </td>
+</tr>
+<tr>
+<td>lastuseddate </td>
+<td> 最終使用日</td>
+</tr>
+<tr>
+<td>templatestyle </td>
+<td> </td>
+</tr>
+<tr>
+<td>isactive </td>
+<td> 有効か</td>
+</tr>
+<tr>
+<td>namespaceprefix </td>
+<td> </td>
+</tr>
+<tr>
+<td>description </td>
+<td> テンプレートの説明</td>
+</tr>
+<tr>
+<td>name </td>
+<td> テンプレートの一意の名前</td>
+</tr>
+<tr>
+<td>templatetype </td>
+<td> テンプレートのタイプ</td>
+</tr>
+<tr>
+<td>encoding </td>
+<td> 文字コード</td>
+</tr>
+<tr>
+<td>systemmodstamp </td>
+<td> </td>
+</tr>
+<tr>
+<td>lastmodifiedbyid </td>
+<td> 更新者のID</td>
+</tr>
+<tr>
+<td>htmlvalue </td>
+<td> HTMLテンプレートの場合の本文</td>
+</tr>
+</tbody>
+</table>
+
+
+<hr />
+
+<p>以下の方法でオブジェクトの項目一覧を取得出来る。</p>
+
+<p>参考：<br/>
+<a href="http://techblog.appirio.co.jp/2012/07/forcecom-apexdescribe.html">http://techblog.appirio.co.jp/2012/07/forcecom-apexdescribe.html</a><br/>
+<a href="http://www30304u.sakura.ne.jp/blog/?p=188">http://www30304u.sakura.ne.jp/blog/?p=188</a><br/>
+<a href="http://vaindespair.blogspot.jp/2012/04/blog-post_04.html">http://vaindespair.blogspot.jp/2012/04/blog-post_04.html</a></p>
+
+<p>実際に取得したapexコード</p>
+
+<pre><code>public Pagereference getList() {
+    sObject newObj = (sObject)Type.forName('EmailTemplate').newInstance();
+    Schema.DescribeSObjectResult descResult = newObj.getsObjectType().getDescribe();
+    String keys = concatSet(descResult.fields.getMap().keySet(), ', ');
+
+    System.debug('***** EmailTemplate keys: ' + keys);
+}
+
+private static String concatSet(Set&lt;String&gt; strSet, String sep) {
+    String retStr;
+    for (String str : strSet) {
+        retStr = retStr == null ? str : retStr + sep + str;
+    }
+    return retStr == null ? '' : retStr;
+}
+</code></pre>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[SaleseForce]匿名ブロックでの実行テスト]]></title>
@@ -1865,106 +2018,6 @@ Haxe自体がワンソース・マルチユース的なものなのに、<br/>
 
 <script async src="http://kayakuguri.github.io//platform.twitter.com/widgets.js" charset="utf-8"></script>
 
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[CodenvyとherokuでブラウザのみでRailsアプリを作成する その1]]></title>
-    <link href="http://kayakuguri.github.io/blog/2014/01/29/railsapp-on-codenvy-and-heroku/"/>
-    <updated>2014-01-29T16:33:01+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2014/01/29/railsapp-on-codenvy-and-heroku</id>
-    <content type="html"><![CDATA[<p>herokuがRailsを全面サポートしている事や、phpは公式にはサポートしていないこともあって、<br/>
-Ruby、Railsを勉強してみよう、と思い立つ。</p>
-
-<p>開発環境はローカルに構築するつもり(というか当然そうなると思っていた)のだけれど、<br/>
-すこし調べてみると今はクラウド開発環境なるものがある、とのことで、どうせならそちらを使用してみることにする。<br/>
-(そちらのほうが楽そうだし)<br/>
-というわけでそれらのメモ。</p>
-
-<!-- more -->
-
-
-<p>参考にさせてもらったページ<br/>
-<a href="http://libro.tuyano.com/index3?id=780003&amp;page=6">Herokuではじめる 初心者のためのRuby on Rails3入門</a></p>
-
-<p>クラウド開発環境は有名どころでは、<a href="https://c9.io/">cloud9</a>と、<a href="https://codenvy.com/">Codenvy</a>があるようだけれど、<br/>
-標準でherokuに対応している、という点で、Codenvyをチョイス。</p>
-
-<p>セットアップしていく。</p>
-
-<h4>herokuのアカウント作成</h4>
-
-<p><a href="https://www.heroku.com">heroku</a></p>
-
-<p>まずは、<code>Sing up for free</code>からアカウント作成。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2014/01/heroku01.jpg" alt="Sing up for free" /></p>
-
-<p>開いた先でメールアドレスを入れて、メールを待つ。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2014/01/heroku02.jpg" alt="Sing up for free" /></p>
-
-<p>メール内に記載されているアドレスをクリックして、パスワードを設定。<br/>
-以上でアカウントの作成は終了。</p>
-
-<h4>Codenvyのアカウント作成</h4>
-
-<p><a href="https://codenvy.com/">Codenvy</a></p>
-
-<p>まずは、<code>FREE SIGN UP</code>からアカウントを作成。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2014/01/codenvy01.jpg" alt="FREE SIGN UP" /></p>
-
-<p>開いたモーダルウインドウで、メールとユーザー名(ワークスペースネーム)を入力して<code>GO</code>。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2014/01/codenvy02.jpg" alt="FREE SIGN UP" /></p>
-
-<p>メール確認してね、と出るので、メールをチェック。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2014/01/codenvy03.jpg" alt="THANK YOU SINGING UP" /></p>
-
-<p>メール本文中の、<code>confirm</code>をクリック、するとアカウントが作成、、されると思ったら以下の画面が。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2014/01/codenvy04.jpg" alt="unable to account" /></p>
-
-<p>どうやらユーザー名が不適切(被ってるとかおかしいとか)でエラーが出ているよう。<br/>
-メール送る前に事前に言ってくれないのね。。。</p>
-
-<p>気を取り直して、再度違う名前で送信。<br/>
-無事、作成出来ました。</p>
-
-<p>パスワードを設定し、ログインするとプロジェクト作成の画面に。<br/>
-サービスはもちろん、<code>Ruby on Rails</code>で<code>Heroku</code>を選択。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2014/01/codenvy06.jpg" alt="create project" /></p>
-
-<p><code>next</code>をクリックして進むと、heroku側のプロジェクト名？を入力するダイアログが出てくる。<br/>
-(多分、その前にherokuのアカウントを聞かれた気がするけど、どのタイミングで聞かれたか忘れてしまった。<br/>
-聞かれたら、メールアドレスとパスワードを入力して連携させておく。)</p>
-
-<p><img src="http://kayakuguri.github.io/images/2014/01/codenvy07.jpg" alt="deploy heroku project" /></p>
-
-<p>今回はCodenvy側でプロジェクト名を<code>RubyProject001</code>とつけていたので、herokuのプロジェクト名も同じにしておいた。<br/>
-すると、１文字目は小文字にしなさい、と怒られてしまった。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2014/01/codenvy08.jpg" alt="warning" /></p>
-
-<p>とにかく、これでプロジェクトが作成出来た。<br/>
-IDEはこのような画面が表示された。<br/>
-左側はファイルツリーで、右側がエディタ、とおなじみの構成。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2014/01/codenvy05.jpg" alt="warning" /></p>
-
-<p>heroku側はどうなっているかというと、上記の小文字エラーが出たからなのか、<br/>
-プロジェクト名は連番のような形になってしまっていた。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2014/01/heroku03.jpg" alt="myproject" /></p>
-
-<p>このプロジェクト名を、<code>testrubyproject1</code>で、作成してみると、herokuのアプリ名も同じ名前で作成された。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2014/01/codenvy09.jpg" alt="myproject" /></p>
-
-<p>これで開発環境は整った。と思われる。</p>
 ]]></content>
   </entry>
   
