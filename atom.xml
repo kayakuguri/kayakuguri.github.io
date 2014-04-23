@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2014-04-04T13:49:44+09:00</updated>
+  <updated>2014-04-23T16:23:41+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,50 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[SaleseForce]匿名ブロックでの実行テスト]]></title>
+    <link href="http://kayakuguri.github.io/blog/2014/04/23/sf-anonymous-debug/"/>
+    <updated>2014-04-23T16:17:04+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2014/04/23/sf-anonymous-debug</id>
+    <content type="html"><![CDATA[<p>特定のメソッドを実行してデバッグ出力を確認したいときに、<br/>
+そのメソッドだけ単発で実行させる方法として、<code>匿名ブロック</code>による実行というのがある。</p>
+
+<!-- more -->
+
+
+<p>参考：<a href="http://blog.livedoor.jp/rays4live/archives/67722528.html">Apexプログラミング～基本編２～</a></p>
+
+<p>基本、上記参考サイトの通り。<br/>
+Force.com IDE上でも匿名ブロック、<code>Execute Anonymous</code>での実行が出来る。</p>
+
+<blockquote><p>Execute Anonymous」の機能を使います。この機能は、「匿名ブロック」と呼ばれていて、単発でメソッドの呼び出しなどを行うことができます。一種のコンソール的なものとイメージするといいかと思います。</p></blockquote>
+
+<p>VisualForceのページから呼び出す用のクラスを実行する場合は、<br/>
+テストクラスを書くときと同じ要領で、クラスをnewして実行させる。<br/>
+例えば、そのページがLeadを標準のコントローラーとしている時は以下のように。<br/>
+<code>testMethod</code>が実行したい関数だとする。
+(別にページでLeadに指定していても他のオブジェクトを渡しても問題ない)</p>
+
+<pre><code>Lead p = new Lead();
+HogeController c = new HogeController(new ApexPages.StandardController(p));
+c.testMethod();
+</code></pre>
+
+<p>で、<code>testMethod</code>内には以下のように書いていたとする。</p>
+
+<pre><code>public Pagereference testMethod() {
+    System.debug('Hello world!');
+    return null;
+}
+</code></pre>
+
+<p>実行後、ログが出力されて、目的のデバッグログも以下のような形で吐かれる。</p>
+
+<pre><code>15:11:05.049 (49728000)|USER_DEBUG|[46]|DEBUG|Hello world!
+</code></pre>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[PhpstormでRubyファイルにシンタックスハイライトを適用]]></title>
@@ -1921,28 +1965,6 @@ IDEはこのような画面が表示された。<br/>
 <p><img src="http://kayakuguri.github.io/images/2014/01/codenvy09.jpg" alt="myproject" /></p>
 
 <p>これで開発環境は整った。と思われる。</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[FLVPlaybackのスムージング]]></title>
-    <link href="http://kayakuguri.github.io/blog/2014/01/24/flvplayback-smoothing/"/>
-    <updated>2014-01-24T16:47:11+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2014/01/24/flvplayback-smoothing</id>
-    <content type="html"><![CDATA[<p>Videoクラスにはそのものズバリの名前の、<code>sommthing</code>プロパティがあるのだけれど、<br/>
-FLVPlaybackにはない。<br/>
-なので、スムージングはかけられないのかと思っていたけれど、あった。</p>
-
-<!-- more -->
-
-
-<pre><code>player.getVideoPlayer(player.activeVideoPlayerIndex).smoothing = true;
-</code></pre>
-
-<p>これでいい、らしい。<br/>
-知らなかったのでメモメモ。</p>
-
-<p>情報：<a href="http://un-q.net/2008/06/flvplayback_smoothing_video_as3.html">http://un-q.net/2008/06/flvplayback_smoothing_video_as3.html</a></p>
 ]]></content>
   </entry>
   
