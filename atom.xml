@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2014-04-30T11:54:38+09:00</updated>
+  <updated>2014-05-14T11:17:10+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,63 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[heokuで既存アプリにビルドパックを適用させる]]></title>
+    <link href="http://kayakuguri.github.io/blog/2014/05/14/heroku-set-build-pack/"/>
+    <updated>2014-05-14T11:04:44+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2014/05/14/heroku-set-build-pack</id>
+    <content type="html"><![CDATA[<p>新規アプリを作成時にビルドパックを適用する方法は<br/>
+<a href="http://kayakuguri.github.io/blog/2014/02/18/create-php-heroku-mbstring/">以前に書いた</a>のですが、すでに作成しているいアプリに適用させる必要が出たので<br/>
+調べてみました。</p>
+
+<!-- more -->
+
+
+<p>結論から言うと、公式にありました。</p>
+
+<p><a href="https://devcenter.heroku.com/articles/buildpacks">Buildpacks | Heroku Dev Center</a></p>
+
+<p>実際に適用させてみます。<br/>
+(<code>myapp</code>となっている箇所は変更して下さい。)</p>
+
+<p>まず、適用したいアプリを任意のフォルダに<code>clone</code>。</p>
+
+<pre><code>$ git clone git@heroku.com:myapp.git
+</code></pre>
+
+<p>で、上記のURLを参考に、ビルドパックを適用させる。<br/>
+PHPでmbStringが使いたいので、以下のカスタムビルドパックを指定した。<br/>
+(PHPが<a href="https://blog.heroku.com/archives/2014/4/29/introducing_the_new_php_on_heroku">公式にサポート</a>されたけれど、mbStringは入ってないっぽい。<br/>
+ 公式分でのmb環境構築方法がわかればまたメモします。)</p>
+
+<pre><code>heroku config:set BUILDPACK_URL=https://github.com/iphoting/heroku-buildpack-php-tyler.git#php/5.4.9
+</code></pre>
+
+<p>適当にファイルを作って、コミットして、プッシュ。<br/>
+プッシュ時にデプロイされるので、そこでビルドパックも適用される。</p>
+
+<pre><code>$ echo '&lt;?php phpinfo();' &gt; index.php
+$ git add .
+$ git commit -m 'initial commit'
+$ git push heroku master
+</code></pre>
+
+<p>しかし、このpushの段階で怒られる。</p>
+
+<pre><code>fatal: Could not read from remote repository.
+</code></pre>
+
+<p>ググると、herokuにremoteでaddしないといけない模様。<br/>
+参考：<a href="http://d.hatena.ne.jp/s-0samu/20110416/1302890751">Railsでtwitterサービスをつくる（続きの続き） &ndash; ありえないなど、ありえない</a></p>
+
+<pre><code>$ git remote add heroku git@heroku.com:myapp.git
+$ git push heroku master
+</code></pre>
+
+<p>再度pushすると無事、デプロイが完了し、PHP環境が出来上がりました。</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[RawGitを使ったページへのアクセス過多]]></title>
@@ -1724,264 +1781,6 @@ function check(){
 <blockquote><p>ただし、デフォルトではこれらのものはすべてセットで用意しないと動きません。<br/>
 Controllerだけ作ればいいや、とはいかないのです。全部を用意して動かすのがRailsの基本なのです。<br/>
 <a href="http://libro.tuyano.com/index3?id=790003">http://libro.tuyano.com/index3?id=790003</a></p></blockquote>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[OpenFLをインストールしてみる]]></title>
-    <link href="http://kayakuguri.github.io/blog/2014/01/31/install-openfl/"/>
-    <updated>2014-01-31T11:23:47+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2014/01/31/install-openfl</id>
-    <content type="html"><![CDATA[<p>インストールした環境は、<code>MaxOS X 10.8.5</code></p>
-
-<!-- more -->
-
-
-<p>一つ前の記事で紹介した<a href="http://ics-web.jp/lab/archives/1329">参考記事</a>に<a href="https://plus.google.com/102594170131511973965/posts">池田さん</a>がアップしてくれているインストール方法の動画があるので、<br/>
-基本それを見ればわかるのだけれど、一応、実際に作業してみたメモ。<br/>
-デモ画面を起動するところまでやってみる。</p>
-
-<hr />
-
-<h4>Hexeをインストール</h4>
-
-<p><a href="http://haxe.org/">Haxe(公式サイト)</a></p>
-
-<p>ダウンロードページは以下。<br/>
-<a href="http://haxe.org/download">ダウンロード</a><br/>
-2014/1/31時点でのバージョンは、<code>3.0.1</code></p>
-
-<p><img src="http://kayakuguri.github.io/images/2014/01/openfl1.jpg" alt="Download haxe" /></p>
-
-<p>インストーラーでインストール。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2014/01/openfl2.jpg" alt="install haxe" /></p>
-
-<p>後は、OpenFLのページに書いてある手順に従って、ターミナルからコマンドを打ち込んでいく。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2014/01/openfl3.jpg" alt="Download openfl" /></p>
-
-<h4>Limeをインストール</h4>
-
-<p>OpenFLはLimeで動作しているので、Limeをまずはインストールする、との事。<br/>
-以下のコマンドからインストール。</p>
-
-<pre><code>$ haxelib install lime
-</code></pre>
-
-<p>うえの、install limeを実行すると、以下のように怒られた。</p>
-
-<pre><code>This is the first time you are runing haxelib. Please run `haxelib setup` first
-</code></pre>
-
-<p>まずは、setupから実行しろ、と。<br/>
-言われたとおりに実行。</p>
-
-<p>すると、haxeのpathの入力を求められた。</p>
-
-<pre><code>Please enter haxelib repository path with write access
-Hit enter for default (/usr/lib/haxe/lib)
-Path :
-</code></pre>
-
-<p>pathがわからないので一旦置いておく。<br/>
-調べると、haxelibのセットアップはhaxeの公式ページに手順が載っていた。</p>
-
-<p><a href="http://haxe.org/com/haxelib/setup">haxelib setup</a></p>
-
-<p>ここでの手順をまずは試してみる。</p>
-
-<pre><code>$ sudo mkdir -p /usr/lib/haxe/lib
-$ sudo chown -R myusername /usr/lib/haxe
-</code></pre>
-
-<p>※パスはデフォルトでは、<code>/usr/lib/haxe/lib</code>。もし違ったらそのパスを入力。<br/>
-また、<code>myusername</code>はPCのユーザー名を記入。</p>
-
-<p>で、上記のsetupを実行。</p>
-
-<pre><code>$ haxelib setup
-</code></pre>
-
-<p>pathには、先ほど作成したlibディレクトリを指定。</p>
-
-<pre><code>/usr/lib/haxe/lib/
-</code></pre>
-
-<p><code>haxelib repository is now /usr/lib/haxe/lib/</code>と出れば大丈夫のよう。</p>
-
-<p>ようやく冒頭のLimeのインストールへ戻る。</p>
-
-<pre><code>$ haxelib install lime
-</code></pre>
-
-<p><img src="http://kayakuguri.github.io/images/2014/01/openfl4.jpg" alt="install lime" /></p>
-
-<p>で、セットアップを実行</p>
-
-<pre><code>$ haxelib run lime setup
-</code></pre>
-
-<p>lime commandをインストールするか聞かれる。<br/>
-たぶん、必要っぽいので、<code>y</code>で。</p>
-
-<pre><code>Do you want to install the "lime" command? [y/n/a] ? y
-</code></pre>
-
-<h4>OpenFLをインストール</h4>
-
-<p>で、ようやっとOpenFLのインストール。</p>
-
-<pre><code>$ lime install openfl
-</code></pre>
-
-<p>つらつらと色んなものが展開されて、無事、インストール成功。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2014/01/openfl5.jpg" alt="install openfl" /></p>
-
-<h4>各デバイス用セットアップ(オプション)</h4>
-
-<p>それぞれのデバイス用のセットアップがオプションで用意されているよう。</p>
-
-<pre><code>lime setup windows
-lime setup android
-lime setup blackberry
-lime setup tizen
-</code></pre>
-
-<p>blackberryとtizenはいらないとしても、androidは入れとこうか。<br/>
-windowsは、、微妙。<br/>
-iOSはセットアップの必要はないけれど、Xcodeのインストールが必要、とのこと。</p>
-
-<blockquote><p>Apple platforms don&rsquo;t require setup, but need Xcode to be installed.</p></blockquote>
-
-<h5>Android用セットアップ</h5>
-
-<p>とりあえず、androidのセットアップを実行。<br/>
-SDKを入れるか、聞かれるので、yesで。</p>
-
-<pre><code>$ lime setup android
-Download and install the Android SDK? [y/n/a] ? y
-</code></pre>
-
-<p>アウトプットするディレクトリを聞かれたので、とりあえずデフォルト？のものを指定しておいた。<br/>
-けど、そのディレクトリがないので事前に作成しておく。<br/>
-作成は、haxeのセットアップ時を参考にして、ディレクトリ作成後、オーナーの変更もしておいた。<br/>
-(必要ないかもしれないけれど)</p>
-
-<pre><code>$ sudo mkdir -p /opt/android-sdk
-$ sudo chown -R myusername /opt/android-sdk
-</code></pre>
-
-<p>で、改めて、アウトプットのディレクトリを指定。</p>
-
-<pre><code>Output directory [/opt/android-sdk]: /opt/android-sdk
-</code></pre>
-
-<p>すると、<code>Android SDK Manager</code>なるものが立ち上がる。<br/>
-つらつらと処理が進み、準備が整うと、パッケージをインストールするような待ちに入ったため、そのままインストール。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2014/01/openfl6.jpg" alt="install android sdk" /></p>
-
-<p>各ライセンスに同意が必要なため、<s>気にせず</s>目を通してから同意。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2014/01/openfl7.jpg" alt="agree android sdk" /></p>
-
-<p>次に、<code>android-ndk</code>をインストールしますか？と出た。<br/>
-インストールしようとすると、ここでもディレクトリが必要。。。</p>
-
-<pre><code>Download and install the Android NDK? [y/n/a] ? y
-Output directory [/opt/android-ndk]: /opt/android-ndk
-</code></pre>
-
-<p>もちろんないので、再度、作成して、インストール。</p>
-
-<p>参考：<a href="http://www.dm-android.com/column/ndk.html">コラム：Android NDKとは？Android NDKを学ぶメリット</a></p>
-
-<p>次は、<code>Apatch Ant</code>。同じようにディレクリ作成。<br/>
-(事前にこれだけいる、と言ってくれたらいいのに。。。)</p>
-
-<pre><code>Download and install the apache ant? [y/n/a] ? y
-Output directory [/opt/apache-ant]: /opt/apache-ant
-</code></pre>
-
-<p>参考：<a href="http://ja.wikipedia.org/wiki/Apache_Ant">Apache Ant &ndash; Wikipedia</a></p>
-
-<p>で、Android SDKとNDKのパスを聞かれる。変更してないので、例のまま。</p>
-
-<pre><code>Path to Android SDK [/opt/android-sdk]:/opt/android-sdk
-Path to Android NDK [/opt/android-ndk]: /opt/android-ndk
-</code></pre>
-
-<p>これでようやっと終了(たぶん)。</p>
-
-<h4>サンプルを実行</h4>
-
-<p>ここからは、実行後にファイルが作成されるので、適当なディレクトリに移動してから実行する。<br/>
-(デスクトップとか)</p>
-
-<pre><code>$ lime create openfl:DisplayingABitmap
-$ cd DisplayingABitmap
-$ lime test neko
-</code></pre>
-
-<p>(<code>neko</code>とはmacのアプリのこと?)<br/>
-サンプルどおり、nekoを起動させてみた状態は以下。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2014/01/openfl8.jpg" alt="sample neko" /></p>
-
-<p>このプログラムのまま、様々なプラットフォームで出力可能。<br/>
-例えば、flashの場合は以下。</p>
-
-<pre><code>$ lime test flash
-</code></pre>
-
-<p><img src="http://kayakuguri.github.io/images/2014/01/openfl9.jpg" alt="sample flash" /></p>
-
-<p>最後に、ちょっと見栄えのするサンプルを実行させてみる。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2014/01/openfl10.jpg" alt="HerokuShaders" /></p>
-
-<p>DOCUMENTATION &ndash;> Samples &ndash;> HerokuShaders</p>
-
-<pre><code>$ openfl create HerokuShaders
-</code></pre>
-
-<p>ページの通り、上記を実行すると、openflっていうコメンドがない、と言われたので、<br/>
-上記の<code>lime</code>で、実行してみる。</p>
-
-<pre><code>$ lime create openfl:HerokuShaders
-$ cd HerokuShaders
-$ lime test neko
-</code></pre>
-
-<p><img src="http://kayakuguri.github.io/images/2014/01/openfl11.jpg" alt="HerokuShaders" /></p>
-
-<p>これもそれぞれ、flash、HTML5などで実行してみる。</p>
-
-<pre><code>$ lime test flash
-$ lime test html5
-</code></pre>
-
-<p>flashはエラーで実行できなかった。<br/>
-何か必要なライブラリ？が入ってなかったよう。</p>
-
-<pre><code>Error: Could not find sample "HerokuShaders" in project ""
-</code></pre>
-
-<p>HTML5はそのまま実行出来た。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2014/01/openfl12.jpg" alt="HerokuShaders in HTML5" /></p>
-
-<p>ちょっと重かったけど、そのまま動いたのはすごい。<br/>
-てか、このサンプルは何を使ってるんだろう？</p>
-
-<h4>参考</h4>
-
-<p>冒頭で上げた<a href="https://plus.google.com/102594170131511973965/pos]ts">池田さん</a>のインストール動画は以下。</p>
-
-<iframe width="100%" height="315" src="http://kayakuguri.github.io//www.youtube.com/embed/MYHFJICUzzI" frameborder="0" allowfullscreen></iframe>
-
 ]]></content>
   </entry>
   
