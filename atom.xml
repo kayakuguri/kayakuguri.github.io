@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2014-05-14T11:22:36+09:00</updated>
+  <updated>2014-05-15T15:47:05+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,38 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[SOQLでルックアップ先データを取得する]]></title>
+    <link href="http://kayakuguri.github.io/blog/2014/05/15/soql-relationship/"/>
+    <updated>2014-05-15T15:34:57+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2014/05/15/soql-relationship</id>
+    <content type="html"><![CDATA[<p>SalseforceでSOQLを使用してルックアップ先のデータを取得する方法。</p>
+
+<!-- more -->
+
+
+<p>単純に、ルックアップ先を指定している項目名を使用して指定する。<br/>
+その際、通常カスタム項目の参照方法、<code>__c</code>ではなくて、<code>__r</code>を使用する。以上。</p>
+
+<p>例：取引先(Account)で作成したカスタム項目、Companyに入っている先から取得する場合<br/>
+(参照先のオブジェクト名は気にしない)</p>
+
+<pre><code>SELECT id, name, Company__r.Name FROM Account
+</code></pre>
+
+<p>Accountのid、nameと、Companyに入っているオブジェクトのname項目を取得出来る。</p>
+
+<p>これをapex上で使用して、Companyのname項目を取得したい場合は以下。</p>
+
+<pre><code>List&lt;Account&gt; list= [select Name ,Company__r.Name from Account];
+System.debug(list[0].Company__r.Name);
+</code></pre>
+
+<p>ちなみに、この場合は、<strong>参照関係</strong>と言うよう。<br/>
+<a href="http://blog.flect.co.jp/salesforce/2010/07/post-2e88.html">参照関係と主従関係</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[heokuで既存アプリにビルドパックを適用させる]]></title>
@@ -1738,49 +1770,6 @@ function check(){
 <p>注意点としては、エラーページに遷移しなくていい場合には、<br/>
 自身のページを指定してしまうと、無限ループに入って、内部サーバーエラー、となってしまう。<br/>
 なので、遷移しなくていい場合は、<code>null</code>を返しておくと大丈夫なよう。</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[CodenvyとherokuでブラウザのみでRailsアプリを作成する その2]]></title>
-    <link href="http://kayakuguri.github.io/blog/2014/02/04/railsapp-on-codenvy-and-heroku-2/"/>
-    <updated>2014-02-04T11:40:08+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2014/02/04/railsapp-on-codenvy-and-heroku-2</id>
-    <content type="html"><![CDATA[<p>まずはそのままの状態でherokuにcommit、pushしてみる。</p>
-
-<!-- more -->
-
-
-<p>コミットして、、</p>
-
-<p><img src="http://kayakuguri.github.io/images/2014/02/IDE1.jpg" alt="commit" /><br/>
-<img src="http://kayakuguri.github.io/images/2014/02/IDE2.jpg" alt="commit" /></p>
-
-<p>プッシュして。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2014/02/IDE3.jpg" alt="push" /><br/>
-<img src="http://kayakuguri.github.io/images/2014/02/IDE4.jpg" alt="push" /></p>
-
-<p>プッシュ先とユーザー名は複数ある場合は選べる。<br/>
-現状は一つしかないので、そのまま。</p>
-
-<p>少し待つと成功したので、heroku側でログを確認。<br/>
-すると以下のような表示。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2014/02/heroku1.jpg" alt="heroku log" /></p>
-
-<p>rubyアプリを使う準備がプッシュしたことによって構築されたみたい。<br/>
-トップでの表示はこんな感じ。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2014/02/heroku2.jpg" alt="heroku top" /></p>
-
-<p>現状、ページにアクセスすると以下のような表示になっている。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2014/02/ruby_site.jpg" alt="heroku page" /></p>
-
-<blockquote><p>ただし、デフォルトではこれらのものはすべてセットで用意しないと動きません。<br/>
-Controllerだけ作ればいいや、とはいかないのです。全部を用意して動かすのがRailsの基本なのです。<br/>
-<a href="http://libro.tuyano.com/index3?id=790003">http://libro.tuyano.com/index3?id=790003</a></p></blockquote>
 ]]></content>
   </entry>
   
