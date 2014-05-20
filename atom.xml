@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2014-05-15T15:47:05+09:00</updated>
+  <updated>2014-05-20T18:45:05+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -14,7 +14,124 @@
 
   
   <entry>
-    <title type="html"><![CDATA[SOQLでルックアップ先データを取得する]]></title>
+    <title type="html"><![CDATA[[SalesForce]チェックボックス付きのテーブルリストを作る]]></title>
+    <link href="http://kayakuguri.github.io/blog/2014/05/20/pageblocktable-with-checkbox/"/>
+    <updated>2014-05-20T18:11:21+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2014/05/20/pageblocktable-with-checkbox</id>
+    <content type="html"><![CDATA[<p>チェックボックスがついたテーブルのリストを<br/>
+カスタマイズされた項目で作成してみた。</p>
+
+<!-- more -->
+
+
+<p>参考サイト：<br/>
+<a href="http://blog.livedoor.jp/totalsoft/archives/3017384.html">[Visualforce] チェックボックスつきリストの実現（ページング機能つき） [技術情報]</a><br/>
+<a href="http://system21sf.seesaa.net/article/135800427.html">チェックボックス付きリストの作り方</a></p>
+
+<p>２つ目の参考サイトによると、</p>
+
+<blockquote><p>&lt;apex:listViews>を使えばあっという間に作れてしまいますが、残念ながらそこでチェックされたレコードをサーバー側で取得することができません。</p></blockquote>
+
+<p>そうなので、任意のオブジェクトをラップしたクラスを作成してそのオブジェクトにチェックされた項目を保存することになる。<br/>
+上記２つの参考サイトではページングなどで結構ややこしくなっているので、<br/>
+なるべく簡易に、オブジェクトのラッパークラスを使うことだけに注目して作成してみた。</p>
+
+<p>ちなみに、標準の<code>Attachment</code>オブジェクトではリストを作成出来なかった。<br/>
+(サポートしてない、的なエラーが出た)</p>
+
+<p>標準オブジェクトでは確認していないので、カスタムオブジェクトでの方法を例に上げる。</p>
+
+<p>オーバーライドするオブジェクト：HogeObject__c</p>
+
+<p><strong>オーバーライドしたクラス</strong></p>
+
+<pre><code>public class  HogeObjectWrapper {
+
+    public HogeObject__c Record {get; private set;}  //元のオブジェクト格納
+    public Boolean selected {get; set;} //チェックボックス用
+    public String hogeName {get; set;} //追加する項目(あれば)
+
+    public HogeObjectWrapper(Position__c record) {
+        this.Record = record;
+        this.selected = false; //デフォルト値
+        this.hogeName = '';
+    }
+}
+</code></pre>
+
+<p>ページで指定しているapexクラスで使用する</p>
+
+<pre><code>public class hogePageController {
+    public Lead lead { get; set; }
+
+    public List&lt;HogeObjectWrapper&gt; HogeObjectSelects; //リスト格納用
+
+    //コンストラクタ
+    public hogePageController(ApexPages.StandardController controller) {
+        //コンストラクタで表示するリストを取得しておく
+        AttachmentObjectSelects= new List&lt;SendmailAttachmentWrapper&gt;();
+
+        List&lt;HogeObject__c&gt; hogeLists = [SELECT Id, Name FROM HogeObject__c];
+        for(HogeObject__c h:hogeLists){
+            //ラッパークラスに代入する
+            HogeObjectWrapper hObj = new HogeObjectWrapper(h);
+            hObj.hogeName = '何かしらの名前';
+            HogeObjectSelects.add(hObj);
+        }
+    }
+
+    //ページからの参照用
+    public List&lt;HogeObjectWrapper&gt; getHogeObjectSelects() {
+        return HogeObjectSelects;
+    }
+}
+</code></pre>
+
+<p><strong>VisualForceページ</strong></p>
+
+<pre><code>&lt;apex:pageBlock &gt;
+    &lt;apex:pageBlockTable value="{!HogeObjectSelects}" var="h"&gt;
+        &lt;apex:column &gt;
+            &lt;apex:facet name="header"&gt;チェックボックス&lt;/apex:facet&gt;
+            &lt;apex:inputCheckbox value="{! a.selected }"/&gt;
+        &lt;/apex:column&gt;
+        &lt;apex:column &gt;
+            &lt;apex:facet name="header"&gt;オブジェクトのID&lt;/apex:facet&gt;
+            &lt;apex:outputText value="{! h.Record.id }" /&gt;
+        &lt;/apex:column&gt;
+        &lt;apex:column &gt;
+            &lt;apex:facet name="header"&gt;任意の名前&lt;/apex:facet&gt;
+            &lt;apex:outputText value="{! h.hogeName }" /&gt;
+        &lt;/apex:column&gt;
+    &lt;/apex:pageBlockTable&gt;
+&lt;/apex:pageBlock&gt;
+</code></pre>
+
+<p><code>pageBlockTable</code>を使用するには、<code>pageBlock</code>で囲まないといけない。<br/>
+<a href="http://www.salesforce.com/us/developer/docs/pages/Content/pages_compref_pageBlockTable.htm">apex:pageBlockTable</a><br/>
+<code>apex:facet</code>は、<code>apex:column</code>内で使用し、そのテーブル内の列の見出しとなる。<br/>
+<a href="https://www.salesforce.com/us/developer/docs/pages/Content/pages_compref_facet.htm">apex:facet</a><br/>
+参考：<a href="http://www30304u.sakura.ne.jp/blog/?p=510">[SFDC]一覧表にリンクを表示したい（ヘッダタイトルもつける）</a></p>
+
+<p>これで、一番左の列にチェックボックスのついたテーブルが完成した。</p>
+
+<p>チェックして送信した場合、<code>HogeObjectSelects</code>の<code>selected</code>がtrueになる。<br/>
+そこからデータを取得出来る。<br/>
+forで回して、selectedがtrueになっている場合に何かしらをする、、というストーリーが想定される。</p>
+
+<p>apexでの使用方法</p>
+
+<pre><code>for(HogeObjectWrapper h:HogeObjectSelects){
+    if(h.selected){
+        //tureの時、何かの処理をする
+    }
+}
+</code></pre>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[SalesForce]SOQLでルックアップ先データを取得する]]></title>
     <link href="http://kayakuguri.github.io/blog/2014/05/15/soql-relationship/"/>
     <updated>2014-05-15T15:34:57+09:00</updated>
     <id>http://kayakuguri.github.io/blog/2014/05/15/soql-relationship</id>
@@ -1725,51 +1842,6 @@ function check(){
 <p>これで、連打しても大丈夫。</p>
 
 <p>参考：<a href="http://blog.livedoor.jp/volvic_beer/archives/52301425.html">http://blog.livedoor.jp/volvic_beer/archives/52301425.html</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Visualforceページでカスタムコントローラーを指定する]]></title>
-    <link href="http://kayakuguri.github.io/blog/2014/02/06/apex-page/"/>
-    <updated>2014-02-06T13:00:31+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2014/02/06/apex-page</id>
-    <content type="html"><![CDATA[<p>タイトルの通りだけのメモ。</p>
-
-<!-- more -->
-
-
-<p>visualforceのページ内の冒頭、<code>&lt;apex:page&gt;</code>内で、<br/>
-<code>extensions="RemindController"</code>という風に指定する。</p>
-
-<pre><code>&lt;apex:page standardController="Lead" extensions="CustomController" &gt;
-</code></pre>
-
-<p>この指定をしておくことで、<code>action</code>内で参照する関数は、指定したクラス内から呼び出されるようになる。</p>
-
-<p>また、VisualForce内の冒頭、<code>apex:page</code>タグ内で、<code>action</code>を指定して、そこで関数を実行するようにする。<br/>
-すると、ページアクセス時にまず呼び出されるようになる。</p>
-
-<p>[VisualForce]</p>
-
-<pre><code>&lt;apex:page standardController="Lead" action="{!checkKey}" &gt;
-</code></pre>
-
-<p>[apexクラス]</p>
-
-<pre><code>public Pagereference checkKey(){
-    if(/*処理*/){
-        reutrn Page.xx;
-    }else{
-        return null;
-    }
-}
-</code></pre>
-
-<p>参考：<a href="http://www.kokyakukanri.info/salesforce/blog/2010/11/urlkey.html">ページを開いた段階でURLに含まれるKeyなどが不足している場合に、 別ページに遷移させる方法。</a></p>
-
-<p>注意点としては、エラーページに遷移しなくていい場合には、<br/>
-自身のページを指定してしまうと、無限ループに入って、内部サーバーエラー、となってしまう。<br/>
-なので、遷移しなくていい場合は、<code>null</code>を返しておくと大丈夫なよう。</p>
 ]]></content>
   </entry>
   

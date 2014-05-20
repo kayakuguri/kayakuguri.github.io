@@ -4,7 +4,7 @@
   <title><![CDATA[Category: salesforce | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/salesforce/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2014-05-15T15:47:05+09:00</updated>
+  <updated>2014-05-20T18:45:05+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -14,7 +14,124 @@
 
   
   <entry>
-    <title type="html"><![CDATA[SOQLでルックアップ先データを取得する]]></title>
+    <title type="html"><![CDATA[[SalesForce]チェックボックス付きのテーブルリストを作る]]></title>
+    <link href="http://kayakuguri.github.io/blog/2014/05/20/pageblocktable-with-checkbox/"/>
+    <updated>2014-05-20T18:11:21+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2014/05/20/pageblocktable-with-checkbox</id>
+    <content type="html"><![CDATA[<p>チェックボックスがついたテーブルのリストを<br/>
+カスタマイズされた項目で作成してみた。</p>
+
+<!-- more -->
+
+
+<p>参考サイト：<br/>
+<a href="http://blog.livedoor.jp/totalsoft/archives/3017384.html">[Visualforce] チェックボックスつきリストの実現（ページング機能つき） [技術情報]</a><br/>
+<a href="http://system21sf.seesaa.net/article/135800427.html">チェックボックス付きリストの作り方</a></p>
+
+<p>２つ目の参考サイトによると、</p>
+
+<blockquote><p>&lt;apex:listViews>を使えばあっという間に作れてしまいますが、残念ながらそこでチェックされたレコードをサーバー側で取得することができません。</p></blockquote>
+
+<p>そうなので、任意のオブジェクトをラップしたクラスを作成してそのオブジェクトにチェックされた項目を保存することになる。<br/>
+上記２つの参考サイトではページングなどで結構ややこしくなっているので、<br/>
+なるべく簡易に、オブジェクトのラッパークラスを使うことだけに注目して作成してみた。</p>
+
+<p>ちなみに、標準の<code>Attachment</code>オブジェクトではリストを作成出来なかった。<br/>
+(サポートしてない、的なエラーが出た)</p>
+
+<p>標準オブジェクトでは確認していないので、カスタムオブジェクトでの方法を例に上げる。</p>
+
+<p>オーバーライドするオブジェクト：HogeObject__c</p>
+
+<p><strong>オーバーライドしたクラス</strong></p>
+
+<pre><code>public class  HogeObjectWrapper {
+
+    public HogeObject__c Record {get; private set;}  //元のオブジェクト格納
+    public Boolean selected {get; set;} //チェックボックス用
+    public String hogeName {get; set;} //追加する項目(あれば)
+
+    public HogeObjectWrapper(Position__c record) {
+        this.Record = record;
+        this.selected = false; //デフォルト値
+        this.hogeName = '';
+    }
+}
+</code></pre>
+
+<p>ページで指定しているapexクラスで使用する</p>
+
+<pre><code>public class hogePageController {
+    public Lead lead { get; set; }
+
+    public List&lt;HogeObjectWrapper&gt; HogeObjectSelects; //リスト格納用
+
+    //コンストラクタ
+    public hogePageController(ApexPages.StandardController controller) {
+        //コンストラクタで表示するリストを取得しておく
+        AttachmentObjectSelects= new List&lt;SendmailAttachmentWrapper&gt;();
+
+        List&lt;HogeObject__c&gt; hogeLists = [SELECT Id, Name FROM HogeObject__c];
+        for(HogeObject__c h:hogeLists){
+            //ラッパークラスに代入する
+            HogeObjectWrapper hObj = new HogeObjectWrapper(h);
+            hObj.hogeName = '何かしらの名前';
+            HogeObjectSelects.add(hObj);
+        }
+    }
+
+    //ページからの参照用
+    public List&lt;HogeObjectWrapper&gt; getHogeObjectSelects() {
+        return HogeObjectSelects;
+    }
+}
+</code></pre>
+
+<p><strong>VisualForceページ</strong></p>
+
+<pre><code>&lt;apex:pageBlock &gt;
+    &lt;apex:pageBlockTable value="{!HogeObjectSelects}" var="h"&gt;
+        &lt;apex:column &gt;
+            &lt;apex:facet name="header"&gt;チェックボックス&lt;/apex:facet&gt;
+            &lt;apex:inputCheckbox value="{! a.selected }"/&gt;
+        &lt;/apex:column&gt;
+        &lt;apex:column &gt;
+            &lt;apex:facet name="header"&gt;オブジェクトのID&lt;/apex:facet&gt;
+            &lt;apex:outputText value="{! h.Record.id }" /&gt;
+        &lt;/apex:column&gt;
+        &lt;apex:column &gt;
+            &lt;apex:facet name="header"&gt;任意の名前&lt;/apex:facet&gt;
+            &lt;apex:outputText value="{! h.hogeName }" /&gt;
+        &lt;/apex:column&gt;
+    &lt;/apex:pageBlockTable&gt;
+&lt;/apex:pageBlock&gt;
+</code></pre>
+
+<p><code>pageBlockTable</code>を使用するには、<code>pageBlock</code>で囲まないといけない。<br/>
+<a href="http://www.salesforce.com/us/developer/docs/pages/Content/pages_compref_pageBlockTable.htm">apex:pageBlockTable</a><br/>
+<code>apex:facet</code>は、<code>apex:column</code>内で使用し、そのテーブル内の列の見出しとなる。<br/>
+<a href="https://www.salesforce.com/us/developer/docs/pages/Content/pages_compref_facet.htm">apex:facet</a><br/>
+参考：<a href="http://www30304u.sakura.ne.jp/blog/?p=510">[SFDC]一覧表にリンクを表示したい（ヘッダタイトルもつける）</a></p>
+
+<p>これで、一番左の列にチェックボックスのついたテーブルが完成した。</p>
+
+<p>チェックして送信した場合、<code>HogeObjectSelects</code>の<code>selected</code>がtrueになる。<br/>
+そこからデータを取得出来る。<br/>
+forで回して、selectedがtrueになっている場合に何かしらをする、、というストーリーが想定される。</p>
+
+<p>apexでの使用方法</p>
+
+<pre><code>for(HogeObjectWrapper h:HogeObjectSelects){
+    if(h.selected){
+        //tureの時、何かの処理をする
+    }
+}
+</code></pre>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[SalesForce]SOQLでルックアップ先データを取得する]]></title>
     <link href="http://kayakuguri.github.io/blog/2014/05/15/soql-relationship/"/>
     <updated>2014-05-15T15:34:57+09:00</updated>
     <id>http://kayakuguri.github.io/blog/2014/05/15/soql-relationship</id>
@@ -298,135 +415,6 @@ return Page.FormComplete.setRedirect(true);
 
 <p>しかしこれをしてしまうと、最初に書いた判定用のフラグの値も引き継がれないので、<br/>
 逆に値がなければエラー、という流れで作ったほうがいいかもしれません。</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[apexからPOSTでファイルを送信する 改訂版]]></title>
-    <link href="http://kayakuguri.github.io/blog/2014/02/27/submit-base64/"/>
-    <updated>2014-02-27T13:41:16+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2014/02/27/submit-base64</id>
-    <content type="html"><![CDATA[<p><a href="http://kayakuguri.github.io/blog/2014/02/26/submit-callout-with-multipart/">前回のファイル送信</a>の動作確認版。</p>
-
-<!-- more -->
-
-
-<p>まず、やりたいこととして、<br/>
-saleseforceで作成したページからファイルをherokuで作成したapiに送信して、<br/>
-herokuのapiからそのファイルを添付で送信したかった。</p>
-
-<p>結論としては以下の手順で動作した。</p>
-
-<ol>
-<li>visualforceで<code>apex:inputFile</code>を使用してファイルをアプロード</li>
-<li>apexでファイルを受け取り、そのファイルを<code>base64エンコード</code>。</li>
-<li>base64エンコードした文字列をPOSTのパラメータとして送信</li>
-<li>herokuにアップしているphpでPOSTデータを受け取る</li>
-<li>受け取ったbase64データをデコードして保存(一時的)</li>
-<li>保存されたファイルからQdmailを使用してメールを送信</li>
-</ol>
-
-
-<hr />
-
-<p>1) visualforceで<code>apex:inputFile</code>を使用してファイルをアプロード<br/>
-visualforceページでのinputの書き方</p>
-
-<pre><code>&lt;apex:input value="{!Email}" /&gt;
-&lt;apex:inputFile value="{!FileBody}" filename="{!FileName}"/&gt;
-</code></pre>
-
-<p>2) apexでファイルを受け取り、そのファイルを<code>base64エンコード</code>。<br/>
-3) base64エンコードした文字列をPOSTのパラメータとして送信<br/>
-apex側で受け取る</p>
-
-<pre><code>public String FileName { get; set; }
-public Blob FileBody { get; set; }
-public String Email { get; set; }
-
-public Pagereference submit() {
-    HttpRequest request = new HttpRequest();
-    request.setEndpoint('送信先のphp');
-    request.setMethod('POST');
-    request.setHeader('Accept-Language', 'ja');
-    //パラメータ
-    Map&lt;String, String&gt; params = new Map&lt;String, String&gt;();
-    params.put('to', Email);  //送信先
-    params.put('attachName', FileName); //ファイル名
-    params.put('attach', EncodingUtil.base64Encode(FileBody)); //ファイル内容
-    Set&lt;String&gt; keys = params.keySet();
-    String r = '';
-    for(String key : keys) {
-        //body用にパラメータを整形 to=xx&amp;attach=xx のように
-        String val = params.get(key);
-        r += key + '=';
-        if(val != null) r += val;
-        r += '&amp;';
-    }
-    r = r.removeEnd('&amp;');
-    request.setBody(r);
-
-    //送信
-    Http http = new Http();
-    HttpResponse response = http.send(request);
-    ResResult = response.getBody(); //結果を受け取る
-}
-</code></pre>
-
-<p>4) herokuにアップしているphpでPOSTデータを受け取る<br/>
-5) 受け取ったbase64データをデコードして保存(一時的)<br/>
-6) 保存されたファイルからQdmailを使用してメールを送信</p>
-
-<p><a href="http://kayakuguri.github.io/blog/2014/02/18/php-heroku-sendattachmail/">Qdmailでの送信方法は以前の投稿を参照。</a></p>
-
-<pre><code>require_once('../lib/qdmail.php');
-require_once('../lib/qdsmtp.php');
-
-//送信内容
-$to          = $_POST['to'];
-$subject     = '件名';
-$body        = '本文';
-$fromname    = '送り先名';
-$fromaddress = '送り先アドレス';
-$attachname  = $_POST['attachName'];
-$attach      = $_POST['attach'];
-
-$mail = new Qdmail();
-$mail -&gt; smtp(true);
-$param = array(
-    'host'=&gt; $_ENV['MAILGUN_SMTP_SERVER'],
-    'port'=&gt; $_ENV['MAILGUN_SMTP_PORT'],
-    'from'=&gt; $fromaddress,
-    'protocol'=&gt;'SMTP_AUTH',
-    'user'=&gt; $_ENV['MAILGUN_SMTP_LOGIN'],
-    'pass' =&gt; $_ENV['MAILGUN_SMTP_PASSWORD']
-);
-$mail -&gt;smtpServer($param);
-$mail -&gt;to($to);
-$mail -&gt;subject($subject);
-$mail -&gt;from($fromaddress,$fromname);
-$mail -&gt;text($body);
-
-//添付ファイル
-$bin = base64_decode(str_replace(' ', '+', $_POST['attach'][0])); //注意
-$fp = fopen( "./" . $_POST['attachName'][0], "w" );
-fwrite( $fp, $bin );
-fclose( $fp );
-$attach = array();
-$attach[] = array( "./" . $_POST['attachName'][0] , $_POST['attachName'][0] );
-
-//送信
-echo $mail -&gt;send(); //成功の場合は「1」が返ってくる
-</code></pre>
-
-<p>Base64デコードしてファイルに保存する方法は以下を参考にしました。<br/>
-<a href="http://blog.nipx.jp/archives/4137">Flashからアップロードする方法いろいろ</a><br/>
-ただし、そのままではエラーになることがあるよう。</p>
-
-<blockquote><p>どうやら、POSTでデータを渡すと、Base64の「+」記号が勝手にスペースに変換されてしまうらしい。<br/>
-<a href="http://pontago.hatenablog.com/entry/20091028/1256743421">http://pontago.hatenablog.com/entry/20091028/1256743421</a></p></blockquote>
-
-<p>(ヘッダ分を差し引く、の部分は無視しても問題なかった)</p>
 ]]></content>
   </entry>
   
