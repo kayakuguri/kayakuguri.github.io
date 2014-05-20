@@ -131,7 +131,7 @@
     public Boolean selected {get; set;} //チェックボックス用
     public String hogeName {get; set;} //追加する項目(あれば)
 
-    public HogeObjectWrapper(Position__c record) {
+    public HogeObjectWrapper(HogeObject__c record) {
         this.Record = record;
         this.selected = false; //デフォルト値
         this.hogeName = '';
