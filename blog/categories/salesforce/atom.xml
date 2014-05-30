@@ -4,7 +4,7 @@
   <title><![CDATA[Category: salesforce | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/salesforce/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2014-05-20T18:47:55+09:00</updated>
+  <updated>2014-05-30T16:47:14+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,117 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[SalesForce]apex:inputFileで添付されたファイルの種類をチェックする]]></title>
+    <link href="http://kayakuguri.github.io/blog/2014/05/30/apex-inputfile-contenttype/"/>
+    <updated>2014-05-30T15:59:00+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2014/05/30/apex-inputfile-contenttype</id>
+    <content type="html"><![CDATA[<p>添付されたファイルが指定のものかどうかをチェックする。</p>
+
+<!-- more -->
+
+
+<h4>1.inputタグのacceptで制限</h4>
+
+<p>一番簡単な方法だけど、ブラウザによっては効かないものもあり。<br/>
+salseforce独自の方法というわけではなく、一般的なもの。</p>
+
+<p><a href="http://yokano-jp.blogspot.jp/2013/08/accept.html">accept 属性でアップロードするファイルフォーマットを指定</a></p>
+
+<h4>2.contenttypeを取得</h4>
+
+<p>以下のように指定することで、選択されたファイルのcontenttype (MIMEタイプ)を取得出来る。</p>
+
+<p>[VisualForce]</p>
+
+<pre><code>&lt;apex:inputFile fileName="{!upload.name}" value="{!upload.body}" contentType="{!upload.contentType}" /&gt;
+</code></pre>
+
+<p>[apexクラス]</p>
+
+<pre><code>//Documentに保存する場合
+public Document upload { get; set; }
+
+//確認ボタンが押された場合
+public Pagereference confirm() {
+    String ctype = upload.ContentType; //ContentTypeを取得
+    if(ctype != 'image/jpeg'){
+        // エラーにする
+    }
+}
+</code></pre>
+
+<p>以下、主なcontenttype。(METAタイプ)</p>
+
+<table>
+<thead>
+<tr>
+<th>contenttype </th>
+<th> 種類</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>image/jpeg </td>
+<td> JPG画像</td>
+</tr>
+<tr>
+<td>application/pdf </td>
+<td> PDF</td>
+</tr>
+<tr>
+<td>application/vnd.ms-excel </td>
+<td> エクセル(.xls)</td>
+</tr>
+<tr>
+<td>application/vnd.openxmlformats-officedocument.spreadsheetml.sheet </td>
+<td> エクセル(.xlsx)</td>
+</tr>
+<tr>
+<td>application/msword </td>
+<td> ワード(.doc)</td>
+</tr>
+<tr>
+<td>application/vnd.openxmlformats-officedocument.wordprocessingml.document </td>
+<td> ワード(.docx)</td>
+</tr>
+</tbody>
+</table>
+
+
+<p>ただし、macでエクセルなどを添付した場合に、このcontenttypeが、<br/>
+<code>application/octet-stream</code>になってしまった場合があった。<br/>
+このタイプはファイルタイプが不明、の場合になるよう。<br/>
+(たぶん、使用しているPCが不明なタイプと判断している場合にそうなる可能性がある)</p>
+
+<p>その場合には、拡張子で判断するようにした。</p>
+
+<h4>3.拡張子で判断</h4>
+
+<p>単純に、ファイル名から、ドットで区切って文字列を取得。<br/>
+その文字列と判定、とした。<br/>
+上記のapexクラスに追記</p>
+
+<pre><code>if(ctype != 'image/jpeg'){
+    if(ctype == 'application/octet-stream'){
+        List&lt;String&gt; names = upload.Name.split('\\.');
+        String dotex = names[names.size() - 1];
+        if(dotex != 'jpg'){
+            //エラー
+        }
+    }else{
+        //エラー
+    }
+}
+</code></pre>
+
+<h4>まとめ</h4>
+
+<p>これで単純に、ファイルタイプと拡張子によるチェックは出来るかと思います。<br/>
+が、PC側で拡張子を変更するだけで偽装できてしまうので、確実なチェックをしようと思うと、別アプローチが必要になるかと思います。</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[SalesForce]チェックボックス付きのテーブルリストを作る]]></title>
@@ -356,65 +467,6 @@ c.testMethod();
 
 <pre><code>15:11:05.049 (49728000)|USER_DEBUG|[46]|DEBUG|Hello world!
 </code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Visual Forceでのブラウザバック対策]]></title>
-    <link href="http://kayakuguri.github.io/blog/2014/03/20/sf-browser-back/"/>
-    <updated>2014-03-20T10:50:36+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2014/03/20/sf-browser-back</id>
-    <content type="html"><![CDATA[<p>salseforceでフォームを作成している際、<br/>
-完了画面を表示させた後にブラウザで戻るボタンを押すと、<br/>
-フォームや確認画面に戻ってしまい、更に入力した内容が表示されてしまう。</p>
-
-<p>このまま何も対策を取っていないと、二重送信されてしまうおそれがあるので、<br/>
-対策を考えてみた。</p>
-
-<!-- more -->
-
-
-<p>基本的な考え方は以下の通り。</p>
-
-<p><a href="http://piyopiyocs.blog115.fc2.com/blog-entry-6.html">セッションとhistory.back()とブラウザの戻るボタン。</a></p>
-
-<p>まずは、上記と同じように、一度送信が完了した段階で、<br/>
-それとわかるフラグを立てておきます。<br/>
-再度入力画面を表示させようとすると、このフラグが立った状態だとエラー画面へ遷移するように設定しておきます。</p>
-
-<p>しかし、salseforceでデフォルトの設定のまま(?)作業すると、<br/>
-戻るボタンを押した際には、キャッシュされたページが表示されます。<br/>
-(入力された値も含めて)</p>
-
-<p>なので、キャッシュを無効にして、ページが無条件で表示されないようにします。<br/>
-入力ページの冒頭に以下の設定を入れます。</p>
-
-<pre><code>&lt;apex:page . . .  cache="false" &gt;
-</code></pre>
-
-<p>こうすると、完了画面に遷移後、この入力ページへ戻ってくると、<br/>
-「フォーム内容を再送信して下さい。」のような画面が表示され、リロードせざる得なくなります。<br/>
-そうすることで、フラグを判定してエラーページへ遷移させることが出来ました。</p>
-
-<hr />
-
-<p>この事を調査している時に知ったのですが、<br/>
-(基本的な事のようですが、)<br/>
-<code>setRedirect</code>を利用すると、値を引き継ぐか、URLを変更するか、が選べるようです。</p>
-
-<blockquote><p>画面遷移する際にPageReferenceのsetRedirect(false)を使用することで変数の値を引き継ぐことができます。<br/>
-&ndash; <a href="http://tyoshikawa1106.hatenablog.com/entry/2013/05/03/234647">SFDC：2つのVFページと同一コントローラ</a></p></blockquote>
-
-<p>デフォルトではfalseに設定されているようです。<br/>
-なので、確認画面への遷移などでは、URLは変わらず、同一コントローラー内の値も引き継がれます。<br/>
-しかし、完了画面への遷移の際は値は必要なく、URLも変わって欲しいので、上記をtrueで遷移させた方が良さそうです。</p>
-
-<pre><code>//apexクラスの関数内で
-return Page.FormComplete.setRedirect(true);
-</code></pre>
-
-<p>しかしこれをしてしまうと、最初に書いた判定用のフラグの値も引き継がれないので、<br/>
-逆に値がなければエラー、という流れで作ったほうがいいかもしれません。</p>
 ]]></content>
   </entry>
   

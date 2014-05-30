@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2014-05-20T18:47:55+09:00</updated>
+  <updated>2014-05-30T16:47:14+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,117 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[SalesForce]apex:inputFileで添付されたファイルの種類をチェックする]]></title>
+    <link href="http://kayakuguri.github.io/blog/2014/05/30/apex-inputfile-contenttype/"/>
+    <updated>2014-05-30T15:59:00+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2014/05/30/apex-inputfile-contenttype</id>
+    <content type="html"><![CDATA[<p>添付されたファイルが指定のものかどうかをチェックする。</p>
+
+<!-- more -->
+
+
+<h4>1.inputタグのacceptで制限</h4>
+
+<p>一番簡単な方法だけど、ブラウザによっては効かないものもあり。<br/>
+salseforce独自の方法というわけではなく、一般的なもの。</p>
+
+<p><a href="http://yokano-jp.blogspot.jp/2013/08/accept.html">accept 属性でアップロードするファイルフォーマットを指定</a></p>
+
+<h4>2.contenttypeを取得</h4>
+
+<p>以下のように指定することで、選択されたファイルのcontenttype (MIMEタイプ)を取得出来る。</p>
+
+<p>[VisualForce]</p>
+
+<pre><code>&lt;apex:inputFile fileName="{!upload.name}" value="{!upload.body}" contentType="{!upload.contentType}" /&gt;
+</code></pre>
+
+<p>[apexクラス]</p>
+
+<pre><code>//Documentに保存する場合
+public Document upload { get; set; }
+
+//確認ボタンが押された場合
+public Pagereference confirm() {
+    String ctype = upload.ContentType; //ContentTypeを取得
+    if(ctype != 'image/jpeg'){
+        // エラーにする
+    }
+}
+</code></pre>
+
+<p>以下、主なcontenttype。(METAタイプ)</p>
+
+<table>
+<thead>
+<tr>
+<th>contenttype </th>
+<th> 種類</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>image/jpeg </td>
+<td> JPG画像</td>
+</tr>
+<tr>
+<td>application/pdf </td>
+<td> PDF</td>
+</tr>
+<tr>
+<td>application/vnd.ms-excel </td>
+<td> エクセル(.xls)</td>
+</tr>
+<tr>
+<td>application/vnd.openxmlformats-officedocument.spreadsheetml.sheet </td>
+<td> エクセル(.xlsx)</td>
+</tr>
+<tr>
+<td>application/msword </td>
+<td> ワード(.doc)</td>
+</tr>
+<tr>
+<td>application/vnd.openxmlformats-officedocument.wordprocessingml.document </td>
+<td> ワード(.docx)</td>
+</tr>
+</tbody>
+</table>
+
+
+<p>ただし、macでエクセルなどを添付した場合に、このcontenttypeが、<br/>
+<code>application/octet-stream</code>になってしまった場合があった。<br/>
+このタイプはファイルタイプが不明、の場合になるよう。<br/>
+(たぶん、使用しているPCが不明なタイプと判断している場合にそうなる可能性がある)</p>
+
+<p>その場合には、拡張子で判断するようにした。</p>
+
+<h4>3.拡張子で判断</h4>
+
+<p>単純に、ファイル名から、ドットで区切って文字列を取得。<br/>
+その文字列と判定、とした。<br/>
+上記のapexクラスに追記</p>
+
+<pre><code>if(ctype != 'image/jpeg'){
+    if(ctype == 'application/octet-stream'){
+        List&lt;String&gt; names = upload.Name.split('\\.');
+        String dotex = names[names.size() - 1];
+        if(dotex != 'jpg'){
+            //エラー
+        }
+    }else{
+        //エラー
+    }
+}
+</code></pre>
+
+<h4>まとめ</h4>
+
+<p>これで単純に、ファイルタイプと拡張子によるチェックは出来るかと思います。<br/>
+が、PC側で拡張子を変更するだけで偽装できてしまうので、確実なチェックをしようと思うと、別アプローチが必要になるかと思います。</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[SalesForce]チェックボックス付きのテーブルリストを作る]]></title>
@@ -1802,46 +1913,6 @@ if(!$mail-&gt;send()){
 
 <p>ただし、もちろんだけど、日本語で送信すると文字化けする。<br/>
 (Gmailの場合はなぜか本文は正しく表示出来た。件名は文字化けする)</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Visual Forceでの送信ボタン2度押し防止策]]></title>
-    <link href="http://kayakuguri.github.io/blog/2014/02/12/vf-doubleclick-check/"/>
-    <updated>2014-02-12T19:47:53+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2014/02/12/vf-doubleclick-check</id>
-    <content type="html"><![CDATA[<p>salesforceでvisualforceの<code>commandButton</code>で、ボタンを連打すると、<br/>
-送信が完了してページが遷移するまでに何度でもデータが送信されてしまう。</p>
-
-<p>単純に、apexクラス内で２度目はinsertしない、とかにしてればいいのだけど、<br/>
-それをvisualforceで完結させることが出来たので、メモ。</p>
-
-<!-- more -->
-
-
-<p><code>apex:commandButton</code>内で、<code>onclick</code>を使って、JSを呼んで、<br/>
-１度目だと<code>true</code>、2度目だと<code>false</code>を返すようにする。<br/>
-<code>true</code>が返って来た時だけ、<code>action</code>内の関数が実行される。</p>
-
-<pre><code>//JS
-&lt;script type="text/javascript"&gt;
-var isSave = false;
-function check(){
-    if (!isSave) {
-        isSave = true;
-        return true;
-    }
-    return false;
-}
-&lt;/script&gt;
-
-//HTML
-&lt;apex:commandButton action="{!save}" onclick="return check();" image="{!URLFOR($Resource.remind, 'images/btn_send.gif')}" alt="OK" /&gt;
-</code></pre>
-
-<p>これで、連打しても大丈夫。</p>
-
-<p>参考：<a href="http://blog.livedoor.jp/volvic_beer/archives/52301425.html">http://blog.livedoor.jp/volvic_beer/archives/52301425.html</a></p>
 ]]></content>
   </entry>
   
