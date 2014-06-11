@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: heroku,php | KayaMemo]]></title>
+  <link href="http://kayakuguri.github.io/blog/categories/heroku-php/atom.xml" rel="self"/>
+  <link href="http://kayakuguri.github.io/"/>
+  <updated>2014-06-11T16:56:45+09:00</updated>
+  <id>http://kayakuguri.github.io/</id>
+  <author>
+    <name><![CDATA[萱潜]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[herokuでPHP環境の構築]]></title>
+    <link href="http://kayakuguri.github.io/blog/2014/06/11/heroku-php/"/>
+    <updated>2014-06-11T16:35:35+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2014/06/11/heroku-php</id>
+    <content type="html"><![CDATA[<p>herokuがphpを公式にサポートしました。<br/>
+以前に<a href="http://kayakuguri.github.io/blog/2014/02/18/create-php-heroku-mbstring/">ビルドパックのを使用した環境の構築方法</a>を書きましたが、<br/>
+公式の作成方法も試してみました。</p>
+
+<!-- more -->
+
+
+<p><a href="https://devcenter.heroku.com/articles/php-support">Heroku PHP Support | Heroku Dev Center</a></p>
+
+<p>herokuでは基本、アップされたファイルからherokuが自動的に判定して環境を構築してくれます。<br/>
+で、PHPの場合は、<br/>
+<code>composer.json</code><br/>
+ファイルがルートにあれば、PHP環境と判定されて構築してくれる。</p>
+
+<p>現時点では作成されるバージョンはデフォルトでは、以下。</p>
+
+<blockquote><p>By default, Heroku runs PHP 5.5 (5.5.12, 64-bit).</p></blockquote>
+
+<p>バージョンを指定してやる場合は<code>composer.json</code>に以下のように記述。</p>
+
+<pre><code>{
+  "require": {
+    "php": "~5.5.12"
+  }
+}
+</code></pre>
+
+<p>ただし、サポートしているバージョンは以下のみ。</p>
+
+<ul>
+<li>5.5.11</li>
+<li>5.5.12</li>
+<li>5.5.13</li>
+</ul>
+
+
+<p>facebookが開発したというphpを高速に動作させる環境である、HipHop VMもサポートされており、<br/>
+(実験的に、と書いてあるので使用には注意)<br/>
+これもデフォルトではバージョンは以下。</p>
+
+<blockquote><p>HipHop VM (HHVM) (3.1.0, 64-bit)</p></blockquote>
+
+<p>使用する場合は以下のように記述。</p>
+
+<pre><code>{
+  "require": {
+    "hhvm": "~3.1.0"
+  }
+}
+</code></pre>
+
+<p>サポートしているバージョンは以下。</p>
+
+<ul>
+<li>3.0.1</li>
+<li>3.1.0</li>
+</ul>
+
+
+<hr />
+
+<p>mbStringはデフォルトでは有効になっていないので、以下のように記述することで有効に出来る。</p>
+
+<pre><code>{
+    "require": {
+        "ext-mbstring": "*"
+    }
+}
+</code></pre>
+
+<p>デプロイ結果</p>
+
+<pre><code>-----&gt; PHP app detected
+-----&gt; Setting up runtime environment...
+       - PHP 5.5.12
+       - Apache 2.4.9
+       - Nginx 1.4.6
+-----&gt; Installing PHP extensions:
+       - opcache (automatic; bundled, using 'ext-opcache.ini')
+       - mbstring (composer.json; bundled)
+. . .
+</code></pre>
+
+<p>デフォルトで有効になっている環境や拡張機能は以下を参考。<br/>
+<a href="https://devcenter.heroku.com/articles/php-support#php-5-5">https://devcenter.heroku.com/articles/php-support#php-5-5</a></p>
+
+<p>拡張機能はリストのカッコ内の単語を、<code>ext-</code>をつけて並べていく。<br/>
+ちなみに、<code>*</code>の部分はバージョンを指定する箇所で、<code>*</code>は自動で指定されるようになる。<br/>
+ドキュメント内には、<code>*</code>での指定が推奨されている。<br/>
+理由は、PHPのバージョンアップとは別に、各機能のバージョンアップが不定期に行われる可能性があるから、だそう。</p>
+
+<blockquote><p>It is strongly recommended that you use “*” as the version selector when specifying extensions, as their version numbers can be extremely inconsistent (most of them report their version as “0”) and Heroku will sometimes update extensions outside the regular PHP update cycles.</p></blockquote>
+
+<p>　</p>
+
+<hr />
+
+<p>ドキュメントルートの設定は、<code>Procfile</code>で指定する事ができる。<br/>
+<code>Procfile</code>ファイルは、heroku起動時に実行してくれるファイル。<br/>
+拡張子もなしで、<code>Procfile</code>という名前のファイルをルートに設置することで動作する。<br/>
+<a href="https://devcenter.heroku.com/articles/procfile">Process Types and the Procfile | Heroku Dev Center</a></p>
+
+<p>PHPを動作させるwebサーバを、Apacheか、Nginxを指定出来る。<br/>
+Apacheで動作させ、ドキュメントルートを<code>public/</code>にする場合は以下の記述を<code>Procfile</code>に追加する。</p>
+
+<pre><code>web: vendor/bin/heroku-php-apache2 public/
+</code></pre>
+
+<p>これで、public/がwebのドキュメントルートになる。</p>
+]]></content>
+  </entry>
+  
+</feed>
