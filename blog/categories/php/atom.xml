@@ -4,7 +4,7 @@
   <title><![CDATA[Category: php | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/php/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2014-06-19T21:10:51+09:00</updated>
+  <updated>2014-06-26T11:16:52+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,144 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Smartyのテンプレート内における中括弧の扱い]]></title>
+    <link href="http://kayakuguri.github.io/blog/2014/06/26/smarty-literal/"/>
+    <updated>2014-06-26T11:10:01+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2014/06/26/smarty-literal</id>
+    <content type="html"><![CDATA[<p>Smartyのカテゴリ内にコンバーションタグ用のJSを設置したところ、<br/>
+エラーが出てしまい、調べてみると、<code>{ }</code>内はSmaryのデリミタでPHPとして扱われてしまうことに起因していました。</p>
+
+<!-- more -->
+
+
+<p>考えれば当たり前の話だけど、回避方法が簡単だったのでメモ。<br/>
+そのJSを外部ファイル化する、が修正がなくて一番簡単だけれど、<br/>
+中に書き込む場合には、<strong><code>{</code>と<code>}</code>の前後にスペースを挟む</strong>、でOK。</p>
+
+<p>そんだけ。</p>
+
+<p><a href="http://www.smarty.net/docs/ja/language.escaping.tpl">Smarty の構文解析を回避する | Smarty</a></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[herokuでPHP環境の構築]]></title>
+    <link href="http://kayakuguri.github.io/blog/2014/06/11/heroku-php/"/>
+    <updated>2014-06-11T16:35:35+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2014/06/11/heroku-php</id>
+    <content type="html"><![CDATA[<p>herokuがphpを公式にサポートしました。<br/>
+以前に<a href="http://kayakuguri.github.io/blog/2014/02/18/create-php-heroku-mbstring/">ビルドパックのを使用した環境の構築方法</a>を書きましたが、<br/>
+公式の作成方法も試してみました。</p>
+
+<!-- more -->
+
+
+<p><a href="https://devcenter.heroku.com/articles/php-support">Heroku PHP Support | Heroku Dev Center</a></p>
+
+<p>herokuでは基本、アップされたファイルからherokuが自動的に判定して環境を構築してくれます。<br/>
+で、PHPの場合は、<br/>
+<code>composer.json</code><br/>
+ファイルがルートにあれば、PHP環境と判定されて構築してくれる。</p>
+
+<p>現時点では作成されるバージョンはデフォルトでは、以下。</p>
+
+<blockquote><p>By default, Heroku runs PHP 5.5 (5.5.12, 64-bit).</p></blockquote>
+
+<p>バージョンを指定してやる場合は<code>composer.json</code>に以下のように記述。</p>
+
+<pre><code>{
+  "require": {
+    "php": "~5.5.12"
+  }
+}
+</code></pre>
+
+<p>ただし、サポートしているバージョンは以下のみ。</p>
+
+<ul>
+<li>5.5.11</li>
+<li>5.5.12</li>
+<li>5.5.13</li>
+</ul>
+
+
+<p>facebookが開発したというphpを高速に動作させる環境である、HipHop VMもサポートされており、<br/>
+(実験的に、と書いてあるので使用には注意)<br/>
+これもデフォルトではバージョンは以下。</p>
+
+<blockquote><p>HipHop VM (HHVM) (3.1.0, 64-bit)</p></blockquote>
+
+<p>使用する場合は以下のように記述。</p>
+
+<pre><code>{
+  "require": {
+    "hhvm": "~3.1.0"
+  }
+}
+</code></pre>
+
+<p>サポートしているバージョンは以下。</p>
+
+<ul>
+<li>3.0.1</li>
+<li>3.1.0</li>
+</ul>
+
+
+<hr />
+
+<p>mbStringはデフォルトでは有効になっていないので、以下のように記述することで有効に出来る。</p>
+
+<pre><code>{
+    "require": {
+        "ext-mbstring": "*"
+    }
+}
+</code></pre>
+
+<p>デプロイ結果</p>
+
+<pre><code>-----&gt; PHP app detected
+-----&gt; Setting up runtime environment...
+       - PHP 5.5.12
+       - Apache 2.4.9
+       - Nginx 1.4.6
+-----&gt; Installing PHP extensions:
+       - opcache (automatic; bundled, using 'ext-opcache.ini')
+       - mbstring (composer.json; bundled)
+. . .
+</code></pre>
+
+<p>デフォルトで有効になっている環境や拡張機能は以下を参考。<br/>
+<a href="https://devcenter.heroku.com/articles/php-support#php-5-5">https://devcenter.heroku.com/articles/php-support#php-5-5</a></p>
+
+<p>拡張機能はリストのカッコ内の単語を、<code>ext-</code>をつけて並べていく。<br/>
+ちなみに、<code>*</code>の部分はバージョンを指定する箇所で、<code>*</code>は自動で指定されるようになる。<br/>
+ドキュメント内には、<code>*</code>での指定が推奨されている。<br/>
+理由は、PHPのバージョンアップとは別に、各機能のバージョンアップが不定期に行われる可能性があるから、だそう。</p>
+
+<blockquote><p>It is strongly recommended that you use “*” as the version selector when specifying extensions, as their version numbers can be extremely inconsistent (most of them report their version as “0”) and Heroku will sometimes update extensions outside the regular PHP update cycles.</p></blockquote>
+
+<p>　</p>
+
+<hr />
+
+<p>ドキュメントルートの設定は、<code>Procfile</code>で指定する事ができる。<br/>
+<code>Procfile</code>ファイルは、heroku起動時に実行してくれるファイル。<br/>
+拡張子もなしで、<code>Procfile</code>という名前のファイルをルートに設置することで動作する。<br/>
+<a href="https://devcenter.heroku.com/articles/procfile">Process Types and the Procfile | Heroku Dev Center</a></p>
+
+<p>PHPを動作させるwebサーバを、Apacheか、Nginxを指定出来る。<br/>
+Apacheで動作させ、ドキュメントルートを<code>public/</code>にする場合は以下の記述を<code>Procfile</code>に追加する。</p>
+
+<pre><code>web: vendor/bin/heroku-php-apache2 public/
+</code></pre>
+
+<p>これで、public/がwebのドキュメントルートになる。</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[apexからPOSTでファイルを送信する 改訂版]]></title>
@@ -338,151 +476,6 @@ upload_max_filesize = 8M
 </code></pre>
 
 <p>参考：<a href="http://tkyk.name/blog/2012/11/28/php-on-heroku/">Heroku上に最新のPHP5.4 + Nginx環境を30秒で構築する</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[herokuでmb-string付きのPHP環境を作る]]></title>
-    <link href="http://kayakuguri.github.io/blog/2014/02/18/create-php-heroku-mbstring/"/>
-    <updated>2014-02-18T10:57:30+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2014/02/18/create-php-heroku-mbstring</id>
-    <content type="html"><![CDATA[<p>順番が前後しますが、mbstring付きのphp環境を作る方法をメモしておきます。</p>
-
-<!-- more -->
-
-
-<p>前提条件としては、heorkuのアカウントを持っていて、herokuコマンドが有効になっていて、<br/>
-gitも使える状態、です。<br/>
-<a href="http://devcenter.heroku.com/articles/heroku-command">Heroku Toolbelt</a>とかをインストールしておけば、herokuコマンドが使えるようになります。</p>
-
-<p>参考：<a href="http://blog.infinity-dimensions.com/2012/01/heroku-toolbelt-install.html">Herokuコマンドを使えるようにするHeroku Toolbeltをインストール</a></p>
-
-<hr />
-
-<p>まずは、ディレクトリを作成しておき、そのディレクトリ内にgitを作成。<br/>
-phpinfo()などだけ書いたテストのindex.phpを作成し、commitしておきます。</p>
-
-<pre><code>$ mkdir myapp
-$ cd myapp
-$ git init
-$ echo '&lt;?php phpinfo();' &gt; index.php
-$ git add .
-$ git commit -m 'initial commit'
-</code></pre>
-
-<p>で、herokuコマンドを使用して、phpをherokuで動かすためのプラグインである、'buildpack'をインストール。</p>
-
-<pre><code>$ heroku create -s cedar -b git://github.com/iphoting/heroku-buildpack-php-tyler.git#php/5.4.9
-</code></pre>
-
-<p>ただし、このまま作成すると、heroku側で勝手に決められたアプリ名になってしまう。<br/>
-後から名前を変更することは出来るが、リポジトリのURLを変更しないといけなかったりして、ちょっと面倒。<br/>
-最初から名前を指定した上で作成するには、<code>heroku create myapp</code>とすればよい。<br/>
-(名前は他のユーザーと被っているとダメ。また、アルファベットの大文字を使用しても怒られた。)<br/>
-なので上記の分を名前指定で作成すると、以下。</p>
-
-<pre><code>$ heroku create myapp -s cedar -b git://github.com/iphoting/heroku-buildpack-php-tyler.git#php/5.4.9
-</code></pre>
-
-<p>で、herokuにpush。<br/>
-pushすると自動的にdeployもされるので、成功すればこれでmbstring付きのphp環境の作成は環境。</p>
-
-<pre><code>$ git push heroku master
-</code></pre>
-
-<p>openするとページが表示される。</p>
-
-<pre><code>$ heroku open
-</code></pre>
-
-<p>参考：<a href="http://d.hatena.ne.jp/hnw/20120603">HerokuのBuildpackを利用してmbstringが有効なPHPサーバを立ててみた</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[PHP]herokuで添付ファイル付きメールを送る]]></title>
-    <link href="http://kayakuguri.github.io/blog/2014/02/18/php-heroku-sendattachmail/"/>
-    <updated>2014-02-18T10:38:12+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2014/02/18/php-heroku-sendattachmail</id>
-    <content type="html"><![CDATA[<p>herokuで、POSTされたファイルを添付してメールを送信してみた。</p>
-
-<!-- more -->
-
-
-<p>環境は、PHPのmbstring環境。<br/>
-メールは、Mailgun。</p>
-
-<p>SMTPメールを送るためのライブラリは、QBMailを使用。<br/>
-<a href="http://qiita.com/tsunet111/items/0ba0e8fc61882c3905c0">php から確実にメール送信（Qdmail使用、SMTP経由）</a></p>
-
-<p>POSTから送信されたファイルは、<code>$_FILES</code>に保存される。<br/>
-herokuでは、<a href="http://gihyo.jp/dev/serial/01/heroku/0011">ファイルの保存が出来ない</a>ので、<br/>
-一時ファイルから添付することで実現する。</p>
-
-<p>送信された一時ファイル : <code>$_FILES['xxx']['tmp_name']</code><br/>
-ファイル名 : <code>$_FILES['xxx']['name']</code></p>
-
-<p>以下、送信部分のソース。</p>
-
-<pre><code>[HTML]
-&lt;input type="file" name="upfile" /&gt;
-
-[PHP]
-$mail = new Qdmail();
-$mail -&gt; smtp(true);
-$param = array(
-    'host'=&gt; $_ENV['MAILGUN_SMTP_SERVER'],
-    'port'=&gt; $_ENV['MAILGUN_SMTP_PORT'],
-    'from'=&gt; 'test@hoge.jp',
-    'protocol'=&gt;'SMTP_AUTH',
-    'user'=&gt; $_ENV['MAILGUN_SMTP_LOGIN'],
-    'pass' =&gt; $_ENV['MAILGUN_SMTP_PASSWORD'],
-);
-$mail -&gt;attach(array($_FILES["upfile"]["tmp_name"], $_FILES["upfile"]['name'])); //添付ファイル
-$mail -&gt;smtpServer($param);
-$mail -&gt;to('送信先アドレス');
-$mail -&gt;subject('件名');
-$mail -&gt;from('送信元アドレス','送信元名');
-$mail -&gt;text('本文');
-$mail -&gt;send();
-</code></pre>
-
-<p>参考：<a href="http://hal456.net/qdmail/oopattach"> 添付ファイルの指定(OOP)</a></p>
-
-<hr />
-
-<p>　
-　</p>
-
-<p>以下、余談。</p>
-
-<p>ファイルを送信する場合は、htmlのformタグに、<code>enctype="multipart/form-data"</code>をつけないといけない。</p>
-
-<pre><code>&lt;form method="post" action="example.php" enctype="multipart/form-data"&gt;
-</code></pre>
-
-<p>jqueryを使ってajaxで実現したい場合は、enctypeは必要なく、<code>FormData</code>でまとめたデータを送信するようにし、<br/>
-<code>contentType</code>と<code>processData</code>を<code>false</code>にする必要がある。</p>
-
-<pre><code>var $form = $("form");
-var fd = new FormData($form[0]);
-// 送信
-$.ajax({
-    url: $form.attr('action'),
-    type: $form.attr('method'),
-    data: fd,
-    contentType : false,
-    processData : false,
-    success: function(result) {
-        console.log(result);
-    },
-    error: function(xhr, textStatus, error) {}
-}
-</code></pre>
-
-<p>参考：<br/>
-<a href="http://ginpen.com/2013/05/07/jquery-ajax-form/">jQueryでフォームをAjax送信する際の基本パターンのチュートリアル。二重送信の防御とか。</a><br/>
-<a href="http://yokano-jp.blogspot.jp/2013/07/jqueryajax.html">jQuery.ajax() でファイルを送る</a></p>
 ]]></content>
   </entry>
   
