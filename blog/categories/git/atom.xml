@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: git | KayaMemo]]></title>
+  <link href="http://kayakuguri.github.io/blog/categories/git/atom.xml" rel="self"/>
+  <link href="http://kayakuguri.github.io/"/>
+  <updated>2014-07-02T15:36:35+09:00</updated>
+  <id>http://kayakuguri.github.io/</id>
+  <author>
+    <name><![CDATA[萱潜]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Herokuでステージング環境をブランチを切って作成する]]></title>
+    <link href="http://kayakuguri.github.io/blog/2014/07/02/heroku-staging/"/>
+    <updated>2014-07-02T15:18:31+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2014/07/02/heroku-staging</id>
+    <content type="html"><![CDATA[<p>herokuでステージング環境を作成してみた。<br/>
+ブランチを切って、切り替えできるようにした。</p>
+
+<!-- more -->
+
+
+<p>アプリの作成はブラウザ上で行い、<br/>
+そこに後からpushしていく想定とする。<br/>
+(使用していてターミナル上でアプリを作成することが少なかったので)<br/>
+アプリ名(ID)は以下とする</p>
+
+<p>本番：sampleapp<br/>
+ステージング：sampleapp-staging</p>
+
+<p>ターミナルでアプリ用のファイルが入ったディレクトリに移動する。<br/>
+(以降はそのディレクトリでの作業となる。)<br/>
+まず、本番環境の分にアプリをサクっとプッシュ＆デプロイ。</p>
+
+<pre><code>$ git init
+$ git add .
+$ git remote add heroku git@heroku.com:sampleapp.git
+$ git commit -m 'init'
+$ git push heroku master
+</code></pre>
+
+<p>３つ目の<code>remote add</code>でプッシュ先のリモートリポジトリを設定しているわけだけれど、<br/>
+このaddの後の、<code>heroku</code>が本番用のリモートリポジトリ名となる。</p>
+
+<p>で。ローカルのリポジトリのブランチをステージング用に切る。<br/>
+その後、stagingリポジトリに移動。</p>
+
+<pre><code>$ git branch
+* master
+
+$ git branch staging
+$ git checkout staging  
+Switched to branch 'staging'
+$ git branch
+  master
+* staging
+</code></pre>
+
+<p>で、ステージング環境のリモートリポジトリを追加。</p>
+
+<pre><code>$ git remote add staging git@heroku.com:sampleapp-staging.git
+</code></pre>
+
+<p>確認。</p>
+
+<pre><code>$ git remote --v
+heroku  git@heroku.kano:sampleapp.git (fetch)
+heroku  git@heroku.kano:sampleapp.git (push)
+staging git@heroku.com:sampleapp-staging.git (fetch)
+staging git@heroku.com:sampleapp-staging.git (push)
+</code></pre>
+
+<p>で、ステージング環境にプッシュ、するわけだけれど、通常の感覚で、<br/>
+ローカルのstagingリポジトリをリモートのstagingリポジトリに追加、とすると、<br/>
+<code>$ git push staging staging</code>になるわけだけれど、<br/>
+そうすると、ステージング環境用のアプリがデプロイされない。</p>
+
+<pre><code>$ git push staging staging
+. . .
+Pushed to non-master branch, skipping build.
+. . .
+</code></pre>
+
+<p>書いてある通り、masterブランチにプッシュしないとデプロイされない。<br/>
+以下に情報があった。<br/>
+<a href="http://www.ownway.info/Ruby/index.php?heroku%2Fhow%2Fmanagement%2Fapplication">Heroku アプリケーションの管理 &ndash; 君の瞳はまるでルビー &ndash; Ruby 関連まとめサイト</a></p>
+
+<blockquote><p>アプリケーションとして認識されるのは master ブランチにあるソースコードだけです。</p></blockquote>
+
+<p>同サイト内に解決方法も載っていた。</p>
+
+<blockquote><p>master 以外のブランチやタグにあるソースコードを既存の Heroku アプリケーションとしてデプロイするには git push に &mdash;force オプションを使う必要があります。<br/>
+git push heroku beta_1:master &mdash;force<br/>
+これはローカルリポジトリのブランチ beta_1 の内容を heroku リモートリポジトリの master に強制的に入れるためのものです。</p></blockquote>
+
+<p>というわけで、以下のようにしてステージング環境にプッシュ。</p>
+
+<pre><code>$ git push staging staging:master --force
+</code></pre>
+
+<p>これでステージング環境が作成できた。</p>
+
+<p>主な作業はstagingブランチで作業し、上記の<code>--force</code>付きpushでステージングアプリに反映。<br/>
+確認後、masterブランチに切り替えてstagingブランチとマージして、<br/>
+通常の<code>$ git push heroku master</code>で、本番アプリに反映する、<br/>
+という流れになる予定。</p>
+]]></content>
+  </entry>
+  
+</feed>
