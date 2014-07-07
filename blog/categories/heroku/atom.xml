@@ -4,7 +4,7 @@
   <title><![CDATA[Category: heroku | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/heroku/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2014-07-02T15:36:35+09:00</updated>
+  <updated>2014-07-07T15:28:44+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,130 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[herokuで独自ドメインをRoute53で設定する]]></title>
+    <link href="http://kayakuguri.github.io/blog/2014/07/07/heroku-set-domain/"/>
+    <updated>2014-07-07T15:12:29+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2014/07/07/heroku-set-domain</id>
+    <content type="html"><![CDATA[<p>ドメインはムームードメインで取得してた。<br/>
+そのドメインをherokuに割り当てる。</p>
+
+<!-- more -->
+
+
+<p>内容は全く以下のままなんだけど、メモとして。。</p>
+
+<p><a href="http://www.workabroad.jp/posts/2002">heroku で 独自ドメインを使う際の最善策を考えた | Workabroad.jp</a></p>
+
+<h3>herokuにドメインを登録</h3>
+
+<p>herokuに独自ドメインをwwwありなし２つ登録</p>
+
+<pre><code>$ heroku domains:add example.com
+$ heroku domains:add www.example.com
+</code></pre>
+
+<h3>Amazon Route53 CNAMEの設定</h3>
+
+<p><img src="/images/2014/07/aws01.jpg" alt="Route53" /></p>
+
+<p>画面上部から<code>Create Hosted Zone</code>を選択。</p>
+
+<p><img src="/images/2014/07/aws02.jpg" alt="Create Hosted Zone" /></p>
+
+<p>ドメインを入力。wwwなし。</p>
+
+<p><img src="/images/2014/07/aws03.jpg" alt="Domain Name" /></p>
+
+<p>作成したレコードをダブルクリック。<br/>
+<code>Create Record Set</code>をクリック。</p>
+
+<p><img src="/images/2014/07/aws04.jpg" alt="Create Record Set" /></p>
+
+<p>作成。</p>
+
+<p><img src="/images/2014/07/aws05.jpg" alt="Create Record Set" /></p>
+
+<p>Name：www<br/>
+Type：CNAME<br/>
+value：xxx.herokuapp.com</p>
+
+<h3>S3の設定</h3>
+
+<p>S3でBucketを作成</p>
+
+<p><img src="/images/2014/07/aws06.jpg" alt="Create Bucket" /></p>
+
+<p>nameはルートドメインにする。<br/>
+RegionはTokyoにしといたらいいと思う。</p>
+
+<p><img src="/images/2014/07/aws07.jpg" alt="name" /></p>
+
+<p>Createした後、<code>Properties</code>の<code>Static Website Hosting</code>を選択。</p>
+
+<p><img src="/images/2014/07/aws08.jpg" alt="Properties" /></p>
+
+<p><code>Redirect all requests to another host name</code>を選択。<br/>
+最初から<code>www</code>付きのURLが入力されているので、そのままSave。<br/>
+これでwwwサブドメインへのリダイレクトが完了。</p>
+
+<p><img src="/images/2014/07/aws09.jpg" alt="Redirect all requests to another host name" /></p>
+
+<h3>Amazon Route53 ANAMEの設定</h3>
+
+<p>Route53に戻り、先ほど作成したレコードをダブルクリックして、<code>Create Record Set</code>をクリック。<br/>
+以下のようにして作成。</p>
+
+<p>Name：空<br/>
+Type：A &ndash; IPv4 address<br/>
+Alias：Yes<br/>
+Alias Target：先ほどS3で作成したBucketが選択できるのでそれを選択。</p>
+
+<p><img src="/images/2014/07/aws10.jpg" alt="A name" /></p>
+
+<h3>DNSサーバの設定</h3>
+
+<p>ドメインはムームードメインで取得しているので、<br/>
+ネームサーバーの設定をする。<br/>
+Route53の作成したレコードを選択すると右側にネームサーバーが表示される。</p>
+
+<p><img src="/images/2014/07/aws11.jpg" alt="name saever" /></p>
+
+<p>ムームードメインの「取得したドメインで使用する」を選択し、<br/>
+上記のネームサーバーを記入。</p>
+
+<p><img src="/images/2014/07/aws12.jpg" alt="mu-mu-domain" /></p>
+
+<p>完了。</p>
+
+<h3>料金</h3>
+
+<p>気になるお値段ですが、今現在は月、$0.51。<br/>
+現在のレートでは、52円くらい。安い。</p>
+
+<p><a href="https://www.google.co.jp/search?q=%240.51&amp;oq=%240.51&amp;aqs=chrome..69i57j0l5.755j0j7&amp;sourceid=chrome&amp;es_sm=91&amp;ie=UTF-8&amp;qscrl=1#q=%240.51+%E5%86%86&amp;qscrl=1&amp;safe=off">現在のレートで見る</a></p>
+
+<p><img src="/images/2014/07/aws13.jpg" alt="spend money" /></p>
+
+<p>ただし、新規にアカウントを作成したので、S3などが無料期間中かもしれません。<br/>
+１年後には数円上がるかもしれません。</p>
+
+<h3>結果</h3>
+
+<p>22時くらいに作業していたけれど、完了後、15分後くらいで切り替わりを確認出来た。<br/>
+ただし、その後元に戻ったり、と、不安定だった。<br/>
+翌朝には安定し、無事切り替わっていた。<br/>
+丸１日くらいかかると思っていたので結構早かった。</p>
+
+<h3>参考サイト</h3>
+
+<p>参考サイト：<br/>
+<a href="http://tsumazuki.hatenadiary.jp/entry/2013/12/11/174038">Herokuで独自ドメインを設定する方法</a><br/>
+<a href="http://tanukiti1987.hatenablog.com/entry/2013/01/24/233140">Herokuで独自のドメインを設定する[ムームードメイン]</a><br/>
+<a href="http://tech.tanaka733.net/entry/2013/09/15/%E3%81%8A%E5%90%8D%E5%89%8D.com_%E3%81%A7%E5%8F%96%E3%81%A3%E3%81%9F%E3%83%89%E3%83%A1%E3%82%A4%E3%83%B3%E3%82%92_Amazon_Route53%E3%81%A7%E7%AE%A1%E7%90%86%E3%81%97%E3%80%81%E3%82%B5%E3%83%96%E3%83%89">お名前.com で取ったドメインを Amazon Route53で管理し、サブドメインをはてなブログに割り当てるまで</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Herokuでステージング環境をブランチを切って作成する]]></title>
@@ -411,110 +535,6 @@ echo $mail -&gt;send(); //成功の場合は「1」が返ってくる
 <a href="http://pontago.hatenablog.com/entry/20091028/1256743421">http://pontago.hatenablog.com/entry/20091028/1256743421</a></p></blockquote>
 
 <p>(ヘッダ分を差し引く、の部分は無視しても問題なかった)</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[PHP][heroku]Mailgun APIを使って添付ファイルを送る]]></title>
-    <link href="http://kayakuguri.github.io/blog/2014/02/19/attachment-use-mailgunapi/"/>
-    <updated>2014-02-19T17:37:48+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2014/02/19/attachment-use-mailgunapi</id>
-    <content type="html"><![CDATA[<p>以前に、<a href="http://kayakuguri.github.io/blog/2014/02/18/php-heroku-sendattachmail/">mailgunで添付ファイル付きメールを送る方法</a>を書いたが、<br/>
-そちらは、<code>SMTP</code>バージョンで、今回はそのMailgun APIバージョン。</p>
-
-<!-- more -->
-
-
-<p>以下のファイルをダウンロードして一式アップしておく。<br/>
-(readmeファイルなどいらないものが大量にあるが、とりあえず全部あげておく)</p>
-
-<p><a href="https://9f67cbbd1116d8afb399-7760483f5d1e5f28c2d253278a2a5045.ssl.cf2.rackcdn.com/mailgun-php-1.7.zip">Library Download</a> (zip直リンク)</p>
-
-<p>基本の送信方法は以下。<br/>
-<a href="http://documentation.mailgun.com/quickstart.html#sending-messages">Sending Messages</a></p>
-
-<pre><code># Include the Autoloader (see "Libraries" for install instructions)
-require 'vendor/autoload.php';
-use Mailgun\Mailgun;
-
-# Instantiate the client.
-$mgClient = new Mailgun('key-3ax6xnjp29jd6fds4gc373sgvjxteol0');
-$domain = "samples.mailgun.org";
-
-# Make the call to the client.
-$result = $mgClient-&gt;sendMessage("$domain",
-              array('from'    =&gt; 'Excited User &lt;me@samples.mailgun.org&gt;',
-                    'to'      =&gt; 'Baz &lt;baz@example.com&gt;',
-                    'subject' =&gt; 'Hello',
-                    'text'    =&gt; 'Testing some Mailgun awesomness!'));
-</code></pre>
-
-<p>添付ファイルを送る方法は、<code>attachment</code>を使って、その中にファイル名を書く。<br/>
-ファイル名を指定する方法が紹介されていた。<br/>
-<a href="https://github.com/mailgun/mailgun-php/issues/35">https://github.com/mailgun/mailgun-php/issues/35</a></p>
-
-<pre><code>array(
-    'attachment' =&gt; array(
-        'filePath' =&gt; './' . $attach['name'],
-        'remoteName' =&gt; $attach['name']
-    )
-)
-</code></pre>
-
-<p>この方法で実装したところ、一時ファイルから添付ファイルにしての送信、が出来なかった。<br/>
-(ファイルがないと怒られる)</p>
-
-<p>試しに、heroku内で<code>move_uploaded_file</code>を使ってみると、エラーもなく保存出来た。<br/>
-そのままそのファイルを添付して送ったところ、無事、送信完了。<br/>
-ただしファイル自体は直接アクセスしようとすると<code>404</code>が表示されるので、<br/>
-そのスクリプト内でのみ有効、のよう。</p>
-
-<p>あと、上記の添付例のまま送信すると、2つ添付された。<br/>
-どうやらファイル名を指定する箇所が効いておらず、書かれているファイル名が添付されたよう。<br/>
-試しに、<code>'remoteName' =&gt; $attach['name']</code>の行を削除しても送信出来た。</p>
-
-<p>その部分を考慮して、最終的に出来たコードが以下。</p>
-
-<p>・1ファイルを1つの宛先に送信する場合<br/>
-・送信先や内容などはPOSTで受け取る想定</p>
-
-<pre><code>require '../vendor/autoload.php';
-use Mailgun\Mailgun;
-$mgClient = new Mailgun('key-xxx');
-$domain = "appxxx.mailgun.org";
-
-$attach = $_FILES["attach"]; //添付ファイル
-
-//ファイル保存
-try{
-    $result = move_uploaded_file($attach['tmp_name'], './'.$attach['name']);
-} catch (Exception $e) {
-    var_dump($e-&gt;getMessage());
-}
-
-//メール送信
-try {
-    $result = $mgClient-&gt;sendMessage("$domain",
-        array(
-            'from'    =&gt; $_POST['fromname'].' &lt;'.$_POST['fromaddress'].'&gt;',
-            'to'      =&gt; $_POST['toname'].' &lt;'.$_POST['to'].'&gt;',
-            'subject' =&gt; $_POST['subject'],
-            'text'    =&gt; $_POST['body']
-        ),
-        array(
-            'attachment' =&gt; array(
-                './' . $attach['name']
-            )
-        )
-    );
-    var_dump($result);
-
-} catch (Exception $e) {
-    var_dump($e-&gt;getMessage());
-}               
-</code></pre>
-
-<p>結局、一度保存してからの送信、となるので、SMTPを使った方が処理が速いかも。(未検証)</p>
 ]]></content>
   </entry>
   
