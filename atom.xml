@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2014-07-09T17:23:02+09:00</updated>
+  <updated>2014-07-09T17:32:53+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -108,6 +108,17 @@ NewRelicが重くなってしまっているようだった。<br/>
 <p><img src="http://kayakuguri.github.io/images/2014/07/scheduler02.jpg" alt="Phpstrom diff" /></p>
 
 <p>これで1時間毎に指定のURLを叩いてくれる。</p>
+
+<hr />
+
+<h3>Dyno Hour</h3>
+
+<p>Herokuの料金は、1Dynoで起動時間が月750時間までは無料。<br/>
+通常であれば、1日 x 24時間 x 31日 = 744時間 で、無料範囲ない。<br/>
+ただし、Heroku Schedulerで実行した時間もDynoの起動時間に含まれる。</p>
+
+<p>単純にURLを叩くだけ、なら大丈夫かと思うけれど、<br/>
+重めのバッチ処理をスケジューラーでこまめに起動していると請求が発生する可能性があるので注意。</p>
 ]]></content>
   </entry>
   
