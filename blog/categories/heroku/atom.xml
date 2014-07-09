@@ -4,7 +4,7 @@
   <title><![CDATA[Category: heroku | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/heroku/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2014-07-07T15:28:44+09:00</updated>
+  <updated>2014-07-09T17:23:02+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,104 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Herokuでデプロイエラーが起きた]]></title>
+    <link href="http://kayakuguri.github.io/blog/2014/07/09/heroku-r10/"/>
+    <updated>2014-07-09T17:13:26+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2014/07/09/heroku-r10</id>
+    <content type="html"><![CDATA[<p>いつものようにさくっとpushすると、サイトにアクセス出来ない。。<br/>
+とりあえず、<code>rollback</code>で戻しておいたが、原因を探った。</p>
+
+<!-- more -->
+
+
+<p>ログを見ると以下のようになっていた。</p>
+
+<pre><code>heroku/web.1:  State changed from up to starting 
+app/web.1:  Going down, terminating child processes... 
+heroku/web.1:  Stopping all processes with SIGTERM 
+heroku/web.1:  Process exited with status 0 
+heroku/web.1:  State changed from starting to crashed
+heroku/web.1:  State changed from crashed to starting 
+heroku/web.1:  Error R10 (Boot timeout) -&gt; Web process failed to bind to $PORT within 60 seconds of launch 
+heroku/web.1:  Stopping process with SIGKILL 
+heroku/web.1:  Process exited with status 137 
+</code></pre>
+
+<p>どうやら、<code>R10 (Boot timeout)</code>なるエラーが発生しているよう。</p>
+
+<p><a href="https://devcenter.heroku.com/articles/error-codes#r10-boot-timeout">R10 &ndash; Boot timeout</a></p>
+
+<blockquote><p>A web process took longer than 60 seconds to bind to its assigned <code>$PORT</code>. When this happens, the dyno’s process is killed and the dyno is considered crashed. Crashed dynos are restarted according to the dyno manager’s restart policy.</p></blockquote>
+
+<p>Webプロセスは、割り当てられた<code>$PORT</code>にバインドするために60秒以上かかった。これが発生すると、dynoのプロセスは強制終了され、dynoがクラッシュしたと考えられている。ダウンしたdynoは、dynoマネージャの再起動ポリシーに応じて再起動されます。</p>
+
+<blockquote><p>This error is often caused by a process being unable to reach an external resource, such as a database, or the application doing too much work, such as parsing and evaluating numerous, large code dependencies, during startup.</p></blockquote>
+
+<p>このエラーは、多くの場合、データベース、または起動時に、非常に多くの、大規模なコードの依存関係を解析し、評価するようなあまりにも多くの処理を行なっているアプリケーションなどの外部リソースに到達することができないというプロセスが原因で発生します。</p>
+
+<blockquote><p>Common solutions are to access external resources asynchronously, so they don’t block startup, and to reduce the amount of application code or its dependencies.</p></blockquote>
+
+<p>一般的な解決策は非同期に外部リソースにアクセスすることなので、起動をブロックしないように、アプリケーションコードまたはその依存関係の量を低減する事です。</p>
+
+<p>サポートに問い合わせることで、この60秒制限を120秒にすることもできるそう。</p>
+
+<hr />
+
+<h3>Heroku::Forward</h3>
+
+<p>R10エラーが起きる主な原因は存在しない外部リソースへのアクセスや、使用しているgemの量が増えている事が挙げられるらしい。<br/>
+それを自動で整理？してくれるようなものが以下のよう。</p>
+
+<p><a href="https://github.com/dblock/heroku-forward">dblock/heroku-forward · GitHub</a></p>
+
+<p>しかしこれは<code>Ruby</code>。今回は<code>PHP</code>。</p>
+
+<hr />
+
+<h3>原因</h3>
+
+<p>で、テストアプリを作って全く同じ構成にして検証してみたところ、<br/>
+NewRelicが重くなってしまっているようだった。<br/>
+試しにそれを外すとエラーが出なくなった。</p>
+
+<hr />
+
+<h3>対策</h3>
+
+<p>NewRelicはアプリを起動し続けるためのpingとしての使用がメインだったので、<br/>
+(ログなどが見られるのは嬉しかったが)<br/>
+同じように定期的にpingを飛ばす方法を探してみた。</p>
+
+<h4>Heroku Schedulerで叩き起こす</h4>
+
+<p><a href="http://blog.mah-lab.com/2013/05/16/heroku-commons-16/">知っておきたい！Herokuを使う上では当たり前？の16の常識 | mah365</a></p>
+
+<blockquote><p>1時間毎に<code>curl http://your-app-name.herokuapp.com/</code>というコマンドを叩くように設定すれば、起き続けます。</p></blockquote>
+
+<p><a href="https://addons.heroku.com/scheduler">Heroku Scheduler</a><br/>
+アドオンを追加</p>
+
+<pre><code>$ heroku addons:add scheduler
+</code></pre>
+
+<p>この状態でデプロイが通るかを確認。→ OK。</p>
+
+<p><img src="/images/2014/07/scheduler01.jpg" alt="Phpstrom diff" /></p>
+
+<p>以下を追加</p>
+
+<pre><code>curl http://your-app-name.herokuapp.com/
+</code></pre>
+
+<p>FREQUENCY(頻度)を、<code>Hourly</code>にして、save。</p>
+
+<p><img src="/images/2014/07/scheduler02.jpg" alt="Phpstrom diff" /></p>
+
+<p>これで1時間毎に指定のURLを叩いてくれる。</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[herokuで独自ドメインをRoute53で設定する]]></title>
@@ -406,135 +504,6 @@ $ git push heroku master
 </code></pre>
 
 <p>再度pushすると無事、デプロイが完了し、PHP環境が出来上がりました。</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[apexからPOSTでファイルを送信する 改訂版]]></title>
-    <link href="http://kayakuguri.github.io/blog/2014/02/27/submit-base64/"/>
-    <updated>2014-02-27T13:41:16+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2014/02/27/submit-base64</id>
-    <content type="html"><![CDATA[<p><a href="http://kayakuguri.github.io/blog/2014/02/26/submit-callout-with-multipart/">前回のファイル送信</a>の動作確認版。</p>
-
-<!-- more -->
-
-
-<p>まず、やりたいこととして、<br/>
-saleseforceで作成したページからファイルをherokuで作成したapiに送信して、<br/>
-herokuのapiからそのファイルを添付で送信したかった。</p>
-
-<p>結論としては以下の手順で動作した。</p>
-
-<ol>
-<li>visualforceで<code>apex:inputFile</code>を使用してファイルをアプロード</li>
-<li>apexでファイルを受け取り、そのファイルを<code>base64エンコード</code>。</li>
-<li>base64エンコードした文字列をPOSTのパラメータとして送信</li>
-<li>herokuにアップしているphpでPOSTデータを受け取る</li>
-<li>受け取ったbase64データをデコードして保存(一時的)</li>
-<li>保存されたファイルからQdmailを使用してメールを送信</li>
-</ol>
-
-
-<hr />
-
-<p>1) visualforceで<code>apex:inputFile</code>を使用してファイルをアプロード<br/>
-visualforceページでのinputの書き方</p>
-
-<pre><code>&lt;apex:input value="{!Email}" /&gt;
-&lt;apex:inputFile value="{!FileBody}" filename="{!FileName}"/&gt;
-</code></pre>
-
-<p>2) apexでファイルを受け取り、そのファイルを<code>base64エンコード</code>。<br/>
-3) base64エンコードした文字列をPOSTのパラメータとして送信<br/>
-apex側で受け取る</p>
-
-<pre><code>public String FileName { get; set; }
-public Blob FileBody { get; set; }
-public String Email { get; set; }
-
-public Pagereference submit() {
-    HttpRequest request = new HttpRequest();
-    request.setEndpoint('送信先のphp');
-    request.setMethod('POST');
-    request.setHeader('Accept-Language', 'ja');
-    //パラメータ
-    Map&lt;String, String&gt; params = new Map&lt;String, String&gt;();
-    params.put('to', Email);  //送信先
-    params.put('attachName', FileName); //ファイル名
-    params.put('attach', EncodingUtil.base64Encode(FileBody)); //ファイル内容
-    Set&lt;String&gt; keys = params.keySet();
-    String r = '';
-    for(String key : keys) {
-        //body用にパラメータを整形 to=xx&amp;attach=xx のように
-        String val = params.get(key);
-        r += key + '=';
-        if(val != null) r += val;
-        r += '&amp;';
-    }
-    r = r.removeEnd('&amp;');
-    request.setBody(r);
-
-    //送信
-    Http http = new Http();
-    HttpResponse response = http.send(request);
-    ResResult = response.getBody(); //結果を受け取る
-}
-</code></pre>
-
-<p>4) herokuにアップしているphpでPOSTデータを受け取る<br/>
-5) 受け取ったbase64データをデコードして保存(一時的)<br/>
-6) 保存されたファイルからQdmailを使用してメールを送信</p>
-
-<p><a href="http://kayakuguri.github.io/blog/2014/02/18/php-heroku-sendattachmail/">Qdmailでの送信方法は以前の投稿を参照。</a></p>
-
-<pre><code>require_once('../lib/qdmail.php');
-require_once('../lib/qdsmtp.php');
-
-//送信内容
-$to          = $_POST['to'];
-$subject     = '件名';
-$body        = '本文';
-$fromname    = '送り先名';
-$fromaddress = '送り先アドレス';
-$attachname  = $_POST['attachName'];
-$attach      = $_POST['attach'];
-
-$mail = new Qdmail();
-$mail -&gt; smtp(true);
-$param = array(
-    'host'=&gt; $_ENV['MAILGUN_SMTP_SERVER'],
-    'port'=&gt; $_ENV['MAILGUN_SMTP_PORT'],
-    'from'=&gt; $fromaddress,
-    'protocol'=&gt;'SMTP_AUTH',
-    'user'=&gt; $_ENV['MAILGUN_SMTP_LOGIN'],
-    'pass' =&gt; $_ENV['MAILGUN_SMTP_PASSWORD']
-);
-$mail -&gt;smtpServer($param);
-$mail -&gt;to($to);
-$mail -&gt;subject($subject);
-$mail -&gt;from($fromaddress,$fromname);
-$mail -&gt;text($body);
-
-//添付ファイル
-$bin = base64_decode(str_replace(' ', '+', $_POST['attach'][0])); //注意
-$fp = fopen( "./" . $_POST['attachName'][0], "w" );
-fwrite( $fp, $bin );
-fclose( $fp );
-$attach = array();
-$attach[] = array( "./" . $_POST['attachName'][0] , $_POST['attachName'][0] );
-
-//送信
-echo $mail -&gt;send(); //成功の場合は「1」が返ってくる
-</code></pre>
-
-<p>Base64デコードしてファイルに保存する方法は以下を参考にしました。<br/>
-<a href="http://blog.nipx.jp/archives/4137">Flashからアップロードする方法いろいろ</a><br/>
-ただし、そのままではエラーになることがあるよう。</p>
-
-<blockquote><p>どうやら、POSTでデータを渡すと、Base64の「+」記号が勝手にスペースに変換されてしまうらしい。<br/>
-<a href="http://pontago.hatenablog.com/entry/20091028/1256743421">http://pontago.hatenablog.com/entry/20091028/1256743421</a></p></blockquote>
-
-<p>(ヘッダ分を差し引く、の部分は無視しても問題なかった)</p>
 ]]></content>
   </entry>
   
