@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: composer | KayaMemo]]></title>
+  <link href="http://kayakuguri.github.io/blog/categories/composer/atom.xml" rel="self"/>
+  <link href="http://kayakuguri.github.io/"/>
+  <updated>2014-07-15T10:46:26+09:00</updated>
+  <id>http://kayakuguri.github.io/</id>
+  <author>
+    <name><![CDATA[萱潜]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Windows7でComposerのインストール]]></title>
+    <link href="http://kayakuguri.github.io/blog/2014/07/15/win7-composer/"/>
+    <updated>2014-07-15T10:37:53+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2014/07/15/win7-composer</id>
+    <content type="html"><![CDATA[<p>windows7でheroku+php環境を整えたかったので、<br/>
+composerをインストールしてみた。</p>
+
+<!-- more -->
+
+
+<h3>準備</h3>
+
+<h4>XAMPP</h4>
+
+<p>phpを使用するので、XAMPPを入れておくのが手取り早い。<br/>
+<a href="https://www.apachefriends.org/jp/index.html">XAMPP</a></p>
+
+<p>ページからインストーラーをダウンロード。<br/>
+<img src="/images/2014/07/composer-win11.jpg" alt="XAMPP" /></p>
+
+<p>クリックして起動。<br/>
+ウイルス対策ソフトを起動している場合、動作が遅くなるかも、などの注意文が出るので、OKをクリック。<br/>
+<img src="/images/2014/07/composer-win12.jpg" alt="warning" /></p>
+
+<p>そのあとにも警告文が表示されました。<br/>
+内容は、</p>
+
+<blockquote><p>これはWindows Vista/7のユーザーアカウント制御(UAC)機能によってXAMPPの機能が制限される場合があるので、<br/>
+1) C:\Program Filesフォルダ以外にインストールする<br/>
+2) UACをオフにする<br/>
+のいずれかで対応せよという警告</p></blockquote>
+
+<p>という事のようです。<br/>
+<a href="http://jubei.co.jp/kouza/setup/xampp.html">XAMPPのインストール (Windows) &ndash; 講座用PCの準備</a></p>
+
+<p>Componentsは特に気にせずデフォルトのままで。<br/>
+<img src="/images/2014/07/composer-win13.jpg" alt="Components" /></p>
+
+<p>スカイプとポートが被っている場合は、以下。<br/>
+<a href="http://degital-zakki.blogspot.jp/2009/08/xamppskype.html">xamppとskypeの共存</a></p>
+
+<h3>Composer</h3>
+
+<h4>ダウンロード</h4>
+
+<p>公式サイトからインストーラをダウンロードする。<br/>
+<a href="https://getcomposer.org/">Composer</a></p>
+
+<p><code>Downlaod</code>をクリック。<br/>
+<img src="/images/2014/07/composer-win01.jpg" alt="Composer" /></p>
+
+<p><code>Windows Installer</code>から、<code>Composer-Setup.exe</code>をダウンロード。<br/>
+<img src="/images/2014/07/composer-win02.jpg" alt="Setup.exe" /></p>
+
+<h4>インストール</h4>
+
+<p>ダウンロードした、<code>Composer-Setup.exe</code>を起動。<br/>
+<code>Next</code>をクリック。<br/>
+<img src="/images/2014/07/composer-win03.jpg" alt="Next" /></p>
+
+<p>オプションでツールを入れるか、とあったので、<br/>
+デフォルトのまま、<code>Do not Install</code>を選択して、<code>Next</code>。<br/>
+<img src="/images/2014/07/composer-win05.jpg" alt="Shell" /></p>
+
+<p>次に<code>php.exe</code>の場所を聞かれるので、<br/>
+XAMPP でインストールされたphp.exeの場所を指定します。</p>
+
+<pre><code>C:\xampp\php\php.exe
+</code></pre>
+
+<p><img src="/images/2014/07/composer-win06.jpg" alt="PHP.exe" /></p>
+
+<p>設定内容を確認して、<code>Install</code>。<br/>
+で、インストール完了。<br/>
+<img src="/images/2014/07/composer-win15.jpg" alt="PHP.exe" /></p>
+]]></content>
+  </entry>
+  
+</feed>
