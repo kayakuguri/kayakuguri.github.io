@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2014-07-15T10:46:26+09:00</updated>
+  <updated>2014-07-15T17:47:21+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,133 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Mailgun APIを使ってメールを送る Composer版]]></title>
+    <link href="http://kayakuguri.github.io/blog/2014/07/15/mailgunapi/"/>
+    <updated>2014-07-15T14:13:12+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2014/07/15/mailgunapi</id>
+    <content type="html"><![CDATA[<p>いくつか書いているmailgunを使用したメール送信の件ですが、<br/>
+たぶん正しいと思われる方法がわかったのでメモしておきます。</p>
+
+<!-- more -->
+
+
+<h3>composerでインストール</h3>
+
+<p><a href="https://github.com/mailgun/mailgun-php">mailgun/mailgun-php · GitHub</a></p>
+
+<p>composerを使用して、ライブラリをインストールします。<br/>
+Composerのインストールは以下などを参照に。<br/>
+<a href="http://tech.basicinc.jp/php/2013/08/18/php_composer/">PHPのパッケージ管理Composerを使う</a></p>
+
+<p>Windowsの場合は以下に書きました。<br/>
+<a href="http://kayakuguri.github.io/blog/2014/07/15/win7-composer/">Windows7でComposerのインストール</a></p>
+
+<p><code>composer.json</code>に以下のように記述。</p>
+
+<pre><code>{
+    "require": {
+        "mailgun/mailgun-php": "~1.7.1"
+    }
+}
+</code></pre>
+
+<p>で、インストール。</p>
+
+<pre><code>$ composer install
+</code></pre>
+
+<p>これでライブラリなどがダウンロードされ、mailgunの依存関係が出来上がります。</p>
+
+<h3>Mailgun</h3>
+
+<h4>インストール</h4>
+
+<p>アドオンのインストール。</p>
+
+<pre><code>$ heroku addons:add mailgun
+</code></pre>
+
+<h4>セットアップ</h4>
+
+<p>PHPの冒頭で初期化して送信。<br/>
+初期化するためにはAPIキーとドメインが必要。<br/>
+これは環境変数に入っている。</p>
+
+<pre><code>MAILGUN_API_KEY:       key-xxx
+MAILGUN_SMTP_LOGIN:    postmaster@xxx.mailgun.org
+MAILGUN_SMTP_PASSWORD: xxx
+MAILGUN_SMTP_PORT:     587
+MAILGUN_SMTP_SERVER:   smtp.mailgun.org
+</code></pre>
+
+<p>ドメインは、<code>MAILGUN_SMTP_LOGIN</code>の<code>@</code>より後ろ、になるので、それを使用する。</p>
+
+<pre><code>require 'vendor/autoload.php';
+use Mailgun\Mailgun;
+
+$mgClient = new Mailgun(getenv('MAILGUN_API_KEY'));
+$domain = getenv('MAILGUN_SMTP_LOGIN');
+$domain = substr($domain, strpos($domain, '@') + 1);
+</code></pre>
+
+<h4>送信</h4>
+
+<p>通常の送信は以下。</p>
+
+<pre><code>$result = $mgClient-&gt;sendMessage($domain, array(
+    'from'    =&gt; 'Excited User &lt;me@samples.mailgun.org&gt;',
+    'to'      =&gt; 'Baz &lt;baz@example.com&gt;',
+    'subject' =&gt; 'Hello',
+    'text'    =&gt; 'Testing some Mailgun awesomness!'
+));
+</code></pre>
+
+<h4>パラメータを個別に設定</h4>
+
+<p>上記では送信時に一括で指定しているけれど、これを個別に設定するには、<br/>
+<code>Message Builder</code>というものを使用します。<br/>
+<a href="https://github.com/mailgun/mailgun-php/blob/master/src/Mailgun/Messages/README.md#usage---message-builder">Usage &ndash; Message Builder</a></p>
+
+<p>上記のセットをバラすと以下のようになります。</p>
+
+<pre><code>$msgBldr = $mgClient-&gt;MessageBuilder();
+$msgBldr-&gt;setFromAddress('Excited User &lt;me@samples.mailgun.org&gt;');
+$msgBldr-&gt;addToRecipient('Baz &lt;baz@example.com&gt;');
+$msgBldr-&gt;setSubject('Hello');
+$msgBldr-&gt;setTextBody('Testing some Mailgun awesomness!'); 
+$result = $mgClient-&gt;post("{$domain}/messages", $msgBldr-&gt;getMessage(), $msgBldr-&gt;getFiles());
+</code></pre>
+
+<h4>キューにまとめて登録</h4>
+
+<p>また、キューにまとめて登録する場合は、<code>Batch Message</code>を使用します。<br/>
+<a href="https://github.com/mailgun/mailgun-php/blob/master/src/Mailgun/Messages/README.md#usage---batch-message">Usage &ndash; Batch Message</a></p>
+
+<p>これを使用して、toを複数登録すると、それぞれのtoにバラバラに同じメールが送られます。</p>
+
+<pre><code>$msgBldr = $mgClient-&gt;BatchMessage($domain);
+$msgBldr-&gt;addToRecipient('test1 &lt;test1@example.com&gt;');
+$msgBldr-&gt;addToRecipient('test2 &lt;test2@example.com&gt;');
+// 他のパラメータ設定は同じ
+$result = $msgBldr-&gt;finalize();
+</code></pre>
+
+<p><code>finalize</code>で、キューに登録されるようでした。</p>
+
+<hr />
+
+<p>今までのmailgun関連の記事はこちら</p>
+
+<ul>
+<li><a href="http://kayakuguri.github.io/blog/2014/02/17/send-mail-from-heroku-with-mailgun/">PHPでMailgunを使ってherokuでメール送信する</a></li>
+<li><a href="http://kayakuguri.github.io/blog/2014/02/18/php-heroku-sendattachmail/">[PHP]herokuで添付ファイル付きメールを送る</a></li>
+<li><a href="http://kayakuguri.github.io/blog/2014/02/19/attachment-use-mailgunapi/">[PHP][heroku]Mailgun APIを使って添付ファイルを送る</a></li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Windows7でComposerのインストール]]></title>
@@ -1611,179 +1738,6 @@ return Page.FormComplete.setRedirect(true);
 
 <p>しかしこれをしてしまうと、最初に書いた判定用のフラグの値も引き継がれないので、<br/>
 逆に値がなければエラー、という流れで作ったほうがいいかもしれません。</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[HTTP Live StreamingをFFmpegで作成する]]></title>
-    <link href="http://kayakuguri.github.io/blog/2014/03/05/http-live-streaming/"/>
-    <updated>2014-03-05T17:18:13+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2014/03/05/http-live-streaming</id>
-    <content type="html"><![CDATA[<p>iOSで端末で動画をストリーミング再生させるべく、<br/>
-HTTP Live Streamingを作成してみた。</p>
-
-<!-- more -->
-
-
-<blockquote><p>HTTP Live Streaming(HLS)は動画ファイルを約10秒程度の短時間に分割しMPEG-TSコンテナに入れたものをひたすら生成しつつm3u8形式のリストファイルにそのファイルを逐次追加していくことで、HTTPのみで擬似的にLive Streamingを実現する方法です。<br/>
-Appleが提唱したらしく、iOSが最も安定して再生できるのですが一応Androidでも対応します。
-(手元のNexus7で試した所、Androidだとシークが出来なくなる)
-<a href="http://qiita.com/joker1007/items/def9d58ddb00fafc936d">http://qiita.com/joker1007/items/def9d58ddb00fafc936d</a></p></blockquote>
-
-<p>作成するには、<a href="http://www.ffmpeg.org/">FFmpeg</a>を使うのが楽、とのことで、FFmpegをインストール。<br/>
-新しめのFFmpegには分割するためのsegmenterも入っているようなので、FFmpegを入れるだけでOK。</p>
-
-<p>インストール環境は、<code>Mac OS X 10.8.5</code></p>
-
-<p>以下のページを参考にしてインストールした。</p>
-
-<p><a href="http://kujirahand.com/blog/index.php?Mac+OS+X%E3%81%A7FFmpeg%E3%81%AE%E3%82%A4%E3%83%B3%E3%82%B9%E3%83%88%E3%83%BC%E3%83%AB%E3%81%A8WebM%E5%8B%95%E7%94%BB%E3%81%AE%E4%BD%9C%E3%82%8A%E6%96%B9">Mac OS XでFFmpegのインストールとWebM動画の作り方</a></p>
-
-<p>インストールには、<a href="http://brew.sh/">Homebrew</a>を使用。<br/>
-必要なプラグインをbrewを使用して入れていく。<br/>
-(以下は1行)</p>
-
-<pre><code>brew install automake celt faac fdk-aac git lame libass libtool
- libvorbis libvpx libvo-aacenc opencore-amr openjpeg opus sdl
- schroedinger shtool speex texi2html theora wget x264 xvid yasm
-</code></pre>
-
-<p>Xcodeが最新版でないとWarningが出るので、アップデートしておく。<br/>
-(すでにインストール済みのものがある場合もwarningが出る。)</p>
-
-<p>で、FFmpegをオプションつきでインストールする。<br/>
-(以下も1行)</p>
-
-<pre><code>brew install ffmpeg 
- --with-fdk-aac --with-libvo-aacenc 
- --with-libvorbis --with-libvpx --with-openjpeg 
- --with-theora --with-opencore-amr
-</code></pre>
-
-<p>これで準備は完了。</p>
-
-<hr />
-
-<p>以下を参考に変換、分割作業。</p>
-
-<p><a href="http://qiita.com/joker1007/items/def9d58ddb00fafc936d">HTML5のvideoタグで利用するmp4の動画を作る時のTips</a><br/>
-(以下は1行)</p>
-
-<pre><code>ffmpeg -i test.mp4 -vcodec libx264
- -b:v 768k -s 640x360 -acodec libfaac
- -b:a 96k -ar 44100 -flags +loop-global_heade 
- -map 0 -bsf h264_mp4toannexb -f segment 
- -segment_format mpegts -segment_time 10 
- -segment_list index.m3u8 test%03d.ts
-</code></pre>
-
-<p>オプションの説明</p>
-
-<table>
-<thead>
-<tr>
-<th>コマンド </th>
-<th> 値 </th>
-<th> 説明</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>-i </td>
-<td> test.mp4 </td>
-<td> 入力ファイル</td>
-</tr>
-<tr>
-<td>-vcodec </td>
-<td> libx264 </td>
-<td> ビデオコーデック。h264</td>
-</tr>
-<tr>
-<td>-b:v </td>
-<td> 768k </td>
-<td> ビデオビットレート</td>
-</tr>
-<tr>
-<td>-acodec </td>
-<td> libfaac </td>
-<td> オーディオ・コーデック。AAC</td>
-</tr>
-<tr>
-<td>-b:a </td>
-<td> 96k </td>
-<td> オーディオビットレート</td>
-</tr>
-<tr>
-<td>-ar </td>
-<td> 44100 </td>
-<td> オーディオサンプリングレート</td>
-</tr>
-<tr>
-<td>-flags </td>
-<td> +loop-global_header </td>
-<td> </td>
-</tr>
-<tr>
-<td>-map </td>
-<td> 0 </td>
-<td> </td>
-</tr>
-<tr>
-<td>-bsf </td>
-<td> h264_mp4toannexb ※1 </td>
-<td> ビデオフィルター</td>
-</tr>
-<tr>
-<td>-f </td>
-<td> segment </td>
-<td> コマンドの指定</td>
-</tr>
-<tr>
-<td>-segment_format </td>
-<td> mpegts </td>
-<td> 分割フォーマット</td>
-</tr>
-<tr>
-<td>-segment_time </td>
-<td> 10 </td>
-<td> 分割秒数</td>
-</tr>
-<tr>
-<td>-segment_list </td>
-<td> index.m3u8 </td>
-<td> リストファイル</td>
-</tr>
-</tbody>
-</table>
-
-
-<p>最後に出力ファイル名を記述。<code>%03d</code>は３桁の連番。<br/>
--flagsと-mapは詳細不明。</p>
-
-<p>※1 <code>mpegts</code>形式にする場合、必要なフィルターのよう。</p>
-
-<blockquote><p>h264_mp4toannexb :<br/>
-Convert an H.264 bitstream from length prefixed mode to start code prefixed mode (as defined in the Annex B of the ITU-T H.264 specification).<br/>
-This is required by some streaming formats, typically the MPEG-2 transport stream format (&ldquo;mpegts&rdquo;).<br/>
-<a href="http://www.ffmpeg.org/ffmpeg-bitstream-filters.html">http://www.ffmpeg.org/ffmpeg-bitstream-filters.html</a></p></blockquote>
-
-<p>HTMLにはこの場合、index.m3u8を読みこめば表示出来る。</p>
-
-<pre><code>&lt;video controls poster="hoge.jpg" preload="none" onclick="this.play();" width="640" height="320" id="stageVideo"&gt;
-    &lt;source src="index.m3u8"&gt;
-    &lt;img src="hoge.jpg" alt="代替" width="640" height="320" /&gt;
-&lt;/video&gt;
-</code></pre>
-
-<hr />
-
-<p>参考サイト：<br/>
-<a href="http://do-gugan.com/~furuta/archives/2013/03/http_live_strea.html">HTTP Live Streaming覚え書き</a><br/>
-<a href="https://developer.apple.com/jp/devcenter/ios/library/documentation/StreamingMediaGuide.pdf">HTTP Live Streamingの概要(PDF)</a><br/>
-<a href="http://blog.fumiz.me/2008/10/19/ffmpeg%E3%81%A7%E5%8B%95%E7%94%BB%E3%81%8B%E3%82%89%E7%94%BB%E5%83%8F%E3%82%92%E5%88%87%E3%82%8A%E5%87%BA%E3%81%99/">ffmpegで動画から画像を切り出す</a><br/>
-<a href="http://yosilove.blogspot.jp/2011/04/mac-ffmpeg.html">[Mac] ffmpegをコンパイル</a><br/>
-<a href="http://venture-blog.blogspot.jp/2012/05/http-live-streaming.html">HTTP Live Streamingを使ったサーバ構築</a><br/>
-<a href="http://qiita.com/joker1007/items/def9d58ddb00fafc936d">HTML5のvideoタグで利用するmp4の動画を作る時のTips</a></p>
 ]]></content>
   </entry>
   

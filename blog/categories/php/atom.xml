@@ -4,7 +4,7 @@
   <title><![CDATA[Category: php | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/php/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2014-07-15T10:46:26+09:00</updated>
+  <updated>2014-07-15T17:47:21+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,133 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Mailgun APIを使ってメールを送る Composer版]]></title>
+    <link href="http://kayakuguri.github.io/blog/2014/07/15/mailgunapi/"/>
+    <updated>2014-07-15T14:13:12+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2014/07/15/mailgunapi</id>
+    <content type="html"><![CDATA[<p>いくつか書いているmailgunを使用したメール送信の件ですが、<br/>
+たぶん正しいと思われる方法がわかったのでメモしておきます。</p>
+
+<!-- more -->
+
+
+<h3>composerでインストール</h3>
+
+<p><a href="https://github.com/mailgun/mailgun-php">mailgun/mailgun-php · GitHub</a></p>
+
+<p>composerを使用して、ライブラリをインストールします。<br/>
+Composerのインストールは以下などを参照に。<br/>
+<a href="http://tech.basicinc.jp/php/2013/08/18/php_composer/">PHPのパッケージ管理Composerを使う</a></p>
+
+<p>Windowsの場合は以下に書きました。<br/>
+<a href="http://kayakuguri.github.io/blog/2014/07/15/win7-composer/">Windows7でComposerのインストール</a></p>
+
+<p><code>composer.json</code>に以下のように記述。</p>
+
+<pre><code>{
+    "require": {
+        "mailgun/mailgun-php": "~1.7.1"
+    }
+}
+</code></pre>
+
+<p>で、インストール。</p>
+
+<pre><code>$ composer install
+</code></pre>
+
+<p>これでライブラリなどがダウンロードされ、mailgunの依存関係が出来上がります。</p>
+
+<h3>Mailgun</h3>
+
+<h4>インストール</h4>
+
+<p>アドオンのインストール。</p>
+
+<pre><code>$ heroku addons:add mailgun
+</code></pre>
+
+<h4>セットアップ</h4>
+
+<p>PHPの冒頭で初期化して送信。<br/>
+初期化するためにはAPIキーとドメインが必要。<br/>
+これは環境変数に入っている。</p>
+
+<pre><code>MAILGUN_API_KEY:       key-xxx
+MAILGUN_SMTP_LOGIN:    postmaster@xxx.mailgun.org
+MAILGUN_SMTP_PASSWORD: xxx
+MAILGUN_SMTP_PORT:     587
+MAILGUN_SMTP_SERVER:   smtp.mailgun.org
+</code></pre>
+
+<p>ドメインは、<code>MAILGUN_SMTP_LOGIN</code>の<code>@</code>より後ろ、になるので、それを使用する。</p>
+
+<pre><code>require 'vendor/autoload.php';
+use Mailgun\Mailgun;
+
+$mgClient = new Mailgun(getenv('MAILGUN_API_KEY'));
+$domain = getenv('MAILGUN_SMTP_LOGIN');
+$domain = substr($domain, strpos($domain, '@') + 1);
+</code></pre>
+
+<h4>送信</h4>
+
+<p>通常の送信は以下。</p>
+
+<pre><code>$result = $mgClient-&gt;sendMessage($domain, array(
+    'from'    =&gt; 'Excited User &lt;me@samples.mailgun.org&gt;',
+    'to'      =&gt; 'Baz &lt;baz@example.com&gt;',
+    'subject' =&gt; 'Hello',
+    'text'    =&gt; 'Testing some Mailgun awesomness!'
+));
+</code></pre>
+
+<h4>パラメータを個別に設定</h4>
+
+<p>上記では送信時に一括で指定しているけれど、これを個別に設定するには、<br/>
+<code>Message Builder</code>というものを使用します。<br/>
+<a href="https://github.com/mailgun/mailgun-php/blob/master/src/Mailgun/Messages/README.md#usage---message-builder">Usage &ndash; Message Builder</a></p>
+
+<p>上記のセットをバラすと以下のようになります。</p>
+
+<pre><code>$msgBldr = $mgClient-&gt;MessageBuilder();
+$msgBldr-&gt;setFromAddress('Excited User &lt;me@samples.mailgun.org&gt;');
+$msgBldr-&gt;addToRecipient('Baz &lt;baz@example.com&gt;');
+$msgBldr-&gt;setSubject('Hello');
+$msgBldr-&gt;setTextBody('Testing some Mailgun awesomness!'); 
+$result = $mgClient-&gt;post("{$domain}/messages", $msgBldr-&gt;getMessage(), $msgBldr-&gt;getFiles());
+</code></pre>
+
+<h4>キューにまとめて登録</h4>
+
+<p>また、キューにまとめて登録する場合は、<code>Batch Message</code>を使用します。<br/>
+<a href="https://github.com/mailgun/mailgun-php/blob/master/src/Mailgun/Messages/README.md#usage---batch-message">Usage &ndash; Batch Message</a></p>
+
+<p>これを使用して、toを複数登録すると、それぞれのtoにバラバラに同じメールが送られます。</p>
+
+<pre><code>$msgBldr = $mgClient-&gt;BatchMessage($domain);
+$msgBldr-&gt;addToRecipient('test1 &lt;test1@example.com&gt;');
+$msgBldr-&gt;addToRecipient('test2 &lt;test2@example.com&gt;');
+// 他のパラメータ設定は同じ
+$result = $msgBldr-&gt;finalize();
+</code></pre>
+
+<p><code>finalize</code>で、キューに登録されるようでした。</p>
+
+<hr />
+
+<p>今までのmailgun関連の記事はこちら</p>
+
+<ul>
+<li><a href="http://kayakuguri.github.io/blog/2014/02/17/send-mail-from-heroku-with-mailgun/">PHPでMailgunを使ってherokuでメール送信する</a></li>
+<li><a href="http://kayakuguri.github.io/blog/2014/02/18/php-heroku-sendattachmail/">[PHP]herokuで添付ファイル付きメールを送る</a></li>
+<li><a href="http://kayakuguri.github.io/blog/2014/02/19/attachment-use-mailgunapi/">[PHP][heroku]Mailgun APIを使って添付ファイルを送る</a></li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Windows7でComposerのインストール]]></title>
@@ -356,110 +483,6 @@ echo $mail -&gt;send(); //成功の場合は「1」が返ってくる
 <a href="http://pontago.hatenablog.com/entry/20091028/1256743421">http://pontago.hatenablog.com/entry/20091028/1256743421</a></p></blockquote>
 
 <p>(ヘッダ分を差し引く、の部分は無視しても問題なかった)</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[PHP][heroku]Mailgun APIを使って添付ファイルを送る]]></title>
-    <link href="http://kayakuguri.github.io/blog/2014/02/19/attachment-use-mailgunapi/"/>
-    <updated>2014-02-19T17:37:48+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2014/02/19/attachment-use-mailgunapi</id>
-    <content type="html"><![CDATA[<p>以前に、<a href="http://kayakuguri.github.io/blog/2014/02/18/php-heroku-sendattachmail/">mailgunで添付ファイル付きメールを送る方法</a>を書いたが、<br/>
-そちらは、<code>SMTP</code>バージョンで、今回はそのMailgun APIバージョン。</p>
-
-<!-- more -->
-
-
-<p>以下のファイルをダウンロードして一式アップしておく。<br/>
-(readmeファイルなどいらないものが大量にあるが、とりあえず全部あげておく)</p>
-
-<p><a href="https://9f67cbbd1116d8afb399-7760483f5d1e5f28c2d253278a2a5045.ssl.cf2.rackcdn.com/mailgun-php-1.7.zip">Library Download</a> (zip直リンク)</p>
-
-<p>基本の送信方法は以下。<br/>
-<a href="http://documentation.mailgun.com/quickstart.html#sending-messages">Sending Messages</a></p>
-
-<pre><code># Include the Autoloader (see "Libraries" for install instructions)
-require 'vendor/autoload.php';
-use Mailgun\Mailgun;
-
-# Instantiate the client.
-$mgClient = new Mailgun('key-3ax6xnjp29jd6fds4gc373sgvjxteol0');
-$domain = "samples.mailgun.org";
-
-# Make the call to the client.
-$result = $mgClient-&gt;sendMessage("$domain",
-              array('from'    =&gt; 'Excited User &lt;me@samples.mailgun.org&gt;',
-                    'to'      =&gt; 'Baz &lt;baz@example.com&gt;',
-                    'subject' =&gt; 'Hello',
-                    'text'    =&gt; 'Testing some Mailgun awesomness!'));
-</code></pre>
-
-<p>添付ファイルを送る方法は、<code>attachment</code>を使って、その中にファイル名を書く。<br/>
-ファイル名を指定する方法が紹介されていた。<br/>
-<a href="https://github.com/mailgun/mailgun-php/issues/35">https://github.com/mailgun/mailgun-php/issues/35</a></p>
-
-<pre><code>array(
-    'attachment' =&gt; array(
-        'filePath' =&gt; './' . $attach['name'],
-        'remoteName' =&gt; $attach['name']
-    )
-)
-</code></pre>
-
-<p>この方法で実装したところ、一時ファイルから添付ファイルにしての送信、が出来なかった。<br/>
-(ファイルがないと怒られる)</p>
-
-<p>試しに、heroku内で<code>move_uploaded_file</code>を使ってみると、エラーもなく保存出来た。<br/>
-そのままそのファイルを添付して送ったところ、無事、送信完了。<br/>
-ただしファイル自体は直接アクセスしようとすると<code>404</code>が表示されるので、<br/>
-そのスクリプト内でのみ有効、のよう。</p>
-
-<p>あと、上記の添付例のまま送信すると、2つ添付された。<br/>
-どうやらファイル名を指定する箇所が効いておらず、書かれているファイル名が添付されたよう。<br/>
-試しに、<code>'remoteName' =&gt; $attach['name']</code>の行を削除しても送信出来た。</p>
-
-<p>その部分を考慮して、最終的に出来たコードが以下。</p>
-
-<p>・1ファイルを1つの宛先に送信する場合<br/>
-・送信先や内容などはPOSTで受け取る想定</p>
-
-<pre><code>require '../vendor/autoload.php';
-use Mailgun\Mailgun;
-$mgClient = new Mailgun('key-xxx');
-$domain = "appxxx.mailgun.org";
-
-$attach = $_FILES["attach"]; //添付ファイル
-
-//ファイル保存
-try{
-    $result = move_uploaded_file($attach['tmp_name'], './'.$attach['name']);
-} catch (Exception $e) {
-    var_dump($e-&gt;getMessage());
-}
-
-//メール送信
-try {
-    $result = $mgClient-&gt;sendMessage("$domain",
-        array(
-            'from'    =&gt; $_POST['fromname'].' &lt;'.$_POST['fromaddress'].'&gt;',
-            'to'      =&gt; $_POST['toname'].' &lt;'.$_POST['to'].'&gt;',
-            'subject' =&gt; $_POST['subject'],
-            'text'    =&gt; $_POST['body']
-        ),
-        array(
-            'attachment' =&gt; array(
-                './' . $attach['name']
-            )
-        )
-    );
-    var_dump($result);
-
-} catch (Exception $e) {
-    var_dump($e-&gt;getMessage());
-}               
-</code></pre>
-
-<p>結局、一度保存してからの送信、となるので、SMTPを使った方が処理が速いかも。(未検証)</p>
 ]]></content>
   </entry>
   
