@@ -1,0 +1,385 @@
+
+<!DOCTYPE HTML>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>[勉強] Ruby on Rails #02 - KayaMemo</title>
+
+	
+	<meta name="description" content="<!-- google_ad_client = "ca-pub-0887267957680144"; /* kayakuguri top */ google_ad_slot = "1210228675"; google_ad_width = 468; google_ad_height = 60 &hellip;">
+	
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+	<link href="/atom.xml" rel="alternate" title="KayaMemo" type="application/atom+xml">
+	<link rel="canonical" href="">
+	<link href="/favicon.png" rel="shortcut icon">
+	<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+	<script async="true" src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+	
+<meta property="og:title" content="[勉強] Ruby on Rails #02 - KayaMemo" />
+<meta property="og:type" content="article" />
+<meta property="og:description" content="<!-- google_ad_client = "ca-pub-0887267957680144"; /* kayakuguri top */ google_ad_slot = "1210228675"; google_ad_width = 468; google_ad_height = 60 &hellip;" />
+
+<meta property="og:url" content="" />
+<meta property="og:image" content="http://kayakuguri.github.io/images/about_me.jpg" />
+<meta property="og:author" content="kayakuguri" />
+<meta property="og:site_name" content="KayaMemo" />
+<meta property="og:locale" content="ja_JP" />
+<meta property="fb:app_id" content="509051419202319" />
+</head>
+
+
+<body>
+	<header id="header" class="inner"><h1><a href="/">KayaMemo</a></h1>
+<nav id="main-nav"><ul class="main">
+	<li><a href="/">Blog</a></li>
+	<li><a href="/blog/archives">Archives</a></li>
+</ul>
+</nav>
+<nav id="mobile-nav">
+	<div class="alignleft menu">
+		<a class="button">Menu</a>
+		<div class="container"><ul class="main">
+	<li><a href="/">Blog</a></li>
+	<li><a href="/blog/archives">Archives</a></li>
+</ul>
+</div>
+	</div>
+	<div class="alignright search">
+		<a class="button"></a>
+		<div class="container">
+			<form action="http://google.com/search" method="get">
+				<input type="text" name="q" results="0">
+				<input type="hidden" name="q" value="site:kayakuguri.github.io">
+			</form>
+		</div>
+	</div>
+</nav>
+<nav id="sub-nav" class="alignright">
+	<div class="social">
+		
+		
+		
+		
+    
+		
+		
+		
+		
+		
+		<a class="rss" href="/atom.xml" title="RSS">RSS</a>
+		
+    
+	</div>
+	<form class="search" action="http://google.com/search" method="get">
+		<input class="alignright" type="text" name="q" results="0">
+		<input type="hidden" name="q" value="site:kayakuguri.github.io">
+	</form>
+</nav>
+
+</header>
+	
+		
+	
+	<div id="content" class="inner"><article class="post">
+	<h2 class="title">[勉強] Ruby on Rails #02</h2>
+	<div class="entry-content">
+        <div class="adArea">
+    <script type="text/javascript"><!--
+    google_ad_client = "ca-pub-0887267957680144";
+    /* kayakuguri top */
+    google_ad_slot = "1210228675";
+    google_ad_width = 468;
+    google_ad_height = 60;
+    //-->
+    </script>
+    <script type="text/javascript"
+            src="//pagead2.googlesyndication.com/pagead/show_ads.js">
+    </script>
+</div>
+        <p><a href="http://railstutorial.jp/">Ruby on Rails チュートリアル：実例を使って Rails を学ぼう</a></p>
+
+<p>web上では無料で公開されているこちらを利用して勉強していく上での備忘録です。</p>
+
+<!-- more -->
+
+
+<h3>最初のアプリケーション</h3>
+
+<blockquote><p>どんなRailsアプリケーションも最初の作成手順は同じです。rails newコマンドを実行して作成します。</p></blockquote>
+
+<pre><code>$ rails new first_app
+</code></pre>
+
+<p>(<code>Permission denied</code>がたくさん出ているのは、もしかしたら<code>sudo</code>が必要なのかも。。)</p>
+
+<h3>Bundler</h3>
+
+<p><code>Gemfile</code>を編集して、bundlerを再実行してみる。<br/>
+[内容]</p>
+
+<pre><code>source 'https://rubygems.org'
+ruby '2.0.0'
+#ruby-gemset=rails4
+
+gem 'rails', '4.1.4'
+
+group :development do
+  gem 'sqlite3', '1.3.8'
+end
+
+gem 'sass-rails', '4.0.2'
+gem 'uglifier', '2.1.1'
+gem 'coffee-rails', '4.0.1'
+gem 'jquery-rails', '3.0.4'
+gem 'turbolinks', '1.1.1'
+gem 'jbuilder', '1.0.2'
+
+group :doc do
+  gem 'sdoc', '0.3.20', require: false
+end
+</code></pre>
+
+<blockquote><p>SQLiteをdevelopment環境でのみ使用するための指定も行なっていることに注目してください。こうすることで、Herokuで使用するデータベースソフトウェアと衝突する可能性を避けられます。</p></blockquote>
+
+<p>元の内容の説明。<br/>
+<code>gem 'uglifier', '&gt;= 1.3.0'</code> : uglifierのバージョンが1.3.0以上であれば最新バージョンのgemがインストールされる<br/>
+<code>gem 'coffee-rails', '~&gt; 4.0.0'</code> : 4.0.0から4.0.1へのアップグレードは行われますが、4.0から4.1へのアップグレードは行われません</p>
+
+<blockquote><p>経験上、残念ながらマイナーアップグレードですら問題を引き起こすことがあります。このため、Railsチュートリアルでは基本的にすべてのgemでバージョンをピンポイントで指定しています。</p></blockquote>
+
+<p>アップデートして、インストール。</p>
+
+<blockquote><p>bundle updateの手順が必要となるのは、Rails gemのバージョンを変更した場合に限られます。</p></blockquote>
+
+<p><code>sudo</code>をつけないと実行出来なかった。</p>
+
+<pre><code>$ sudo bundle update
+$ sudo bundle install
+</code></pre>
+
+<h3>rails server</h3>
+
+<blockquote><p>Railsには開発マシンでのみブラウズできるローカルWebサーバーを起動するためのコマンドラインプログラム (スクリプト) が付属しているので、以下のコマンドを実行するだけで簡単に起動することができます。</p></blockquote>
+
+<pre><code>$ rails server
+</code></pre>
+
+<p>これでサーバーが起動。<br/>
+<a href="http://localhost:3000/">http://localhost:3000/</a><br/>
+ここで、確認出来る。<br/>
+<img src="/images/2014/07/ror01.jpg" alt="rails server" /></p>
+
+<p><code>control + c</code>で終了出来る。</p>
+
+<h3>MVC</h3>
+
+<p>この流れになっているよう。<br/>
+(画像は引用)</p>
+
+<p><img src="http://railstutorial.jp/images/figures/mvc_schematic.png" alt="MVC" /></p>
+
+<h3>Gitによるバージョン管理</h3>
+
+<p>ここは飛ばそうか悩んだけれど、この後にherokuにアップする流れだったので、<br/>
+ここで管理しておくことにした。</p>
+
+<p>Gitについて詳しくは以下参照のこと、と。<br/>
+<a href="http://git-scm.com/book/ja/">Pro Git</a></p>
+
+<p>リポジトリを作成。</p>
+
+<pre><code>$ git init
+</code></pre>
+
+<blockquote><p>たとえば、Railsによって作成されるログファイルは頻繁に内容が変わるので、いちいちバージョン管理に更新させたくありません。<br/>
+railsコマンドを実行した時にRailsアプリケーションのルートディレクトリに.gitignoreファイルが作成されています</p>
+
+<p>しかし、以下のリストの方がさらに便利で、セキュリティ上も有利なのでお勧めです。この.gitignoreでは、Railsドキュメントファイル、VimやEmacsのスワップファイル、そしてOS Xユーザーにはお馴染みの、あのいまいましい.DS_Storeディレクトリ (MacのFinder操作で作成される隠しディレクトリ) も管理対象から除外されます。</p></blockquote>
+
+<pre><code># Ignore bundler config.
+/.bundle
+
+# Ignore the default SQLite database.
+/db/*.sqlite3
+/db/*.sqlite3-journal
+
+# Ignore all logfiles and tempfiles.
+/log/*.log
+/tmp
+
+# Ignore other unneeded files.
+doc/
+*.swp
+*~
+.project
+.DS_Store
+.idea
+.secret
+</code></pre>
+
+<p>で、追加して、コミットする。</p>
+
+<pre><code>$ git add .
+$ git commit -m "Initialize repository"
+</code></pre>
+
+<h3>GitHub</h3>
+
+<p>自分のgithubアカウントに追加する。<br/>
+<a href="https://github.com/k-usk/railstutorial">https://github.com/k-usk/railstutorial</a></p>
+
+<pre><code>$ git remote add origin https://github.com/k-usk/railstutorial.git
+$ git push -u origin master
+</code></pre>
+
+<blockquote><p>コミットメッセージは現在形で書くようにしましょう。<br/>
+そのコミットが「何をしたのか」と履歴スタイルで書くよりも「何をする」ためのものなのかを書く方が、後から見返したときにわかりやすくなります。</p>
+
+<p>大抵のシステムではgit pushを実行するときにorigin masterを省略できます。</p></blockquote>
+
+<h3>Heroku</h3>
+
+<blockquote><p>HerokuではPostgreSQLデータベースを使用します</p></blockquote>
+
+<p><code>Gemfile</code>に本番用の設定を追記する。</p>
+
+<pre><code>group :production do
+  gem 'pg', '0.15.1'
+  gem 'rails_12factor', '0.0.2'
+end
+</code></pre>
+
+<p>Gemfileを更新したので、installしておく。</p>
+
+<pre><code>$ bundle install --without production
+</code></pre>
+
+<blockquote><p>&mdash;without productionオプションを追加すると、 本番用のgem (この場合はpgとrails_12factor) はローカルの環境にはインストールされません。<br/>
+このコマンドを実行するのは、後の本番環境に備えてGemfile.lockを更新し、pg gemとrails_12factor gem、Rubyバージョンの指定を含めておく必要があるためです。</p></blockquote>
+
+<p>herokuのアプリを作成して、プッシュして、デプロイ。</p>
+
+<pre><code>$ heroku create rails-myfirstapp
+$ git push heroku master
+</code></pre>
+
+<p>以下に作成した。</p>
+
+<p><a href="http://rails-myfirstapp.herokuapp.com/">http://rails-myfirstapp.herokuapp.com/</a></p>
+
+<p>エラーがでてる！と思いきや、仕様のよう。</p>
+
+<blockquote><p>残念ながら、Rails 4.0では技術的な理由によりエラーページが表示されます。Rails 4.0のデフォルトページはHerokuでは表示できません。サンプルアプリケーションの一環として、ルートへのルーティングを追加すればこのエラーは解消しますのでご安心ください。</p></blockquote>
+
+<hr />
+
+<p>これでようやく開発環境が一通り整った、という事になる。<br/>
+チュートリアルサイトの冒頭にあった言葉が身にしみる。。。</p>
+
+<blockquote><p>本書の第1章は、さしずめロースクールで言うところの「淘汰期間」(訳注: そこで生き残れるかどうかを選別する期間) のようなものである。本章で開発環境の構築に成功できた人ならば、最後までやり通すことは難しくありません。
+—Bob Cavezza (Railsチュートリアル読者)</p></blockquote>
+
+    </div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-07-18T17:49:50+09:00" pubdate data-updated="true">Jul 18<span>th</span>, 2014</time></div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/memo/'>memo</a>, <a class='category' href='/blog/categories/rails/'>rails</a>, <a class='category' href='/blog/categories/rudy/'>rudy</a>, <a class='category' href='/blog/categories/mian-qiang/'>勉強</a>
+
+
+</div>
+	
+</div>
+</article>
+
+	<div class="share">
+	<div class="addthis_toolbox addthis_default_style ">
+		
+        <div id="fb-root"></div>
+<script>(function(d, s, id) {
+    var js, fjs = d.getElementsByTagName(s)[0];
+    if (d.getElementById(id)) return;
+    js = d.createElement(s); js.id = id;
+    js.src = "//connect.facebook.net/ja_JP/all.js#xfbml=1&appId=509051419202319";
+    fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+        <div class="fb-like" data-href="http://kayakuguri.github.io/blog/2014/07/18/rails-study02/" data-layout="button_count" data-action="like" data-show-faces="true" data-share="false"></div>
+		
+		
+		
+		<a class="addthis_button_google_plusone" g:plusone:size="medium"></a>
+		
+		
+        
+        <a href="http://b.hatena.ne.jp/entry/http://kayakuguri.github.io/blog/2014/07/18/rails-study02/" class="hatena-bookmark-button" data-hatena-bookmark-title="[勉強] Ruby on Rails #02 - KayaMemo" data-hatena-bookmark-layout="standard-noballoon" data-hatena-bookmark-lang="ja" title="このエントリーをはてなブックマークに追加">
+<img src="http://b.st-hatena.com/images/entry-button/button-only@2x.png" alt="このエントリーをはてなブックマークに追加" width="20" height="20" style="border: none;" /></a>
+<script type="text/javascript" src="http://b.st-hatena.com/js/bookmark_button.js" charset="utf-8" async="async"></script>
+        
+	</div>
+	
+</div>
+
+
+<div class="share">
+    <script type="text/javascript"><!--
+    google_ad_client = "ca-pub-0887267957680144";
+    /* kayakuguri git */
+    google_ad_slot = "2041160274";
+    google_ad_width = 336;
+    google_ad_height = 280;
+    //-->
+    </script>
+    <script type="text/javascript"
+            src="//pagead2.googlesyndication.com/pagead/show_ads.js">
+    </script>
+</div>
+</div>
+	<footer id="footer" class="inner">Copyright &copy; 2014
+
+    萱潜
+
+</footer>
+	<script src="/javascripts/slash.js"></script>
+<script src="/javascripts/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+	$('.fancybox').fancybox();
+})(jQuery);
+</script> <!-- Delete or comment this line to disable Fancybox -->
+
+
+
+
+	<script type="text/javascript">
+		var _gaq = _gaq || [];
+		_gaq.push(['_setAccount', 'UA-3730932-4']);
+		_gaq.push(['_trackPageview']);
+
+		(function() {
+			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+		})();
+	</script>
+
+
+
+</body>
+</html>
