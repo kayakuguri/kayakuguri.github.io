@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: rudy,rails,勉強,memo | KayaMemo]]></title>
+  <link href="http://kayakuguri.github.io/blog/categories/rudy-rails-mian-qiang-memo/atom.xml" rel="self"/>
+  <link href="http://kayakuguri.github.io/"/>
+  <updated>2014-07-18T17:48:42+09:00</updated>
+  <id>http://kayakuguri.github.io/</id>
+  <author>
+    <name><![CDATA[萱潜]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[[勉強] Ruby on Rails #01]]></title>
+    <link href="http://kayakuguri.github.io/blog/2014/07/18/rails-study01/"/>
+    <updated>2014-07-18T15:43:48+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2014/07/18/rails-study01</id>
+    <content type="html"><![CDATA[<p><a href="http://railstutorial.jp/">Ruby on Rails チュートリアル：実例を使って Rails を学ぼう</a></p>
+
+<p>web上では無料で公開されているこちらを利用して勉強していく上での備忘録です。</p>
+
+<!-- more -->
+
+
+<h3>はじめに〜読者の皆さまへ</h3>
+
+<p>印象に残った箇所を引用させてもらいます。</p>
+
+<blockquote><p>チュートリアルが統合的に構成されていることにより、本書を最後まで完了することができれば、現時点のWeb開発の知識量に関わらず、より高度な情報源を難なく読みこなす実力が身につき、上に挙げたJavaScriptなどのRails以外のトピックについても理解しやすくなります。</p>
+
+<p>「最初からテストを書かないといけないでしょうか？」<br/>
+Railsチュートリアルでは最初からテスト駆動開発 (TDD) を採用しています。<br/>
+ただし、テスト駆動開発を全面的に採用したことにより、本チュートリアルはその分複雑になり、読者の負担も増えています。<br/>
+そこで、もしテストで行き詰まってしまった場合には、そこで長々と悩むよりも思い切って (一周目は) その箇所をスキップしてしまいましょう。</p>
+
+<p>(Rubyでは行末にセミコロンを置いても置かなくても問題なく動きますので、行末にセミコロンがないとどうしても落ち着かない方はそうしてみてもよいかもしれません。お勧めはしませんが。)</p>
+
+<p>「Railsはスケールアップできない」という主張について<br/>
+Webサイトをスケールさせるのはあなたが行わなければいけない作業であって、フレームワークがWebサイトをスケールさせるのではない</p></blockquote>
+
+<h5>表記について</h5>
+
+<blockquote><p>Railsで作成するWebアプリケーションが置かれているディレクトリのルート (root) を、Railsルートと呼ぶことにします。<br/>
+多くの人がRailsルートを「Railsというアプリケーションそのものがインストールされているディレクトリのルート」だと勘違いします。</p></blockquote>
+
+<h3>開発環境</h3>
+
+<h4>IDE</h4>
+
+<ul>
+<li><a href="http://www.aptana.com/products/radrails">Aptana RadRails</a></li>
+<li><a href="http://www.jetbrains.com/ruby/index.html">RubyMine</a></li>
+</ul>
+
+
+<p><a href="http://blog.mah-lab.com/2013/12/09/rubymine/">イマドキ、Ruby on Railsで開発するならエディタはRubyMineだよね？ 6出たよー！</a><br/>
+PHPStromは使っているので、RubyMineがいいけど、お値段が。。。<br/>
+(統合できて、安くなる仕組みになってたらいいのに)</p>
+
+<h4>エディタ</h4>
+
+<p>上記IDEは開発からコマンド実行、アップロードなどもオールインワンで行えるものだけれど、<br/>
+テキストエディタ+ターミナルでのコマンド実行、でも大丈夫。<br/>
+<a href="http://www.sublimetext.com/">Sublime Text</a> と ターミナル、(とりあえず)無料で始められる。</p>
+
+<p><a href="https://github.com/mhartl/rails_tutorial_sublime_text">SublimeTextでRailsの開発環境を整える(英語)</a></p>
+
+<h4>インストール</h4>
+
+<p>rvmはインストール済だったので、最新版にアップデートしておいた。</p>
+
+<pre><code>$ rvm get stable
+</code></pre>
+
+<blockquote><p>Rubyをインストールしたら、Railsのアプリケーションを実行するために必要な他のソフトウェア向けにシステムを構成する必要があります。<br/>
+gemとは自己完結型のRubyコードのパッケージです。<br/>
+一連のgemを自己完結的にまとめたgemsetというものを作成してバージョンを使い分けるのが便利です。<br/>
+本書向けに、以下を実行してrailstutorial_rails_4_0という名前のgemsetを作成しておく</p></blockquote>
+
+<pre><code>$ rvm use 2.0.0@railstutorial_rails_4_0 --create
+</code></pre>
+
+<p>これを実行すると、<code>ruby-2.0.0-p481 is not installed.</code>と怒られた。<br/>
+ので、インストールしておく。</p>
+
+<pre><code>$ rvm install 2.0.0 --with-openssl-dir=$HOME/.rvm/usr
+. . .
+Install of ruby-2.0.0-p481 - #complete
+</code></pre>
+
+<p>再度、gemsetを作成。<br/>
+チュートリアル内ではこれをデフォルトに、とあるけど、<br/>
+他に影響が出そうなので、とりあえず、セットを作って、必要に応じて適応させるようにする。<br/>
+で、このままだとセット名が長いので、セット名を<code>rails4</code>など簡単なものにしておいた。</p>
+
+<p>一旦削除して、</p>
+
+<pre><code>$ rvm gemset delete railstutorial_rails_4_0
+Are you SURE you wish to remove the entire gemset directory 'railstutorial_rails_4_0'
+(anything other than 'yes' will cancel) &gt; 
+</code></pre>
+
+<p>再度作成。</p>
+
+<pre><code>$ rvm use 2.0.0@rails4 --create
+</code></pre>
+
+<p>これで作成されたので、次回起動時にはこのセットを適用、、、すればいいのだけれど、<br/>
+現状、デフォルトは、<code>ruby-1.9.3-p484</code>にしている。<br/>
+この状態で、<code>rvm gemset use rails4</code>としても、ファイルがない、と言われて実行出来ない。<br/>
+一度、<code>rvm use 2.0.0</code>にしてやれば実行できた。(それだとセットを適用させる意味がないけど。。)</p>
+
+<p>参考：<a href="http://transitive.info/article/ruby/rvm/gemset/">transitive.info &ndash; RVM の gemset を使う</a></p>
+
+<p><strong>RubyGems</strong></p>
+
+<blockquote><p>RVMをインストールしてあれば、既にRubyGemsも同時にインストールされているはずです。</p></blockquote>
+
+<p>だけれど、<code>which gem</code>とすると、パスがそのままは出なかった。<br/>
+とりあえず、下記のコマンドを実行すると、無事インストールされたよう。<br/>
+(権限上、<code>sudo</code>が必要だった)</p>
+
+<pre><code>$ sudo gem update --system 2.0.3
+. . .
+RubyGems 2.0.3 installed
+. . .
+RubyGems installed the following executables:
+    /Users/xxx/.rvm/rubies/ruby-2.0.0-p481/bin/gem
+</code></pre>
+
+<p>2種類のドキュメント、riやrdocの自動生成を抑制するために、<code>.gemrc</code>に追記。</p>
+
+<blockquote><p>sublはOS XでSublime Textを起動するコマンドです</p></blockquote>
+
+<pre><code>$ subl ~/.gemrc
+</code></pre>
+
+<p>以下を追記</p>
+
+<pre><code>install: --no-rdoc --no-ri
+update:  --no-rdoc --no-ri
+</code></pre>
+
+<p>このチュートリアルを始める前にすでに入れてしまってたので、<br/>
+バージョンを確認しようとしたらエラーが出た。</p>
+
+<pre><code>$ rails -v
+/usr/local/Cellar/ruby/2.1.2_2/lib/ruby/2.1.0/rubygems/dependency.rb:298:in `to_specs': Could not find 'railties' (&gt;= 0) among 15 total gem(s) (Gem::LoadError)
+    from /usr/local/Cellar/ruby/2.1.2_2/lib/ruby/2.1.0/rubygems/dependency.rb:309:in `to_spec'
+    from /usr/local/Cellar/ruby/2.1.2_2/lib/ruby/2.1.0/rubygems/core_ext/kernel_gem.rb:53:in `gem'
+    from /usr/local/bin/rails:22:in `&lt;main&gt;'
+</code></pre>
+
+<p>以下で解決した。</p>
+
+<pre><code>$ sudo gem install railties
+</code></pre>
+
+<p>参考：<a href="http://undersourcecode.blog62.fc2.com/blog-entry-173.html">Ruby 2.0.0-p0 でRailsを動かす</a></p>
+
+<p>バージョンは、<code>4.1.4</code>だった。<br/>
+チュートリアルは<code>4.0.5</code>だけど、とりあえずこのままにしておく。</p>
+
+<p>次回、いよいよアプリの作成です。</p>
+]]></content>
+  </entry>
+  
+</feed>
