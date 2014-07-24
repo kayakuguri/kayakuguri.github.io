@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2014-07-24T12:31:24+09:00</updated>
+  <updated>2014-07-24T15:24:22+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -236,10 +236,9 @@ $ git commit -m "Initialize repository"
 
 <h3>GitHub</h3>
 
-<p>自分のgithubアカウントに追加する。<br/>
-<a href="https://github.com/k-usk/railstutorial">https://github.com/k-usk/railstutorial</a></p>
+<p>githubアカウントに追加する。</p>
 
-<pre><code>$ git remote add origin https://github.com/k-usk/railstutorial.git
+<pre><code>$ git remote add origin https://github.com/USER-NAME/railstutorial.git
 $ git push -u origin master
 </code></pre>
 
