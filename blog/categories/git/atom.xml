@@ -4,7 +4,7 @@
   <title><![CDATA[Category: git | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/git/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2014-07-24T15:24:22+09:00</updated>
+  <updated>2014-07-28T12:54:41+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,82 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[エラー] bad line length character: Sysl]]></title>
+    <link href="http://kayakuguri.github.io/blog/2014/07/28/git-heroku-error/"/>
+    <updated>2014-07-28T12:39:54+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2014/07/28/git-heroku-error</id>
+    <content type="html"><![CDATA[<p>とあるタイミングでheroku上のgitからフェッチしようとすると、<br/>
+タイトルのようなエラーが出た。</p>
+
+<!-- more -->
+
+
+<p>エラー内容。</p>
+
+<pre><code>$ git fetch staging
+Fetching repositoryfatal: protocol error: bad line length character: Sysl
+</code></pre>
+
+<p>環境は、herokuで、<a href="http://kayakuguri.github.io/blog/2014/07/02/heroku-staging/">ここで書いた</a>とおり、ローカルでブランチを切って、<br/>
+それぞれのブランチでリモートのプッシュ先を変えて管理している。<br/>
+ここでは、staging環境の分をフェッチしたかった。</p>
+
+<p>heroku関連として全く同じ内容のエラーがStackOverFlowに投稿されていたが、<br/>
+どうやら解決はしていないよう。</p>
+
+<p><a href="http://stackoverflow.com/questions/23034100/git-error-bad-line-length-character-sysl">Git Error: bad line length character: Sysl</a></p>
+
+<p>ググってみると、リモート先のサーバーにsshでログインする時に表示されるメッセージが悪いとか、<br/>
+ssh関連で、<code>.bashrc</code>とか<code>.zshrc</code>とかの設定を見なおしたよ、というような内容が多い。</p>
+
+<p><a href="http://d.hatena.ne.jp/kuromoyo/20120217/1329460576">protocol error: bad line length character と出たら &ndash; #9 Backyard</a><br/>
+<a href="http://verytired.hateblo.jp/entry/2013/07/10/191324">gitのエラー解決方法 &ndash; Shut the fuck up and write some code</a><br/>
+<a href="http://kimoi.hatenadiary.com/entry/20130701/1372693974">fatal: protocol error: bad line length character: # Us &ndash; きもい交換日記</a></p>
+
+<p>しかしどれもピンと来ない。</p>
+
+<p>とりあえず、master環境に切り替えてみよう(理由はない)と思い、変更してみると以下のエラー。</p>
+
+<pre><code>$ git checkout master
+fatal: This operation must be run in a work tree
+</code></pre>
+
+<p>ググると以下の情報が。<br/>
+<a href="http://dqn.sakusakutto.jp/2012/09/git-bare-checkout-This-operation-must-be-run-in-a-work-tree.html">#git bareレポジトリでcheckoutしようとして&quot;This operation must be run in a work tree&quot;の対処法 &ndash; DQNEO起業日記</a></p>
+
+<p>内容通り、以下のコマンドで切り替えは出来た。</p>
+
+<pre><code>$ git symbolic-ref HEAD refs/heads/master
+</code></pre>
+
+<p>ただし、またstagingに戻そうとすると、上記のコマンドが必要になる。。</p>
+
+<p>ターミナルだけでなく、gitはsourceTreeでも管理しているのだけれど、<br/>
+そのソフト上では、ブランチの切り替えはダブルクリックだけで簡単に出来た。</p>
+
+<p>そんな感じで、ブランチの切り替えをしていると、自動的にstaging環境でフェッチが行われていた。<br/>
+流れとしてはこんな感じ。</p>
+
+<blockquote><p>stagigブランチ<br/>
+masterブランチに切り替え<br/>
+stagingブランチに切り替え<br/>
+自動的にフェッチが行われる<br/>
+ (全てsourcetree上での作業)</p></blockquote>
+
+<p>その後、ターミナル上でも<code>fetch</code>してみたが、何事もなく動作した。</p>
+
+<pre><code>$ git fetch staging
+Fetching repository, done.
+</code></pre>
+
+<hr />
+
+<p>結局、原因は不明で、修正手順も不明、なのだけれど、<br/>
+ちょっと情報が少なかったのでメモとして残しておく。</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Herokuでステージング環境をブランチを切って作成する]]></title>
