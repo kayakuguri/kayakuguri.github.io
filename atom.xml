@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2014-07-28T12:54:41+09:00</updated>
+  <updated>2014-08-04T19:58:08+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,83 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Facebookのphp-sdk-v4をcomposerを使ってインストールした時のメモ]]></title>
+    <link href="http://kayakuguri.github.io/blog/2014/08/04/facebook-sdk-v4-composer/"/>
+    <updated>2014-08-04T19:26:37+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2014/08/04/facebook-sdk-v4-composer</id>
+    <content type="html"><![CDATA[<p>今更ながらFacebookのAPIがv2.0にアップデートされた事による<br/>
+影響範囲の大きさにショックを受けています。</p>
+
+<p><a href="http://kuneko.hatenadiary.com/entry/facebook_search_public_post">Facebookの全体公開投稿は2015年に完全に検索できなくなるかも &ndash; ku:neko ism</a><br/>
+<a href="http://snowadays.jp/2014/05/2762">Facebookログイン Version2.0（アプリのパーミッション仕様変更）</a><br/>
+<a href="http://qiita.com/hilotter/items/b88402505faeebbbce89">Facebook Graph API 2.0について &ndash; Qiita</a></p>
+
+<!-- more -->
+
+
+<p>で、新しいものに対応したアプリを作成するべく、<br/>
+PHPのSDKをダウンロードしてきて、、と思ったのですが、composerに対応しているということで、<br/>
+composerでインストールしてみることに。</p>
+
+<p><a href="https://developers.facebook.com/docs/php/gettingstarted/4.0.0">Getting Started php-sdk-v4</a><br/>
+この公式によると、以下のようにしてインストールする、だけ。</p>
+
+<pre><code>{
+  "require" : {
+    "facebook/php-sdk-v4" : "4.0.*"
+  }
+}
+</code></pre>
+
+<p>しかしエラーが。</p>
+
+<pre><code>Your requirements could not be resolved to an installable set of packages.
+  Problem 1
+- facebook/php-sdk-v4 4.0.9 requires php &gt;=5.4.0 -&gt; no matching package found.
+</code></pre>
+
+<p>バージョンの指定を、<code>4.0.9</code>としたり、<code>*</code>としてみても同じ。<br/>
+ググってみると以下の情報に当たる。</p>
+
+<p><a href="http://stackoverflow.com/questions/24269649/composer-not-installing-latest-facebook-php-sdk-due-to-multiple-php-versions">composer not installing latest facebook php sdk due to multiple php versions &ndash; Stack Overflow</a></p>
+
+<p>どうやら、php-sdk-v4は、PHPのバージョンが5.4からの対応、なのだけれど、<br/>
+PCにインストールしているPHPのバージョンが低いとエラーが出るらしい。</p>
+
+<p>ターミナルからPHPのバージョンを調べてみると、きっちり、<code>5.3.28</code>。</p>
+
+<pre><code>$ php -v
+PHP 5.3.28 (cli) (built: Jan 23 2014 18:02:48)
+</code></pre>
+
+<p>調べてみると、下記が一番簡単そうだったので、この方法でインストールした。</p>
+
+<p><a href="http://kimikimi714.hatenablog.com/entry/2013/07/06/233518">macのphpをアップデート &ndash; わすれっぽいきみえ</a></p>
+
+<pre><code>$ curl -s http://php-osx.liip.ch/install.sh | bash -s 5.5
+</code></pre>
+
+<p>で、このままではデフォルトにはならないので、パスを通す、と。<br/>
+<code>~/.bashrc</code>の冒頭に下記を追加しておいた。</p>
+
+<pre><code>export PATH=/usr/local/php5/bin:$PATH
+</code></pre>
+
+<p>で、バージョンを再度確認してみると、無事、アップデートされていた。</p>
+
+<pre><code>$ php -v
+PHP 5.5.14 (cli) (built: Jun 28 2014 10:29:43)
+</code></pre>
+
+<p>で、再度、composerをインストールしてみると、無事、完了した。<br/>
+これでようやく環境が整ったことになる。</p>
+
+<pre><code>  - Installing facebook/php-sdk-v4 (4.0.9)
+</code></pre>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[エラー] bad line length character: Sysl]]></title>
@@ -1842,65 +1919,6 @@ c.testMethod();
 
 <pre><code>15:11:05.049 (49728000)|USER_DEBUG|[46]|DEBUG|Hello world!
 </code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[PhpstormでRubyファイルにシンタックスハイライトを適用]]></title>
-    <link href="http://kayakuguri.github.io/blog/2014/04/04/phpstorm-ruby/"/>
-    <updated>2014-04-04T13:39:21+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2014/04/04/phpstorm-ruby</id>
-    <content type="html"><![CDATA[<p>シンタックスハイライトや補完なんかはやっぱりphpstormでは無理なよう。<br/>
-通常は、<code>IntelliJ IDEA Ultimate</code>使え、と。<br/>
-とはいえ、基本的なシンタックスハイライトくらいは適応させる方法がある、とのこと。</p>
-
-<!-- more -->
-
-
-<p><a href="http://stackoverflow.com/questions/16451359/is-it-possible-to-get-ruby-syntax-highlighting-in-phpstorm">Is it possible to get Ruby syntax highlighting in PHPStorm?</a></p>
-
-<p>基本は上記の訳。</p>
-
-<p>1) <a href="https://github.com/drnic/ruby-tmbundle">ruby-tmbundle</a>を適当なディレクトリにクローン。</p>
-
-<pre><code>$ git clone https://github.com/drnic/ruby-tmbundle.git
-</code></pre>
-
-<p>2) <code>Phpsotrm -&gt; Preference</code>を開く<br/>
-<code>IDE Settings</code>以下にある、<code>TextMate Bundles</code>に1)のディレクトリを追加。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2014/04/phpstorm-ruby1.jpg" alt="TextMate Bundles" /></p>
-
-<p>3) 諸々の理由で、このバンドルはrubyの<code>rb</code>ファイルをサポートしていないらしい。<br/>
-なので、サポートするように修正する。<br/>
-1)のディレクトリ内の、<code>ruby-tmbundle/Syntaxes/Ruby.plist</code>を開く。<br/>
-その中で、<code>&lt;key&gt;fileTypes&lt;/key&gt;</code>以下にある、<code>&lt;array&gt;</code>タグの中に<code>&lt;string&gt;rb&lt;/string&gt;</code>を追加する。</p>
-
-<pre><code>...
-&lt;key&gt;fileTypes&lt;/key&gt;
-&lt;array&gt;
-    &lt;string&gt;rb&lt;/string&gt; ←追加
-    &lt;string&gt;rbx&lt;/string&gt;
-    &lt;string&gt;Rakefile&lt;/string&gt;
-    &lt;string&gt;rake&lt;/string&gt;
-    &lt;string&gt;sake&lt;/string&gt;
-    &lt;string&gt;cgi&lt;/string&gt;
-    &lt;string&gt;fcgi&lt;/string&gt;
-    &lt;string&gt;gemspec&lt;/string&gt;
-    &lt;string&gt;irbrc&lt;/string&gt;
-    &lt;string&gt;capfile&lt;/string&gt;
-&lt;/array&gt;
-&lt;key&gt;firstLineMatch&lt;/key&gt;
-…
-</code></pre>
-
-<p>4) <code>Preference</code>で、<code>File Types</code>で、<code>*.rb</code>を追加が追加されていることを確認する。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2014/04/phpstorm-ruby2.jpg" alt="File Types" /></p>
-
-<p>完了。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2014/04/phpstorm-ruby3.jpg" alt="Ruby syntax highlight" /></p>
 ]]></content>
   </entry>
   
