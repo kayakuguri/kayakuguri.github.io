@@ -4,7 +4,7 @@
   <title><![CDATA[Category: facebook | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/facebook/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2014-08-07T17:01:45+09:00</updated>
+  <updated>2014-08-07T17:05:38+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -71,6 +71,10 @@ facebookページのタブにアプリを追加するような多少めんどく
 
 <p><img src="/images/2014/08/test-user02.jpg" alt="Get App Token" /><br/>
 <img src="/images/2014/08/test-user03.jpg" alt="Get App Token" /></p>
+
+<p>OKOKすると、以下のような形でログインできる。</p>
+
+<p><img src="/images/2014/08/test-user04.jpg" alt="Get App Token" /></p>
 
 <p>終了したい場合は、ログアウトしてログインしなおせばよい。</p>
 
