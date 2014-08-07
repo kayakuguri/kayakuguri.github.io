@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2014-08-04T19:58:08+09:00</updated>
+  <updated>2014-08-07T17:01:45+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,78 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Facebookでテストユーザーを使用してログイン]]></title>
+    <link href="http://kayakuguri.github.io/blog/2014/08/07/facebook-test-user/"/>
+    <updated>2014-08-07T16:44:44+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2014/08/07/facebook-test-user</id>
+    <content type="html"><![CDATA[<p>Facebookのアプリを作成している際に、<br/>
+テストユーザーを使用してログインする方法のメモ。</p>
+
+<!-- more -->
+
+
+<p>以前まではアプリのメニューからポチポチっと設定出来ましたが、<br/>
+今は、URLを作成してそこにアクセスする、<br/>
+facebookページのタブにアプリを追加するような多少めんどくさいものになっているようです。</p>
+
+<h3>準備</h3>
+
+<h4>アプリのID</h4>
+
+<p>作成したアプリのIDを取得しておきます。</p>
+
+<h4>アプリに接続する際のアクセストークンの取得</h4>
+
+<p>以下のGraph API Explorerにアクセスし、そこからテストしたいアプリを選択し、<br/>
+その後、「Get App Token」(右側。Get Access Tokenではない)を取得しておく。<br/>
+<a href="https://developers.facebook.com/tools/explorer/">https://developers.facebook.com/tools/explorer/</a></p>
+
+<p><img src="http://kayakuguri.github.io/images/2014/08/test-user01.jpg" alt="Get App Token" /></p>
+
+<h3>ログイン</h3>
+
+<h4>ログインURLを取得</h4>
+
+<p>取得した２つの情報から以下のURLを作成し、アクセスする。</p>
+
+<pre><code>https://graph.facebook.com/アプリのID/accounts/test-users?installed=true&amp;name=ユーザー名(任意の名前)&amp;locale=ja_JP&amp;permissions=read_stream&amp;method=post&amp;access_token=アプリトークン
+</code></pre>
+
+<p>ブラウザでアクセスすると、JSONが返ってくる。</p>
+
+<pre><code>{
+   "id": "xxIDxx",
+   "email": "testtamsanuser_rrfidrb_testtamsanuser\u0040tfbnw.net",
+   "access_token":  "xxACCESS_TOKENxx",
+   "login_url": "https://developers.facebook.com/checkpoint/test-user-login/xxx/",
+   "password": "xxPASSWORDxx"
+}
+</code></pre>
+
+<p>この中の、<code>login_url</code>でアクセス。<br/>
+この時に、自分のアカウントでログインした状態でアクセスすること。</p>
+
+<h4>ログイン</h4>
+
+<p>しつこく確認される。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2014/08/test-user02.jpg" alt="Get App Token" /><br/>
+<img src="http://kayakuguri.github.io/images/2014/08/test-user03.jpg" alt="Get App Token" /></p>
+
+<p>終了したい場合は、ログアウトしてログインしなおせばよい。</p>
+
+<h3>参考サイト</h3>
+
+<p>参考、というか、ほぼ以下のままです。<br/>
+ありがとうございます。<br/>
+<a href="http://qiita.com/se_ino/items/a96449cd25886a6d05fb">Facebookアプリのテストユーザーの作り方手順 &ndash; Qiita</a></p>
+
+<p>公式ドキュメント<br/>
+<a href="https://developers.facebook.com/docs/graph-api/reference/v2.0/test-user">Graph API Reference Test User /test-user</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Facebookのphp-sdk-v4をcomposerを使ってインストールした時のメモ]]></title>
@@ -1874,50 +1946,6 @@ private static String concatSet(Set&lt;String&gt; strSet, String sep) {
     }
     return retStr == null ? '' : retStr;
 }
-</code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[SaleseForce]匿名ブロックでの実行テスト]]></title>
-    <link href="http://kayakuguri.github.io/blog/2014/04/23/sf-anonymous-debug/"/>
-    <updated>2014-04-23T16:17:04+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2014/04/23/sf-anonymous-debug</id>
-    <content type="html"><![CDATA[<p>特定のメソッドを実行してデバッグ出力を確認したいときに、<br/>
-そのメソッドだけ単発で実行させる方法として、<code>匿名ブロック</code>による実行というのがある。</p>
-
-<!-- more -->
-
-
-<p>参考：<a href="http://blog.livedoor.jp/rays4live/archives/67722528.html">Apexプログラミング～基本編２～</a></p>
-
-<p>基本、上記参考サイトの通り。<br/>
-Force.com IDE上でも匿名ブロック、<code>Execute Anonymous</code>での実行が出来る。</p>
-
-<blockquote><p>Execute Anonymous」の機能を使います。この機能は、「匿名ブロック」と呼ばれていて、単発でメソッドの呼び出しなどを行うことができます。一種のコンソール的なものとイメージするといいかと思います。</p></blockquote>
-
-<p>VisualForceのページから呼び出す用のクラスを実行する場合は、<br/>
-テストクラスを書くときと同じ要領で、クラスをnewして実行させる。<br/>
-例えば、そのページがLeadを標準のコントローラーとしている時は以下のように。<br/>
-<code>testMethod</code>が実行したい関数だとする。
-(別にページでLeadに指定していても他のオブジェクトを渡しても問題ない)</p>
-
-<pre><code>Lead p = new Lead();
-HogeController c = new HogeController(new ApexPages.StandardController(p));
-c.testMethod();
-</code></pre>
-
-<p>で、<code>testMethod</code>内には以下のように書いていたとする。</p>
-
-<pre><code>public Pagereference testMethod() {
-    System.debug('Hello world!');
-    return null;
-}
-</code></pre>
-
-<p>実行後、ログが出力されて、目的のデバッグログも以下のような形で吐かれる。</p>
-
-<pre><code>15:11:05.049 (49728000)|USER_DEBUG|[46]|DEBUG|Hello world!
 </code></pre>
 ]]></content>
   </entry>
