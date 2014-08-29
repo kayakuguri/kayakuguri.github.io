@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2014-08-07T17:05:38+09:00</updated>
+  <updated>2014-08-29T20:40:37+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,151 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Typefoemを試してみた]]></title>
+    <link href="http://kayakuguri.github.io/blog/2014/08/29/typeform/"/>
+    <updated>2014-08-29T20:30:06+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2014/08/29/typeform</id>
+    <content type="html"><![CDATA[<p>簡単にモダンなフォームが作成出来る、<br/>
+typeformを触ってみた。</p>
+
+<!-- more -->
+
+
+<p>基本機能は無料。<br/>
+しかも、フォームの作成数に制限はないよう。<br/>
+ただし、機能の制限は色々とある。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2014/08/typeform00.jpg" alt="アカウント" /></p>
+
+<h3>出来上がりサンプル</h3>
+
+<p>実際に作成されるアンケートは以下のようになります。<br/>
+(サンプル)</p>
+
+<ul>
+<li><a href="https://s3-eu-west-1.amazonaws.com/share.typeform.com/typeform_embed_widget_en.html">iframe埋め込み</a></li>
+<li><a href="https://s3-eu-west-1.amazonaws.com/share.typeform.com/typeform_embed_full_en.html">ページ全体に埋め込み</a></li>
+</ul>
+
+
+<h3>Build</h3>
+
+<p><code>+</code>をクリックして新しくフォームを作成。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2014/08/typeform01.jpg" alt="新規作成" /></p>
+
+<p>すると、その場で小さいモーダルが開くので、<br/>
+タイトルと言語とプランを選択。<br/>
+言語は日本語もあった。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2014/08/typeform02.jpg" alt="入力" /></p>
+
+<p><code>Build it now</code>をクリックすると、<br/>
+フォームの編集画面が開く。<br/>
+左側のメニューから追加したいものをドラッグして追加していく。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2014/08/typeform03.jpg" alt="作成" /></p>
+
+<p>上部の<code>Welcom Screen</code>は、フォーム前の説明画面で、<br/>
+真ん中がフォーム画面。<br/>
+一番下は完了画面、となっている。</p>
+
+<p>例えば、<code>Multiple choice</code>をドラッグすると、下記のような編集画面が開く。<br/>
+日本語もばっちり使える。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2014/08/typeform04.jpg" alt="項目の編集" /></p>
+
+<p>左メニューのオプションのらへんで、必須か、複数選択できるか、など<br/>
+諸々の設定ができる。<br/>
+この辺は英語での説明だけれど、苦にならないくらいUIが簡単でわかりやすい。</p>
+
+<p>完了画面に画像を入れてみたところ。<br/>
+画像は以下の素材を使わせてもらいました。</p>
+
+<p><a href="http://www.irasutoya.com/2013/06/thank-you.html">http://www.irasutoya.com/2013/06/thank-you.html</a></p>
+
+<p><img src="http://kayakuguri.github.io/images/2014/08/typeform05.jpg" alt="完了画面" /></p>
+
+<p>下部にある、<code>Hidden fields</code>を使用すれば、URLにGETパラメータを持たせて、<br/>
+個人の特定などが出来るよう。<br/>
+これにはProアカウントが必要。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2014/08/typeform14.jpg" alt="Hidden Fields" /></p>
+
+<h3>Design</h3>
+
+<p>上部メニューの<code>Design</code>から、色の変更をしたり、<br/>
+フォントを変更したり、<br/>
+背景に画像を引いたりが出来る。<br/>
+反映は、右下の、<code>Apply to typeform</code>をクリックする。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2014/08/typeform06.jpg" alt="デザイン" /></p>
+
+<h3>Configure</h3>
+
+<p><code>Configure</code>は、諸々の設定。<br/>
+アンケートから、Typeformのロゴを消すにはProアカウントのアップデートが必要(有料)。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2014/08/typeform07.jpg" alt="設定" /></p>
+
+<p><code>Self Notifications</code>は、回答があった際に自身にお知らせするメールの内容をカスタマイズできる。<br/>
+ここのテキストエリアの編集が若干使いにくかった。<br/>
+(消えてほしくない箇所が消えてしまったり)<br/>
+<code>Respondent notifications</code>は、回答者への自動返信のよう。ここもProアカウントが必要。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2014/08/typeform08.jpg" alt="受付メール" /></p>
+
+<p>回答されたデータを、<a href="https://zapier.com/">Zapier</a>を使用して、他サービスへ連動もできる。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2014/08/typeform09.jpg" alt="Zapier" /></p>
+
+<h3>Distribute</h3>
+
+<p>アンケートの表示方法を色々と選べる。</p>
+
+<ul>
+<li>直接URLを表示</li>
+<li>ポップアップや、横から開く形のボタンやリンクを追加</li>
+<li>iframeを使った埋め込み</li>
+</ul>
+
+
+<p><img src="http://kayakuguri.github.io/images/2014/08/typeform10.jpg" alt="表示方法" /></p>
+
+<h3>Analyze</h3>
+
+<p>ここで、アクセス状況や、回答内容が見れる。</p>
+
+<p><strong>アクセス状況</strong>
+<img src="http://kayakuguri.github.io/images/2014/08/typeform11.jpg" alt="アクセス状況" /></p>
+
+<p><strong>回答内容一覧</strong>
+<img src="http://kayakuguri.github.io/images/2014/08/typeform12.jpg" alt="回答内容" /></p>
+
+<p>GoogleAnalyticsのコードを埋め込んだりも簡単に出来る。</p>
+
+<p><code>Reports</code>で、回答内容のレポートを実際の設問に重ねて表示することが出来る。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2014/08/typeform13.jpg" alt="レポート" /></p>
+
+<p>右下のボタンで、LiveのReportが確認出来るよう。</p>
+
+<h3>まとめ</h3>
+
+<p>すごくモダンで使いやすい。<br/>
+さくさくできる。<br/>
+zapierとの連携もあって、使いようによってはなんでも出来そう。</p>
+
+<p>作成されるフォームは、完全にスマホファーストで、<br/>
+PCではちょっと使いづらかった。<br/>
+その代わり、スマホではサクサク答えられる。</p>
+
+<p>zapierとともに有料アカウント持ってたらこれらだけでかなり<br/>
+有用なツールとして使えそう。</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Facebookでテストユーザーを使用してログイン]]></title>
@@ -1798,159 +1943,6 @@ FAQを読むと、ここに出るようなサイトの場合は、自前でサ�
 <p>全体を180度回転させている。</p>
 
 <p>アクセスが多いサイトに対してこうやって読めなくさせる手法とは面白い。</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[SalesForce]メールテンプレートの項目一覧]]></title>
-    <link href="http://kayakuguri.github.io/blog/2014/04/23/sf-mailtemplate/"/>
-    <updated>2014-04-23T16:39:55+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2014/04/23/sf-mailtemplate</id>
-    <content type="html"><![CDATA[<p>メールテンプレートは、<code>SOQL</code>を使用して、<code>EmailTemplate</code>でとってこれる。</p>
-
-<!-- more -->
-
-
-<p>参考：<a href="https://developer.salesforce.com/forums?id=906F00000009BOlIAM">https://developer.salesforce.com/forums?id=906F00000009BOlIAM</a></p>
-
-<p>取得した<code>EmailTemplate</code>の一覧<br/>
-(内容は間違っている可能性があります)</p>
-
-<table>
-<thead>
-<tr>
-<th>項目名 </th>
-<th> 内容</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>body </td>
-<td> 本文</td>
-</tr>
-<tr>
-<td>markup </td>
-<td> </td>
-</tr>
-<tr>
-<td>folderid </td>
-<td> フォルダーのID</td>
-</tr>
-<tr>
-<td>subject </td>
-<td> 件名</td>
-</tr>
-<tr>
-<td>developername </td>
-<td> 作成者</td>
-</tr>
-<tr>
-<td>timesused </td>
-<td> 使用回数</td>
-</tr>
-<tr>
-<td>createddate </td>
-<td> 作成日</td>
-</tr>
-<tr>
-<td>ownerid </td>
-<td> オーナーのID</td>
-</tr>
-<tr>
-<td>apiversion </td>
-<td> </td>
-</tr>
-<tr>
-<td>createdbyid </td>
-<td> 作成者のID</td>
-</tr>
-<tr>
-<td>lastmodifieddate </td>
-<td> 更新日</td>
-</tr>
-<tr>
-<td>id </td>
-<td> ID</td>
-</tr>
-<tr>
-<td>brandtemplateid </td>
-<td> </td>
-</tr>
-<tr>
-<td>lastuseddate </td>
-<td> 最終使用日</td>
-</tr>
-<tr>
-<td>templatestyle </td>
-<td> </td>
-</tr>
-<tr>
-<td>isactive </td>
-<td> 有効か</td>
-</tr>
-<tr>
-<td>namespaceprefix </td>
-<td> </td>
-</tr>
-<tr>
-<td>description </td>
-<td> テンプレートの説明</td>
-</tr>
-<tr>
-<td>name </td>
-<td> テンプレートの一意の名前</td>
-</tr>
-<tr>
-<td>templatetype </td>
-<td> テンプレートのタイプ</td>
-</tr>
-<tr>
-<td>encoding </td>
-<td> 文字コード</td>
-</tr>
-<tr>
-<td>systemmodstamp </td>
-<td> </td>
-</tr>
-<tr>
-<td>lastmodifiedbyid </td>
-<td> 更新者のID</td>
-</tr>
-<tr>
-<td>htmlvalue </td>
-<td> HTMLテンプレートの場合の本文</td>
-</tr>
-</tbody>
-</table>
-
-
-<hr />
-
-<p>以下の方法でオブジェクトの項目一覧を取得出来る。</p>
-
-<p>参考：<br/>
-<a href="http://techblog.appirio.co.jp/2012/07/forcecom-apexdescribe.html">http://techblog.appirio.co.jp/2012/07/forcecom-apexdescribe.html</a><br/>
-<a href="http://www30304u.sakura.ne.jp/blog/?p=188">http://www30304u.sakura.ne.jp/blog/?p=188</a><br/>
-<a href="http://vaindespair.blogspot.jp/2012/04/blog-post_04.html">http://vaindespair.blogspot.jp/2012/04/blog-post_04.html</a></p>
-
-<p>実際に取得したapexコード</p>
-
-<pre><code>public Pagereference getList() {
-    sObject newObj = (sObject)Type.forName('EmailTemplate').newInstance();
-    Schema.DescribeSObjectResult descResult = newObj.getsObjectType().getDescribe();
-    String keys = concatSet(descResult.fields.getMap().keySet(), ', ');
-
-    System.debug('***** EmailTemplate keys: ' + keys);
-}
-
-private static String concatSet(Set&lt;String&gt; strSet, String sep) {
-    String retStr;
-    for (String str : strSet) {
-        retStr = retStr == null ? str : retStr + sep + str;
-    }
-    return retStr == null ? '' : retStr;
-}
-</code></pre>
 ]]></content>
   </entry>
   
