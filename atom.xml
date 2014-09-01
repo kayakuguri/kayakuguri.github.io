@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2014-08-29T20:49:59+09:00</updated>
+  <updated>2014-09-01T15:06:39+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,136 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[TypeformのAPI]]></title>
+    <link href="http://kayakuguri.github.io/blog/2014/09/01/typeform-api/"/>
+    <updated>2014-09-01T14:53:57+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2014/09/01/typeform-api</id>
+    <content type="html"><![CDATA[<p><a href="http://kayakuguri.github.io/blog/2014/08/29/typeform/">前回、Typeformを触ってみた</a>けれど、<br/>
+APIがあるとのことなので見てみました。</p>
+
+<!-- more -->
+
+
+<p>公式ページ(英語)<br/>
+<a href="http://helpcenter.typeform.com/hc/en-us/articles/200071986-Data-API">http://helpcenter.typeform.com/hc/en-us/articles/200071986-Data-API</a></p>
+
+<p>認証や何やらは全くなくて、<br/>
+取得したAPIキーとアンケートIDを使用して、URLから直接JSONを取得する形式。<br/>
+逆に言えば、URLさえわかれば誰でもアクセス出来てしまうので、<br/>
+あまり個人情報的な内容を書かせてしまうと、セキュリティ的にまずいのかもしれない。<br/>
+(キーはどちらも推測はされにくいとは思いますが)</p>
+
+<p>APIキーは、<code>My Account</code>内の、<code>Your API Key</code>にあります。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2014/09/Typeform__-_My_typeforms.jpg" alt="myaccount" /><br/>
+<img src="http://kayakuguri.github.io/images/2014/09/Typeform__-_Account.jpg" alt="myAPIkey" /></p>
+
+<p>このキーを利用して、以下のよう書式で記述します。</p>
+
+<pre><code>https://api.typeform.com/v0/form/アンケートID?key=自分のAPIキー
+</code></pre>
+
+<p>すると、以下の様なレスポンスがあります。</p>
+
+<pre><code>{
+    "http_status": 200, 
+    "questions": [
+        {
+            "id": "rating_1595673", 
+            "question": "イベントを評価して下さい"
+        }, 
+        {
+            "id": "list_1595676_choice", 
+            "question": "面白かったですか？"
+        }, 
+        {
+            "id": "textarea_1595680", 
+            "question": "何かあれば記入して下さい"
+        }
+    ], 
+    "responses": [
+        {
+            "answers": {
+                "list_1595676_choice": "楽しかった", 
+                "rating_1595673": "3", 
+                "textarea_1595680": "ぜひまた開催をお願い致します。"
+            }, 
+            "completed": "1", 
+            "hidden": [], 
+            "id": "3", 
+            "locked": "0", 
+            "metadata": {
+                "browser": "default", 
+                "date_land": "2014-08-29 13:00:43", 
+                "date_submit": "2014-08-29 13:01:09", 
+                "network_id": "xxxxxx", 
+                "platform": "other", 
+                "referer": "", 
+                "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_5)   AppleWebKit/537.75.14 (KHTML, like Gecko) Version/6.1.3 Safari/537.75.14"
+            }, 
+            "token": "xxxxxx"
+        }, 
+         {
+            …中略
+        }
+    ], 
+    "stats": {
+        "responses": {
+            "completed": 2, 
+            "locked": 0, 
+            "showing": 2, 
+            "total": 10
+        }
+    }
+}
+</code></pre>
+
+<p>オプションは以下。</p>
+
+<table>
+<thead>
+<tr>
+<th>項目 </th>
+<th> 型 </th>
+<th> 説明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>completed </td>
+<td> boolean </td>
+<td> true:完了している項目のみ false:完了していないもののみ</td>
+</tr>
+<tr>
+<td>since </td>
+<td> number (Unix time/Timestamp) </td>
+<td> 指定した日付より後</td>
+</tr>
+<tr>
+<td>until </td>
+<td> number (Unix time/Timestamp) </td>
+<td> 指定した日付まで</td>
+</tr>
+<tr>
+<td>offset </td>
+<td> number </td>
+<td> (ページがある場合)何ページ目から始めるか</td>
+</tr>
+<tr>
+<td>limit </td>
+<td> number </td>
+<td> 1ページの表示件数</td>
+</tr>
+</tbody>
+</table>
+
+
+<p>アンケート作成用のAPIは現在開発中だそうです。<br/>
+<a href="http://helpcenter.typeform.com/hc/en-us/articles/200070236-Build-API-coming-soon-">http://helpcenter.typeform.com/hc/en-us/articles/200070236-Build-API-coming-soon-</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[モダンで軽量、作成も簡単と話題のTypeformを試してみた]]></title>
@@ -1873,76 +2003,6 @@ $ git push heroku master
 </code></pre>
 
 <p>再度pushすると無事、デプロイが完了し、PHP環境が出来上がりました。</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[RawGitを使ったページへのアクセス過多]]></title>
-    <link href="http://kayakuguri.github.io/blog/2014/04/30/rowgit-rotate/"/>
-    <updated>2014-04-30T11:31:51+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2014/04/30/rowgit-rotate</id>
-    <content type="html"><![CDATA[<p>いつものように<a href="http://b.hatena.ne.jp/hotentry">ホッテントリ―一覧</a>を眺めていると、以下の記事が。</p>
-
-<p><a href="http://mizchi.hatenablog.com/entry/2014/04/30/015730">#ガチJS でJavaScriptとフロントエンドの未来について熱い話をした &ndash; mizchi&#39;s blog</a></p>
-
-<p>興味があり、クリックしてみると、変なアラートが表示されてOKを押すと、なんと、<br/>
-記事が逆さまに表示されている。<br/>
-なんでこんなことになってるのか調べてみた。</p>
-
-<!-- more -->
-
-
-<p>アラートの内容は以下。</p>
-
-<blockquote><p>This website abuses rawgit.com. You should complain to its owner.</p></blockquote>
-
-<p><a href="http://translate.weblio.jp/">自動翻訳</a>にかけてみると、以下。</p>
-
-<blockquote><p>このウェブサイトは、rawgit.comを罵倒します。あなたは、その所有者に不平を言わなければなりません。</p></blockquote>
-
-<p><code>abuses</code>は、<code>乱用</code>とかの意味があるみたい。</p>
-
-<p>このサイトでは、rawgitというサイトを使用しているよう。</p>
-
-<p><a href="http://rawgit.com/">http://rawgit.com/</a></p>
-
-<p>このrowgit、というのは、CDNが提供されていないgithub上のコードを直接使用したいけれど、<br/>
-そのままだと上手く使えないから、それを使えるように出来るサービス、というものみたい。<br/>
-<a href="http://qiita.com/futoase/items/39cb4b7d704b1e53e7f6">この説明サイト</a>の内容のように、URLを、<code>https://raw.github.com</code>から、<code>https://rawgithub.com</code>へ変更する。</p>
-
-<p>参考：<a href="http://qiita.com/futoase/items/8e20db8f7a191941d6b6">http://qiita.com/futoase/items/8e20db8f7a191941d6b6</a></p>
-
-<blockquote><p>Production betaという表現がサイトにあったので、気になって見てみた。<br/>
-今のところCDNをrawgitの作者が自費で借りているようだ。<br/>
-一応Productionという表現はあるけれど、商売で使うには自前でね★とのことだ。</p></blockquote>
-
-<p>この辺で引っかかっているよう。</p>
-
-<p>rawgitのサイトを改めて見てみると、<code>stats</code>というページがあり、アクセスの多いページを公開している。<br/>
-<a href="http://rawgit.com/stats">http://rawgit.com/stats</a><br/>
-FAQを読むと、ここに出るようなサイトの場合は、自前でサーバーとか用意してね、とのことのよう。<br/>
-<a href="http://rawgit.com/faq#how-do-i-know-if-im-a-jerk">http://rawgit.com/faq#how-do-i-know-if-im-a-jerk</a></p>
-
-<p>で、冒頭の警告文に戻って改めて解釈してみると、</p>
-
-<blockquote><p>このサイトは、rawgitへのアクセスが多すぎるよ！<br/>
-改善されるまでは見た目逆さまにして読めなくするからアクセスしないでね。<br/>
-クレームはサイトの製作者に入れてね。</p></blockquote>
-
-<p>みたいな感じでしょうか。</p>
-
-<p>ちなみに、逆さまになっているのは、htmlタグに対して以下のCSSが追加されているから、のよう。</p>
-
-<pre><code>html {
-    -moz-transform: rotateX(180deg) !important;
-    -webkit-transform: rotateX(180deg) !important;
-    transform: rotateX(180deg) !important;
-}
-</code></pre>
-
-<p>全体を180度回転させている。</p>
-
-<p>アクセスが多いサイトに対してこうやって読めなくさせる手法とは面白い。</p>
 ]]></content>
   </entry>
   
