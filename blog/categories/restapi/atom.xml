@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: restapi | KayaMemo]]></title>
+  <link href="http://kayakuguri.github.io/blog/categories/restapi/atom.xml" rel="self"/>
+  <link href="http://kayakuguri.github.io/"/>
+  <updated>2014-09-08T22:50:44+09:00</updated>
+  <id>http://kayakuguri.github.io/</id>
+  <author>
+    <name><![CDATA[萱潜]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[[SalesForce]ApexでカスタムREST APIを作成する]]></title>
+    <link href="http://kayakuguri.github.io/blog/2014/09/08/apex-restapi/"/>
+    <updated>2014-09-08T22:30:35+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2014/09/08/apex-restapi</id>
+    <content type="html"><![CDATA[<p>apexにて、自作のRestAPIを作成してみました。<br/>
+そして、作成したAPIをPHPから叩いてみました。</p>
+
+<!-- more -->
+
+
+<p>まずは、Salesforce側の設定。<br/>
+今回は、GETで指定されたIDのリードデータを取得するもの。</p>
+
+<pre><code>@RestResource(urlMapping='/CustomLead/*')
+global with sharing class CustomLeadSample {
+    @HttpGet
+    global static sObject doGet() {
+        RestRequest req = RestContext.request;
+        Id LeadID = req.params.get('id');
+        try {
+            Lead acc = [SELECT Id, Name FROM Lead WHERE Id = :LeadID LIMIT 1];
+            return acc;
+        } catch (exception e) {
+            return null;
+        }
+    }
+}
+</code></pre>
+
+<p>公式の解説の最後に載っているものほぼそのままです。<br/>
+<a href="https://developer.salesforce.com/page/Creating_REST_APIs_using_Apex_REST">Creating REST APIs using Apex REST &ndash; developer.force.com</a></p>
+
+<p>で、これをPHP側から呼び出します。<br/>
+oauth認証は以下の記事のものを使用させてもらっています。<br/>
+<a href="http://www.nkjmkzk.net/?p=2328">nkjmkzk.net &raquo; 新しくなったForce.com OAuth Toolkit for phpの使い方 のコメントのフィード</a><br/>
+<a href="https://github.com/nkjm/Force.com-OAuth-Toolkit-for-PHP">nkjm/Force.com-OAuth-Toolkit-for-PHP</a></p>
+
+<p><code>@RestResource</code>で作成したAPIは、<code>/services/apexrest/</code>から始まるURLで定義されています。<br/>
+また、外部から接続する場合には、<code>接続アプリケーション</code>の設定が必要になります。<br/>
+<a href="https://help.salesforce.com/HTViewHelpDoc?id=connected_app_create.htm&amp;language=ja">接続アプリケーションの作成</a><br/>
+コールバックURLは今回は必要ないので、適当なローカルURLを指定しています。<br/>
+また、パスワードは、(特定のIPアドレスからのアクセスに制限しなかった場合には)<br/>
+パスワード＋セキュリティトークン、の形で渡す必要があります。</p>
+
+<pre><code>require_once('sf_oauth.php');
+$app_token = 'xxx';
+$app_secret = 'xxx';
+$app_callback = 'http://localhost:9000/';
+$sf_id = 'xxx';
+$sf_pass = 'password+security-token';
+
+$oauth = new oauth($app_token, $app_secret, $app_callback);
+$oauth-&gt;auth_with_password($sf_id, $sf_pass);
+
+$url = "$oauth-&gt;instance_url/services/apexrest/CustomLead/?id=".'リードのID';
+$curl = curl_init($url);
+curl_setopt($curl, CURLOPT_HEADER, false);
+curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($curl, CURLOPT_HTTPHEADER,
+    array("Authorization: OAuth $oauth-&gt;access_token",
+        "Content-type: application/json"));
+$json_response = curl_exec($curl);
+$status = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+</code></pre>
+
+<p>レスポンスは以下のような形です。</p>
+
+<pre><code>{
+    "attributes":
+    {
+        "type":"Lead",
+        "url":"/services/data/v32.0/sobjects/Lead/ユーザーID"
+    },
+    "Name":"ユーザー名",
+    "Id":"ユーザーID"
+}
+</code></pre>
+
+<p>参考サイト：<br/>
+<a href="http://magnet88jp.hateblo.jp/entry/2014/07/09/105848">Salesforce 外部サイトからApexメソッドを呼び出したい &ndash; まぐねっとのブログ</a></p>
+]]></content>
+  </entry>
+  
+</feed>

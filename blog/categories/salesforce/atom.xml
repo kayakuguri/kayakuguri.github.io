@@ -4,7 +4,7 @@
   <title><![CDATA[Category: salesforce | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/salesforce/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2014-09-01T15:06:39+09:00</updated>
+  <updated>2014-09-08T22:50:44+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,90 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[SalesForce]ApexでカスタムREST APIを作成する]]></title>
+    <link href="http://kayakuguri.github.io/blog/2014/09/08/apex-restapi/"/>
+    <updated>2014-09-08T22:30:35+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2014/09/08/apex-restapi</id>
+    <content type="html"><![CDATA[<p>apexにて、自作のRestAPIを作成してみました。<br/>
+そして、作成したAPIをPHPから叩いてみました。</p>
+
+<!-- more -->
+
+
+<p>まずは、Salesforce側の設定。<br/>
+今回は、GETで指定されたIDのリードデータを取得するもの。</p>
+
+<pre><code>@RestResource(urlMapping='/CustomLead/*')
+global with sharing class CustomLeadSample {
+    @HttpGet
+    global static sObject doGet() {
+        RestRequest req = RestContext.request;
+        Id LeadID = req.params.get('id');
+        try {
+            Lead acc = [SELECT Id, Name FROM Lead WHERE Id = :LeadID LIMIT 1];
+            return acc;
+        } catch (exception e) {
+            return null;
+        }
+    }
+}
+</code></pre>
+
+<p>公式の解説の最後に載っているものほぼそのままです。<br/>
+<a href="https://developer.salesforce.com/page/Creating_REST_APIs_using_Apex_REST">Creating REST APIs using Apex REST &ndash; developer.force.com</a></p>
+
+<p>で、これをPHP側から呼び出します。<br/>
+oauth認証は以下の記事のものを使用させてもらっています。<br/>
+<a href="http://www.nkjmkzk.net/?p=2328">nkjmkzk.net &raquo; 新しくなったForce.com OAuth Toolkit for phpの使い方 のコメントのフィード</a><br/>
+<a href="https://github.com/nkjm/Force.com-OAuth-Toolkit-for-PHP">nkjm/Force.com-OAuth-Toolkit-for-PHP</a></p>
+
+<p><code>@RestResource</code>で作成したAPIは、<code>/services/apexrest/</code>から始まるURLで定義されています。<br/>
+また、外部から接続する場合には、<code>接続アプリケーション</code>の設定が必要になります。<br/>
+<a href="https://help.salesforce.com/HTViewHelpDoc?id=connected_app_create.htm&amp;language=ja">接続アプリケーションの作成</a><br/>
+コールバックURLは今回は必要ないので、適当なローカルURLを指定しています。<br/>
+また、パスワードは、(特定のIPアドレスからのアクセスに制限しなかった場合には)<br/>
+パスワード＋セキュリティトークン、の形で渡す必要があります。</p>
+
+<pre><code>require_once('sf_oauth.php');
+$app_token = 'xxx';
+$app_secret = 'xxx';
+$app_callback = 'http://localhost:9000/';
+$sf_id = 'xxx';
+$sf_pass = 'password+security-token';
+
+$oauth = new oauth($app_token, $app_secret, $app_callback);
+$oauth-&gt;auth_with_password($sf_id, $sf_pass);
+
+$url = "$oauth-&gt;instance_url/services/apexrest/CustomLead/?id=".'リードのID';
+$curl = curl_init($url);
+curl_setopt($curl, CURLOPT_HEADER, false);
+curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($curl, CURLOPT_HTTPHEADER,
+    array("Authorization: OAuth $oauth-&gt;access_token",
+        "Content-type: application/json"));
+$json_response = curl_exec($curl);
+$status = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+</code></pre>
+
+<p>レスポンスは以下のような形です。</p>
+
+<pre><code>{
+    "attributes":
+    {
+        "type":"Lead",
+        "url":"/services/data/v32.0/sobjects/Lead/ユーザーID"
+    },
+    "Name":"ユーザー名",
+    "Id":"ユーザーID"
+}
+</code></pre>
+
+<p>参考サイト：<br/>
+<a href="http://magnet88jp.hateblo.jp/entry/2014/07/09/105848">Salesforce 外部サイトからApexメソッドを呼び出したい &ndash; まぐねっとのブログ</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[SalesForce]テスト時にgetパラメータをセット]]></title>
@@ -334,159 +418,6 @@ System.debug(list[0].Company__r.Name);
 
 <p>ちなみに、この場合は、<strong>参照関係</strong>と言うよう。<br/>
 <a href="http://blog.flect.co.jp/salesforce/2010/07/post-2e88.html">参照関係と主従関係</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[SalesForce]メールテンプレートの項目一覧]]></title>
-    <link href="http://kayakuguri.github.io/blog/2014/04/23/sf-mailtemplate/"/>
-    <updated>2014-04-23T16:39:55+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2014/04/23/sf-mailtemplate</id>
-    <content type="html"><![CDATA[<p>メールテンプレートは、<code>SOQL</code>を使用して、<code>EmailTemplate</code>でとってこれる。</p>
-
-<!-- more -->
-
-
-<p>参考：<a href="https://developer.salesforce.com/forums?id=906F00000009BOlIAM">https://developer.salesforce.com/forums?id=906F00000009BOlIAM</a></p>
-
-<p>取得した<code>EmailTemplate</code>の一覧<br/>
-(内容は間違っている可能性があります)</p>
-
-<table>
-<thead>
-<tr>
-<th>項目名 </th>
-<th> 内容</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>body </td>
-<td> 本文</td>
-</tr>
-<tr>
-<td>markup </td>
-<td> </td>
-</tr>
-<tr>
-<td>folderid </td>
-<td> フォルダーのID</td>
-</tr>
-<tr>
-<td>subject </td>
-<td> 件名</td>
-</tr>
-<tr>
-<td>developername </td>
-<td> 作成者</td>
-</tr>
-<tr>
-<td>timesused </td>
-<td> 使用回数</td>
-</tr>
-<tr>
-<td>createddate </td>
-<td> 作成日</td>
-</tr>
-<tr>
-<td>ownerid </td>
-<td> オーナーのID</td>
-</tr>
-<tr>
-<td>apiversion </td>
-<td> </td>
-</tr>
-<tr>
-<td>createdbyid </td>
-<td> 作成者のID</td>
-</tr>
-<tr>
-<td>lastmodifieddate </td>
-<td> 更新日</td>
-</tr>
-<tr>
-<td>id </td>
-<td> ID</td>
-</tr>
-<tr>
-<td>brandtemplateid </td>
-<td> </td>
-</tr>
-<tr>
-<td>lastuseddate </td>
-<td> 最終使用日</td>
-</tr>
-<tr>
-<td>templatestyle </td>
-<td> </td>
-</tr>
-<tr>
-<td>isactive </td>
-<td> 有効か</td>
-</tr>
-<tr>
-<td>namespaceprefix </td>
-<td> </td>
-</tr>
-<tr>
-<td>description </td>
-<td> テンプレートの説明</td>
-</tr>
-<tr>
-<td>name </td>
-<td> テンプレートの一意の名前</td>
-</tr>
-<tr>
-<td>templatetype </td>
-<td> テンプレートのタイプ</td>
-</tr>
-<tr>
-<td>encoding </td>
-<td> 文字コード</td>
-</tr>
-<tr>
-<td>systemmodstamp </td>
-<td> </td>
-</tr>
-<tr>
-<td>lastmodifiedbyid </td>
-<td> 更新者のID</td>
-</tr>
-<tr>
-<td>htmlvalue </td>
-<td> HTMLテンプレートの場合の本文</td>
-</tr>
-</tbody>
-</table>
-
-
-<hr />
-
-<p>以下の方法でオブジェクトの項目一覧を取得出来る。</p>
-
-<p>参考：<br/>
-<a href="http://techblog.appirio.co.jp/2012/07/forcecom-apexdescribe.html">http://techblog.appirio.co.jp/2012/07/forcecom-apexdescribe.html</a><br/>
-<a href="http://www30304u.sakura.ne.jp/blog/?p=188">http://www30304u.sakura.ne.jp/blog/?p=188</a><br/>
-<a href="http://vaindespair.blogspot.jp/2012/04/blog-post_04.html">http://vaindespair.blogspot.jp/2012/04/blog-post_04.html</a></p>
-
-<p>実際に取得したapexコード</p>
-
-<pre><code>public Pagereference getList() {
-    sObject newObj = (sObject)Type.forName('EmailTemplate').newInstance();
-    Schema.DescribeSObjectResult descResult = newObj.getsObjectType().getDescribe();
-    String keys = concatSet(descResult.fields.getMap().keySet(), ', ');
-
-    System.debug('***** EmailTemplate keys: ' + keys);
-}
-
-private static String concatSet(Set&lt;String&gt; strSet, String sep) {
-    String retStr;
-    for (String str : strSet) {
-        retStr = retStr == null ? str : retStr + sep + str;
-    }
-    return retStr == null ? '' : retStr;
-}
-</code></pre>
 ]]></content>
   </entry>
   
