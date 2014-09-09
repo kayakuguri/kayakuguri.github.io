@@ -4,7 +4,7 @@
   <title><![CDATA[Category: salesforce | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/salesforce/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2014-09-08T22:50:44+09:00</updated>
+  <updated>2014-09-09T16:01:31+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,68 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[SOQLクエリの結果をJSONで出力する]]></title>
+    <link href="http://kayakuguri.github.io/blog/2014/09/09/create-json-in-apex/"/>
+    <updated>2014-09-09T15:54:29+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2014/09/09/create-json-in-apex</id>
+    <content type="html"><![CDATA[<p>SOQLで取得したクエリ内容をJSONにパースして出力する方法。</p>
+
+<!-- more -->
+
+
+<p>Apexクラス</p>
+
+<pre><code>public class sample
+{
+    public String text1 {get;set;}
+
+    public sample()
+    {
+
+    }    
+    public void parseJson()
+    {
+        String soql = 'SELECT Name FROM Lead';
+        List&lt;Account&gt; acct = Database.Query(soql); 
+        text1 = JSON.serialize(acct);
+    }    
+} 
+</code></pre>
+
+<p>VisualForceページ</p>
+
+<pre><code>&lt;apex:page showHeader="false" controller="ShowCampaignListController" action="{!parseJson}"&gt;
+    {!text1}
+&lt;/apex:page&gt;
+</code></pre>
+
+<p>出力結果例</p>
+
+<pre><code>[{
+    "attributes":
+    {
+        "type":"Lead",
+        "url":"/services/data/v32.0/sobjects/Lead/00QO0000002xxxxxxx"
+    },
+    "Name":"テストユーザー3",
+    "Id":"00QO0000002xxxxxxx"
+},
+{
+    "attributes":
+    {
+        "type":"Lead",
+        "url":"/services/data/v32.0/sobjects/Lead/00QO0000002ooooooo"
+    },
+    "Name":"テストユーザー2",
+    "Id":"00QO0000002ooooooo"
+}]
+</code></pre>
+
+<p>参考：<a href="http://www.infallibletechie.com/2012/10/generating-json-in-visualforce-page-in.html">Infallible Techie: Generating JSON in Visualforce page in Salesforce</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[SalesForce]ApexでカスタムREST APIを作成する]]></title>
@@ -386,38 +448,6 @@ forで回して、selectedがtrueになっている場合に何かしらをす�
     }
 }
 </code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[SalesForce]SOQLでルックアップ先データを取得する]]></title>
-    <link href="http://kayakuguri.github.io/blog/2014/05/15/soql-relationship/"/>
-    <updated>2014-05-15T15:34:57+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2014/05/15/soql-relationship</id>
-    <content type="html"><![CDATA[<p>SalseforceでSOQLを使用してルックアップ先のデータを取得する方法。</p>
-
-<!-- more -->
-
-
-<p>単純に、ルックアップ先を指定している項目名を使用して指定する。<br/>
-その際、通常カスタム項目の参照方法、<code>__c</code>ではなくて、<code>__r</code>を使用する。以上。</p>
-
-<p>例：取引先(Account)で作成したカスタム項目、Companyに入っている先から取得する場合<br/>
-(参照先のオブジェクト名は気にしない)</p>
-
-<pre><code>SELECT id, name, Company__r.Name FROM Account
-</code></pre>
-
-<p>Accountのid、nameと、Companyに入っているオブジェクトのname項目を取得出来る。</p>
-
-<p>これをapex上で使用して、Companyのname項目を取得したい場合は以下。</p>
-
-<pre><code>List&lt;Account&gt; list= [select Name ,Company__r.Name from Account];
-System.debug(list[0].Company__r.Name);
-</code></pre>
-
-<p>ちなみに、この場合は、<strong>参照関係</strong>と言うよう。<br/>
-<a href="http://blog.flect.co.jp/salesforce/2010/07/post-2e88.html">参照関係と主従関係</a></p>
 ]]></content>
   </entry>
   
