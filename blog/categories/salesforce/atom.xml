@@ -4,7 +4,7 @@
   <title><![CDATA[Category: salesforce | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/salesforce/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2014-09-09T16:01:31+09:00</updated>
+  <updated>2014-09-12T11:45:24+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,50 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[SalesForceキャンペーンメンバーの状況を追加する]]></title>
+    <link href="http://kayakuguri.github.io/blog/2014/09/12/campaignmemberstatus/"/>
+    <updated>2014-09-12T11:40:25+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2014/09/12/campaignmemberstatus</id>
+    <content type="html"><![CDATA[<p>キャンペーンメンバーオブジェクトのデフォルト項目である、<br/>
+<code>状況</code>は、デフォルトでは、</p>
+
+<blockquote><p>送信<br/>
+レスポンスあり</p></blockquote>
+
+<p>の２つになっている。<br/>
+これを独自で追加したい。</p>
+
+<!-- more -->
+
+
+<p>結論から言うと、仕様上、無理だった。<br/>
+以下に同じような質問があった。</p>
+
+<p><a href="https://developer.salesforce.com/forums/ForumsMain?id=906F00000009B5HIAU">キャンペーンメンバーの状況に値を追加したい &ndash; Salesforce Developer Community</a></p>
+
+<blockquote><p>レコードを横断した設定ではなく、キャンペーンレコード毎に状況を設定する必要があります。</p></blockquote>
+
+<ol>
+<li>キャンペーンタブから、状況を追加したいキャンペーンレコードの詳細画面を表示</li>
+<li>「高度な設定」ボタン押下</li>
+<li>メンバーの状況の値の「編集」ボタン押下</li>
+<li>メンバー状況の一番下にある、「さらに追加」リンク押下</li>
+</ol>
+
+
+<p>この仕様は謎仕様としても有名？なよう。</p>
+
+<blockquote><p>キャンペーンメンバーの「状況」のクソ仕様(?)を質問した。<br/>
+デフォルト値を変更できない件となぜか手入力な仕様について。<br/>
+キャンペーンを作るたびに「状況」の選択肢を追加しないとダメな上に、手入力だから後からの集計がヒドイことになる。<br/>
+<a href="https://twitter.com/realichiro5221/status/337413167804203009">https://twitter.com/realichiro5221/status/337413167804203009</a></p></blockquote>
+
+<p>解決策としては、同じ<code>状況</code>項目をカスタム項目として作成するしかないよう。<br/>
+それでもデフォルトの<code>状況</code>は必須項目になるので、運用がややこしくなりそうだけれど。</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[SOQLクエリの結果をJSONで出力する]]></title>
@@ -331,123 +375,6 @@ public Pagereference confirm() {
 
 <p>これで単純に、ファイルタイプと拡張子によるチェックは出来るかと思います。<br/>
 が、PC側で拡張子を変更するだけで偽装できてしまうので、確実なチェックをしようと思うと、別アプローチが必要になるかと思います。</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[SalesForce]チェックボックス付きのテーブルリストを作る]]></title>
-    <link href="http://kayakuguri.github.io/blog/2014/05/20/pageblocktable-with-checkbox/"/>
-    <updated>2014-05-20T18:11:21+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2014/05/20/pageblocktable-with-checkbox</id>
-    <content type="html"><![CDATA[<p>チェックボックスがついたテーブルのリストを<br/>
-カスタマイズされた項目で作成してみた。</p>
-
-<!-- more -->
-
-
-<p>参考サイト：<br/>
-<a href="http://blog.livedoor.jp/totalsoft/archives/3017384.html">[Visualforce] チェックボックスつきリストの実現（ページング機能つき） [技術情報]</a><br/>
-<a href="http://system21sf.seesaa.net/article/135800427.html">チェックボックス付きリストの作り方</a></p>
-
-<p>２つ目の参考サイトによると、</p>
-
-<blockquote><p>&lt;apex:listViews>を使えばあっという間に作れてしまいますが、残念ながらそこでチェックされたレコードをサーバー側で取得することができません。</p></blockquote>
-
-<p>そうなので、任意のオブジェクトをラップしたクラスを作成してそのオブジェクトにチェックされた項目を保存することになる。<br/>
-上記２つの参考サイトではページングなどで結構ややこしくなっているので、<br/>
-なるべく簡易に、オブジェクトのラッパークラスを使うことだけに注目して作成してみた。</p>
-
-<p>ちなみに、標準の<code>Attachment</code>オブジェクトではリストを作成出来なかった。<br/>
-(サポートしてない、的なエラーが出た)</p>
-
-<p>標準オブジェクトでは確認していないので、カスタムオブジェクトでの方法を例に上げる。</p>
-
-<p>オーバーライドするオブジェクト：HogeObject__c</p>
-
-<p><strong>オーバーライドしたクラス</strong></p>
-
-<pre><code>public class  HogeObjectWrapper {
-
-    public HogeObject__c Record {get; private set;}  //元のオブジェクト格納
-    public Boolean selected {get; set;} //チェックボックス用
-    public String hogeName {get; set;} //追加する項目(あれば)
-
-    public HogeObjectWrapper(HogeObject__c record) {
-        this.Record = record;
-        this.selected = false; //デフォルト値
-        this.hogeName = '';
-    }
-}
-</code></pre>
-
-<p>ページで指定しているapexクラスで使用する</p>
-
-<pre><code>public class hogePageController {
-    public Lead lead { get; set; }
-
-    public List&lt;HogeObjectWrapper&gt; HogeObjectSelects; //リスト格納用
-
-    //コンストラクタ
-    public hogePageController(ApexPages.StandardController controller) {
-        //コンストラクタで表示するリストを取得しておく
-        AttachmentObjectSelects= new List&lt;SendmailAttachmentWrapper&gt;();
-
-        List&lt;HogeObject__c&gt; hogeLists = [SELECT Id, Name FROM HogeObject__c];
-        for(HogeObject__c h:hogeLists){
-            //ラッパークラスに代入する
-            HogeObjectWrapper hObj = new HogeObjectWrapper(h);
-            hObj.hogeName = '何かしらの名前';
-            HogeObjectSelects.add(hObj);
-        }
-    }
-
-    //ページからの参照用
-    public List&lt;HogeObjectWrapper&gt; getHogeObjectSelects() {
-        return HogeObjectSelects;
-    }
-}
-</code></pre>
-
-<p><strong>VisualForceページ</strong></p>
-
-<pre><code>&lt;apex:pageBlock &gt;
-    &lt;apex:pageBlockTable value="{!HogeObjectSelects}" var="h"&gt;
-        &lt;apex:column &gt;
-            &lt;apex:facet name="header"&gt;チェックボックス&lt;/apex:facet&gt;
-            &lt;apex:inputCheckbox value="{! a.selected }"/&gt;
-        &lt;/apex:column&gt;
-        &lt;apex:column &gt;
-            &lt;apex:facet name="header"&gt;オブジェクトのID&lt;/apex:facet&gt;
-            &lt;apex:outputText value="{! h.Record.id }" /&gt;
-        &lt;/apex:column&gt;
-        &lt;apex:column &gt;
-            &lt;apex:facet name="header"&gt;任意の名前&lt;/apex:facet&gt;
-            &lt;apex:outputText value="{! h.hogeName }" /&gt;
-        &lt;/apex:column&gt;
-    &lt;/apex:pageBlockTable&gt;
-&lt;/apex:pageBlock&gt;
-</code></pre>
-
-<p><code>pageBlockTable</code>を使用するには、<code>pageBlock</code>で囲まないといけない。<br/>
-<a href="http://www.salesforce.com/us/developer/docs/pages/Content/pages_compref_pageBlockTable.htm">apex:pageBlockTable</a><br/>
-<code>apex:facet</code>は、<code>apex:column</code>内で使用し、そのテーブル内の列の見出しとなる。<br/>
-<a href="https://www.salesforce.com/us/developer/docs/pages/Content/pages_compref_facet.htm">apex:facet</a><br/>
-参考：<a href="http://www30304u.sakura.ne.jp/blog/?p=510">[SFDC]一覧表にリンクを表示したい（ヘッダタイトルもつける）</a></p>
-
-<p>これで、一番左の列にチェックボックスのついたテーブルが完成した。</p>
-
-<p>チェックして送信した場合、<code>HogeObjectSelects</code>の<code>selected</code>がtrueになる。<br/>
-そこからデータを取得出来る。<br/>
-forで回して、selectedがtrueになっている場合に何かしらをする、、というストーリーが想定される。</p>
-
-<p>apexでの使用方法</p>
-
-<pre><code>for(HogeObjectWrapper h:HogeObjectSelects){
-    if(h.selected){
-        //tureの時、何かの処理をする
-    }
-}
-</code></pre>
 ]]></content>
   </entry>
   
