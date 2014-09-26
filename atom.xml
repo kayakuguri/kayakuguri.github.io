@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2014-09-26T15:21:17+09:00</updated>
+  <updated>2014-09-26T18:16:08+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,233 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[heroku]QuotaGuard Staticを使ってHerokuでのIP固定を試してみる]]></title>
+    <link href="http://kayakuguri.github.io/blog/2014/09/26/static-ip-heroku/"/>
+    <updated>2014-09-26T17:59:42+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2014/09/26/static-ip-heroku</id>
+    <content type="html"><![CDATA[<p>herokuでのIP固定といえば、<a href="https://addons.heroku.com/proximo">Proximo</a>の方が有名っぽいけど、<br/>
+QuotaGuard Staticというのでも同じく固定できるようなので試してみた。</p>
+
+<!-- more -->
+
+
+<p><img src="http://kayakuguri.github.io/images/2014/09/quotaguard1.jpg" alt="QuotaGuard Static add-on" /></p>
+
+<p><a href="https://addons.heroku.com/quotaguardstatic">QuotaGuard Static</a></p>
+
+<p>アプリへのセットアップをコマンドラインからする場合は以下。<br/>
+無料プランがあるので、それで試してみる。</p>
+
+<pre><code>$ heroku addons:add quotaguardstatic
+</code></pre>
+
+<p>以下のように結果が返ってくる。<br/>
+その中にIPアドレスも含まれる。</p>
+
+<pre><code>Adding quotaguardstatic on static-ip-test... done, v4 (free)
+Your static IPs are [54.88.136.216, 54.84.188.199]
+Use `heroku addons:docs quotaguardstatic` to view documentation.
+</code></pre>
+
+<p>Proximoでも同じ仕組のようだけど、<br/>
+入れたアドオンによって指定されたURLを介してアクセスすることで<br/>
+固定IPを実現しているよ。<br/>
+アドオンがプロキシの役目を果たす。<br/>
+このプロキシ経由でのアクセス数に制限があり、その数で値段が変わる仕組み。</p>
+
+<p>そのアクセス用のURLは環境変数に格納されている。</p>
+
+<pre><code>$ heroku config
+QUOTAGUARDSTATIC_URL: http://username:pass@us-east-1-static-brooks.quotaguard.com:9293
+</code></pre>
+
+<p>上記、<code>IPs</code>となっているのは、２つのIPのうちどちらかでアクセスされる、とのこと。<br/>
+負荷分散のよう。<br/>
+一応、公式の理由。</p>
+
+<blockquote><p>We believe all apps should be built for scalability and high availability. Our commitment to this means we only provide load balanced, high availability services. Load balancing our nodes allows one node to fail or be brought down for maintenance with no impact to your application. Each IP you are given represents one proxy node that is running behind a load balancer.</p></blockquote>
+
+<p>IPアドレスはアドオンのダッシュボードからも確認できる。<br/>
+以下、ダッシュボードを開くコマンド</p>
+
+<pre><code>$ heroku addons:open quotaguardstatic
+</code></pre>
+
+<p>公式にPHPでの動作サンプルが載っていたのでそのまま使用して試してみた。<br/>
+以下、転載。</p>
+
+<p><a href="https://devcenter.heroku.com/articles/quotaguardstatic#using-with-php">PHPのサンプル</a></p>
+
+<pre><code>&lt;?php
+
+function lookup(){
+  $quotaguard_env = getenv("QUOTAGUARDSTATIC_URL");
+  $quotaguard = parse_url($quotaguard_env);
+
+  $proxyUrl       = $quotaguard['host'].":".$quotaguard['port'];
+  $proxyAuth       = $quotaguard['user'].":".$quotaguard['pass'];
+
+  $url = "http://ip.jsontest.com/";
+
+  $ch = curl_init();
+  curl_setopt($ch, CURLOPT_URL, $url);
+  curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+  curl_setopt($ch, CURLOPT_PROXY, $proxyUrl);
+  curl_setopt($ch, CURLOPT_PROXYAUTH, CURLAUTH_BASIC);
+  curl_setopt($ch, CURLOPT_PROXYUSERPWD, $proxyAuth);
+  $response = curl_exec($ch);
+  return $response;
+}
+
+$res = lookup();
+print_r($res);
+
+?&gt;
+</code></pre>
+
+<p>ここでアクセスしている<code>http://ip.jsontest.com/</code>のURLは、接続元のIPアドレスをJsonで返してくれるサービスのよう。</p>
+
+<p>アクセスすると、以下のようなJSONが返ってきた。</p>
+
+<pre><code>{"ip": "54.84.188.199"}
+</code></pre>
+
+<p>リロードすると以下のものとランダムに切り替わっているのが確認できる。</p>
+
+<pre><code>{"ip": "54.88.136.216"}
+</code></pre>
+
+<p>管理画面を確認すると、アクセス数と残りアクセス数がわかる。<br/>
+アクセス数は、１月の制限のよう。<br/>
+無料の場合は250/月。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2014/09/quotaguard2.jpg" alt="管理画面" /></p>
+
+<p>冒頭のProximoと比較すべく、料金表を抜き出してみた。</p>
+
+<p><strong>QuotaGuard Static</strong></p>
+
+<table>
+<thead>
+<tr>
+<th>プラン </th>
+<th> 値段(月) </th>
+<th> アクセス数(月) </th>
+<th> 帯域幅</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Starter </td>
+<td> 無料 </td>
+<td> 250 </td>
+<td> 100MB</td>
+</tr>
+<tr>
+<td>Spike </td>
+<td> $5 </td>
+<td> 500 </td>
+<td> 250MB</td>
+</tr>
+<tr>
+<td>Micro </td>
+<td> $19 </td>
+<td> 10,000 </td>
+<td> 1GB</td>
+</tr>
+<tr>
+<td>Medium </td>
+<td> $49 </td>
+<td> 50,000 </td>
+<td> 10GB</td>
+</tr>
+<tr>
+<td>Large </td>
+<td> $89 </td>
+<td> 1000,000 </td>
+<td> 50GB</td>
+</tr>
+<tr>
+<td>Enterprise </td>
+<td> $219 </td>
+<td> 1,000,000 </td>
+<td> 1TB</td>
+</tr>
+<tr>
+<td>Premium </td>
+<td> $399 </td>
+<td> 5,000,000 </td>
+<td> 無制限</td>
+</tr>
+</tbody>
+</table>
+
+
+<p><strong>Proximo</strong></p>
+
+<table>
+<thead>
+<tr>
+<th>プラン </th>
+<th> 値段(月) </th>
+<th> アクセス数(月) </th>
+<th> 帯域幅</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Development </td>
+<td> $5 </td>
+<td> 1,000 </td>
+<td> 500MB</td>
+</tr>
+<tr>
+<td>Starter </td>
+<td> $25 </td>
+<td> 20,000 </td>
+<td> 2GB</td>
+</tr>
+<tr>
+<td>Professional </td>
+<td> $75 </td>
+<td> 200,000 </td>
+<td> 100GB</td>
+</tr>
+<tr>
+<td>Dedicated </td>
+<td> $250 </td>
+<td> 1,000,000 </td>
+<td> 1TB</td>
+</tr>
+<tr>
+<td>Elite </td>
+<td> $500 </td>
+<td> 5,000,000 </td>
+<td> 5TB</td>
+</tr>
+<tr>
+<td>Enterprise </td>
+<td> $1250 </td>
+<td> 無制限 </td>
+<td> 無制限</td>
+</tr>
+</tbody>
+</table>
+
+
+<p>QuotaGuardは無料があるのがやはりお手軽。<br/>
+しかし、安いうちはProximoの方がお得。<br/>
+増えてくるとQuotaGuardの方がお得かも。<br/>
+他の機能もあったりするので一概には言えないけれど。</p>
+
+<h3>参考</h3>
+
+<p><a href="https://devcenter.heroku.com/articles/quotaguardstatic">QuotaGuard Static 公式ドキュメント</a><br/>
+<a href="https://devcenter.heroku.com/articles/proximo">Proximo 公式ドキュメント</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[Salesforce]Mass Actionsでリードを一括編集]]></title>
@@ -1856,123 +2083,6 @@ private class SampleControllerTest{
     }
 }
 </code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[herokuでPHP環境の構築]]></title>
-    <link href="http://kayakuguri.github.io/blog/2014/06/11/heroku-php/"/>
-    <updated>2014-06-11T16:35:35+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2014/06/11/heroku-php</id>
-    <content type="html"><![CDATA[<p>herokuがphpを公式にサポートしました。<br/>
-以前に<a href="http://kayakuguri.github.io/blog/2014/02/18/create-php-heroku-mbstring/">ビルドパックのを使用した環境の構築方法</a>を書きましたが、<br/>
-公式の作成方法も試してみました。</p>
-
-<!-- more -->
-
-
-<p><a href="https://devcenter.heroku.com/articles/php-support">Heroku PHP Support | Heroku Dev Center</a></p>
-
-<p>herokuでは基本、アップされたファイルからherokuが自動的に判定して環境を構築してくれます。<br/>
-で、PHPの場合は、<br/>
-<code>composer.json</code><br/>
-ファイルがルートにあれば、PHP環境と判定されて構築してくれる。</p>
-
-<p>現時点では作成されるバージョンはデフォルトでは、以下。</p>
-
-<blockquote><p>By default, Heroku runs PHP 5.5 (5.5.12, 64-bit).</p></blockquote>
-
-<p>バージョンを指定してやる場合は<code>composer.json</code>に以下のように記述。</p>
-
-<pre><code>{
-  "require": {
-    "php": "~5.5.12"
-  }
-}
-</code></pre>
-
-<p>ただし、サポートしているバージョンは以下のみ。</p>
-
-<ul>
-<li>5.5.11</li>
-<li>5.5.12</li>
-<li>5.5.13</li>
-</ul>
-
-
-<p>facebookが開発したというphpを高速に動作させる環境である、HipHop VMもサポートされており、<br/>
-(実験的に、と書いてあるので使用には注意)<br/>
-これもデフォルトではバージョンは以下。</p>
-
-<blockquote><p>HipHop VM (HHVM) (3.1.0, 64-bit)</p></blockquote>
-
-<p>使用する場合は以下のように記述。</p>
-
-<pre><code>{
-  "require": {
-    "hhvm": "~3.1.0"
-  }
-}
-</code></pre>
-
-<p>サポートしているバージョンは以下。</p>
-
-<ul>
-<li>3.0.1</li>
-<li>3.1.0</li>
-</ul>
-
-
-<hr />
-
-<p>mbStringはデフォルトでは有効になっていないので、以下のように記述することで有効に出来る。</p>
-
-<pre><code>{
-    "require": {
-        "ext-mbstring": "*"
-    }
-}
-</code></pre>
-
-<p>デプロイ結果</p>
-
-<pre><code>-----&gt; PHP app detected
------&gt; Setting up runtime environment...
-       - PHP 5.5.12
-       - Apache 2.4.9
-       - Nginx 1.4.6
------&gt; Installing PHP extensions:
-       - opcache (automatic; bundled, using 'ext-opcache.ini')
-       - mbstring (composer.json; bundled)
-. . .
-</code></pre>
-
-<p>デフォルトで有効になっている環境や拡張機能は以下を参考。<br/>
-<a href="https://devcenter.heroku.com/articles/php-support#php-5-5">https://devcenter.heroku.com/articles/php-support#php-5-5</a></p>
-
-<p>拡張機能はリストのカッコ内の単語を、<code>ext-</code>をつけて並べていく。<br/>
-ちなみに、<code>*</code>の部分はバージョンを指定する箇所で、<code>*</code>は自動で指定されるようになる。<br/>
-ドキュメント内には、<code>*</code>での指定が推奨されている。<br/>
-理由は、PHPのバージョンアップとは別に、各機能のバージョンアップが不定期に行われる可能性があるから、だそう。</p>
-
-<blockquote><p>It is strongly recommended that you use “*” as the version selector when specifying extensions, as their version numbers can be extremely inconsistent (most of them report their version as “0”) and Heroku will sometimes update extensions outside the regular PHP update cycles.</p></blockquote>
-
-<p>　</p>
-
-<hr />
-
-<p>ドキュメントルートの設定は、<code>Procfile</code>で指定する事ができる。<br/>
-<code>Procfile</code>ファイルは、heroku起動時に実行してくれるファイル。<br/>
-拡張子もなしで、<code>Procfile</code>という名前のファイルをルートに設置することで動作する。<br/>
-<a href="https://devcenter.heroku.com/articles/procfile">Process Types and the Procfile | Heroku Dev Center</a></p>
-
-<p>PHPを動作させるwebサーバを、Apacheか、Nginxを指定出来る。<br/>
-Apacheで動作させ、ドキュメントルートを<code>public/</code>にする場合は以下の記述を<code>Procfile</code>に追加する。</p>
-
-<pre><code>web: vendor/bin/heroku-php-apache2 public/
-</code></pre>
-
-<p>これで、public/がwebのドキュメントルートになる。</p>
 ]]></content>
   </entry>
   

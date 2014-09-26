@@ -1,0 +1,422 @@
+
+<!DOCTYPE HTML>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>[heroku]QuotaGuard Staticを使ってHerokuでのIP固定を試してみる - KayaMemo</title>
+
+	
+	<meta name="description" content="<!-- google_ad_client = "ca-pub-0887267957680144"; /* kayakuguri top */ google_ad_slot = "1210228675"; google_ad_width = 468; google_ad_height = 60 &hellip;">
+	
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+	<link href="/atom.xml" rel="alternate" title="KayaMemo" type="application/atom+xml">
+	<link rel="canonical" href="">
+	<link href="/favicon.png" rel="shortcut icon">
+	<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+	<script async="true" src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+	
+<meta property="og:title" content="[heroku]QuotaGuard Staticを使ってHerokuでのIP固定を試してみる - KayaMemo" />
+<meta property="og:type" content="article" />
+<meta property="og:description" content="<!-- google_ad_client = "ca-pub-0887267957680144"; /* kayakuguri top */ google_ad_slot = "1210228675"; google_ad_width = 468; google_ad_height = 60 &hellip;" />
+
+<meta property="og:url" content="" />
+<meta property="og:image" content="http://kayakuguri.github.io/images/about_me.jpg" />
+<meta property="og:author" content="kayakuguri" />
+<meta property="og:site_name" content="KayaMemo" />
+<meta property="og:locale" content="ja_JP" />
+<meta property="fb:app_id" content="509051419202319" />
+</head>
+
+
+<body>
+	<header id="header" class="inner"><h1><a href="/">KayaMemo</a></h1>
+<nav id="main-nav"><ul class="main">
+	<li><a href="/">Blog</a></li>
+	<li><a href="/blog/archives">Archives</a></li>
+</ul>
+</nav>
+<nav id="mobile-nav">
+	<div class="alignleft menu">
+		<a class="button">Menu</a>
+		<div class="container"><ul class="main">
+	<li><a href="/">Blog</a></li>
+	<li><a href="/blog/archives">Archives</a></li>
+</ul>
+</div>
+	</div>
+	<div class="alignright search">
+		<a class="button"></a>
+		<div class="container">
+			<form action="http://google.com/search" method="get">
+				<input type="text" name="q" results="0">
+				<input type="hidden" name="q" value="site:kayakuguri.github.io">
+			</form>
+		</div>
+	</div>
+</nav>
+<nav id="sub-nav" class="alignright">
+	<div class="social">
+		
+		
+		
+		
+    
+		
+		
+		
+		
+		
+		<a class="rss" href="/atom.xml" title="RSS">RSS</a>
+		
+    
+	</div>
+	<form class="search" action="http://google.com/search" method="get">
+		<input class="alignright" type="text" name="q" results="0">
+		<input type="hidden" name="q" value="site:kayakuguri.github.io">
+	</form>
+</nav>
+
+</header>
+	
+		
+	
+	<div id="content" class="inner"><article class="post">
+	<h2 class="title">[heroku]QuotaGuard Staticを使ってHerokuでのIP固定を試してみる</h2>
+	<div class="entry-content">
+        <div class="adArea">
+    <script type="text/javascript"><!--
+    google_ad_client = "ca-pub-0887267957680144";
+    /* kayakuguri top */
+    google_ad_slot = "1210228675";
+    google_ad_width = 468;
+    google_ad_height = 60;
+    //-->
+    </script>
+    <script type="text/javascript"
+            src="//pagead2.googlesyndication.com/pagead/show_ads.js">
+    </script>
+</div>
+        <p>herokuでのIP固定といえば、<a href="https://addons.heroku.com/proximo">Proximo</a>の方が有名っぽいけど、<br/>
+QuotaGuard Staticというのでも同じく固定できるようなので試してみた。</p>
+
+<!-- more -->
+
+
+<p><img src="/images/2014/09/quotaguard1.jpg" alt="QuotaGuard Static add-on" /></p>
+
+<p><a href="https://addons.heroku.com/quotaguardstatic">QuotaGuard Static</a></p>
+
+<p>アプリへのセットアップをコマンドラインからする場合は以下。<br/>
+無料プランがあるので、それで試してみる。</p>
+
+<pre><code>$ heroku addons:add quotaguardstatic
+</code></pre>
+
+<p>以下のように結果が返ってくる。<br/>
+その中にIPアドレスも含まれる。</p>
+
+<pre><code>Adding quotaguardstatic on static-ip-test... done, v4 (free)
+Your static IPs are [54.88.136.216, 54.84.188.199]
+Use `heroku addons:docs quotaguardstatic` to view documentation.
+</code></pre>
+
+<p>Proximoでも同じ仕組のようだけど、<br/>
+入れたアドオンによって指定されたURLを介してアクセスすることで<br/>
+固定IPを実現しているよ。<br/>
+アドオンがプロキシの役目を果たす。<br/>
+このプロキシ経由でのアクセス数に制限があり、その数で値段が変わる仕組み。</p>
+
+<p>そのアクセス用のURLは環境変数に格納されている。</p>
+
+<pre><code>$ heroku config
+QUOTAGUARDSTATIC_URL: http://username:pass@us-east-1-static-brooks.quotaguard.com:9293
+</code></pre>
+
+<p>上記、<code>IPs</code>となっているのは、２つのIPのうちどちらかでアクセスされる、とのこと。<br/>
+負荷分散のよう。<br/>
+一応、公式の理由。</p>
+
+<blockquote><p>We believe all apps should be built for scalability and high availability. Our commitment to this means we only provide load balanced, high availability services. Load balancing our nodes allows one node to fail or be brought down for maintenance with no impact to your application. Each IP you are given represents one proxy node that is running behind a load balancer.</p></blockquote>
+
+<p>IPアドレスはアドオンのダッシュボードからも確認できる。<br/>
+以下、ダッシュボードを開くコマンド</p>
+
+<pre><code>$ heroku addons:open quotaguardstatic
+</code></pre>
+
+<p>公式にPHPでの動作サンプルが載っていたのでそのまま使用して試してみた。<br/>
+以下、転載。</p>
+
+<p><a href="https://devcenter.heroku.com/articles/quotaguardstatic#using-with-php">PHPのサンプル</a></p>
+
+<pre><code>&lt;?php
+
+function lookup(){
+  $quotaguard_env = getenv("QUOTAGUARDSTATIC_URL");
+  $quotaguard = parse_url($quotaguard_env);
+
+  $proxyUrl       = $quotaguard['host'].":".$quotaguard['port'];
+  $proxyAuth       = $quotaguard['user'].":".$quotaguard['pass'];
+
+  $url = "http://ip.jsontest.com/";
+
+  $ch = curl_init();
+  curl_setopt($ch, CURLOPT_URL, $url);
+  curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+  curl_setopt($ch, CURLOPT_PROXY, $proxyUrl);
+  curl_setopt($ch, CURLOPT_PROXYAUTH, CURLAUTH_BASIC);
+  curl_setopt($ch, CURLOPT_PROXYUSERPWD, $proxyAuth);
+  $response = curl_exec($ch);
+  return $response;
+}
+
+$res = lookup();
+print_r($res);
+
+?&gt;
+</code></pre>
+
+<p>ここでアクセスしている<code>http://ip.jsontest.com/</code>のURLは、接続元のIPアドレスをJsonで返してくれるサービスのよう。</p>
+
+<p>アクセスすると、以下のようなJSONが返ってきた。</p>
+
+<pre><code>{"ip": "54.84.188.199"}
+</code></pre>
+
+<p>リロードすると以下のものとランダムに切り替わっているのが確認できる。</p>
+
+<pre><code>{"ip": "54.88.136.216"}
+</code></pre>
+
+<p>管理画面を確認すると、アクセス数と残りアクセス数がわかる。<br/>
+アクセス数は、１月の制限のよう。<br/>
+無料の場合は250/月。</p>
+
+<p><img src="/images/2014/09/quotaguard2.jpg" alt="管理画面" /></p>
+
+<p>冒頭のProximoと比較すべく、料金表を抜き出してみた。</p>
+
+<p><strong>QuotaGuard Static</strong></p>
+
+<table>
+<thead>
+<tr>
+<th>プラン </th>
+<th> 値段(月) </th>
+<th> アクセス数(月) </th>
+<th> 帯域幅</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Starter </td>
+<td> 無料 </td>
+<td> 250 </td>
+<td> 100MB</td>
+</tr>
+<tr>
+<td>Spike </td>
+<td> $5 </td>
+<td> 500 </td>
+<td> 250MB</td>
+</tr>
+<tr>
+<td>Micro </td>
+<td> $19 </td>
+<td> 10,000 </td>
+<td> 1GB</td>
+</tr>
+<tr>
+<td>Medium </td>
+<td> $49 </td>
+<td> 50,000 </td>
+<td> 10GB</td>
+</tr>
+<tr>
+<td>Large </td>
+<td> $89 </td>
+<td> 1000,000 </td>
+<td> 50GB</td>
+</tr>
+<tr>
+<td>Enterprise </td>
+<td> $219 </td>
+<td> 1,000,000 </td>
+<td> 1TB</td>
+</tr>
+<tr>
+<td>Premium </td>
+<td> $399 </td>
+<td> 5,000,000 </td>
+<td> 無制限</td>
+</tr>
+</tbody>
+</table>
+
+
+<p><strong>Proximo</strong></p>
+
+<table>
+<thead>
+<tr>
+<th>プラン </th>
+<th> 値段(月) </th>
+<th> アクセス数(月) </th>
+<th> 帯域幅</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Development </td>
+<td> $5 </td>
+<td> 1,000 </td>
+<td> 500MB</td>
+</tr>
+<tr>
+<td>Starter </td>
+<td> $25 </td>
+<td> 20,000 </td>
+<td> 2GB</td>
+</tr>
+<tr>
+<td>Professional </td>
+<td> $75 </td>
+<td> 200,000 </td>
+<td> 100GB</td>
+</tr>
+<tr>
+<td>Dedicated </td>
+<td> $250 </td>
+<td> 1,000,000 </td>
+<td> 1TB</td>
+</tr>
+<tr>
+<td>Elite </td>
+<td> $500 </td>
+<td> 5,000,000 </td>
+<td> 5TB</td>
+</tr>
+<tr>
+<td>Enterprise </td>
+<td> $1250 </td>
+<td> 無制限 </td>
+<td> 無制限</td>
+</tr>
+</tbody>
+</table>
+
+
+<p>QuotaGuardは無料があるのがやはりお手軽。<br/>
+しかし、安いうちはProximoの方がお得。<br/>
+増えてくるとQuotaGuardの方がお得かも。<br/>
+他の機能もあったりするので一概には言えないけれど。</p>
+
+<h3>参考</h3>
+
+<p><a href="https://devcenter.heroku.com/articles/quotaguardstatic">QuotaGuard Static 公式ドキュメント</a><br/>
+<a href="https://devcenter.heroku.com/articles/proximo">Proximo 公式ドキュメント</a></p>
+
+    </div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-09-26T17:59:42+09:00" pubdate data-updated="true">Sep 26<span>th</span>, 2014</time></div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/heroku/'>heroku</a>
+
+
+</div>
+	
+</div>
+</article>
+
+	<div class="share">
+	<div class="addthis_toolbox addthis_default_style ">
+		
+        <div id="fb-root"></div>
+<script>(function(d, s, id) {
+    var js, fjs = d.getElementsByTagName(s)[0];
+    if (d.getElementById(id)) return;
+    js = d.createElement(s); js.id = id;
+    js.src = "//connect.facebook.net/ja_JP/all.js#xfbml=1&appId=509051419202319";
+    fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+        <div class="fb-like" data-href="http://kayakuguri.github.io/blog/2014/09/26/static-ip-heroku/" data-layout="button_count" data-action="like" data-show-faces="true" data-share="false"></div>
+		
+		
+		
+		<a class="addthis_button_google_plusone" g:plusone:size="medium"></a>
+		
+		
+        
+        <a href="http://b.hatena.ne.jp/entry/http://kayakuguri.github.io/blog/2014/09/26/static-ip-heroku/" class="hatena-bookmark-button" data-hatena-bookmark-title="[heroku]QuotaGuard Staticを使ってHerokuでのIP固定を試してみる - KayaMemo" data-hatena-bookmark-layout="standard-noballoon" data-hatena-bookmark-lang="ja" title="このエントリーをはてなブックマークに追加">
+<img src="http://b.st-hatena.com/images/entry-button/button-only@2x.png" alt="このエントリーをはてなブックマークに追加" width="20" height="20" style="border: none;" /></a>
+<script type="text/javascript" src="http://b.st-hatena.com/js/bookmark_button.js" charset="utf-8" async="async"></script>
+        
+	</div>
+	
+</div>
+
+
+<div class="share">
+    <script type="text/javascript"><!--
+    google_ad_client = "ca-pub-0887267957680144";
+    /* kayakuguri git */
+    google_ad_slot = "2041160274";
+    google_ad_width = 336;
+    google_ad_height = 280;
+    //-->
+    </script>
+    <script type="text/javascript"
+            src="//pagead2.googlesyndication.com/pagead/show_ads.js">
+    </script>
+</div>
+</div>
+	<footer id="footer" class="inner">Copyright &copy; 2014
+
+    萱潜
+
+</footer>
+	<script src="/javascripts/slash.js"></script>
+<script src="/javascripts/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+	$('.fancybox').fancybox();
+})(jQuery);
+</script> <!-- Delete or comment this line to disable Fancybox -->
+
+
+
+
+	<script type="text/javascript">
+		var _gaq = _gaq || [];
+		_gaq.push(['_setAccount', 'UA-3730932-4']);
+		_gaq.push(['_trackPageview']);
+
+		(function() {
+			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+		})();
+	</script>
+
+
+
+</body>
+</html>
