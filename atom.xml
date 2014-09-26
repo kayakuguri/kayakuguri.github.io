@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2014-09-12T11:45:24+09:00</updated>
+  <updated>2014-09-26T15:17:06+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,103 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[Salesforce]Mass Actionsでリードを一括編集]]></title>
+    <link href="http://kayakuguri.github.io/blog/2014/09/26/mass-edit-salesforce/"/>
+    <updated>2014-09-26T14:44:48+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2014/09/26/mass-edit-salesforce</id>
+    <content type="html"><![CDATA[<p>リードのリストビュー画面から抽出したリードを一括編集できるが、<br/>
+そこで編集できる項目は限られている。<br/>
+なので、好きな項目の編集を可能にするアドオンがあったのでご紹介。</p>
+
+<p><a href="https://appexchange.salesforce.com/listingDetail?listingId=a0N30000003J6KcEAK">Mass Edit + Mass Update + Mass Delete &ndash; VersatileCapitalist, Inc &ndash; AppExchange</a></p>
+
+<!-- more -->
+
+
+<p>上記AppExchangeの画面から、<code>Get It Now!</code>をクリックして、インストールする。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2014/09/mass01.jpg" alt="Get It Now" /></p>
+
+<p>ログインしていない場合は自身のアカウントでログイン。<br/>
+sandboxかプロダクションへのインストールを選択。<br/>
+今回はプロダクションへインストールした。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2014/09/mass02.jpg" alt="Install" /></p>
+
+<p>内容を確認して、<code>Confilm and Install!</code>。<br/>
+再度、ID、パスワードを聞かれるので、入力する。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2014/09/mass03.jpg" alt="Confilm and Install!" /></p>
+
+<p>インストールする内容を確認して、<code>次へ</code>。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2014/09/mass04.jpg" alt="パッケージインストールの詳細" /></p>
+
+<p>ユーザーごとの権限を設定し、<code>次へ</code>。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2014/09/mass05.jpg" alt="権限" /></p>
+
+<p>セキュリティレベルを設定し、<code>次へ</code>。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2014/09/mass06.jpg" alt="セキュリティレベル" /></p>
+
+<p>最後の確認をされるので、<code>インストール</code>。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2014/09/mass07.jpg" alt="インストール確認" /></p>
+
+<p>少し待つと、インストールが完了。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2014/09/mass08.jpg" alt="インストール完了" /></p>
+
+<p>使用するには、リードの<code>検索レイアウト</code>にMassActionのボタンを追加してやる必要がある。<br/>
+<code>設定 -&gt; カスタマイズ -&gt; リード -&gt; 検索レイアウト</code>を開く。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2014/09/mass09.jpg" alt="リード検索レイアウト" /></p>
+
+<p>その中の、<code>リードリストビュー</code>に追加するので、<code>編集</code>をクリック。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2014/09/mass10.jpg" alt="リードリストビュー" /></p>
+
+<p>利用可能なボタン、の中にMassActionのボタンがあるので、<br/>
+今回は全て選択して、追加し、保存。</p>
+
+<blockquote><p>Mass Delete<br/>
+Mass Edit<br/>
+Mass Update</p></blockquote>
+
+<p><img src="http://kayakuguri.github.io/images/2014/09/mass11.jpg" alt="リードリストビューの編集" /></p>
+
+<p>後は通常通り、リードからビューを選択する。<br/>
+新規ビューを作成するときに、<code>表示する項目を選択</code>できるが、<br/>
+ここで選択したものが後で更新出来る項目となる。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2014/09/mass12.jpg" alt="表示する項目" /></p>
+
+<p>リストビューを表示すると、上部に先程追加したMassのボタンが表示されている。<br/>
+変更したいリードをチェックボックスで選択し、その上部のボタン、今回は<code>Mass Edit</code>をクリック。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2014/09/mass13.jpg" alt="Mass Edit" /></p>
+
+<p>選択したリードがリストで表示されるので、変更したい箇所を編集し、saveをクリックすると反映される。<br/>
+今回は<code>会社名</code>を変更してみた。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2014/09/mass14.jpg" alt="編集" /></p>
+
+<p>結果が反映される。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2014/09/mass15.jpg" alt="結果" /></p>
+
+<p>このように、リードの項目をまとめて編集したりする場合にはこれは非常に便利だと思う。<br/>
+いちいち詳細、編集画面に遷移しなくてよいので楽。</p>
+
+<h3>参考</h3>
+
+<p><a href="http://synergylead.jp/support/faq-salesforce-mass-update-edit-delete/">一覧表示画面からチェックボックスで選択して削除・更新を行うには？｜Synergy!LEAD</a><br/>
+<a href="https://www.youtube.com/watch?v=xZCyhuTmaWE">Mass Edit and Mass Update in Salesforce.com &ndash; YouTube</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[SalesForceキャンペーンメンバーの状況を追加する]]></title>
@@ -1876,117 +1973,6 @@ Apacheで動作させ、ドキュメントルートを<code>public/</code>にす
 </code></pre>
 
 <p>これで、public/がwebのドキュメントルートになる。</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[SalesForce]apex:inputFileで添付されたファイルの種類をチェックする]]></title>
-    <link href="http://kayakuguri.github.io/blog/2014/05/30/apex-inputfile-contenttype/"/>
-    <updated>2014-05-30T15:59:00+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2014/05/30/apex-inputfile-contenttype</id>
-    <content type="html"><![CDATA[<p>添付されたファイルが指定のものかどうかをチェックする。</p>
-
-<!-- more -->
-
-
-<h4>1.inputタグのacceptで制限</h4>
-
-<p>一番簡単な方法だけど、ブラウザによっては効かないものもあり。<br/>
-salseforce独自の方法というわけではなく、一般的なもの。</p>
-
-<p><a href="http://yokano-jp.blogspot.jp/2013/08/accept.html">accept 属性でアップロードするファイルフォーマットを指定</a></p>
-
-<h4>2.contenttypeを取得</h4>
-
-<p>以下のように指定することで、選択されたファイルのcontenttype (MIMEタイプ)を取得出来る。</p>
-
-<p>[VisualForce]</p>
-
-<pre><code>&lt;apex:inputFile fileName="{!upload.name}" value="{!upload.body}" contentType="{!upload.contentType}" /&gt;
-</code></pre>
-
-<p>[apexクラス]</p>
-
-<pre><code>//Documentに保存する場合
-public Document upload { get; set; }
-
-//確認ボタンが押された場合
-public Pagereference confirm() {
-    String ctype = upload.ContentType; //ContentTypeを取得
-    if(ctype != 'image/jpeg'){
-        // エラーにする
-    }
-}
-</code></pre>
-
-<p>以下、主なcontenttype。(METAタイプ)</p>
-
-<table>
-<thead>
-<tr>
-<th>contenttype </th>
-<th> 種類</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>image/jpeg </td>
-<td> JPG画像</td>
-</tr>
-<tr>
-<td>application/pdf </td>
-<td> PDF</td>
-</tr>
-<tr>
-<td>application/vnd.ms-excel </td>
-<td> エクセル(.xls)</td>
-</tr>
-<tr>
-<td>application/vnd.openxmlformats-officedocument.spreadsheetml.sheet </td>
-<td> エクセル(.xlsx)</td>
-</tr>
-<tr>
-<td>application/msword </td>
-<td> ワード(.doc)</td>
-</tr>
-<tr>
-<td>application/vnd.openxmlformats-officedocument.wordprocessingml.document </td>
-<td> ワード(.docx)</td>
-</tr>
-</tbody>
-</table>
-
-
-<p>ただし、macでエクセルなどを添付した場合に、このcontenttypeが、<br/>
-<code>application/octet-stream</code>になってしまった場合があった。<br/>
-このタイプはファイルタイプが不明、の場合になるよう。<br/>
-(たぶん、使用しているPCが不明なタイプと判断している場合にそうなる可能性がある)</p>
-
-<p>その場合には、拡張子で判断するようにした。</p>
-
-<h4>3.拡張子で判断</h4>
-
-<p>単純に、ファイル名から、ドットで区切って文字列を取得。<br/>
-その文字列と判定、とした。<br/>
-上記のapexクラスに追記</p>
-
-<pre><code>if(ctype != 'image/jpeg'){
-    if(ctype == 'application/octet-stream'){
-        List&lt;String&gt; names = upload.Name.split('\\.');
-        String dotex = names[names.size() - 1];
-        if(dotex != 'jpg'){
-            //エラー
-        }
-    }else{
-        //エラー
-    }
-}
-</code></pre>
-
-<h4>まとめ</h4>
-
-<p>これで単純に、ファイルタイプと拡張子によるチェックは出来るかと思います。<br/>
-が、PC側で拡張子を変更するだけで偽装できてしまうので、確実なチェックをしようと思うと、別アプローチが必要になるかと思います。</p>
 ]]></content>
   </entry>
   
