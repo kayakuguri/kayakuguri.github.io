@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2014-09-30T18:04:40+09:00</updated>
+  <updated>2014-09-30T19:29:08+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,100 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[heroku]herokuでのSSL設定とカスタムサブドメインの適用方法]]></title>
+    <link href="http://kayakuguri.github.io/blog/2014/09/30/heroku-ssl-subdomain/"/>
+    <updated>2014-09-30T19:24:37+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2014/09/30/heroku-ssl-subdomain</id>
+    <content type="html"><![CDATA[<p>herokuでのSSL設定とカスタムサブドメインの設定をさっくりと調べてみた。</p>
+
+<!-- more -->
+
+
+<h2>SSL</h2>
+
+<h3>手順</h3>
+
+<ol>
+<li>プライベートキーを作成</li>
+<li>CSRを作成</li>
+<li>CSRを契約の際に業者に提出</li>
+<li>証明書が発行される</li>
+<li>証明書 + 中間証明書 + プライベートキーをherokuに設定</li>
+</ol>
+
+
+<p>1はローカルPC上にて作成<br/>
+2の作成方法は以下、など。
+<a href="https://jp.globalsign.com/support/ssl/list.php?cat=csr">https://jp.globalsign.com/support/ssl/list.php?cat=csr</a><br/>
+5のみ、heroku上。</p>
+
+<h3>herokuでの操作</h3>
+
+<p>SSLのアドオン($20/mo)<br/>
+<a href="https://addons.heroku.com/ssl">https://addons.heroku.com/ssl</a></p>
+
+<p>アドオンの追加</p>
+
+<pre><code>$ heroku addons:add ssl:endpoint
+</code></pre>
+
+<p>サーバー証明書と中間証明書を合体させる</p>
+
+<pre><code>$ cat chain_ca.pem &gt;&gt; server.crt
+</code></pre>
+
+<p>プライベートキーのパスフレーズが解除されていない場合は解除する。</p>
+
+<pre><code>$ openssl rsa -in site.key -out server.key
+Enter pass phrase for site.key:
+writing RSA key
+</code></pre>
+
+<p>で、合体させた証明書とキーをアップする。</p>
+
+<pre><code>$ heroku certs:add server.crt server.key
+</code></pre>
+
+<p>アップロード結果で返ってくるURLが証明書が適応されたURLとなる。<br/>
+<code>hokkaido-1212.herokussl.com</code><br/>
+この状態でアクセスすると、<code>No such app</code>と出るがこれで正しい。</p>
+
+<h3>参考</h3>
+
+<p><a href="http://qiita.com/yu1ch1/items/290efb666209354e8fb3">herokuのssl証明書を更新する</a><br/>
+<a href="http://interu.hatenablog.com/entry/2012/07/25/184812">HerokuでカスタムドメインのSSL endpointを利用する方法</a><br/>
+<a href="http://d.hatena.ne.jp/install-memo/20110906/1315291837">SSL証明書のKEYファイル・CSRファイル・CRTファイルのチェック方法</a></p>
+
+<h2>サブドメイン</h2>
+
+<h3>herokuでの操作</h3>
+
+<p>herokuのアプリのSettings内にある、<br/>
+Domains、から設定したいドメインを指定する。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2014/09/Settings___Heroku.jpg" alt="Settings___Heroku" /></p>
+
+<p>契約しているドメイン業者のCNAMEに、適用したいアプリのURLを指定する。<br/>
+例：<code>hoge.herokuapp.com</code></p>
+
+<h3>SSLの場合</h3>
+
+<p>SSLをカスタムドメインで使用したい場合は、上記SSLの項で設定した、<br/>
+<code>hokkaido-1212.herokussl.com</code>のドメインをCNAMEに指定する。</p>
+
+<p>反映後、設定の確認は以下で出来る。</p>
+
+<pre><code>$ heroku certs
+Endpoint                     Common Name(s)            Expires               Trusted
+---------------------------  ------------------------  --------------------  -------
+hokkaido-1212.herokussl.com  secure.example.co.jp  2015-06-24 23:59 UTC  True
+</code></pre>
+
+<p>詳細は、<code>heroku certs:info</code>で確認できる。</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[apigeeを使用してAPIの動作を確認する]]></title>
@@ -2070,27 +2164,6 @@ git push heroku beta_1:master &mdash;force<br/>
 確認後、masterブランチに切り替えてstagingブランチとマージして、<br/>
 通常の<code>$ git push heroku master</code>で、本番アプリに反映する、<br/>
 という流れになる予定。</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Smartyのテンプレート内における中括弧の扱い]]></title>
-    <link href="http://kayakuguri.github.io/blog/2014/06/26/smarty-literal/"/>
-    <updated>2014-06-26T11:10:01+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2014/06/26/smarty-literal</id>
-    <content type="html"><![CDATA[<p>Smartyのカテゴリ内にコンバーションタグ用のJSを設置したところ、<br/>
-エラーが出てしまい、調べてみると、<code>{ }</code>内はSmaryのデリミタでPHPとして扱われてしまうことに起因していました。</p>
-
-<!-- more -->
-
-
-<p>考えれば当たり前の話だけど、回避方法が簡単だったのでメモ。<br/>
-そのJSを外部ファイル化する、が修正がなくて一番簡単だけれど、<br/>
-中に書き込む場合には、<strong><code>{</code>と<code>}</code>の前後にスペースを挟む</strong>、でOK。</p>
-
-<p>そんだけ。</p>
-
-<p><a href="http://www.smarty.net/docs/ja/language.escaping.tpl">Smarty の構文解析を回避する | Smarty</a></p>
 ]]></content>
   </entry>
   

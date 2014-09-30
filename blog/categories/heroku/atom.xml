@@ -4,7 +4,7 @@
   <title><![CDATA[Category: heroku | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/heroku/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2014-09-30T18:04:40+09:00</updated>
+  <updated>2014-09-30T19:29:08+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,100 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[heroku]herokuでのSSL設定とカスタムサブドメインの適用方法]]></title>
+    <link href="http://kayakuguri.github.io/blog/2014/09/30/heroku-ssl-subdomain/"/>
+    <updated>2014-09-30T19:24:37+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2014/09/30/heroku-ssl-subdomain</id>
+    <content type="html"><![CDATA[<p>herokuでのSSL設定とカスタムサブドメインの設定をさっくりと調べてみた。</p>
+
+<!-- more -->
+
+
+<h2>SSL</h2>
+
+<h3>手順</h3>
+
+<ol>
+<li>プライベートキーを作成</li>
+<li>CSRを作成</li>
+<li>CSRを契約の際に業者に提出</li>
+<li>証明書が発行される</li>
+<li>証明書 + 中間証明書 + プライベートキーをherokuに設定</li>
+</ol>
+
+
+<p>1はローカルPC上にて作成<br/>
+2の作成方法は以下、など。
+<a href="https://jp.globalsign.com/support/ssl/list.php?cat=csr">https://jp.globalsign.com/support/ssl/list.php?cat=csr</a><br/>
+5のみ、heroku上。</p>
+
+<h3>herokuでの操作</h3>
+
+<p>SSLのアドオン($20/mo)<br/>
+<a href="https://addons.heroku.com/ssl">https://addons.heroku.com/ssl</a></p>
+
+<p>アドオンの追加</p>
+
+<pre><code>$ heroku addons:add ssl:endpoint
+</code></pre>
+
+<p>サーバー証明書と中間証明書を合体させる</p>
+
+<pre><code>$ cat chain_ca.pem &gt;&gt; server.crt
+</code></pre>
+
+<p>プライベートキーのパスフレーズが解除されていない場合は解除する。</p>
+
+<pre><code>$ openssl rsa -in site.key -out server.key
+Enter pass phrase for site.key:
+writing RSA key
+</code></pre>
+
+<p>で、合体させた証明書とキーをアップする。</p>
+
+<pre><code>$ heroku certs:add server.crt server.key
+</code></pre>
+
+<p>アップロード結果で返ってくるURLが証明書が適応されたURLとなる。<br/>
+<code>hokkaido-1212.herokussl.com</code><br/>
+この状態でアクセスすると、<code>No such app</code>と出るがこれで正しい。</p>
+
+<h3>参考</h3>
+
+<p><a href="http://qiita.com/yu1ch1/items/290efb666209354e8fb3">herokuのssl証明書を更新する</a><br/>
+<a href="http://interu.hatenablog.com/entry/2012/07/25/184812">HerokuでカスタムドメインのSSL endpointを利用する方法</a><br/>
+<a href="http://d.hatena.ne.jp/install-memo/20110906/1315291837">SSL証明書のKEYファイル・CSRファイル・CRTファイルのチェック方法</a></p>
+
+<h2>サブドメイン</h2>
+
+<h3>herokuでの操作</h3>
+
+<p>herokuのアプリのSettings内にある、<br/>
+Domains、から設定したいドメインを指定する。</p>
+
+<p><img src="/images/2014/09/Settings___Heroku.jpg" alt="Settings___Heroku" /></p>
+
+<p>契約しているドメイン業者のCNAMEに、適用したいアプリのURLを指定する。<br/>
+例：<code>hoge.herokuapp.com</code></p>
+
+<h3>SSLの場合</h3>
+
+<p>SSLをカスタムドメインで使用したい場合は、上記SSLの項で設定した、<br/>
+<code>hokkaido-1212.herokussl.com</code>のドメインをCNAMEに指定する。</p>
+
+<p>反映後、設定の確認は以下で出来る。</p>
+
+<pre><code>$ heroku certs
+Endpoint                     Common Name(s)            Expires               Trusted
+---------------------------  ------------------------  --------------------  -------
+hokkaido-1212.herokussl.com  secure.example.co.jp  2015-06-24 23:59 UTC  True
+</code></pre>
+
+<p>詳細は、<code>heroku certs:info</code>で確認できる。</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[heroku]QuotaGuard Staticを使ってHerokuでのIP固定を試してみる]]></title>
@@ -549,130 +643,6 @@ NewRelicが重くなってしまっているようだった。<br/>
 
 <p>単純にURLを叩くだけ、なら大丈夫かと思うけれど、<br/>
 重めのバッチ処理をスケジューラーでこまめに起動していると請求が発生する可能性があるので注意。</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[herokuで独自ドメインをRoute53で設定する]]></title>
-    <link href="http://kayakuguri.github.io/blog/2014/07/07/heroku-set-domain/"/>
-    <updated>2014-07-07T15:12:29+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2014/07/07/heroku-set-domain</id>
-    <content type="html"><![CDATA[<p>ドメインはムームードメインで取得してた。<br/>
-そのドメインをherokuに割り当てる。</p>
-
-<!-- more -->
-
-
-<p>内容は全く以下のままなんだけど、メモとして。。</p>
-
-<p><a href="http://www.workabroad.jp/posts/2002">heroku で 独自ドメインを使う際の最善策を考えた | Workabroad.jp</a></p>
-
-<h3>herokuにドメインを登録</h3>
-
-<p>herokuに独自ドメインをwwwありなし２つ登録</p>
-
-<pre><code>$ heroku domains:add example.com
-$ heroku domains:add www.example.com
-</code></pre>
-
-<h3>Amazon Route53 CNAMEの設定</h3>
-
-<p><img src="/images/2014/07/aws01.jpg" alt="Route53" /></p>
-
-<p>画面上部から<code>Create Hosted Zone</code>を選択。</p>
-
-<p><img src="/images/2014/07/aws02.jpg" alt="Create Hosted Zone" /></p>
-
-<p>ドメインを入力。wwwなし。</p>
-
-<p><img src="/images/2014/07/aws03.jpg" alt="Domain Name" /></p>
-
-<p>作成したレコードをダブルクリック。<br/>
-<code>Create Record Set</code>をクリック。</p>
-
-<p><img src="/images/2014/07/aws04.jpg" alt="Create Record Set" /></p>
-
-<p>作成。</p>
-
-<p><img src="/images/2014/07/aws05.jpg" alt="Create Record Set" /></p>
-
-<p>Name：www<br/>
-Type：CNAME<br/>
-value：xxx.herokuapp.com</p>
-
-<h3>S3の設定</h3>
-
-<p>S3でBucketを作成</p>
-
-<p><img src="/images/2014/07/aws06.jpg" alt="Create Bucket" /></p>
-
-<p>nameはルートドメインにする。<br/>
-RegionはTokyoにしといたらいいと思う。</p>
-
-<p><img src="/images/2014/07/aws07.jpg" alt="name" /></p>
-
-<p>Createした後、<code>Properties</code>の<code>Static Website Hosting</code>を選択。</p>
-
-<p><img src="/images/2014/07/aws08.jpg" alt="Properties" /></p>
-
-<p><code>Redirect all requests to another host name</code>を選択。<br/>
-最初から<code>www</code>付きのURLが入力されているので、そのままSave。<br/>
-これでwwwサブドメインへのリダイレクトが完了。</p>
-
-<p><img src="/images/2014/07/aws09.jpg" alt="Redirect all requests to another host name" /></p>
-
-<h3>Amazon Route53 ANAMEの設定</h3>
-
-<p>Route53に戻り、先ほど作成したレコードをダブルクリックして、<code>Create Record Set</code>をクリック。<br/>
-以下のようにして作成。</p>
-
-<p>Name：空<br/>
-Type：A &ndash; IPv4 address<br/>
-Alias：Yes<br/>
-Alias Target：先ほどS3で作成したBucketが選択できるのでそれを選択。</p>
-
-<p><img src="/images/2014/07/aws10.jpg" alt="A name" /></p>
-
-<h3>DNSサーバの設定</h3>
-
-<p>ドメインはムームードメインで取得しているので、<br/>
-ネームサーバーの設定をする。<br/>
-Route53の作成したレコードを選択すると右側にネームサーバーが表示される。</p>
-
-<p><img src="/images/2014/07/aws11.jpg" alt="name saever" /></p>
-
-<p>ムームードメインの「取得したドメインで使用する」を選択し、<br/>
-上記のネームサーバーを記入。</p>
-
-<p><img src="/images/2014/07/aws12.jpg" alt="mu-mu-domain" /></p>
-
-<p>完了。</p>
-
-<h3>料金</h3>
-
-<p>気になるお値段ですが、今現在は月、$0.51。<br/>
-現在のレートでは、52円くらい。安い。</p>
-
-<p><a href="https://www.google.co.jp/search?q=%240.51&amp;oq=%240.51&amp;aqs=chrome..69i57j0l5.755j0j7&amp;sourceid=chrome&amp;es_sm=91&amp;ie=UTF-8&amp;qscrl=1#q=%240.51+%E5%86%86&amp;qscrl=1&amp;safe=off">現在のレートで見る</a></p>
-
-<p><img src="/images/2014/07/aws13.jpg" alt="spend money" /></p>
-
-<p>ただし、新規にアカウントを作成したので、S3などが無料期間中かもしれません。<br/>
-１年後には数円上がるかもしれません。</p>
-
-<h3>結果</h3>
-
-<p>22時くらいに作業していたけれど、完了後、15分後くらいで切り替わりを確認出来た。<br/>
-ただし、その後元に戻ったり、と、不安定だった。<br/>
-翌朝には安定し、無事切り替わっていた。<br/>
-丸１日くらいかかると思っていたので結構早かった。</p>
-
-<h3>参考サイト</h3>
-
-<p>参考サイト：<br/>
-<a href="http://tsumazuki.hatenadiary.jp/entry/2013/12/11/174038">Herokuで独自ドメインを設定する方法</a><br/>
-<a href="http://tanukiti1987.hatenablog.com/entry/2013/01/24/233140">Herokuで独自のドメインを設定する[ムームードメイン]</a><br/>
-<a href="http://tech.tanaka733.net/entry/2013/09/15/%E3%81%8A%E5%90%8D%E5%89%8D.com_%E3%81%A7%E5%8F%96%E3%81%A3%E3%81%9F%E3%83%89%E3%83%A1%E3%82%A4%E3%83%B3%E3%82%92_Amazon_Route53%E3%81%A7%E7%AE%A1%E7%90%86%E3%81%97%E3%80%81%E3%82%B5%E3%83%96%E3%83%89">お名前.com で取ったドメインを Amazon Route53で管理し、サブドメインをはてなブログに割り当てるまで</a></p>
 ]]></content>
   </entry>
   
