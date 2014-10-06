@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2014-09-30T19:29:08+09:00</updated>
+  <updated>2014-10-06T18:29:19+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,80 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Mavericksにアップデートしたらターミナルが起動しなくなった]]></title>
+    <link href="http://kayakuguri.github.io/blog/2014/10/06/zsh-reinstall/"/>
+    <updated>2014-10-06T12:24:35+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2014/10/06/zsh-reinstall</id>
+    <content type="html"><![CDATA[<p>今更ながらですが、Mavericksにアップデートしたらターミナルが起動しなくなりましたよ。<br/>
+これが嫌でアップデートしてなかったのですが、やはり起こってしまったので、対応したメモ。</p>
+
+<!-- more -->
+
+
+<p>まずは、ここの通りに。</p>
+
+<p><a href="http://qiita.com/crispy/items/70367cd7e97dd4e0a60d">Maverickに上げたらターミナルが起動しない問題</a></p>
+
+<p>ターミナルのアプリの環境設定から、<br/>
+<code>起動 -&gt; 開くシェル -&gt; コマンド(完全パス)</code><br/>
+に、<code>/bin/zsh</code>を指定。</p>
+
+<p>これで、ターミナルは動作するようになるので、以下の通りに叩いた。</p>
+
+<pre><code>$ brew update
+$ brew upgrade
+</code></pre>
+
+<p>これがかなり時間がかかった。<br/>
+しかしまだエラーが。</p>
+
+<pre><code>dyld: Library not loaded: /usr/local/lib/libgdbm.4.dylib
+  Referenced from: /usr/local/bin/zsh
+  Reason: image not found
+zsh: trace trap  tmux
+</code></pre>
+
+<p>次は以下を参考。</p>
+
+<p><a href="http://umegusa.hatenablog.jp/entry/2012/07/21/155637">teminalが動かなくなってしまいました</a></p>
+
+<p>最新版は、1.11ってことで、以下で追加</p>
+
+<pre><code>$ wget ftp://ftp.gnu.org/pub/gnu/gdbm/gdbm-1.11.tar.gz 
+$ tar zxfv gdbm-1.11.tar.gz
+</code></pre>
+
+<p>手順に従って、インストール。</p>
+
+<pre><code>$ cd gdbm-1.11
+$ ./configure --prefix=/usr/local
+$ make
+$ make install
+</code></pre>
+
+<p>これで解決したけれど、また別のエラーが。</p>
+
+<pre><code>dyld: Library not loaded: /usr/local/lib/libpcre.1.dylib
+  Referenced from: /usr/local/bin/zsh
+  Reason: image not found
+zsh: trace trap  tmux
+</code></pre>
+
+<p>次は以下を参考</p>
+
+<p><a href="http://chaika.hatenablog.com/entry/2014/06/11/170441">Mac OS10.9にしたらHomebrewで入れていたコマンドとか、いろいろ動かなくなった。</a></p>
+
+<p>最後の方の部分だけを叩かせてもらう。</p>
+
+<pre><code>$ brew uninstall pcre
+$ brew install pcre
+</code></pre>
+
+<p>これでようやく起動できた。</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[heroku]herokuでのSSL設定とカスタムサブドメインの適用方法]]></title>
@@ -2066,104 +2140,6 @@ Route53の作成したレコードを選択すると右側にネームサーバ�
 <a href="http://tsumazuki.hatenadiary.jp/entry/2013/12/11/174038">Herokuで独自ドメインを設定する方法</a><br/>
 <a href="http://tanukiti1987.hatenablog.com/entry/2013/01/24/233140">Herokuで独自のドメインを設定する[ムームードメイン]</a><br/>
 <a href="http://tech.tanaka733.net/entry/2013/09/15/%E3%81%8A%E5%90%8D%E5%89%8D.com_%E3%81%A7%E5%8F%96%E3%81%A3%E3%81%9F%E3%83%89%E3%83%A1%E3%82%A4%E3%83%B3%E3%82%92_Amazon_Route53%E3%81%A7%E7%AE%A1%E7%90%86%E3%81%97%E3%80%81%E3%82%B5%E3%83%96%E3%83%89">お名前.com で取ったドメインを Amazon Route53で管理し、サブドメインをはてなブログに割り当てるまで</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Herokuでステージング環境をブランチを切って作成する]]></title>
-    <link href="http://kayakuguri.github.io/blog/2014/07/02/heroku-staging/"/>
-    <updated>2014-07-02T15:18:31+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2014/07/02/heroku-staging</id>
-    <content type="html"><![CDATA[<p>herokuでステージング環境を作成してみた。<br/>
-ブランチを切って、切り替えできるようにした。</p>
-
-<!-- more -->
-
-
-<p>アプリの作成はブラウザ上で行い、<br/>
-そこに後からpushしていく想定とする。<br/>
-(使用していてターミナル上でアプリを作成することが少なかったので)<br/>
-アプリ名(ID)は以下とする</p>
-
-<p>本番：sampleapp<br/>
-ステージング：sampleapp-staging</p>
-
-<p>ターミナルでアプリ用のファイルが入ったディレクトリに移動する。<br/>
-(以降はそのディレクトリでの作業となる。)<br/>
-まず、本番環境の分にアプリをサクっとプッシュ＆デプロイ。</p>
-
-<pre><code>$ git init
-$ git add .
-$ git remote add heroku git@heroku.com:sampleapp.git
-$ git commit -m 'init'
-$ git push heroku master
-</code></pre>
-
-<p>３つ目の<code>remote add</code>でプッシュ先のリモートリポジトリを設定しているわけだけれど、<br/>
-このaddの後の、<code>heroku</code>が本番用のリモートリポジトリ名となる。</p>
-
-<p>で。ローカルのリポジトリのブランチをステージング用に切る。<br/>
-その後、stagingリポジトリに移動。</p>
-
-<pre><code>$ git branch
-* master
-
-$ git branch staging
-$ git checkout staging  
-Switched to branch 'staging'
-$ git branch
-  master
-* staging
-</code></pre>
-
-<p>で、ステージング環境のリモートリポジトリを追加。</p>
-
-<pre><code>$ git remote add staging git@heroku.com:sampleapp-staging.git
-</code></pre>
-
-<p>確認。</p>
-
-<pre><code>$ git remote --v
-heroku  git@heroku.kano:sampleapp.git (fetch)
-heroku  git@heroku.kano:sampleapp.git (push)
-staging git@heroku.com:sampleapp-staging.git (fetch)
-staging git@heroku.com:sampleapp-staging.git (push)
-</code></pre>
-
-<p>で、ステージング環境にプッシュ、するわけだけれど、通常の感覚で、<br/>
-ローカルのstagingリポジトリをリモートのstagingリポジトリに追加、とすると、<br/>
-<code>$ git push staging staging</code>になるわけだけれど、<br/>
-そうすると、ステージング環境用のアプリがデプロイされない。</p>
-
-<pre><code>$ git push staging staging
-. . .
-Pushed to non-master branch, skipping build.
-. . .
-</code></pre>
-
-<p>書いてある通り、masterブランチにプッシュしないとデプロイされない。<br/>
-以下に情報があった。<br/>
-<a href="http://www.ownway.info/Ruby/index.php?heroku%2Fhow%2Fmanagement%2Fapplication">Heroku アプリケーションの管理 &ndash; 君の瞳はまるでルビー &ndash; Ruby 関連まとめサイト</a></p>
-
-<blockquote><p>アプリケーションとして認識されるのは master ブランチにあるソースコードだけです。</p></blockquote>
-
-<p>同サイト内に解決方法も載っていた。</p>
-
-<blockquote><p>master 以外のブランチやタグにあるソースコードを既存の Heroku アプリケーションとしてデプロイするには git push に &mdash;force オプションを使う必要があります。<br/>
-git push heroku beta_1:master &mdash;force<br/>
-これはローカルリポジトリのブランチ beta_1 の内容を heroku リモートリポジトリの master に強制的に入れるためのものです。</p></blockquote>
-
-<p>というわけで、以下のようにしてステージング環境にプッシュ。</p>
-
-<pre><code>$ git push staging staging:master --force
-</code></pre>
-
-<p>これでステージング環境が作成できた。</p>
-
-<p>主な作業はstagingブランチで作業し、上記の<code>--force</code>付きpushでステージングアプリに反映。<br/>
-確認後、masterブランチに切り替えてstagingブランチとマージして、<br/>
-通常の<code>$ git push heroku master</code>で、本番アプリに反映する、<br/>
-という流れになる予定。</p>
 ]]></content>
   </entry>
   
