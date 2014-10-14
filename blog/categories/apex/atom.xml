@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: apex | KayaMemo]]></title>
+  <link href="http://kayakuguri.github.io/blog/categories/apex/atom.xml" rel="self"/>
+  <link href="http://kayakuguri.github.io/"/>
+  <updated>2014-10-14T19:14:39+09:00</updated>
+  <id>http://kayakuguri.github.io/</id>
+  <author>
+    <name><![CDATA[萱潜]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[[salesforce]ListとSet]]></title>
+    <link href="http://kayakuguri.github.io/blog/2014/10/14/list-set-map/"/>
+    <updated>2014-10-14T19:12:55+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2014/10/14/list-set-map</id>
+    <content type="html"><![CDATA[<p>Apexで、配列であるListで重複したデータを取り除きたい、と思ったのだけれど、<br/>
+Listじゃなく、Setでやれば重複が許されなかった。</p>
+
+<!-- more -->
+
+
+<p>JAVAの場合は<code>HashSet</code>というものを使うことで重複したデータが入らないように出来るそう。<br/>
+<a href="http://javatechnology.net/java/duplicate-hashset/">Javaの重複文字列の削除方法 | ジャイアントモリンキーのjavaテック</a></p>
+
+<p>これが、Apexの場合は、<code>Set</code>型がデフォルトで、<code>HashSet</code>になっているよう。<br/>
+ちなみに、<code>Map</code>も重複が許されない、<code>HashMap</code>のよう。</p>
+
+<p><a href="http://blog.livedoor.jp/minoaw/archives/1703075.html">[ApexCode]コレクション : minoawのブログ</a></p>
+
+<p><a href="https://developer.salesforce.com/page/JP:An_Introduction_to_Apex">Apex コードの概要</a><br/>
+コレクション型の部分</p>
+
+<blockquote><p>Set は、プリミティブ型の集合であり、順序の指定はなく、要素の重複は許されません。<br/>
+List は、要素の集合です。要素間の順序を保持したい場合に使用します。要素の重複は許されます。</p></blockquote>
+]]></content>
+  </entry>
+  
+</feed>
