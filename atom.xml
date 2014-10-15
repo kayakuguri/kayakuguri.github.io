@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2014-10-15T18:00:08+09:00</updated>
+  <updated>2014-10-15T18:06:53+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -59,6 +59,10 @@ for(Campaign cdata : campRes){
     }
 }
 </code></pre>
+
+<h3>参考</h3>
+
+<p><a href="http://blog.flect.co.jp/salesforce/2010/07/soql-3dd0.html">セールスフォースの豆知識: SOQLでのリレーションの辿り方</a></p>
 ]]></content>
   </entry>
   
