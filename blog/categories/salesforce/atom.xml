@@ -4,7 +4,7 @@
   <title><![CDATA[Category: salesforce | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/salesforce/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2014-10-14T19:14:39+09:00</updated>
+  <updated>2014-10-15T18:00:08+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,55 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[salesforce]SOQLで子リレーションの情報を取得する]]></title>
+    <link href="http://kayakuguri.github.io/blog/2014/10/15/soql-relation/"/>
+    <updated>2014-10-15T17:42:17+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2014/10/15/soql-relation</id>
+    <content type="html"><![CDATA[<p>SOQLにて、あるオブジェクトの子リレーションになっているオブジェクトの情報を取得したい場合の話です。</p>
+
+<!-- more -->
+
+
+<p>子オブジェクトの参照名は、カスタムオブジェクトの場合は、<code>__r</code>となっていて、<br/>
+標準オブジェクトは、お尻に<code>s</code>をつける形となっています。(だいたい)</p>
+
+<p>今回はあまり例で見ることのなかった、<code>campaign</code>、<code>campaignmember</code>で例を示します。</p>
+
+<p>とあるキャンペーンのキャンペーンメンバーのデータを取得する場合、以下のようなSOQLで取得できます。</p>
+
+<pre><code>Select id, (Select cm.id From CampaignMembers cm) From Campaign
+</code></pre>
+
+<p>これを開発者コンソールの、Query Editorで実行してみると、以下の様なデータが取得できます。<br/>
+(1レコード例)</p>
+
+<pre><code>id: 701O00000007osrIAA
+CampaignMembers: [{"Id":"00vO0000002B00XIAS"},{"Id":"00vO0000002B00SIAS"}]
+</code></pre>
+
+<p>これをapex上で使用するには、<code>CampaignMmber</code>が配列で入ってくるので、<br/>
+for文で回して取得してやる必要があります。<br/>
+以下は、３つの<code>campaignID</code>から取得したデータの<code>CampaignMember</code>の<code>status</code>を取得しています。</p>
+
+<pre><code>List&lt;String&gt; campid = new List&lt;String&gt;();
+campid.add('701O00000007orzIAA');
+campid.add('701O00000007osrIAA');
+campid.add('701O00000007l1sIAA');
+String soql_c = 'SELECT id,type, (Select Status From CampaignMembers) FROM Campaign WHERE id=:campid';
+
+List&lt;Campaign&gt; campRes;
+campRes = Database.query(soql_c);
+
+for(Campaign cdata : campRes){
+    for(CampaignMember cmdata : cdata.CampaignMembers){
+        System.debug(cmdata.Status);
+    }
+}
+</code></pre>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[salesforce]ListとSet]]></title>
@@ -250,68 +299,6 @@ Mass Update</p></blockquote>
 
 <p>解決策としては、同じ<code>状況</code>項目をカスタム項目として作成するしかないよう。<br/>
 それでもデフォルトの<code>状況</code>は必須項目になるので、運用がややこしくなりそうだけれど。</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[SOQLクエリの結果をJSONで出力する]]></title>
-    <link href="http://kayakuguri.github.io/blog/2014/09/09/create-json-in-apex/"/>
-    <updated>2014-09-09T15:54:29+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2014/09/09/create-json-in-apex</id>
-    <content type="html"><![CDATA[<p>SOQLで取得したクエリ内容をJSONにパースして出力する方法。</p>
-
-<!-- more -->
-
-
-<p>Apexクラス</p>
-
-<pre><code>public class sample
-{
-    public String text1 {get;set;}
-
-    public sample()
-    {
-
-    }    
-    public void parseJson()
-    {
-        String soql = 'SELECT Name FROM Lead';
-        List&lt;Account&gt; acct = Database.Query(soql); 
-        text1 = JSON.serialize(acct);
-    }    
-} 
-</code></pre>
-
-<p>VisualForceページ</p>
-
-<pre><code>&lt;apex:page showHeader="false" controller="ShowCampaignListController" action="{!parseJson}"&gt;
-    {!text1}
-&lt;/apex:page&gt;
-</code></pre>
-
-<p>出力結果例</p>
-
-<pre><code>[{
-    "attributes":
-    {
-        "type":"Lead",
-        "url":"/services/data/v32.0/sobjects/Lead/00QO0000002xxxxxxx"
-    },
-    "Name":"テストユーザー3",
-    "Id":"00QO0000002xxxxxxx"
-},
-{
-    "attributes":
-    {
-        "type":"Lead",
-        "url":"/services/data/v32.0/sobjects/Lead/00QO0000002ooooooo"
-    },
-    "Name":"テストユーザー2",
-    "Id":"00QO0000002ooooooo"
-}]
-</code></pre>
-
-<p>参考：<a href="http://www.infallibletechie.com/2012/10/generating-json-in-visualforce-page-in.html">Infallible Techie: Generating JSON in Visualforce page in Salesforce</a></p>
 ]]></content>
   </entry>
   
