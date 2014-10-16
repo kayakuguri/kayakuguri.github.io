@@ -4,7 +4,7 @@
   <title><![CDATA[Category: salesforce | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/salesforce/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2014-10-15T18:06:53+09:00</updated>
+  <updated>2014-10-16T19:09:32+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,72 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[salesforce]リッチテキストエリアに保存された画像を一般公開する]]></title>
+    <link href="http://kayakuguri.github.io/blog/2014/10/16/forcecom-sites-profile/"/>
+    <updated>2014-10-16T17:45:35+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2014/10/16/forcecom-sites-profile</id>
+    <content type="html"><![CDATA[<p>結論から言うと、権限設定の問題でした。</p>
+
+<!-- more -->
+
+
+<p>具体的にしかかったことは以下です。</p>
+
+<ul>
+<li>キャンペーンの情報をvisualforceでsitesを使って表示</li>
+<li>カスタム項目でリッチテキストエリアを作成し、その画像を表示</li>
+</ul>
+
+
+<p>リッチテキストエリアに保存された内容は以下のような形で取得できました。</p>
+
+<pre><code>&lt;img alt=\"ユーザが追加した画像\" src=\"/my-Home/servlet/rtaImage?eid=701O00000007l1s&amp;amp;feoid=00NO0000001Abk2&amp;amp;refid=0EMO000000004py\" style=\"\"&gt;&lt;/img&gt;
+</code></pre>
+
+<p>これを、公開しているサイトのURLにくっつけてアクセスしてみました。</p>
+
+<p>例：</p>
+
+<blockquote><p><a href="https://my-domain.cs6.force.com/my-Home/servlet/rtaImage?eid=701O00000007l1s&amp;feoid=00NO0000001Abk2&amp;refid=0EMO000000004py">https://my-domain.cs6.force.com/my-Home/servlet/rtaImage?eid=701O00000007l1s&amp;feoid=00NO0000001Abk2&amp;refid=0EMO000000004py</a></p></blockquote>
+
+<p>しかし、以下のような画像が表示されました。</p>
+
+<p><img src="/images/2014/10/rich-text-img.png" alt="not avaiable" /></p>
+
+<p>どうやら権限がないことはわかっていたのですが、どこをどう触っていいやら。<br/>
+いろいろ見たあげく、以下の設定でいけました。</p>
+
+<p><a href="http://www.kokyakukanri.info/salesforce/blog/2010/11/visualforce-3.html">Visualforceページの公開 &ndash; セールスフォースお助け隊ブログ | Salesforce</a></p>
+
+<p>設定 &ndash;> 開発 &ndash;> サイト</p>
+
+<p><img src="/images/2014/10/rich-text-img-2.jpg" alt="サイト" /></p>
+
+<p>公開しているサイトの<code>サイトの表示ラベル</code>をクリック</p>
+
+<p><img src="/images/2014/10/rich-text-img-3.jpg" alt="サイト" /></p>
+
+<p>サイトの詳細で、<code>公開アクセス設定</code>をクリック</p>
+
+<p><img src="/images/2014/10/rich-text-img-4.jpg" alt="サイト" /></p>
+
+<p><code>編集</code>をクリックし、</p>
+
+<p><img src="/images/2014/10/rich-text-img-5.jpg" alt="サイト" /></p>
+
+<p><code>標準オブジェクト権限</code>の<code>キャンペーン</code>の<code>参照</code>をチェックして保存。</p>
+
+<p><img src="/images/2014/10/rich-text-img-6.jpg" alt="サイト" /></p>
+
+<p>これでアクセス出来るようになりました。</p>
+
+<p>今回はキャンペーンオブジェクトの話でしたが、<br/>
+<code>標準オブジェクト権限</code>と<code>カスタムオブジェクト権限</code>が権限設定の箇所なので、<br/>
+その他のオブジェクトについても設定が可能です。</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[salesforce]SOQLで子リレーションの情報を取得する]]></title>
@@ -259,50 +325,6 @@ Mass Update</p></blockquote>
 
 <p><a href="http://synergylead.jp/support/faq-salesforce-mass-update-edit-delete/">一覧表示画面からチェックボックスで選択して削除・更新を行うには？｜Synergy!LEAD</a><br/>
 <a href="https://www.youtube.com/watch?v=xZCyhuTmaWE">Mass Edit and Mass Update in Salesforce.com &ndash; YouTube</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[SalesForce]キャンペーンメンバーの状況を追加する]]></title>
-    <link href="http://kayakuguri.github.io/blog/2014/09/12/campaignmemberstatus/"/>
-    <updated>2014-09-12T11:40:25+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2014/09/12/campaignmemberstatus</id>
-    <content type="html"><![CDATA[<p>キャンペーンメンバーオブジェクトのデフォルト項目である、<br/>
-<code>状況</code>は、デフォルトでは、</p>
-
-<blockquote><p>送信<br/>
-レスポンスあり</p></blockquote>
-
-<p>の２つになっている。<br/>
-これを独自で追加したい。</p>
-
-<!-- more -->
-
-
-<p>結論から言うと、仕様上、無理だった。<br/>
-以下に同じような質問があった。</p>
-
-<p><a href="https://developer.salesforce.com/forums/ForumsMain?id=906F00000009B5HIAU">キャンペーンメンバーの状況に値を追加したい &ndash; Salesforce Developer Community</a></p>
-
-<blockquote><p>レコードを横断した設定ではなく、キャンペーンレコード毎に状況を設定する必要があります。</p></blockquote>
-
-<ol>
-<li>キャンペーンタブから、状況を追加したいキャンペーンレコードの詳細画面を表示</li>
-<li>「高度な設定」ボタン押下</li>
-<li>メンバーの状況の値の「編集」ボタン押下</li>
-<li>メンバー状況の一番下にある、「さらに追加」リンク押下</li>
-</ol>
-
-
-<p>この仕様は謎仕様としても有名？なよう。</p>
-
-<blockquote><p>キャンペーンメンバーの「状況」のクソ仕様(?)を質問した。<br/>
-デフォルト値を変更できない件となぜか手入力な仕様について。<br/>
-キャンペーンを作るたびに「状況」の選択肢を追加しないとダメな上に、手入力だから後からの集計がヒドイことになる。<br/>
-<a href="https://twitter.com/realichiro5221/status/337413167804203009">https://twitter.com/realichiro5221/status/337413167804203009</a></p></blockquote>
-
-<p>解決策としては、同じ<code>状況</code>項目をカスタム項目として作成するしかないよう。<br/>
-それでもデフォルトの<code>状況</code>は必須項目になるので、運用がややこしくなりそうだけれど。</p>
 ]]></content>
   </entry>
   
