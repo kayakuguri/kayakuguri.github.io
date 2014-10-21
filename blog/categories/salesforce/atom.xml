@@ -4,7 +4,7 @@
   <title><![CDATA[Category: salesforce | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/salesforce/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2014-10-16T19:09:32+09:00</updated>
+  <updated>2014-10-21T16:56:49+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,59 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[apexで割り算をしたら整数になった]]></title>
+    <link href="http://kayakuguri.github.io/blog/2014/10/21/apex-decimal/"/>
+    <updated>2014-10-21T16:44:39+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2014/10/21/apex-decimal</id>
+    <content type="html"><![CDATA[<p>タイトル通り、apex上で割り算をしたら整数になってしまったんですね。<br/>
+単純に型付け言語による仕様だったのですが、ちょっとハマったのでメモ。</p>
+
+<!-- more -->
+
+
+<p>最初、記述したのが以下のコード</p>
+
+<pre><code>Decimal a = 1 / 2;
+System.debug(a);  //0
+</code></pre>
+
+<p>これだと、<code>0</code>が出力されます。<br/>
+<code>Decimal</code>は小数まで表示できる型なのになんで？？？<br/>
+と思ったんですが、計算している、<code>1</code>とか<code>2</code>が、<code>Integer</code>型、ってことなんですね。<br/>
+なので、これを<code>Decimal</code>型にしてやると計算できます。</p>
+
+<pre><code>Decimal a = Decimal.valueOf(1) / Decimal.valueOf(2);
+System.debug(a);  //0.5
+</code></pre>
+
+<p>しかし数字を書きたいだけなのにいちいちキャストするのはめんどう。<br/>
+なので、以下でも大丈夫。</p>
+
+<pre><code>Decimal a = 1.0 / 2.0;
+System.debug(a);  //0.5
+</code></pre>
+
+<p>小数点をつけると<code>Decimal</code>型になるようです。</p>
+
+<p>ちなみにやりたかったことは、<code>Datetime</code>型の現在時間を日本時間(GMT+9)で表示することです。</p>
+
+<pre><code>Datetime.now() + (9.0/24.0)
+</code></pre>
+
+<p><code>Datetime</code>型の足し算は1日単位で行われるため、24で割ると時間になります。<br/>
+しかし、小数点にしないと<code>0</code>になってしまい計算できませんでした。<br/>
+<code>format</code>をつかってフォーマットしてしまうと文字列になってしまうため、足し算で対応しています。</p>
+
+<p>・<code>format</code>を使った場合</p>
+
+<pre><code>Datetime.now().format('yyyy-MM-dd hh:mm', 'JST');
+</code></pre>
+
+<p><a href="https://sites.google.com/site/odekakeshimasyo/salesforceapexdatetime">Salesforce Apex 日付 時間 &ndash; おでかけしましょ</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[salesforce]リッチテキストエリアに保存された画像を一般公開する]]></title>
@@ -228,103 +281,6 @@ POSTの場合は、以下のように、POSTに設定しAPIを入力します。
 <p><img src="/images/2014/09/apigee10.jpg" alt="API Refarence" /></p>
 
 <p>サインアップするとその他にも色々機能があるようで、もっと使い込めば便利かもしれません。</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[Salesforce]Mass Actionsでリードを一括編集]]></title>
-    <link href="http://kayakuguri.github.io/blog/2014/09/26/mass-edit-salesforce/"/>
-    <updated>2014-09-26T14:44:48+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2014/09/26/mass-edit-salesforce</id>
-    <content type="html"><![CDATA[<p>リードのリストビュー画面から抽出したリードを一括編集できるが、<br/>
-そこで編集できる項目は限られている。<br/>
-なので、好きな項目の編集を可能にするアドオンがあったのでご紹介。</p>
-
-<p><a href="https://appexchange.salesforce.com/listingDetail?listingId=a0N30000003J6KcEAK">Mass Edit + Mass Update + Mass Delete &ndash; VersatileCapitalist, Inc &ndash; AppExchange</a></p>
-
-<!-- more -->
-
-
-<p>上記AppExchangeの画面から、<code>Get It Now!</code>をクリックして、インストールする。</p>
-
-<p><img src="/images/2014/09/mass01.jpg" alt="Get It Now" /></p>
-
-<p>ログインしていない場合は自身のアカウントでログイン。<br/>
-sandboxかプロダクションへのインストールを選択。<br/>
-今回はプロダクションへインストールした。</p>
-
-<p><img src="/images/2014/09/mass02.jpg" alt="Install" /></p>
-
-<p>内容を確認して、<code>Confilm and Install!</code>。<br/>
-再度、ID、パスワードを聞かれるので、入力する。</p>
-
-<p><img src="/images/2014/09/mass03.jpg" alt="Confilm and Install!" /></p>
-
-<p>インストールする内容を確認して、<code>次へ</code>。</p>
-
-<p><img src="/images/2014/09/mass04.jpg" alt="パッケージインストールの詳細" /></p>
-
-<p>ユーザーごとの権限を設定し、<code>次へ</code>。</p>
-
-<p><img src="/images/2014/09/mass05.jpg" alt="権限" /></p>
-
-<p>セキュリティレベルを設定し、<code>次へ</code>。</p>
-
-<p><img src="/images/2014/09/mass06.jpg" alt="セキュリティレベル" /></p>
-
-<p>最後の確認をされるので、<code>インストール</code>。</p>
-
-<p><img src="/images/2014/09/mass07.jpg" alt="インストール確認" /></p>
-
-<p>少し待つと、インストールが完了。</p>
-
-<p><img src="/images/2014/09/mass08.jpg" alt="インストール完了" /></p>
-
-<p>使用するには、リードの<code>検索レイアウト</code>にMassActionのボタンを追加してやる必要がある。<br/>
-<code>設定 -&gt; カスタマイズ -&gt; リード -&gt; 検索レイアウト</code>を開く。</p>
-
-<p><img src="/images/2014/09/mass09.jpg" alt="リード検索レイアウト" /></p>
-
-<p>その中の、<code>リードリストビュー</code>に追加するので、<code>編集</code>をクリック。</p>
-
-<p><img src="/images/2014/09/mass10.jpg" alt="リードリストビュー" /></p>
-
-<p>利用可能なボタン、の中にMassActionのボタンがあるので、<br/>
-今回は全て選択して、追加し、保存。</p>
-
-<blockquote><p>Mass Delete<br/>
-Mass Edit<br/>
-Mass Update</p></blockquote>
-
-<p><img src="/images/2014/09/mass11.jpg" alt="リードリストビューの編集" /></p>
-
-<p>後は通常通り、リードからビューを選択する。<br/>
-新規ビューを作成するときに、<code>表示する項目を選択</code>できるが、<br/>
-ここで選択したものが後で更新出来る項目となる。</p>
-
-<p><img src="/images/2014/09/mass12.jpg" alt="表示する項目" /></p>
-
-<p>リストビューを表示すると、上部に先程追加したMassのボタンが表示されている。<br/>
-変更したいリードをチェックボックスで選択し、その上部のボタン、今回は<code>Mass Edit</code>をクリック。</p>
-
-<p><img src="/images/2014/09/mass13.jpg" alt="Mass Edit" /></p>
-
-<p>選択したリードがリストで表示されるので、変更したい箇所を編集し、saveをクリックすると反映される。<br/>
-今回は<code>会社名</code>を変更してみた。</p>
-
-<p><img src="/images/2014/09/mass14.jpg" alt="編集" /></p>
-
-<p>結果が反映される。</p>
-
-<p><img src="/images/2014/09/mass15.jpg" alt="結果" /></p>
-
-<p>このように、リードの項目をまとめて編集したりする場合にはこれは非常に便利だと思う。<br/>
-いちいち詳細、編集画面に遷移しなくてよいので楽。</p>
-
-<h3>参考</h3>
-
-<p><a href="http://synergylead.jp/support/faq-salesforce-mass-update-edit-delete/">一覧表示画面からチェックボックスで選択して削除・更新を行うには？｜Synergy!LEAD</a><br/>
-<a href="https://www.youtube.com/watch?v=xZCyhuTmaWE">Mass Edit and Mass Update in Salesforce.com &ndash; YouTube</a></p>
 ]]></content>
   </entry>
   

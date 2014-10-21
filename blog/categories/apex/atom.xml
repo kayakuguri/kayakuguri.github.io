@@ -4,7 +4,7 @@
   <title><![CDATA[Category: apex | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/apex/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2014-10-16T19:09:32+09:00</updated>
+  <updated>2014-10-21T16:56:49+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,59 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[apexで割り算をしたら整数になった]]></title>
+    <link href="http://kayakuguri.github.io/blog/2014/10/21/apex-decimal/"/>
+    <updated>2014-10-21T16:44:39+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2014/10/21/apex-decimal</id>
+    <content type="html"><![CDATA[<p>タイトル通り、apex上で割り算をしたら整数になってしまったんですね。<br/>
+単純に型付け言語による仕様だったのですが、ちょっとハマったのでメモ。</p>
+
+<!-- more -->
+
+
+<p>最初、記述したのが以下のコード</p>
+
+<pre><code>Decimal a = 1 / 2;
+System.debug(a);  //0
+</code></pre>
+
+<p>これだと、<code>0</code>が出力されます。<br/>
+<code>Decimal</code>は小数まで表示できる型なのになんで？？？<br/>
+と思ったんですが、計算している、<code>1</code>とか<code>2</code>が、<code>Integer</code>型、ってことなんですね。<br/>
+なので、これを<code>Decimal</code>型にしてやると計算できます。</p>
+
+<pre><code>Decimal a = Decimal.valueOf(1) / Decimal.valueOf(2);
+System.debug(a);  //0.5
+</code></pre>
+
+<p>しかし数字を書きたいだけなのにいちいちキャストするのはめんどう。<br/>
+なので、以下でも大丈夫。</p>
+
+<pre><code>Decimal a = 1.0 / 2.0;
+System.debug(a);  //0.5
+</code></pre>
+
+<p>小数点をつけると<code>Decimal</code>型になるようです。</p>
+
+<p>ちなみにやりたかったことは、<code>Datetime</code>型の現在時間を日本時間(GMT+9)で表示することです。</p>
+
+<pre><code>Datetime.now() + (9.0/24.0)
+</code></pre>
+
+<p><code>Datetime</code>型の足し算は1日単位で行われるため、24で割ると時間になります。<br/>
+しかし、小数点にしないと<code>0</code>になってしまい計算できませんでした。<br/>
+<code>format</code>をつかってフォーマットしてしまうと文字列になってしまうため、足し算で対応しています。</p>
+
+<p>・<code>format</code>を使った場合</p>
+
+<pre><code>Datetime.now().format('yyyy-MM-dd hh:mm', 'JST');
+</code></pre>
+
+<p><a href="https://sites.google.com/site/odekakeshimasyo/salesforceapexdatetime">Salesforce Apex 日付 時間 &ndash; おでかけしましょ</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[salesforce]SOQLで子リレーションの情報を取得する]]></title>
