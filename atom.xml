@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2014-10-22T11:56:56+09:00</updated>
+  <updated>2014-10-22T11:58:52+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -36,6 +36,10 @@
 
 <p>この中で、<code>アクセス権</code>を、<code>システムメールのみ</code>から、<code>すべてのメール</code>に変更し、保存する。<br/>
 これでメールの送信が出来るようになった。</p>
+
+<h3>参考</h3>
+
+<p><a href="http://dackdive.hateblo.jp/entry/2014/01/26/165752"> [salesforce] Sandbox組織だとメール通知ができない問題 &ndash; dackdive&#39;s blog</a></p>
 ]]></content>
   </entry>
   
