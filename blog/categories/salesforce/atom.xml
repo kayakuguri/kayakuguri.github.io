@@ -4,7 +4,7 @@
   <title><![CDATA[Category: salesforce | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/salesforce/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2014-10-21T16:59:36+09:00</updated>
+  <updated>2014-10-22T11:56:56+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,32 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[salesforce]sandboxでメールが送られない]]></title>
+    <link href="http://kayakuguri.github.io/blog/2014/10/22/send-mail-setting-sandbox/"/>
+    <updated>2014-10-22T11:49:53+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2014/10/22/send-mail-setting-sandbox</id>
+    <content type="html"><![CDATA[<p>salesfoceのsandboxでワークフローメールを作成していたのですが、<br/>
+何回やってメールが送信されない。<br/>
+ワークフローは間違ってないし、有効化もできてるし……と思っていたら、設定の問題でした。</p>
+
+<!-- more -->
+
+
+<p>ググってみると、<code>メール管理</code>の<code>送信</code>から設定すると書いてあるのですが、そんなが項目ない。
+そもそもの権限の問題かと思っていたら、いつからか名前が変わっているよう。<br/>
+ググってるとよくある……。</p>
+
+<p><code>管理</code>&ndash;><code>メール管理</code>&ndash;><code>配信可能性</code><br/>
+に、あった。配信可能性、って。</p>
+
+<p><img src="/images/2014/10/send_mail_setting.jpg" alt="配信可能性" /></p>
+
+<p>この中で、<code>アクセス権</code>を、<code>システムメールのみ</code>から、<code>すべてのメール</code>に変更し、保存する。<br/>
+これでメールの送信が出来るようになった。</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[apexで割り算をしたら整数になった]]></title>
@@ -209,78 +235,6 @@ Listじゃなく、Setでやれば重複が許されなかった。</p>
 
 <blockquote><p>Set は、プリミティブ型の集合であり、順序の指定はなく、要素の重複は許されません。<br/>
 List は、要素の集合です。要素間の順序を保持したい場合に使用します。要素の重複は許されます。</p></blockquote>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[apigeeを使用してAPIの動作を確認する]]></title>
-    <link href="http://kayakuguri.github.io/blog/2014/09/30/apigee/"/>
-    <updated>2014-09-30T17:46:34+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2014/09/30/apigee</id>
-    <content type="html"><![CDATA[<p>apigeeというサービスを使用すれば、様々なAPIの動作をブラウザ上から気軽に試せる、<br/>
-ということなので実際に試してみました。</p>
-
-<!-- more -->
-
-
-<p><img src="/images/2014/09/apigee01.jpg" alt="apigee" /></p>
-
-<p><a href="http://apigee.com/about/">apigee</a></p>
-
-<p>トップページからAPIを試すサービスへの動線がわからなかったので、<br/>
-以下から一覧ページに直接アクセスして下さい。<br/>
-(サインアップすれば簡単にアクセス出来ます。)<br/>
-(サインアップしなくても試すことは出来ます。)</p>
-
-<p><a href="https://apigee.com/providers">API Providers</a></p>
-
-<p>この一覧から各サービスのAPIに接続出来るわけですが、<br/>
-今回はsalesforceのsandboxで試してみました。</p>
-
-<p><img src="/images/2014/09/apigee02.jpg" alt="salesforce" /></p>
-
-<p>クリックすると、APIの一覧ページに飛ぶので、とりあえず素通りしてコンソールへ。</p>
-
-<p><img src="/images/2014/09/apigee03.jpg" alt="API Refarence" /></p>
-
-<p>コンソール画面で実際に叩くAPIを指定したりパラメータを設定したり出来ます。<br/>
-このままだと、認証がいらないものしか叩けないので、salesforceと認証させます。</p>
-
-<p><code>Authentication</code>から、<code>OAuth2</code>を選択します。</p>
-
-<p><img src="/images/2014/09/apigee04.jpg" alt="API Refarence" /></p>
-
-<p>すると確認ダイアログが出ますので、<code>Sign in Salesforce Snadbox</code>をクリックしてログインし、認証させます。</p>
-
-<p><img src="/images/2014/09/apigee05.jpg" alt="API Refarence" /></p>
-
-<p>認証後は以下のようになります。</p>
-
-<p><img src="/images/2014/09/apigee06.jpg" alt="API Refarence" /></p>
-
-<p>GETの場合は、この状態で下の入力エリアに叩きたいAPIを入れ、<br/>
-<code>?</code>でパラメータを設定していけば試すことができます。<br/>
-POSTの場合は、以下のように、POSTに設定しAPIを入力します。</p>
-
-<p><img src="/images/2014/09/apigee07.jpg" alt="API Refarence" /></p>
-
-<p>しかしこのままではパラメータを入力出来ません。<br/>
-なので、左側にある三角をクリックし、API一覧を表示させます。</p>
-
-<p><img src="/images/2014/09/apigee08.jpg" alt="API Refarence" /></p>
-
-<p>で、適当にAPIを選択すると、下図のようにタブが出現し、<br/>
-その中の、<code>Body</code>でパラメータを設定する事が出来ます。<br/>
-(ちなみにQueryではGETの値を設定出来ます)</p>
-
-<p><img src="/images/2014/09/apigee09.jpg" alt="API Refarence" /></p>
-
-<p>試しにこれはGETでversionを取得しただけですが、<br/>
-実行すると以下の様な形でレスポンスを取得することができます。</p>
-
-<p><img src="/images/2014/09/apigee10.jpg" alt="API Refarence" /></p>
-
-<p>サインアップするとその他にも色々機能があるようで、もっと使い込めば便利かもしれません。</p>
 ]]></content>
   </entry>
   
