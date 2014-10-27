@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2014-10-22T11:58:52+09:00</updated>
+  <updated>2014-10-27T18:51:11+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,100 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[salesforce]apex Rest APIでPOSTでデータを送信する]]></title>
+    <link href="http://kayakuguri.github.io/blog/2014/10/27/apex-rest-post/"/>
+    <updated>2014-10-27T18:49:51+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2014/10/27/apex-rest-post</id>
+    <content type="html"><![CDATA[<p>getでは送信したデータはすぐに取得できたのですが、<br/>
+postでの送信方法とデータ取得方法がわからずに迷走しまいした。<br/>
+結論は、送信側の話、だったのですが。</p>
+
+<!-- more -->
+
+
+<p>GETの場合は以下のコードで取得可能でした。<br/>
+簡単。</p>
+
+<p>送信データ</p>
+
+<pre><code>?userid=123&amp;name=hoge
+</code></pre>
+
+<p>apex</p>
+
+<pre><code>@RestResource(urlMapping='/GetDataSample/test')
+
+global with sharing class GetDataSampleAPI {
+    @HttpGet
+    global static String doGet(){
+        RestRequest req = RestContext.request;
+        String userid = req.params.get('userid');
+        String name = req.params.get('hoge');
+    }
+}
+</code></pre>
+
+<p>実は、POSTの場合も、apexのコードは全く同じで取得する事が出来ました。<br/>
+以下、取得出来たコードです。</p>
+
+<pre><code>@RestResource(urlMapping='/GetDataSample/test')
+
+global with sharing class GetDataSampleAPI {
+    @HttpPost
+    global static String doPost(){
+        RestRequest req = RestContext.request;
+        String userid = req.params.get('userid');
+        String name = req.params.get('hoge');
+    }
+}
+</code></pre>
+
+<p>ただし、送信する際にヘッダーを正しく指定してやったり、送信形式に注意してやる必要がありました。<br/>
+PHPのcurlで実装していたのですが、大いに迷走していたのは、salesforce側の話ではなく、<br/>
+PHPでの送信方法の問題でしたとさ…。</p>
+
+<p>送信出来たコード<br/>
+(<a href="https://github.com/nkjm/Force.com-OAuth-Toolkit-for-PHP">このライブラリ</a>を使用して送信する前提)</p>
+
+<pre><code>$url = "$oauth-&gt;instance_url/services/apexrest/GetDataSample/test";
+$curl = curl_init($url);
+
+$POST_DATA = array(
+    'userid' =&gt; '123',
+    'hoge' =&gt; 'fugafuga'
+);
+
+curl_setopt($curl, CURLOPT_POST, TRUE);
+curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($POST_DATA));
+curl_setopt($curl, CURLOPT_HEADER, false);
+curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($curl, CURLOPT_HTTPHEADER, array('Content-type: application/x-www-form-urlencoded;charset=UTF-8', "Authorization: OAuth " . $oauth-&gt;access_token));
+
+$output= curl_exec($curl);
+curl_close($curl);
+</code></pre>
+
+<p>ポイントは以下の２つです。</p>
+
+<p>１）<br/>
+<code>Content-type</code>を、<code>application/x-www-form-urlencoded</code>という、POSTでデータを送信する際の標準タイプを指定しています。<br/>
+通常はデフォルトでこれなのですが、salesforceのAPIにPOSTする場合は明示的に指定してやる必要があるようです。(たぶん)<br/>
+ちなみに、apex restは、<code>multipart/form-data</code>タイプはサポートしていないようです。</p>
+
+<p>２）<br/>
+１のタイプで指定してやると、送信するデータは<code>userid=123&amp;hoge=fugafuga</code>のように、GETと同じ形で取得できるようになるようです。<br/>
+なので送信する際にそのような形に変換してやる必要があるようで、それが以下の記述となります。</p>
+
+<pre><code>curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($POST_DATA));
+</code></pre>
+
+<h3>参考</h3>
+
+<p><a href="http://qiita.com/khirose/items/870ffec6ce4562f54c9d">PHP小ネタ &ndash; PHPのcurlでPOST &ndash; Qiita</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[salesforce]sandboxでメールが送られない]]></title>
@@ -1586,195 +1680,6 @@ Fetching repository, done.
 
 <p>他に音楽や動画など、いらないファイルがあったので、それらも削除。<br/>
 結局、50Gくらい増やすことが出来ました。</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[勉強] Ruby on Rails #02]]></title>
-    <link href="http://kayakuguri.github.io/blog/2014/07/18/rails-study02/"/>
-    <updated>2014-07-18T17:49:50+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2014/07/18/rails-study02</id>
-    <content type="html"><![CDATA[<p><a href="http://railstutorial.jp/">Ruby on Rails チュートリアル：実例を使って Rails を学ぼう</a></p>
-
-<p>web上では無料で公開されているこちらを利用して勉強していく上での備忘録です。</p>
-
-<!-- more -->
-
-
-<h3>最初のアプリケーション</h3>
-
-<blockquote><p>どんなRailsアプリケーションも最初の作成手順は同じです。rails newコマンドを実行して作成します。</p></blockquote>
-
-<pre><code>$ rails new first_app
-</code></pre>
-
-<p>(<code>Permission denied</code>がたくさん出ているのは、もしかしたら<code>sudo</code>が必要なのかも。。)</p>
-
-<h3>Bundler</h3>
-
-<p><code>Gemfile</code>を編集して、bundlerを再実行してみる。<br/>
-[内容]</p>
-
-<pre><code>source 'https://rubygems.org'
-ruby '2.0.0'
-#ruby-gemset=rails4
-
-gem 'rails', '4.1.4'
-
-group :development do
-  gem 'sqlite3', '1.3.8'
-end
-
-gem 'sass-rails', '4.0.2'
-gem 'uglifier', '2.1.1'
-gem 'coffee-rails', '4.0.1'
-gem 'jquery-rails', '3.0.4'
-gem 'turbolinks', '1.1.1'
-gem 'jbuilder', '1.0.2'
-
-group :doc do
-  gem 'sdoc', '0.3.20', require: false
-end
-</code></pre>
-
-<blockquote><p>SQLiteをdevelopment環境でのみ使用するための指定も行なっていることに注目してください。こうすることで、Herokuで使用するデータベースソフトウェアと衝突する可能性を避けられます。</p></blockquote>
-
-<p>元の内容の説明。<br/>
-<code>gem 'uglifier', '&gt;= 1.3.0'</code> : uglifierのバージョンが1.3.0以上であれば最新バージョンのgemがインストールされる<br/>
-<code>gem 'coffee-rails', '~&gt; 4.0.0'</code> : 4.0.0から4.0.1へのアップグレードは行われますが、4.0から4.1へのアップグレードは行われません</p>
-
-<blockquote><p>経験上、残念ながらマイナーアップグレードですら問題を引き起こすことがあります。このため、Railsチュートリアルでは基本的にすべてのgemでバージョンをピンポイントで指定しています。</p></blockquote>
-
-<p>アップデートして、インストール。</p>
-
-<blockquote><p>bundle updateの手順が必要となるのは、Rails gemのバージョンを変更した場合に限られます。</p></blockquote>
-
-<p><code>sudo</code>をつけないと実行出来なかった。</p>
-
-<pre><code>$ sudo bundle update
-$ sudo bundle install
-</code></pre>
-
-<h3>rails server</h3>
-
-<blockquote><p>Railsには開発マシンでのみブラウズできるローカルWebサーバーを起動するためのコマンドラインプログラム (スクリプト) が付属しているので、以下のコマンドを実行するだけで簡単に起動することができます。</p></blockquote>
-
-<pre><code>$ rails server
-</code></pre>
-
-<p>これでサーバーが起動。<br/>
-<a href="http://localhost:3000/">http://localhost:3000/</a><br/>
-ここで、確認出来る。<br/>
-<img src="http://kayakuguri.github.io/images/2014/07/ror01.jpg" alt="rails server" /></p>
-
-<p><code>control + c</code>で終了出来る。</p>
-
-<h3>MVC</h3>
-
-<p>この流れになっているよう。<br/>
-(画像は引用)</p>
-
-<p><img src="http://railstutorial.jp/images/figures/mvc_schematic.png" alt="MVC" /></p>
-
-<h3>Gitによるバージョン管理</h3>
-
-<p>ここは飛ばそうか悩んだけれど、この後にherokuにアップする流れだったので、<br/>
-ここで管理しておくことにした。</p>
-
-<p>Gitについて詳しくは以下参照のこと、と。<br/>
-<a href="http://git-scm.com/book/ja/">Pro Git</a></p>
-
-<p>リポジトリを作成。</p>
-
-<pre><code>$ git init
-</code></pre>
-
-<blockquote><p>たとえば、Railsによって作成されるログファイルは頻繁に内容が変わるので、いちいちバージョン管理に更新させたくありません。<br/>
-railsコマンドを実行した時にRailsアプリケーションのルートディレクトリに.gitignoreファイルが作成されています</p>
-
-<p>しかし、以下のリストの方がさらに便利で、セキュリティ上も有利なのでお勧めです。この.gitignoreでは、Railsドキュメントファイル、VimやEmacsのスワップファイル、そしてOS Xユーザーにはお馴染みの、あのいまいましい.DS_Storeディレクトリ (MacのFinder操作で作成される隠しディレクトリ) も管理対象から除外されます。</p></blockquote>
-
-<pre><code># Ignore bundler config.
-/.bundle
-
-# Ignore the default SQLite database.
-/db/*.sqlite3
-/db/*.sqlite3-journal
-
-# Ignore all logfiles and tempfiles.
-/log/*.log
-/tmp
-
-# Ignore other unneeded files.
-doc/
-*.swp
-*~
-.project
-.DS_Store
-.idea
-.secret
-</code></pre>
-
-<p>で、追加して、コミットする。</p>
-
-<pre><code>$ git add .
-$ git commit -m "Initialize repository"
-</code></pre>
-
-<h3>GitHub</h3>
-
-<p>githubアカウントに追加する。</p>
-
-<pre><code>$ git remote add origin https://github.com/USER-NAME/railstutorial.git
-$ git push -u origin master
-</code></pre>
-
-<blockquote><p>コミットメッセージは現在形で書くようにしましょう。<br/>
-そのコミットが「何をしたのか」と履歴スタイルで書くよりも「何をする」ためのものなのかを書く方が、後から見返したときにわかりやすくなります。</p>
-
-<p>大抵のシステムではgit pushを実行するときにorigin masterを省略できます。</p></blockquote>
-
-<h3>Heroku</h3>
-
-<blockquote><p>HerokuではPostgreSQLデータベースを使用します</p></blockquote>
-
-<p><code>Gemfile</code>に本番用の設定を追記する。</p>
-
-<pre><code>group :production do
-  gem 'pg', '0.15.1'
-  gem 'rails_12factor', '0.0.2'
-end
-</code></pre>
-
-<p>Gemfileを更新したので、installしておく。</p>
-
-<pre><code>$ bundle install --without production
-</code></pre>
-
-<blockquote><p>&mdash;without productionオプションを追加すると、 本番用のgem (この場合はpgとrails_12factor) はローカルの環境にはインストールされません。<br/>
-このコマンドを実行するのは、後の本番環境に備えてGemfile.lockを更新し、pg gemとrails_12factor gem、Rubyバージョンの指定を含めておく必要があるためです。</p></blockquote>
-
-<p>herokuのアプリを作成して、プッシュして、デプロイ。</p>
-
-<pre><code>$ heroku create rails-myfirstapp
-$ git push heroku master
-</code></pre>
-
-<p>以下に作成した。</p>
-
-<p><a href="http://rails-myfirstapp.herokuapp.com/">http://rails-myfirstapp.herokuapp.com/</a></p>
-
-<p>エラーがでてる！と思いきや、仕様のよう。</p>
-
-<blockquote><p>残念ながら、Rails 4.0では技術的な理由によりエラーページが表示されます。Rails 4.0のデフォルトページはHerokuでは表示できません。サンプルアプリケーションの一環として、ルートへのルーティングを追加すればこのエラーは解消しますのでご安心ください。</p></blockquote>
-
-<hr />
-
-<p>これでようやく開発環境が一通り整った、という事になる。<br/>
-チュートリアルサイトの冒頭にあった言葉が身にしみる。。。</p>
-
-<blockquote><p>本書の第1章は、さしずめロースクールで言うところの「淘汰期間」(訳注: そこで生き残れるかどうかを選別する期間) のようなものである。本章で開発環境の構築に成功できた人ならば、最後までやり通すことは難しくありません。
-—Bob Cavezza (Railsチュートリアル読者)</p></blockquote>
 ]]></content>
   </entry>
   
