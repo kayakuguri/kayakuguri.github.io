@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2014-11-06T12:24:10+09:00</updated>
+  <updated>2014-11-13T17:44:56+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,180 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Force.com IDE for Eclipse plug-inをインストール]]></title>
+    <link href="http://kayakuguri.github.io/blog/2014/11/13/force-dot-com-ide-for-eclipse/"/>
+    <updated>2014-11-13T17:35:25+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2014/11/13/force-dot-com-ide-for-eclipse</id>
+    <content type="html"><![CDATA[<p>いつのまにやらForce.com IDEの<a href="http://salesforce.stackexchange.com/questions/47653/where-can-i-get-a-standalone-version-of-the-force-com-ide">スタンドアロン版が開発終了してしまっているらしく</a>(未確認)、<br/>
+仕方がないので、Eclipseのインストールからしてみました。</p>
+
+<!-- more -->
+
+
+<p>環境は、macのmavericks(10.9)です。</p>
+
+<p>ググったら出てくる公式の日本語ページ最下部からインストールの解説ページへ。<br/>
+<a href="https://developer.salesforce.com/page/JP:Force.com_IDE">https://developer.salesforce.com/page/JP:Force.com_IDE</a></p>
+
+<p><img src="http://kayakuguri.github.io/images/2014/11/ide01.jpg" alt="force.com ide 解説" /></p>
+
+<h2>Javaのインストール</h2>
+
+<p>まずは、JAVAのバージョンを確認。<br/>
+ターミナルからコマンドで確認できる。</p>
+
+<pre><code>$ java -version
+java version "1.6.0_65"
+Java(TM) SE Runtime Environment (build 1.6.0_65-b14-462-11M4609)
+Java HotSpot(TM) 64-Bit Server VM (build 20.65-b04-462, mixed mode)
+</code></pre>
+
+<p>Force.com IDEは、</p>
+
+<blockquote><p>Java SE Runtime Environment 6 (v1.6) or later</p></blockquote>
+
+<p>となっているんだけど、7以上でないとダメなよう。<br/>
+<a href="https://developer.salesforce.com/forums/?id=906F0000000AbEjIAK">https://developer.salesforce.com/forums/?id=906F0000000AbEjIAK</a><br/>
+なので、以下から7をダウンロード。<br/>
+<a href="http://www.oracle.com/technetwork/java/javase/downloads/jdk7-downloads-1880260.html">http://www.oracle.com/technetwork/java/javase/downloads/jdk7-downloads-1880260.html</a></p>
+
+<p><img src="http://kayakuguri.github.io/images/2014/11/java01.jpg" alt="java" /></p>
+
+<p>中ほどにあるリンクページから、<code>jdk-7u71-macosx-x64.dmg</code>をダウンロード。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2014/11/java02.jpg" alt="java download" /></p>
+
+<p>ダブルクリックしてインストール開始。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2014/11/java03.jpg" alt="java インストール" /></p>
+
+<p>特筆すべき事はなく、次、次、でOK。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2014/11/java04.jpg" alt="java インストール中" /></p>
+
+<p>完了。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2014/11/java05.jpg" alt="java インストール完了" /></p>
+
+<p>再度バージョンを確認。</p>
+
+<pre><code>$ java -version
+java version "1.7.0_71"
+Java(TM) SE Runtime Environment (build 1.7.0_71-b14)
+Java HotSpot(TM) 64-Bit Server VM (build 24.71-b01, mixed mode)
+</code></pre>
+
+<h2>Eclipseのインストール</h2>
+
+<p><a href="https://developer.salesforce.com/page/JP:Force.com_IDE_Installation">https://developer.salesforce.com/page/JP:Force.com_IDE_Installation</a><br/>
+Eclipseのダウンロードページへ。4.2でも4.3でもいい、との事なので、今回は4.3で。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2014/11/ide02.jpg" alt="インストール方法" /></p>
+
+<p>飛び先のページで、<code>Eclipse IDE for Java Developers</code>をダウンロード。<br/>
+自分はmacなので、mac64bit版をダウンロード。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2014/11/ide03.jpg" alt="eclipse ダウンロード" /></p>
+
+<p>次のページでダウンロード開始。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2014/11/ide04.jpg" alt="eclipse ダウンロード" /></p>
+
+<p>ダウンロードは自動で始まる。<br/>
+(寄付してね！画面が表示されるけど、eclipse自体は無料で使える)</p>
+
+<p><img src="http://kayakuguri.github.io/images/2014/11/ide05.jpg" alt="eclipse ダウンロード" /></p>
+
+<p>ダウンロードしたファイル(今回は、<code>eclipse-java-kepler-R-macosx-cocoa-x86_64.tar.gz</code>)をダブルクリックして解凍。<br/>
+macの場合はインストールはなく、解凍して出来たファルダごと、アプリケーションフォルダに突っ込めばOK。<br/>
+(別に入れなくても大丈夫なはず)</p>
+
+<p><img src="http://kayakuguri.github.io/images/2014/11/ide06.jpg" alt="アプリケーションフォルダへ" /></p>
+
+<p>で、起動。<br/>
+ただし、自分の環境(Mavericks)では起動が出来ず、壊れているという表記。<br/>
+これは、Mountain Lionから導入されたGateKeeperによってApp Store以外からインストールしようとした場合に表示される警告、のよう。<br/>
+いきなり実行ファイルがゴミ箱に捨てられるってのがなんともすごい。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2014/11/ide07.jpg" alt="起動失敗" /></p>
+
+<p>以下を参考に、実行を許可して、改めて起動。<br/>
+<a href="http://park1.wakwak.com/~ima/macosx_eclipse0001.html">[OSX]Mountain Lion(10.8)でEclipse4.3(kepler)を日本語化して使う | ごった煮 &ndash; tips about programming and building a server</a></p>
+
+<p>警告は出るけど無視。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2014/11/ide08.jpg" alt="接続警告" /></p>
+
+<p>最初にワークスペースを設定しろ、と言われるので、とりあえずデフォルトのままで起動する。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2014/11/ide09.jpg" alt="ワークスペース" /></p>
+
+<p>起動後、welcomeスクリーンが表示されるが、とりあえずこのまま放置して、<br/>
+上部のメニューから、Help &ndash;> Install New Software を選択。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2014/11/ide10.jpg" alt="Install New Software" /></p>
+
+<p>ネットワークの接続を許可して…、<br/>
+あとは上記公式の解説ページ(英語)と同じ手順となりますが、<br/>
+<code>Add…</code>をクリック。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2014/11/ide11.jpg" alt="Add" /></p>
+
+<p>Nameは適当に。<br/>
+Locationに、<code>http://media.developerforce.com/force-ide/eclipse42</code>と入力。<br/>
+OKをクリック。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2014/11/ide12.jpg" alt="Addリポジトリ" /></p>
+
+<p>結果が表示されるので、リストに表示された、<code>Force.com IDE</code>にチェックを入れ、<br/>
+<code>Next</code>をクリック。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2014/11/ide13.jpg" alt="インストール" /></p>
+
+<p>ダウンロードされ、インストール準備完了。  <br/>
+<code>Next</code>をクリック。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2014/11/ide14.jpg" alt="ダウンロード完了" /></p>
+
+<p>ライセンス情報が表示されるので、一通り目を通してから(通してから…)、<br/>
+<code>I accept the terms of license agreements</code>にチェックを入れて、<code>Finish</code>をクリック。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2014/11/ide15.jpg" alt="ライセンス" /></p>
+
+<p>で、インストールが始まる。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2014/11/ide16.jpg" alt="インストール開始" /></p>
+
+<p>インストール後、再起動が必要、との事なので<code>Yes</code>をクリックして、eclipseを再起動。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2014/11/ide17.jpg" alt="再起動" /></p>
+
+<p>これでインストールは完了したわけだけれども、ウインドウ構成など見た目をForce.com仕様に変更する。<br/>
+上部メニューの、Window &ndash;> Open Perspective &ndash;> Other を選択。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2014/11/ide18.jpg" alt="Perspective" /></p>
+
+<p>Force.comを選択して、OK。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2014/11/ide19.jpg" alt="Force.com選択" /></p>
+
+<p>これで、Force.com IDEのインストールは完了。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2014/11/ide20.jpg" alt="完了！" /></p>
+
+<h2>プロジェクトの作成</h2>
+
+<p>作成は、スタンドアロン版と同じだった。<br/>
+上部メニューから、File &ndash;> New &ndash;> Force.com Project を選択</p>
+
+<p><img src="http://kayakuguri.github.io/images/2014/11/ide21.jpg" alt="プロジェクトの作成" /></p>
+
+<p>プロジェクトの名前と、環境のユーザ名、パスワード、セキュリティトークン(必要なら)と、環境を選択し、Finish。<br/>
+これで開発環境が整った。</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[salesforce]apex Rest APIでPOSTでデータを送信する]]></title>
@@ -1591,95 +1765,6 @@ Fetching repository, done.
 
 <p>結局、原因は不明で、修正手順も不明、なのだけれど、<br/>
 ちょっと情報が少なかったのでメモとして残しておく。</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Macの空き容量を増やす]]></title>
-    <link href="http://kayakuguri.github.io/blog/2014/07/24/mac-storage/"/>
-    <updated>2014-07-24T12:28:39+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2014/07/24/mac-storage</id>
-    <content type="html"><![CDATA[<p>空き容量を増やすべく、色々対応してみた。<br/>
-実行は自己責任でお願いします。</p>
-
-<!-- more -->
-
-
-<p>参考にしたページ：<br/>
-<a href="https://note.mu/akikazutakenaka/n/n362c8c79193b">Mac の SSD 空き容量がガッツリ減ったのであれこれ対応した話 | 竹中 彰一 | note</a></p>
-
-<p>以下のコマンドを実行してサイズの大きい(5ギガ以上)ディレクトリを検索。</p>
-
-<pre><code>$ sudo du -g -x -d 5 / | awk '$1 &gt;= 5{print}'
-</code></pre>
-
-<p>なんだかよくわからないファイル達が次々とヒット。</p>
-
-<h3>メモリ関連？</h3>
-
-<p><code>/private/var/vm/sleepimage</code>が8Gほど食っていた。<br/>
-このファイルは、スリープ状態のまま電源が切れた場合のバックアップとして取られているらしい。<br/>
-<strong>これは消して問題なし。</strong><br/>
-作らなくする方法は以下参照。<br/>
-<a href="http://yoonchulkoh.hatenablog.com/entry/20110903/1315063179">MacBook Proを圧迫するsleepimageをどうにかする &ndash; 悪あがきプログラマー</a><br/>
-<a href="http://blog.livedoor.jp/gf8d/archives/52159018.html">MacBook Airを圧迫するsleepimageをどうにかする : まるたけ食堂</a></p>
-
-<p>詳しい説明は以下。<br/>
-<a href="http://inforati.jp/apple/mac-tips-techniques/system-hints/how-to-change-the-sleep-mode-of-mac.html">MacBookやMacBook Proのスリープ方式を切り替えてバッテリー消費を減らす方法 / Inforati</a></p>
-
-<p>同じフォルダ内にある、swapfile、はメモリ関連のファイルの模様。<br/>
-基本的には、再起動したら消えるらしい。<br/>
-再起動せずに消したい場合などは以下を参照。<br/>
-<a href="http://d.hatena.ne.jp/kazuhooku/20130207/1360226719">Mac OS Xで、再起動せずにスワップを解放する方法 &ndash; kazuhoのメモ置き場</a></p>
-
-<h3>Adobeのキャッシュ</h3>
-
-<p>以下、参照。<br/>
-<a href="http://helpx.adobe.com/jp/x-productkb/multi/cpsid_84648.html"> ハードディスクの空き領域が徐々に減っていく （Premiere Pro/Encore）</a></p>
-
-<p>ここで、1.9Gくらいありました。</p>
-
-<h3>Macのキャッシュ</h3>
-
-<p>macのキャッシュは3つあるよう。<br/>
-以下、それぞれの自分の状態。</p>
-
-<p>・システムキャッシュ<br/>
-<code>/System/Library/Caches</code> : 24Mb</p>
-
-<p>・ローカルキャッシュ<br/>
-<code>/Library/Caches</code> : 1.4Gb</p>
-
-<p>・ユーザーキャッシュ<br/>
-<code>/Users/ユーザ名/Library/Caches</code> : 9.48Gb</p>
-
-<p>ユーザーキャッシュがかなり食っている。</p>
-
-<p>ターミナルからワンライナーで削除。</p>
-
-<pre><code>$ sudo rm -dfR /System/Library/Caches/* /Library/Caches/* ~/Library/Caches/*
-</code></pre>
-
-<p>削除後は再起動が推奨されるよう。</p>
-
-<p>参考：<br/>
-<a href="http://fumie-mac.blog.so-net.ne.jp/2012-07-07">Mac OS Xのメンテナンス：Mac おぼえがき Intel 編：So-netブログ</a><br/>
-<a href="http://www.gadgetlunatic.com/post/803/">Macを高速化！キャッシュを削除。 | Gadget Lunatic</a></p>
-
-<h3>コアダンプ</h3>
-
-<p>以下のページを最初に見つけて容量改善を試みたのだけど、<br/>
-このコアダンプのディレクトリは空だった。<br/>
-ここが容量食ってる人は消したらいいと思う。</p>
-
-<p><a href="http://eiyan.net/diary/mac-%E3%82%B9%E3%83%88%E3%83%AC%E3%83%BC%E3%82%B8-%E3%81%9D%E3%81%AE%E4%BB%96-%E3%81%AE%E5%9C%A7%E8%BF%AB%E3%82%92%E3%82%B5%E3%82%AF%E3%83%83%E3%81%A8%E8%A7%A3%E6%B1%BA%E3%81%99%E3%82%8B%E6%96%B9/">mac ストレージ その他 の圧迫をサクッと解決する方法 &ndash; ゆるぶろ</a></p>
-
-<hr />
-
-<h3>結果</h3>
-
-<p>他に音楽や動画など、いらないファイルがあったので、それらも削除。<br/>
-結局、50Gくらい増やすことが出来ました。</p>
 ]]></content>
   </entry>
   
