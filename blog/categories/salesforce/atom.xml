@@ -4,7 +4,7 @@
   <title><![CDATA[Category: salesforce | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/salesforce/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2014-11-13T17:44:56+09:00</updated>
+  <updated>2014-11-13T17:46:41+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -25,11 +25,6 @@
 
 
 <p>環境は、macのmavericks(10.9)です。</p>
-
-<p>ググったら出てくる公式の日本語ページ最下部からインストールの解説ページへ。<br/>
-<a href="https://developer.salesforce.com/page/JP:Force.com_IDE">https://developer.salesforce.com/page/JP:Force.com_IDE</a></p>
-
-<p><img src="/images/2014/11/ide01.jpg" alt="force.com ide 解説" /></p>
 
 <h2>Javaのインストール</h2>
 
@@ -78,6 +73,11 @@ Java HotSpot(TM) 64-Bit Server VM (build 24.71-b01, mixed mode)
 </code></pre>
 
 <h2>Eclipseのインストール</h2>
+
+<p>ググったら出てくる公式の日本語ページ最下部からインストールの解説ページへ。<br/>
+<a href="https://developer.salesforce.com/page/JP:Force.com_IDE">https://developer.salesforce.com/page/JP:Force.com_IDE</a></p>
+
+<p><img src="/images/2014/11/ide01.jpg" alt="force.com ide 解説" /></p>
 
 <p><a href="https://developer.salesforce.com/page/JP:Force.com_IDE_Installation">https://developer.salesforce.com/page/JP:Force.com_IDE_Installation</a><br/>
 Eclipseのダウンロードページへ。4.2でも4.3でもいい、との事なので、今回は4.3で。</p>
