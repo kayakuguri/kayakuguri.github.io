@@ -4,7 +4,7 @@
   <title><![CDATA[Category: salesforce | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/salesforce/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2014-11-13T17:50:11+09:00</updated>
+  <updated>2014-11-21T12:36:22+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,64 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[salesforce]オブジェクトの詳細ページに作成したVisualForceページを埋め込む]]></title>
+    <link href="http://kayakuguri.github.io/blog/2014/11/21/add-custom-vf-page/"/>
+    <updated>2014-11-21T12:14:39+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2014/11/21/add-custom-vf-page</id>
+    <content type="html"><![CDATA[<p>ページレイアウトで追加するのですが、作成しないと選択肢に出てこないので少し悩みました。</p>
+
+<!-- more -->
+
+
+<p>今回は、サンプルオブジェクト、というオブジェクトを作成しました。<br/>
+今は名前が表示されているだけです。</p>
+
+<p><img src="/images/2014/11/custom_vf01.jpg" alt="詳細画面" /></p>
+
+<p>で、レイアウトの編集画面に行ってみても、VisualForceページの追加タブはありません。</p>
+
+<p><img src="/images/2014/11/custom_vf02.jpg" alt="タブがない" /></p>
+
+<p>なのでまずは、作成したいオブジェクトをコントローラーに指定したpageを作成します。<br/>
+ここでは、<code>hoge__c</code>というオブジェクトにします。<br/>
+<code>standardController="hoge__c"</code>がポイントです。<br/>
+内容は新規で作成したものママです。</p>
+
+<pre><code>&lt;apex:page standardController="hoge__c"&gt;
+&lt;!-- Begin Default Content REMOVE THIS --&gt;
+&lt;h1&gt;Congratulations&lt;/h1&gt;
+This is your new Page
+&lt;!-- End Default Content REMOVE THIS --&gt;
+&lt;/apex:page&gt;
+</code></pre>
+
+<p><img src="/images/2014/11/custom_vf03.jpg" alt="VFページ作成" /></p>
+
+<p>で、再度、サンプルオブジェクトのレイアウト編集画面を見てみると、<br/>
+見事、Visualforceページ、というタブが追加されています。</p>
+
+<p><img src="/images/2014/11/custom_vf04.jpg" alt="タブがある" /></p>
+
+<p>選択すると、先程作成したpageの名前が出てきます。</p>
+
+<p><img src="/images/2014/11/custom_vf05.jpg" alt="ページの選択" /></p>
+
+<p>これを、任意の場所にドラッグ＆ドロップすると、以下のように追加され、ページとして表示できます。</p>
+
+<p><img src="/images/2014/11/custom_vf06.jpg" alt="レイアウトに追加" /></p>
+
+<p>保存して詳細画面を確認すると、見事作成した文章が表示されました。</p>
+
+<p><img src="/images/2014/11/custom_vf07.jpg" alt="追加完了" /></p>
+
+<p>後はVFpageの中身をカスタマイズすれば好きなものを出す事が出来ます。<br/>
+googlemapなんかも思いのまま。</p>
+
+<p><img src="/images/2014/11/custom_vf08.jpg" alt="地図の表示" /></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Force.com IDE for Eclipse plug-inをインストール]]></title>
@@ -364,72 +422,6 @@ System.debug(a);  //0.5
 </code></pre>
 
 <p><a href="https://sites.google.com/site/odekakeshimasyo/salesforceapexdatetime">Salesforce Apex 日付 時間 &ndash; おでかけしましょ</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[salesforce]リッチテキストエリアに保存された画像を一般公開する]]></title>
-    <link href="http://kayakuguri.github.io/blog/2014/10/16/forcecom-sites-profile/"/>
-    <updated>2014-10-16T17:45:35+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2014/10/16/forcecom-sites-profile</id>
-    <content type="html"><![CDATA[<p>結論から言うと、権限設定の問題でした。</p>
-
-<!-- more -->
-
-
-<p>具体的にしかかったことは以下です。</p>
-
-<ul>
-<li>キャンペーンの情報をvisualforceでsitesを使って表示</li>
-<li>カスタム項目でリッチテキストエリアを作成し、その画像を表示</li>
-</ul>
-
-
-<p>リッチテキストエリアに保存された内容は以下のような形で取得できました。</p>
-
-<pre><code>&lt;img alt=\"ユーザが追加した画像\" src=\"/my-Home/servlet/rtaImage?eid=701O00000007l1s&amp;amp;feoid=00NO0000001Abk2&amp;amp;refid=0EMO000000004py\" style=\"\"&gt;&lt;/img&gt;
-</code></pre>
-
-<p>これを、公開しているサイトのURLにくっつけてアクセスしてみました。</p>
-
-<p>例：</p>
-
-<blockquote><p><a href="https://my-domain.cs6.force.com/my-Home/servlet/rtaImage?eid=701O00000007l1s&amp;feoid=00NO0000001Abk2&amp;refid=0EMO000000004py">https://my-domain.cs6.force.com/my-Home/servlet/rtaImage?eid=701O00000007l1s&amp;feoid=00NO0000001Abk2&amp;refid=0EMO000000004py</a></p></blockquote>
-
-<p>しかし、以下のような画像が表示されました。</p>
-
-<p><img src="/images/2014/10/rich-text-img.png" alt="not avaiable" /></p>
-
-<p>どうやら権限がないことはわかっていたのですが、どこをどう触っていいやら。<br/>
-いろいろ見たあげく、以下の設定でいけました。</p>
-
-<p><a href="http://www.kokyakukanri.info/salesforce/blog/2010/11/visualforce-3.html">Visualforceページの公開 &ndash; セールスフォースお助け隊ブログ | Salesforce</a></p>
-
-<p>設定 &ndash;> 開発 &ndash;> サイト</p>
-
-<p><img src="/images/2014/10/rich-text-img-2.jpg" alt="サイト" /></p>
-
-<p>公開しているサイトの<code>サイトの表示ラベル</code>をクリック</p>
-
-<p><img src="/images/2014/10/rich-text-img-3.jpg" alt="サイト" /></p>
-
-<p>サイトの詳細で、<code>公開アクセス設定</code>をクリック</p>
-
-<p><img src="/images/2014/10/rich-text-img-4.jpg" alt="サイト" /></p>
-
-<p><code>編集</code>をクリックし、</p>
-
-<p><img src="/images/2014/10/rich-text-img-5.jpg" alt="サイト" /></p>
-
-<p><code>標準オブジェクト権限</code>の<code>キャンペーン</code>の<code>参照</code>をチェックして保存。</p>
-
-<p><img src="/images/2014/10/rich-text-img-6.jpg" alt="サイト" /></p>
-
-<p>これでアクセス出来るようになりました。</p>
-
-<p>今回はキャンペーンオブジェクトの話でしたが、<br/>
-<code>標準オブジェクト権限</code>と<code>カスタムオブジェクト権限</code>が権限設定の箇所なので、<br/>
-その他のオブジェクトについても設定が可能です。</p>
 ]]></content>
   </entry>
   
