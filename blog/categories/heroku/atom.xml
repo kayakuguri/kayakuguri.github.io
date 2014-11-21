@@ -4,7 +4,7 @@
   <title><![CDATA[Category: heroku | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/heroku/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2014-11-21T12:36:22+09:00</updated>
+  <updated>2014-11-21T20:31:04+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,61 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[herokuアプリとdropboxのファイル同期]]></title>
+    <link href="http://kayakuguri.github.io/blog/2014/11/21/heroku-dropbox-sync/"/>
+    <updated>2014-11-21T20:11:48+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2014/11/21/heroku-dropbox-sync</id>
+    <content type="html"><![CDATA[<p>herokuがdropboxとの同期サービスをベータ版ですが開始したようです。<br/>
+記事：<a href="https://blog.heroku.com/archives/2014/11/19/announcing_beta_dropbox_sync">https://blog.heroku.com/archives/2014/11/19/announcing_beta_dropbox_sync</a><br/>
+ドキュメント：<a href="https://devcenter.heroku.com/articles/dropbox-sync">https://devcenter.heroku.com/articles/dropbox-sync</a></p>
+
+<!-- more -->
+
+
+<p>で、実際に試してみました。</p>
+
+<p>herokuで作成しているアプリの、<code>code</code>からdropboxへの接続が出来ます。</p>
+
+<p><img src="/images/2014/11/dropbox-test1.jpg" alt="" /></p>
+
+<p>少し下に、<code>Connect to Dropbox</code>があるので、クリック。</p>
+
+<p><img src="/images/2014/11/dropbox-test2.jpg" alt="" /></p>
+
+<p>ログインして認証。</p>
+
+<p><img src="/images/2014/11/dropbox-test3.jpg" alt="" />
+<img src="/images/2014/11/dropbox-test4.jpg" alt="" /></p>
+
+<p>認証すると、接続したdropboxの中にフォルダが作成され、そこにアプリ上のソースが一式同期されます。<br/>
+<code>Dropbox/Apps/heroku/アプリ名</code>のフォルダが作成されます。</p>
+
+<p>で、ここにある通り、ここからdropbox内のファイルを使ってdeploy出来ます。<br/>
+メッセージを書いて<code>deploy</code>をクリックすると、書いたメッセージで、<code>commit</code>、<code>push</code>、<code>deploy</code>が実行されます。</p>
+
+<p><img src="/images/2014/11/dropbox-test5.jpg" alt="" /></p>
+
+<p>実行中</p>
+
+<p><img src="/images/2014/11/dropbox-test6.jpg" alt="" /></p>
+
+<p>完了</p>
+
+<p><img src="/images/2014/11/dropbox-test7.jpg" alt="" /></p>
+
+<p>git上でもコミットメッセージが反映されています。</p>
+
+<p><img src="/images/2014/11/dropbox-test8.jpg" alt="" /></p>
+
+<p>シュチエーションとしては、dropboxで同期したディレクトリを他の人とコラボして、<br/>
+その人が更新したファイルをブラウザ上からdeploy出来る、みたいな感じかと。<br/>
+それだと、コラボ相手はgitがいらないので。</p>
+
+<p>dropboxとの接続サービスはいっぱいあるので、他にも組み合わせれば色々出来そう。</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[heroku]herokuでのSSL設定とカスタムサブドメインの適用方法]]></title>
@@ -534,115 +589,6 @@ $result = $msgBldr-&gt;finalize();
 <li><a href="http://kayakuguri.github.io/blog/2014/02/19/attachment-use-mailgunapi/">[PHP][heroku]Mailgun APIを使って添付ファイルを送る</a></li>
 </ul>
 
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Herokuでデプロイエラーが起きた]]></title>
-    <link href="http://kayakuguri.github.io/blog/2014/07/09/heroku-r10/"/>
-    <updated>2014-07-09T17:13:26+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2014/07/09/heroku-r10</id>
-    <content type="html"><![CDATA[<p>いつものようにさくっとpushすると、サイトにアクセス出来ない。。<br/>
-とりあえず、<code>rollback</code>で戻しておいたが、原因を探った。</p>
-
-<!-- more -->
-
-
-<p>ログを見ると以下のようになっていた。</p>
-
-<pre><code>heroku/web.1:  State changed from up to starting 
-app/web.1:  Going down, terminating child processes... 
-heroku/web.1:  Stopping all processes with SIGTERM 
-heroku/web.1:  Process exited with status 0 
-heroku/web.1:  State changed from starting to crashed
-heroku/web.1:  State changed from crashed to starting 
-heroku/web.1:  Error R10 (Boot timeout) -&gt; Web process failed to bind to $PORT within 60 seconds of launch 
-heroku/web.1:  Stopping process with SIGKILL 
-heroku/web.1:  Process exited with status 137 
-</code></pre>
-
-<p>どうやら、<code>R10 (Boot timeout)</code>なるエラーが発生しているよう。</p>
-
-<p><a href="https://devcenter.heroku.com/articles/error-codes#r10-boot-timeout">R10 &ndash; Boot timeout</a></p>
-
-<blockquote><p>A web process took longer than 60 seconds to bind to its assigned <code>$PORT</code>. When this happens, the dyno’s process is killed and the dyno is considered crashed. Crashed dynos are restarted according to the dyno manager’s restart policy.</p></blockquote>
-
-<p>Webプロセスは、割り当てられた<code>$PORT</code>にバインドするために60秒以上かかった。これが発生すると、dynoのプロセスは強制終了され、dynoがクラッシュしたと考えられている。ダウンしたdynoは、dynoマネージャの再起動ポリシーに応じて再起動されます。</p>
-
-<blockquote><p>This error is often caused by a process being unable to reach an external resource, such as a database, or the application doing too much work, such as parsing and evaluating numerous, large code dependencies, during startup.</p></blockquote>
-
-<p>このエラーは、多くの場合、データベース、または起動時に、非常に多くの、大規模なコードの依存関係を解析し、評価するようなあまりにも多くの処理を行なっているアプリケーションなどの外部リソースに到達することができないというプロセスが原因で発生します。</p>
-
-<blockquote><p>Common solutions are to access external resources asynchronously, so they don’t block startup, and to reduce the amount of application code or its dependencies.</p></blockquote>
-
-<p>一般的な解決策は非同期に外部リソースにアクセスすることなので、起動をブロックしないように、アプリケーションコードまたはその依存関係の量を低減する事です。</p>
-
-<p>サポートに問い合わせることで、この60秒制限を120秒にすることもできるそう。</p>
-
-<hr />
-
-<h3>Heroku::Forward</h3>
-
-<p>R10エラーが起きる主な原因は存在しない外部リソースへのアクセスや、使用しているgemの量が増えている事が挙げられるらしい。<br/>
-それを自動で整理？してくれるようなものが以下のよう。</p>
-
-<p><a href="https://github.com/dblock/heroku-forward">dblock/heroku-forward · GitHub</a></p>
-
-<p>しかしこれは<code>Ruby</code>。今回は<code>PHP</code>。</p>
-
-<hr />
-
-<h3>原因</h3>
-
-<p>で、テストアプリを作って全く同じ構成にして検証してみたところ、<br/>
-NewRelicが重くなってしまっているようだった。<br/>
-試しにそれを外すとエラーが出なくなった。</p>
-
-<hr />
-
-<h3>対策</h3>
-
-<p>NewRelicはアプリを起動し続けるためのpingとしての使用がメインだったので、<br/>
-(ログなどが見られるのは嬉しかったが)<br/>
-同じように定期的にpingを飛ばす方法を探してみた。</p>
-
-<h4>Heroku Schedulerで叩き起こす</h4>
-
-<p><a href="http://blog.mah-lab.com/2013/05/16/heroku-commons-16/">知っておきたい！Herokuを使う上では当たり前？の16の常識 | mah365</a></p>
-
-<blockquote><p>1時間毎に<code>curl http://your-app-name.herokuapp.com/</code>というコマンドを叩くように設定すれば、起き続けます。</p></blockquote>
-
-<p><a href="https://addons.heroku.com/scheduler">Heroku Scheduler</a><br/>
-アドオンを追加</p>
-
-<pre><code>$ heroku addons:add scheduler
-</code></pre>
-
-<p>この状態でデプロイが通るかを確認。→ OK。</p>
-
-<p><img src="/images/2014/07/scheduler01.jpg" alt="Phpstrom diff" /></p>
-
-<p>以下を追加</p>
-
-<pre><code>curl http://your-app-name.herokuapp.com/
-</code></pre>
-
-<p>FREQUENCY(頻度)を、<code>Hourly</code>にして、save。</p>
-
-<p><img src="/images/2014/07/scheduler02.jpg" alt="Phpstrom diff" /></p>
-
-<p>これで1時間毎に指定のURLを叩いてくれる。</p>
-
-<hr />
-
-<h3>Dyno Hour</h3>
-
-<p>Herokuの料金は、1Dynoで起動時間が月750時間までは無料。<br/>
-通常であれば、1日 x 24時間 x 31日 = 744時間 で、無料範囲ない。<br/>
-ただし、Heroku Schedulerで実行した時間もDynoの起動時間に含まれる。</p>
-
-<p>単純にURLを叩くだけ、なら大丈夫かと思うけれど、<br/>
-重めのバッチ処理をスケジューラーでこまめに起動していると請求が発生する可能性があるので注意。</p>
 ]]></content>
   </entry>
   
