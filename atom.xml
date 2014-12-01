@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2014-11-21T20:31:04+09:00</updated>
+  <updated>2014-12-01T13:02:44+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,48 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[文字列をDatetime型に変換する時の注意点]]></title>
+    <link href="http://kayakuguri.github.io/blog/2014/12/01/apex-datetime-gmt/"/>
+    <updated>2014-12-01T12:53:59+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2014/12/01/apex-datetime-gmt</id>
+    <content type="html"><![CDATA[<p>apexにて、文字列からDatetime型に変更した際の注意点。</p>
+
+<!-- more -->
+
+
+<p>例えば、日本で作業してる場合は、<code>GMT+9</code>となり、標準時より9時間プラス、となる。<br/>
+文字列からdatetime型に変更する際にはいくつか方法があるが、<code>valueOf</code>が簡単。<br/>
+しかし例えば以下のようにすると意図しない時間が帰って来てしまう</p>
+
+<pre><code>String test_str = '2014-12-1 05:30:18';
+Datetime test_dt = Datetime.valueOf(test_str);
+System.debug(test_dt);
+
+//出力
+// 2014-11-30 20:30:18
+</code></pre>
+
+<p>特に顕著な例だけど、月が変わってしまっている。<br/>
+なぜかというと、Datetime型に変換する際に、(なぜか)GMTが考慮されて、標準時に戻して出力されるよう。<br/>
+日本は+9時間なので、標準時は-9時間。<br/>
+なので、指定した時間よりも９時間マイナスされた日時が返却される仕様。<br/>
+このため、日付が変わり、その結果、月も変わってしまったという現象が起こる。<br/>
+それを回避するにはちゃんとメソッドが用意されていて、<code>valueOfGmt</code>を使う。<br/>
+これだと、設定しているGMTを使って(要するに入力された時間そのまま)、Datetimeを作成してくれる。</p>
+
+<pre><code>String test_str = '2014-12-1 05:30:18';
+Datetime test_dt = Datetime.valueOfGmt(test_str);
+System.debug(test_dt);
+
+//出力
+// 2014-12-1 05:30:18
+</code></pre>
+
+<p>月まで変わると結構クリティカルだと思うので、要注意。</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[herokuアプリとdropboxのファイル同期]]></title>
@@ -1652,82 +1694,6 @@ PCではちょっと使いづらかった。<br/>
 
 <p>zapierとともに有料アカウント持ってたらこれらだけでかなり<br/>
 有用なツールとして使えそう。</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Facebookでテストユーザーを使用してログイン]]></title>
-    <link href="http://kayakuguri.github.io/blog/2014/08/07/facebook-test-user/"/>
-    <updated>2014-08-07T16:44:44+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2014/08/07/facebook-test-user</id>
-    <content type="html"><![CDATA[<p>Facebookのアプリを作成している際に、<br/>
-テストユーザーを使用してログインする方法のメモ。</p>
-
-<!-- more -->
-
-
-<p>以前まではアプリのメニューからポチポチっと設定出来ましたが、<br/>
-今は、URLを作成してそこにアクセスする、<br/>
-facebookページのタブにアプリを追加するような多少めんどくさいものになっているようです。</p>
-
-<h3>準備</h3>
-
-<h4>アプリのID</h4>
-
-<p>作成したアプリのIDを取得しておきます。</p>
-
-<h4>アプリに接続する際のアクセストークンの取得</h4>
-
-<p>以下のGraph API Explorerにアクセスし、そこからテストしたいアプリを選択し、<br/>
-その後、「Get App Token」(右側。Get Access Tokenではない)を取得しておく。<br/>
-<a href="https://developers.facebook.com/tools/explorer/">https://developers.facebook.com/tools/explorer/</a></p>
-
-<p><img src="http://kayakuguri.github.io/images/2014/08/test-user01.jpg" alt="Get App Token" /></p>
-
-<h3>ログイン</h3>
-
-<h4>ログインURLを取得</h4>
-
-<p>取得した２つの情報から以下のURLを作成し、アクセスする。</p>
-
-<pre><code>https://graph.facebook.com/アプリのID/accounts/test-users?installed=true&amp;name=ユーザー名(任意の名前)&amp;locale=ja_JP&amp;permissions=read_stream&amp;method=post&amp;access_token=アプリトークン
-</code></pre>
-
-<p>ブラウザでアクセスすると、JSONが返ってくる。</p>
-
-<pre><code>{
-   "id": "xxIDxx",
-   "email": "testtamsanuser_rrfidrb_testtamsanuser\u0040tfbnw.net",
-   "access_token":  "xxACCESS_TOKENxx",
-   "login_url": "https://developers.facebook.com/checkpoint/test-user-login/xxx/",
-   "password": "xxPASSWORDxx"
-}
-</code></pre>
-
-<p>この中の、<code>login_url</code>でアクセス。<br/>
-この時に、自分のアカウントでログインした状態でアクセスすること。</p>
-
-<h4>ログイン</h4>
-
-<p>しつこく確認される。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2014/08/test-user02.jpg" alt="Get App Token" /><br/>
-<img src="http://kayakuguri.github.io/images/2014/08/test-user03.jpg" alt="Get App Token" /></p>
-
-<p>OKOKすると、以下のような形でログインできる。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2014/08/test-user04.jpg" alt="Get App Token" /></p>
-
-<p>終了したい場合は、ログアウトしてログインしなおせばよい。</p>
-
-<h3>参考サイト</h3>
-
-<p>参考、というか、ほぼ以下のままです。<br/>
-ありがとうございます。<br/>
-<a href="http://qiita.com/se_ino/items/a96449cd25886a6d05fb">Facebookアプリのテストユーザーの作り方手順 &ndash; Qiita</a></p>
-
-<p>公式ドキュメント<br/>
-<a href="https://developers.facebook.com/docs/graph-api/reference/v2.0/test-user">Graph API Reference Test User /test-user</a></p>
 ]]></content>
   </entry>
   
