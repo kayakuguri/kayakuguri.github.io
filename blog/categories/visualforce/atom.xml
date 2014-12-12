@@ -4,7 +4,7 @@
   <title><![CDATA[Category: visualforce | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/visualforce/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2014-12-12T16:03:02+09:00</updated>
+  <updated>2014-12-12T16:04:15+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -78,6 +78,11 @@ function reloadAndClose() {
 
 <p>静的リソースがいつまで同じドメインでアクセスできるかわからないので、あまりオススメは出来ないけれど、他に方法がなさそう。<br/>
 仕事でやる場合には避ける方が無難かもしれない。</p>
+
+<h3>参考</h3>
+
+<p><a href="http://blog.livedoor.jp/minoaw/archives/1654198.html">[Salesforce]標準画面からクロスドメインなVisualforce画面を開き、自分を更新させる : minoawのブログ</a><br/>
+ほぼこのまんまです。ありがとうございます。</p>
 ]]></content>
   </entry>
   
