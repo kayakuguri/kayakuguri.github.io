@@ -4,7 +4,7 @@
   <title><![CDATA[Category: salesforce | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/salesforce/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2014-12-02T18:48:49+09:00</updated>
+  <updated>2014-12-12T16:03:02+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,74 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[salesforce]標準画面でVFからポーリング処理をJSのリロードで実現する]]></title>
+    <link href="http://kayakuguri.github.io/blog/2014/12/12/reload-vf-iframe/"/>
+    <updated>2014-12-12T15:40:08+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2014/12/12/reload-vf-iframe</id>
+    <content type="html"><![CDATA[<p>やりたかった事としては、カスタムオブジェクトの詳細画面に、VisualForceで地図を表示させ、<br/>
+そのVF内のJSからリロード処理をsettimeoutとかで呼び出してポーリングさせるようにしたかった。</p>
+
+<!-- more -->
+
+
+<p>作成したVisualForceのページを詳細画面に埋め込む方法などは、以前に書いた記事を参考にどうぞ。</p>
+
+<p><a href="http://kayakuguri.github.io/blog/2014/11/21/add-custom-vf-page/">[salesforce]オブジェクトの詳細ページに作成したVisualForceページを埋め込む</a></p>
+
+<p>で、上記の方法でVisualForceに埋め込むわけだけれど、そのままそのVisualForce内からJSでリロード処理を書くと、上手く動作しない。<br/>
+原因は、埋め込まれたVisualForceは標準画面から見るとiframeとなっており、しかもその中身は別のドメインとなっている。<br/>
+なので、子ページが別ドメインの親ドメインをリロードしようとしてクロスドメインのエラーが発生していた、というわけ。</p>
+
+<p>例えば、詳細ページのURLが以下のようになっている場合、</p>
+
+<blockquote><p><a href="https://cs6.salesforce.com/xxxxIDxxxx">https://cs6.salesforce.com/xxxxIDxxxx</a></p></blockquote>
+
+<p>読み込まれているVFページのURLは以下のようになっていた。</p>
+
+<blockquote><p><a href="https://c.cs6.visual.force.com/servlet/servlet.Integration?lid=xxxxVFIDxxxx&amp;ic=1">https://c.cs6.visual.force.com/servlet/servlet.Integration?lid=xxxxVFIDxxxx&amp;ic=1</a></p></blockquote>
+
+<p>これはJSの仕様でクロスドメイン(オリジン)がダメなので、根本的に回避する手立てはない。</p>
+
+<p>しかし、バッドノウハウ的に対応するならば、以下のように、同じドメインからリロードをかけるようにしてやれば回避できるよう。</p>
+
+<ol>
+<li><strong>静的リソース</strong>に、リロードするためだけのJSを埋め込んだファイルをアップしておく</li>
+<li>VFページ上に非表示にしたiframeタグを記述しておく</li>
+<li>リロードするタイミングでそのiframeに、1のファイルを表示させる</li>
+<li>静的リソース内からリロードが走り、無事リロードが行われる</li>
+</ol>
+
+
+<p>現状では、標準ページのドメインと静的リソースの表示ドメインは同じなので動作する。<br/>
+標準ページから見れば、孫からリロードを要求される形。</p>
+
+<p>1.の中身は以下のような内容</p>
+
+<pre><code>&lt;html&gt;&lt;head&gt;&lt;script&gt;parent.parent.location.reload();&lt;/script&gt;&lt;/head&gt;&lt;/html&gt;
+</code></pre>
+
+<p>これを、<code>OpenerReload</code>として静的リソースに登録しておく。<br/>
+VF側のJSはこんな内容</p>
+
+<pre><code>setTimeout(reloadAndClose, 60000);
+function reloadAndClose() {
+  var iframe = document.getElementById('iframe');
+  var urlbase = 'https://cs6.salesforce.com';
+  iframe.src = urlbase + '{!URLFOR($Resource.OpenerReload)}';
+}
+</code></pre>
+
+<p>埋め込むiframeのタグ</p>
+
+<pre><code>&lt;iframe src="about:blank" id="iframe" style="display:none;"&gt;&lt;/iframe&gt;
+</code></pre>
+
+<p>静的リソースがいつまで同じドメインでアクセスできるかわからないので、あまりオススメは出来ないけれど、他に方法がなさそう。<br/>
+仕事でやる場合には避ける方が無難かもしれない。</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[salesforce]オブジェクトの詳細ページに作成したVisualForceページを埋め込む]]></title>
@@ -369,59 +437,6 @@ curl_close($curl);
 <h3>参考</h3>
 
 <p><a href="http://dackdive.hateblo.jp/entry/2014/01/26/165752"> [salesforce] Sandbox組織だとメール通知ができない問題 &ndash; dackdive&#39;s blog</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[apexで割り算をしたら整数になった]]></title>
-    <link href="http://kayakuguri.github.io/blog/2014/10/21/apex-decimal/"/>
-    <updated>2014-10-21T16:44:39+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2014/10/21/apex-decimal</id>
-    <content type="html"><![CDATA[<p>タイトル通り、apex上で割り算をしたら整数になってしまったんですね。<br/>
-単純に型付け言語による仕様だったのですが、ちょっとハマったのでメモ。</p>
-
-<!-- more -->
-
-
-<p>最初、記述したのが以下のコード</p>
-
-<pre><code>Decimal a = 1 / 2;
-System.debug(a);  //0
-</code></pre>
-
-<p>これだと、<code>0</code>が出力されます。<br/>
-<code>Decimal</code>は小数まで表示できる型なのになんで？？？<br/>
-と思ったんですが、計算している、<code>1</code>とか<code>2</code>が、<code>Integer</code>型、ってことなんですね。<br/>
-なので、これを<code>Decimal</code>型にしてやると計算できます。</p>
-
-<pre><code>Decimal a = Decimal.valueOf(1) / Decimal.valueOf(2);
-System.debug(a);  //0.5
-</code></pre>
-
-<p>しかし数字を書きたいだけなのにいちいちキャストするのはめんどう。<br/>
-なので、以下でも大丈夫。</p>
-
-<pre><code>Decimal a = 1.0 / 2.0;
-System.debug(a);  //0.5
-</code></pre>
-
-<p>小数点をつけると<code>Decimal</code>型になるようです。</p>
-
-<p>ちなみにやりたかったことは、<code>Datetime</code>型の現在時間を日本時間(GMT+9)で表示することです。</p>
-
-<pre><code>Datetime.now() + (9.0/24.0)
-</code></pre>
-
-<p><code>Datetime</code>型の足し算は1日単位で行われるため、24で割ると時間になります。<br/>
-しかし、小数点にしないと<code>0</code>になってしまい計算できませんでした。<br/>
-<code>format</code>をつかってフォーマットしてしまうと文字列になってしまうため、足し算で対応しています。</p>
-
-<p>・<code>format</code>を使った場合</p>
-
-<pre><code>Datetime.now().format('yyyy-MM-dd hh:mm', 'JST');
-</code></pre>
-
-<p><a href="https://sites.google.com/site/odekakeshimasyo/salesforceapexdatetime">Salesforce Apex 日付 時間 &ndash; おでかけしましょ</a></p>
 ]]></content>
   </entry>
   
