@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2014-12-12T16:05:29+09:00</updated>
+  <updated>2014-12-12T17:02:24+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,56 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[selesforce]Chatter系プロファイルのレコードタイプを変更する]]></title>
+    <link href="http://kayakuguri.github.io/blog/2014/12/12/disable-recode-type-chatteruser/"/>
+    <updated>2014-12-12T16:58:54+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2014/12/12/disable-recode-type-chatteruser</id>
+    <content type="html"><![CDATA[<p>レコードタイプの削除時に、chatter系のユーザープロファイルがデフォルトの設定になっているため、無効に出来ない。<br/>
+その解決方法のキャンペーンメンバーオブジェクト版。</p>
+
+<!-- more -->
+
+
+<p>今回はちょっと特殊なキャンペーンメンバーオブジェクトでの説明。</p>
+
+<p>以下のように無効にしようとしてもエラーが出てしまう。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2014/12/inactive_recodetype00.jpg" alt="エラー" /></p>
+
+<p>各プロファイルのデフォルトのレコードタイプの選択はプロファイルの設定画面から編集が可能。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2014/12/inactive_recodetype01.jpg" alt="レコード選択" /></p>
+
+<p>ただし、chatter系のユーザーは、そもそもこの画面へ遷移する方法がない。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2014/12/inactive_recodetype02.jpg" alt="chatter系プロファイル" /></p>
+
+<p>じゃあ、どうするかというと、各プロファイルのレコードタイプの変更ページはURLの形式が決まっており、<br/>
+そこでユーザーのIDの指定を変えてやれば直接遷移が可能だった。</p>
+
+<p>キャンペーンメンバーのURLはコピペすると以下のようになっている。</p>
+
+<blockquote><p><a href="https://cs5.salesforce.com/setup/ui/profilerecordtypeedit.jsp?id=">https://cs5.salesforce.com/setup/ui/profilerecordtypeedit.jsp?id=</a>[<strong>プロファイルのID</strong>]&amp;tid=CampaignMember&amp;pn=<br/>
+02.%25E5%258A%2587%25E5%25A0%25B4%25E3%2582%25B9%25E3%2582%25BF<br/>
+%25E3%2583%2583%25E3%2583%2595%25E7%2594%25A8<br/>
+&amp;retURL=%2F00eO0000000DwhR</p></blockquote>
+
+<p>ここで、<code>プロファイルのID</code>と書いた部分に、変更したいプロファイルのIDを直接書いてやればOK。<br/>
+以下のように接続できる。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2014/12/inactive_recodetype03.jpg" alt="レコード選択" /></p>
+
+<p>これで、変更してやればOK。<br/>
+公式のヘルプページだと、カスタムオブジェクトでの説明だったので、ちょっとハマった。</p>
+
+<h3>参考</h3>
+
+<p><a href="https://help.salesforce.com/apex/HTViewSolution?id=000181693&amp;language=ja">レコードタイプの削除時に Chatter 関連プロファイルに指定されたレコードタイプを外す方法</a><br/>
+<a href="http://tyoshikawa1106.hatenablog.com/entry/2014/01/30/004636">SFDC：レコードタイプを無効にする際にハマった話</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[salesforce]標準画面でVFからポーリング処理をJSのリロードで実現する]]></title>
@@ -1449,90 +1499,6 @@ Mass Update</p></blockquote>
 </code></pre>
 
 <p>参考：<a href="http://www.infallibletechie.com/2012/10/generating-json-in-visualforce-page-in.html">Infallible Techie: Generating JSON in Visualforce page in Salesforce</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[SalesForce]ApexでカスタムREST APIを作成する]]></title>
-    <link href="http://kayakuguri.github.io/blog/2014/09/08/apex-restapi/"/>
-    <updated>2014-09-08T22:30:35+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2014/09/08/apex-restapi</id>
-    <content type="html"><![CDATA[<p>apexにて、自作のRestAPIを作成してみました。<br/>
-そして、作成したAPIをPHPから叩いてみました。</p>
-
-<!-- more -->
-
-
-<p>まずは、Salesforce側の設定。<br/>
-今回は、GETで指定されたIDのリードデータを取得するもの。</p>
-
-<pre><code>@RestResource(urlMapping='/CustomLead/*')
-global with sharing class CustomLeadSample {
-    @HttpGet
-    global static sObject doGet() {
-        RestRequest req = RestContext.request;
-        Id LeadID = req.params.get('id');
-        try {
-            Lead acc = [SELECT Id, Name FROM Lead WHERE Id = :LeadID LIMIT 1];
-            return acc;
-        } catch (exception e) {
-            return null;
-        }
-    }
-}
-</code></pre>
-
-<p>公式の解説の最後に載っているものほぼそのままです。<br/>
-<a href="https://developer.salesforce.com/page/Creating_REST_APIs_using_Apex_REST">Creating REST APIs using Apex REST &ndash; developer.force.com</a></p>
-
-<p>で、これをPHP側から呼び出します。<br/>
-oauth認証は以下の記事のものを使用させてもらっています。<br/>
-<a href="http://www.nkjmkzk.net/?p=2328">nkjmkzk.net &raquo; 新しくなったForce.com OAuth Toolkit for phpの使い方 のコメントのフィード</a><br/>
-<a href="https://github.com/nkjm/Force.com-OAuth-Toolkit-for-PHP">nkjm/Force.com-OAuth-Toolkit-for-PHP</a></p>
-
-<p><code>@RestResource</code>で作成したAPIは、<code>/services/apexrest/</code>から始まるURLで定義されています。<br/>
-また、外部から接続する場合には、<code>接続アプリケーション</code>の設定が必要になります。<br/>
-<a href="https://help.salesforce.com/HTViewHelpDoc?id=connected_app_create.htm&amp;language=ja">接続アプリケーションの作成</a><br/>
-コールバックURLは今回は必要ないので、適当なローカルURLを指定しています。<br/>
-また、パスワードは、(特定のIPアドレスからのアクセスに制限しなかった場合には)<br/>
-パスワード＋セキュリティトークン、の形で渡す必要があります。</p>
-
-<pre><code>require_once('sf_oauth.php');
-$app_token = 'xxx';
-$app_secret = 'xxx';
-$app_callback = 'http://localhost:9000/';
-$sf_id = 'xxx';
-$sf_pass = 'password+security-token';
-
-$oauth = new oauth($app_token, $app_secret, $app_callback);
-$oauth-&gt;auth_with_password($sf_id, $sf_pass);
-
-$url = "$oauth-&gt;instance_url/services/apexrest/CustomLead/?id=".'リードのID';
-$curl = curl_init($url);
-curl_setopt($curl, CURLOPT_HEADER, false);
-curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-curl_setopt($curl, CURLOPT_HTTPHEADER,
-    array("Authorization: OAuth $oauth-&gt;access_token",
-        "Content-type: application/json"));
-$json_response = curl_exec($curl);
-$status = curl_getinfo($curl, CURLINFO_HTTP_CODE);
-</code></pre>
-
-<p>レスポンスは以下のような形です。</p>
-
-<pre><code>{
-    "attributes":
-    {
-        "type":"Lead",
-        "url":"/services/data/v32.0/sobjects/Lead/ユーザーID"
-    },
-    "Name":"ユーザー名",
-    "Id":"ユーザーID"
-}
-</code></pre>
-
-<p>参考サイト：<br/>
-<a href="http://magnet88jp.hateblo.jp/entry/2014/07/09/105848">Salesforce 外部サイトからApexメソッドを呼び出したい &ndash; まぐねっとのブログ</a></p>
 ]]></content>
   </entry>
   
