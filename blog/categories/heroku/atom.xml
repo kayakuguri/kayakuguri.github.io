@@ -4,7 +4,7 @@
   <title><![CDATA[Category: heroku | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/heroku/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2014-12-12T17:02:24+09:00</updated>
+  <updated>2014-12-16T19:49:42+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,93 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[HerokuからPHPでFTPにファイルをアップしてみる]]></title>
+    <link href="http://kayakuguri.github.io/blog/2014/12/16/heroku-php-ftp/"/>
+    <updated>2014-12-16T19:10:31+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2014/12/16/heroku-php-ftp</id>
+    <content type="html"><![CDATA[<p>herokuのPHPから、FTPプロトコルで接続し、<br/>
+同じディレクトリにあるファイルをアップロードしてみた。</p>
+
+<!-- more -->
+
+
+<p><code>ftp_put</code>を使用するば、接続後にアップロードが出来るよう。<br/>
+<a href="http://php.net/manual/ja/function.ftp-put.php">http://php.net/manual/ja/function.ftp-put.php</a></p>
+
+<p>以下のPHPを書いて、herokuにアップしてみた。</p>
+
+<pre><code>ini_set( 'display_errors', 1 );
+
+$ftp_server = 'ホスト名';
+$ftp_user_name = 'ユーザー名';
+$ftp_user_pass = 'パスワード';
+
+$file = 'somefile.txt';
+$remote_file = '/ディレクトリ/readme.txt';
+
+// 接続を確立する
+$conn_id = ftp_connect($ftp_server);
+
+// ユーザー名とパスワードでログインする
+$login_result = ftp_login($conn_id, $ftp_user_name, $ftp_user_pass);
+
+//パッシブモードをオンにする
+//ftp_pasv($conn_id, true);
+
+// ファイルをアップロードする
+if (ftp_put($conn_id, $remote_file, $file, FTP_ASCII)) {
+ echo "successfully uploaded $file\n";
+} else {
+ echo "There was a problem while uploading $file\n";
+}       
+
+// 接続を閉じる
+ftp_close($conn_id);
+</code></pre>
+
+<p>ローカルではこれで動いていたのだが、herokuにアップすると、以下のエラーが出て動作しなかった。</p>
+
+<blockquote><p>Fatal error: Call to undefined function ftp_connect() in /app/index.php on line 17</p></blockquote>
+
+<p><code>phpinfo</code>で確認してみると、<code>FTP support</code>がなかったので、これでエラーが出ていたよう。<br/>
+<a href="http://d.hatena.ne.jp/kasahi/20090206/1234198797">http://d.hatena.ne.jp/kasahi/20090206/1234198797</a></p>
+
+<hr />
+
+<p>他に方法がないか探してみると、どうやら、<code>CURL</code>でも出来る、とのこと。<br/>
+<a href="http://d.hatena.ne.jp/calpo/20110216/p1">PHPでPASV(passiveモード)なFTP</a></p>
+
+<p>以下を書いてherokuにアップしてみたところ、無事、アップロードされた。</p>
+
+<pre><code>$remote_file = 'ftp://ユーザー:パスワード@ホスト名/ディレクトリ/readme.txt';
+$local_file = 'somefile.txt';
+
+try{
+    $fp = fopen($local_file, "r");
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_FTP_USE_EPSV, false);
+    curl_setopt($ch, CURLOPT_UPLOAD, true);
+    curl_setopt($ch, CURLOPT_URL, $remote_file);
+    curl_setopt($ch, CURLOPT_INFILE, $fp);
+    curl_setopt($ch, CURLOPT_INFILESIZE, filesize($local_file));
+    curl_exec($ch);
+    curl_close($ch);
+    echo 'success';
+} catch (Exception $e) {
+    var_dump($e);
+}
+</code></pre>
+
+<h3>参考URL</h3>
+
+<p><a href="http://loumo.jp/wp/archive/20090813164314/">PHP の cURL を使って FTP を行う。</a></p>
+
+<p>ライブラリもあったけど、未検証<br/>
+<a href="https://github.com/dg/ftp-php">FTP for PHP</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[herokuアプリとdropboxのファイル同期]]></title>
@@ -462,133 +549,6 @@ Fetching repository, done.
 
 <p>結局、原因は不明で、修正手順も不明、なのだけれど、<br/>
 ちょっと情報が少なかったのでメモとして残しておく。</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Mailgun APIを使ってメールを送る Composer版]]></title>
-    <link href="http://kayakuguri.github.io/blog/2014/07/15/mailgunapi/"/>
-    <updated>2014-07-15T14:13:12+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2014/07/15/mailgunapi</id>
-    <content type="html"><![CDATA[<p>いくつか書いているmailgunを使用したメール送信の件ですが、<br/>
-たぶん正しいと思われる方法がわかったのでメモしておきます。</p>
-
-<!-- more -->
-
-
-<h3>composerでインストール</h3>
-
-<p><a href="https://github.com/mailgun/mailgun-php">mailgun/mailgun-php · GitHub</a></p>
-
-<p>composerを使用して、ライブラリをインストールします。<br/>
-Composerのインストールは以下などを参照に。<br/>
-<a href="http://tech.basicinc.jp/php/2013/08/18/php_composer/">PHPのパッケージ管理Composerを使う</a></p>
-
-<p>Windowsの場合は以下に書きました。<br/>
-<a href="http://kayakuguri.github.io/blog/2014/07/15/win7-composer/">Windows7でComposerのインストール</a></p>
-
-<p><code>composer.json</code>に以下のように記述。</p>
-
-<pre><code>{
-    "require": {
-        "mailgun/mailgun-php": "~1.7.1"
-    }
-}
-</code></pre>
-
-<p>で、インストール。</p>
-
-<pre><code>$ composer install
-</code></pre>
-
-<p>これでライブラリなどがダウンロードされ、mailgunの依存関係が出来上がります。</p>
-
-<h3>Mailgun</h3>
-
-<h4>インストール</h4>
-
-<p>アドオンのインストール。</p>
-
-<pre><code>$ heroku addons:add mailgun
-</code></pre>
-
-<h4>セットアップ</h4>
-
-<p>PHPの冒頭で初期化して送信。<br/>
-初期化するためにはAPIキーとドメインが必要。<br/>
-これは環境変数に入っている。</p>
-
-<pre><code>MAILGUN_API_KEY:       key-xxx
-MAILGUN_SMTP_LOGIN:    postmaster@xxx.mailgun.org
-MAILGUN_SMTP_PASSWORD: xxx
-MAILGUN_SMTP_PORT:     587
-MAILGUN_SMTP_SERVER:   smtp.mailgun.org
-</code></pre>
-
-<p>ドメインは、<code>MAILGUN_SMTP_LOGIN</code>の<code>@</code>より後ろ、になるので、それを使用する。</p>
-
-<pre><code>require 'vendor/autoload.php';
-use Mailgun\Mailgun;
-
-$mgClient = new Mailgun(getenv('MAILGUN_API_KEY'));
-$domain = getenv('MAILGUN_SMTP_LOGIN');
-$domain = substr($domain, strpos($domain, '@') + 1);
-</code></pre>
-
-<h4>送信</h4>
-
-<p>通常の送信は以下。</p>
-
-<pre><code>$result = $mgClient-&gt;sendMessage($domain, array(
-    'from'    =&gt; 'Excited User &lt;me@samples.mailgun.org&gt;',
-    'to'      =&gt; 'Baz &lt;baz@example.com&gt;',
-    'subject' =&gt; 'Hello',
-    'text'    =&gt; 'Testing some Mailgun awesomness!'
-));
-</code></pre>
-
-<h4>パラメータを個別に設定</h4>
-
-<p>上記では送信時に一括で指定しているけれど、これを個別に設定するには、<br/>
-<code>Message Builder</code>というものを使用します。<br/>
-<a href="https://github.com/mailgun/mailgun-php/blob/master/src/Mailgun/Messages/README.md#usage---message-builder">Usage &ndash; Message Builder</a></p>
-
-<p>上記のセットをバラすと以下のようになります。</p>
-
-<pre><code>$msgBldr = $mgClient-&gt;MessageBuilder();
-$msgBldr-&gt;setFromAddress('Excited User &lt;me@samples.mailgun.org&gt;');
-$msgBldr-&gt;addToRecipient('Baz &lt;baz@example.com&gt;');
-$msgBldr-&gt;setSubject('Hello');
-$msgBldr-&gt;setTextBody('Testing some Mailgun awesomness!'); 
-$result = $mgClient-&gt;post("{$domain}/messages", $msgBldr-&gt;getMessage(), $msgBldr-&gt;getFiles());
-</code></pre>
-
-<h4>キューにまとめて登録</h4>
-
-<p>また、キューにまとめて登録する場合は、<code>Batch Message</code>を使用します。<br/>
-<a href="https://github.com/mailgun/mailgun-php/blob/master/src/Mailgun/Messages/README.md#usage---batch-message">Usage &ndash; Batch Message</a></p>
-
-<p>これを使用して、toを複数登録すると、それぞれのtoにバラバラに同じメールが送られます。</p>
-
-<pre><code>$msgBldr = $mgClient-&gt;BatchMessage($domain);
-$msgBldr-&gt;addToRecipient('test1 &lt;test1@example.com&gt;');
-$msgBldr-&gt;addToRecipient('test2 &lt;test2@example.com&gt;');
-// 他のパラメータ設定は同じ
-$result = $msgBldr-&gt;finalize();
-</code></pre>
-
-<p><code>finalize</code>で、キューに登録されるようでした。</p>
-
-<hr />
-
-<p>今までのmailgun関連の記事はこちら</p>
-
-<ul>
-<li><a href="http://kayakuguri.github.io/blog/2014/02/17/send-mail-from-heroku-with-mailgun/">PHPでMailgunを使ってherokuでメール送信する</a></li>
-<li><a href="http://kayakuguri.github.io/blog/2014/02/18/php-heroku-sendattachmail/">[PHP]herokuで添付ファイル付きメールを送る</a></li>
-<li><a href="http://kayakuguri.github.io/blog/2014/02/19/attachment-use-mailgunapi/">[PHP][heroku]Mailgun APIを使って添付ファイルを送る</a></li>
-</ul>
-
 ]]></content>
   </entry>
   

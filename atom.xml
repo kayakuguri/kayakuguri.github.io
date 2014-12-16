@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2014-12-12T17:02:24+09:00</updated>
+  <updated>2014-12-16T19:49:42+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,93 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[HerokuからPHPでFTPにファイルをアップしてみる]]></title>
+    <link href="http://kayakuguri.github.io/blog/2014/12/16/heroku-php-ftp/"/>
+    <updated>2014-12-16T19:10:31+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2014/12/16/heroku-php-ftp</id>
+    <content type="html"><![CDATA[<p>herokuのPHPから、FTPプロトコルで接続し、<br/>
+同じディレクトリにあるファイルをアップロードしてみた。</p>
+
+<!-- more -->
+
+
+<p><code>ftp_put</code>を使用するば、接続後にアップロードが出来るよう。<br/>
+<a href="http://php.net/manual/ja/function.ftp-put.php">http://php.net/manual/ja/function.ftp-put.php</a></p>
+
+<p>以下のPHPを書いて、herokuにアップしてみた。</p>
+
+<pre><code>ini_set( 'display_errors', 1 );
+
+$ftp_server = 'ホスト名';
+$ftp_user_name = 'ユーザー名';
+$ftp_user_pass = 'パスワード';
+
+$file = 'somefile.txt';
+$remote_file = '/ディレクトリ/readme.txt';
+
+// 接続を確立する
+$conn_id = ftp_connect($ftp_server);
+
+// ユーザー名とパスワードでログインする
+$login_result = ftp_login($conn_id, $ftp_user_name, $ftp_user_pass);
+
+//パッシブモードをオンにする
+//ftp_pasv($conn_id, true);
+
+// ファイルをアップロードする
+if (ftp_put($conn_id, $remote_file, $file, FTP_ASCII)) {
+ echo "successfully uploaded $file\n";
+} else {
+ echo "There was a problem while uploading $file\n";
+}       
+
+// 接続を閉じる
+ftp_close($conn_id);
+</code></pre>
+
+<p>ローカルではこれで動いていたのだが、herokuにアップすると、以下のエラーが出て動作しなかった。</p>
+
+<blockquote><p>Fatal error: Call to undefined function ftp_connect() in /app/index.php on line 17</p></blockquote>
+
+<p><code>phpinfo</code>で確認してみると、<code>FTP support</code>がなかったので、これでエラーが出ていたよう。<br/>
+<a href="http://d.hatena.ne.jp/kasahi/20090206/1234198797">http://d.hatena.ne.jp/kasahi/20090206/1234198797</a></p>
+
+<hr />
+
+<p>他に方法がないか探してみると、どうやら、<code>CURL</code>でも出来る、とのこと。<br/>
+<a href="http://d.hatena.ne.jp/calpo/20110216/p1">PHPでPASV(passiveモード)なFTP</a></p>
+
+<p>以下を書いてherokuにアップしてみたところ、無事、アップロードされた。</p>
+
+<pre><code>$remote_file = 'ftp://ユーザー:パスワード@ホスト名/ディレクトリ/readme.txt';
+$local_file = 'somefile.txt';
+
+try{
+    $fp = fopen($local_file, "r");
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_FTP_USE_EPSV, false);
+    curl_setopt($ch, CURLOPT_UPLOAD, true);
+    curl_setopt($ch, CURLOPT_URL, $remote_file);
+    curl_setopt($ch, CURLOPT_INFILE, $fp);
+    curl_setopt($ch, CURLOPT_INFILESIZE, filesize($local_file));
+    curl_exec($ch);
+    curl_close($ch);
+    echo 'success';
+} catch (Exception $e) {
+    var_dump($e);
+}
+</code></pre>
+
+<h3>参考URL</h3>
+
+<p><a href="http://loumo.jp/wp/archive/20090813164314/">PHP の cURL を使って FTP を行う。</a></p>
+
+<p>ライブラリもあったけど、未検証<br/>
+<a href="https://github.com/dg/ftp-php">FTP for PHP</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[selesforce]Chatter系プロファイルのレコードタイプを変更する]]></title>
@@ -1437,68 +1524,6 @@ Mass Update</p></blockquote>
 
 <p>解決策としては、同じ<code>状況</code>項目をカスタム項目として作成するしかないよう。<br/>
 それでもデフォルトの<code>状況</code>は必須項目になるので、運用がややこしくなりそうだけれど。</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[SOQLクエリの結果をJSONで出力する]]></title>
-    <link href="http://kayakuguri.github.io/blog/2014/09/09/create-json-in-apex/"/>
-    <updated>2014-09-09T15:54:29+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2014/09/09/create-json-in-apex</id>
-    <content type="html"><![CDATA[<p>SOQLで取得したクエリ内容をJSONにパースして出力する方法。</p>
-
-<!-- more -->
-
-
-<p>Apexクラス</p>
-
-<pre><code>public class sample
-{
-    public String text1 {get;set;}
-
-    public sample()
-    {
-
-    }    
-    public void parseJson()
-    {
-        String soql = 'SELECT Name FROM Lead';
-        List&lt;Account&gt; acct = Database.Query(soql); 
-        text1 = JSON.serialize(acct);
-    }    
-} 
-</code></pre>
-
-<p>VisualForceページ</p>
-
-<pre><code>&lt;apex:page showHeader="false" controller="ShowCampaignListController" action="{!parseJson}"&gt;
-    {!text1}
-&lt;/apex:page&gt;
-</code></pre>
-
-<p>出力結果例</p>
-
-<pre><code>[{
-    "attributes":
-    {
-        "type":"Lead",
-        "url":"/services/data/v32.0/sobjects/Lead/00QO0000002xxxxxxx"
-    },
-    "Name":"テストユーザー3",
-    "Id":"00QO0000002xxxxxxx"
-},
-{
-    "attributes":
-    {
-        "type":"Lead",
-        "url":"/services/data/v32.0/sobjects/Lead/00QO0000002ooooooo"
-    },
-    "Name":"テストユーザー2",
-    "Id":"00QO0000002ooooooo"
-}]
-</code></pre>
-
-<p>参考：<a href="http://www.infallibletechie.com/2012/10/generating-json-in-visualforce-page-in.html">Infallible Techie: Generating JSON in Visualforce page in Salesforce</a></p>
 ]]></content>
   </entry>
   
