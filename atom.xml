@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2014-12-16T19:49:42+09:00</updated>
+  <updated>2014-12-17T17:43:12+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -45,7 +45,7 @@ $conn_id = ftp_connect($ftp_server);
 $login_result = ftp_login($conn_id, $ftp_user_name, $ftp_user_pass);
 
 //パッシブモードをオンにする
-//ftp_pasv($conn_id, true);
+ftp_pasv($conn_id, true);
 
 // ファイルをアップロードする
 if (ftp_put($conn_id, $remote_file, $file, FTP_ASCII)) {
@@ -64,6 +64,23 @@ ftp_close($conn_id);
 
 <p><code>phpinfo</code>で確認してみると、<code>FTP support</code>がなかったので、これでエラーが出ていたよう。<br/>
 <a href="http://d.hatena.ne.jp/kasahi/20090206/1234198797">http://d.hatena.ne.jp/kasahi/20090206/1234198797</a></p>
+
+<h3>追記</h3>
+
+<p><code>FTP support</code>は、composerの設定で後から追加できた。<br/>
+<code>composert.json</code>に以下を記述してdeployするとFTPサポートが追加される。</p>
+
+<pre><code>{
+    "require": {
+        "ext-ftp":"*"
+    }
+}
+</code></pre>
+
+<p>composerで追加できるオプションは以下にある。<br/>
+<a href="https://devcenter.heroku.com/articles/php-support#extensions">https://devcenter.heroku.com/articles/php-support#extensions</a></p>
+
+<p>追加した上で、1つ目のPHPを試してみると、無事、アップロードできました。</p>
 
 <hr />
 
