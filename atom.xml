@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2014-12-17T17:43:12+09:00</updated>
+  <updated>2014-12-18T11:40:11+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -1037,6 +1037,46 @@ $ brew install pcre
 2の作成方法は以下、など。
 <a href="https://jp.globalsign.com/support/ssl/list.php?cat=csr">https://jp.globalsign.com/support/ssl/list.php?cat=csr</a><br/>
 5のみ、heroku上。</p>
+
+<h3>ファイルの準備</h3>
+
+<p>サーバー会社等から取得したデータを保存する。<br/>
+テキストに文字列を貼り付けて保存すればよい。<br/>
+※ファイル名の指定は特になし。拡張子もなんでもいい。</p>
+
+<table>
+<thead>
+<tr>
+<th></th>
+<th align="left"> 項目 </th>
+<th align="left"> ファイル名 </th>
+<th> </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td></td>
+<td align="left"> 秘密鍵 </td>
+<td align="left"> server.key </td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td align="left"> 証明書  </td>
+<td align="left">  server.crt </td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td align="left"> 中間CA証明書  </td>
+<td align="left">  chain_ca.pem </td>
+<td></td>
+</tr>
+</tbody>
+</table>
+
+
+<p><a href="http://q.hatena.ne.jp/1188202204">http://q.hatena.ne.jp/1188202204</a></p>
 
 <h3>herokuでの操作</h3>
 
