@@ -4,7 +4,7 @@
   <title><![CDATA[Category: git | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/git/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2014-12-24T12:11:48+09:00</updated>
+  <updated>2014-12-24T12:12:19+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -20,7 +20,8 @@
     <id>http://kayakuguri.github.io/blog/2014/12/24/git-update-for-mac</id>
     <content type="html"><![CDATA[<p>コマンドからherokuを使おうと思うと、以下のようなメッセージが。</p>
 
-<blockquote><p>Your version of git is 2.1.2. Which has serious security vulnerabilities.
+<blockquote><p>Your version of git is 2.1.2. <br/>
+Which has serious security vulnerabilities.<br/>
 More information here: <a href="https://blog.heroku.com/archives/2014/12/23/update_your_git_clients_on_windows_and_os_x">https://blog.heroku.com/archives/2014/12/23/update_your_git_clients_on_windows_and_os_x</a></p></blockquote>
 
 <p><a href="https://blog.heroku.com/archives/2014/12/23/update_your_git_clients_on_windows_and_os_x">Update Git clients on Windows and OS X</a><br/>
