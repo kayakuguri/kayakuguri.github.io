@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2014-12-18T11:40:11+09:00</updated>
+  <updated>2014-12-24T12:10:19+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,76 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[git-update-for-mac]]></title>
+    <link href="http://kayakuguri.github.io/blog/2014/12/24/git-update-for-mac/"/>
+    <updated>2014-12-24T11:56:25+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2014/12/24/git-update-for-mac</id>
+    <content type="html"><![CDATA[<p>コマンドからherokuを使おうと思うと、以下のようなメッセージが。</p>
+
+<blockquote><p>Your version of git is 2.1.2. Which has serious security vulnerabilities.
+More information here: <a href="https://blog.heroku.com/archives/2014/12/23/update_your_git_clients_on_windows_and_os_x">https://blog.heroku.com/archives/2014/12/23/update_your_git_clients_on_windows_and_os_x</a></p></blockquote>
+
+<p><a href="https://blog.heroku.com/archives/2014/12/23/update_your_git_clients_on_windows_and_os_x">Update Git clients on Windows and OS X</a><br/>
+どうやらgitが古いとセキュリティ的に危ないから最新にしてね、という事のよう。</p>
+
+<!-- more -->
+
+
+<h3>確認</h3>
+
+<p>現行の状態を確認。</p>
+
+<pre><code>$ git --version
+git version 2.1.2
+</code></pre>
+
+<h3>homebrewで</h3>
+
+<p><code>homebrew</code>でもアップグレード出来るよ、とあったので、コマンドをググって叩いてみた。</p>
+
+<pre><code>$ brew upgrade git
+Error: git-2.1.2 already installed
+</code></pre>
+
+<p>しかし、すでに最新が入っている、と起こられてしまう。<br/>
+まだ対応していないのかな？</p>
+
+<h3>パッケージでインストール</h3>
+
+<p>仕方ないので、直接gitのページからインストーラーをダウンロードして、<br/>
+道なりに(いい表現)インストール。</p>
+
+<p><a href="http://sourceforge.net/projects/git-osx-installer/files/">http://sourceforge.net/projects/git-osx-installer/files/</a></p>
+
+<p>しかし、変わらない。。</p>
+
+<h3>パスを変更</h3>
+
+<p>ググるとこんなパスが違う、とうい情報が。<br/>
+<a href="http://qiita.com/d_nishiyama85/items/d63da1e50405abc0929c">OSX で Git をバージョンアップする</a></p>
+
+<p>というわけで、heroku toolebeltのパスが記載されていた、<code>.bashrc</code>に以下を追記。</p>
+
+<pre><code>export PATH="/usr/local/git/bin:$PATH"
+</code></pre>
+
+<p>で、読み込みなおす。</p>
+
+<pre><code>$ source ~/.bashrc
+</code></pre>
+
+<p>バージョン確認。</p>
+
+<pre><code>$ git --version
+git version 2.2.1
+</code></pre>
+
+<p>無事、アップグレード完了。<br/>
+herokuコマンドを叩いても注意は出なくなりました。</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[HerokuからPHPでFTPにファイルをアップしてみる]]></title>
@@ -1537,50 +1607,6 @@ Mass Update</p></blockquote>
 
 <p><a href="http://synergylead.jp/support/faq-salesforce-mass-update-edit-delete/">一覧表示画面からチェックボックスで選択して削除・更新を行うには？｜Synergy!LEAD</a><br/>
 <a href="https://www.youtube.com/watch?v=xZCyhuTmaWE">Mass Edit and Mass Update in Salesforce.com &ndash; YouTube</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[SalesForce]キャンペーンメンバーの状況を追加する]]></title>
-    <link href="http://kayakuguri.github.io/blog/2014/09/12/campaignmemberstatus/"/>
-    <updated>2014-09-12T11:40:25+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2014/09/12/campaignmemberstatus</id>
-    <content type="html"><![CDATA[<p>キャンペーンメンバーオブジェクトのデフォルト項目である、<br/>
-<code>状況</code>は、デフォルトでは、</p>
-
-<blockquote><p>送信<br/>
-レスポンスあり</p></blockquote>
-
-<p>の２つになっている。<br/>
-これを独自で追加したい。</p>
-
-<!-- more -->
-
-
-<p>結論から言うと、仕様上、無理だった。<br/>
-以下に同じような質問があった。</p>
-
-<p><a href="https://developer.salesforce.com/forums/ForumsMain?id=906F00000009B5HIAU">キャンペーンメンバーの状況に値を追加したい &ndash; Salesforce Developer Community</a></p>
-
-<blockquote><p>レコードを横断した設定ではなく、キャンペーンレコード毎に状況を設定する必要があります。</p></blockquote>
-
-<ol>
-<li>キャンペーンタブから、状況を追加したいキャンペーンレコードの詳細画面を表示</li>
-<li>「高度な設定」ボタン押下</li>
-<li>メンバーの状況の値の「編集」ボタン押下</li>
-<li>メンバー状況の一番下にある、「さらに追加」リンク押下</li>
-</ol>
-
-
-<p>この仕様は謎仕様としても有名？なよう。</p>
-
-<blockquote><p>キャンペーンメンバーの「状況」のクソ仕様(?)を質問した。<br/>
-デフォルト値を変更できない件となぜか手入力な仕様について。<br/>
-キャンペーンを作るたびに「状況」の選択肢を追加しないとダメな上に、手入力だから後からの集計がヒドイことになる。<br/>
-<a href="https://twitter.com/realichiro5221/status/337413167804203009">https://twitter.com/realichiro5221/status/337413167804203009</a></p></blockquote>
-
-<p>解決策としては、同じ<code>状況</code>項目をカスタム項目として作成するしかないよう。<br/>
-それでもデフォルトの<code>状況</code>は必須項目になるので、運用がややこしくなりそうだけれど。</p>
 ]]></content>
   </entry>
   
