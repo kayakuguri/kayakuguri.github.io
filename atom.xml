@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2014-12-24T12:10:19+09:00</updated>
+  <updated>2014-12-24T12:11:48+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -14,7 +14,7 @@
 
   
   <entry>
-    <title type="html"><![CDATA[git-update-for-mac]]></title>
+    <title type="html"><![CDATA[herokuからgitのアップグレードを促されたので対応する]]></title>
     <link href="http://kayakuguri.github.io/blog/2014/12/24/git-update-for-mac/"/>
     <updated>2014-12-24T11:56:25+09:00</updated>
     <id>http://kayakuguri.github.io/blog/2014/12/24/git-update-for-mac</id>
