@@ -4,7 +4,7 @@
   <title><![CDATA[Category: salesforce | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/salesforce/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2014-12-24T12:12:19+09:00</updated>
+  <updated>2014-12-25T11:34:09+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,56 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[salesforce]メモ&添付ファイルに添付されたファイルのURLを取得する]]></title>
+    <link href="http://kayakuguri.github.io/blog/2014/12/25/get-attachment-url/"/>
+    <updated>2014-12-25T11:21:42+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2014/12/25/get-attachment-url</id>
+    <content type="html"><![CDATA[<p>オブジェクトの、「メモ＆添付ファイル」で添付されたファイルを公開URLを使用してダウンロードリンクを作成したい。</p>
+
+<!-- more -->
+
+
+<p>添付ファイルの名前などはSOQLで取得できるが、そのファイルへのリンクURLそのものは取得出来ない。<br/>
+けれど、以下のURLを組み立てる事で、ダウンロードは出来るよう。</p>
+
+<pre><code>https://cs6.salesforce.com/servlet/servlet.FileDownload?file=FILE_ID
+</code></pre>
+
+<p>これさえわかれば後は公開URLに適用させてやればよい。<br/>
+その際に参照権限を与えておかないといけない。<br/>
+その方法は以前書いた画像の表示とほぼ同じ。<br/>
+<a href="http://kayakuguri.github.io/blog/2014/10/16/forcecom-sites-profile/">[Salesforce]リッチテキストエリアに保存された画像を一般公開する</a></p>
+
+<p>まずは、サイトの設定から、</p>
+
+<p><img src="/images/2014/12/attach01.jpg" alt="" /></p>
+
+<p>表示ラベルをクリックして詳細を表示し、</p>
+
+<p><img src="/images/2014/12/attach02.jpg" alt="" /></p>
+
+<p>公開アクセス設定から、</p>
+
+<p><img src="/images/2014/12/attach03.jpg" alt="" /></p>
+
+<p>プロファイルの編集を選んで、</p>
+
+<p><img src="/images/2014/12/attach04.jpg" alt="" /></p>
+
+<p>添付ファイルをダウンロードさせたいオブジェクトの権限に参照を与えてやる。</p>
+
+<p><img src="/images/2014/12/attach05.jpg" alt="" /></p>
+
+<p>後は、項目レベルセキュリティの設定で個別な参照権限の設定が必要かと思ったが、これだけでいけた。</p>
+
+<p>設定後は以下のようなアドレスになる。</p>
+
+<pre><code>http://yourdomain.cs6.force.com/yoursite/servlet/servlet.FileDownload?file=FILE-ID
+</code></pre>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[selesforce]Chatter系プロファイルのレコードタイプを変更する]]></title>
@@ -368,100 +418,6 @@ OKをクリック。</p>
 <p><img src="/images/2014/11/ide22.jpg" alt="接続情報" /></p>
 
 <p>これで開発環境が整った。</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[salesforce]apex Rest APIでPOSTでデータを送信する]]></title>
-    <link href="http://kayakuguri.github.io/blog/2014/10/27/apex-rest-post/"/>
-    <updated>2014-10-27T18:49:51+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2014/10/27/apex-rest-post</id>
-    <content type="html"><![CDATA[<p>getでは送信したデータはすぐに取得できたのですが、<br/>
-postでの送信方法とデータ取得方法がわからずに迷走しまいした。<br/>
-結論は、送信側の話、だったのですが。</p>
-
-<!-- more -->
-
-
-<p>GETの場合は以下のコードで取得可能でした。<br/>
-簡単。</p>
-
-<p>送信データ</p>
-
-<pre><code>?userid=123&amp;name=hoge
-</code></pre>
-
-<p>apex</p>
-
-<pre><code>@RestResource(urlMapping='/GetDataSample/test')
-
-global with sharing class GetDataSampleAPI {
-    @HttpGet
-    global static String doGet(){
-        RestRequest req = RestContext.request;
-        String userid = req.params.get('userid');
-        String name = req.params.get('hoge');
-    }
-}
-</code></pre>
-
-<p>実は、POSTの場合も、apexのコードは全く同じで取得する事が出来ました。<br/>
-以下、取得出来たコードです。</p>
-
-<pre><code>@RestResource(urlMapping='/GetDataSample/test')
-
-global with sharing class GetDataSampleAPI {
-    @HttpPost
-    global static String doPost(){
-        RestRequest req = RestContext.request;
-        String userid = req.params.get('userid');
-        String name = req.params.get('hoge');
-    }
-}
-</code></pre>
-
-<p>ただし、送信する際にヘッダーを正しく指定してやったり、送信形式に注意してやる必要がありました。<br/>
-PHPのcurlで実装していたのですが、大いに迷走していたのは、salesforce側の話ではなく、<br/>
-PHPでの送信方法の問題でしたとさ…。</p>
-
-<p>送信出来たコード<br/>
-(<a href="https://github.com/nkjm/Force.com-OAuth-Toolkit-for-PHP">このライブラリ</a>を使用して送信する前提)</p>
-
-<pre><code>$url = "$oauth-&gt;instance_url/services/apexrest/GetDataSample/test";
-$curl = curl_init($url);
-
-$POST_DATA = array(
-    'userid' =&gt; '123',
-    'hoge' =&gt; 'fugafuga'
-);
-
-curl_setopt($curl, CURLOPT_POST, TRUE);
-curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($POST_DATA));
-curl_setopt($curl, CURLOPT_HEADER, false);
-curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-curl_setopt($curl, CURLOPT_HTTPHEADER, array('Content-type: application/x-www-form-urlencoded;charset=UTF-8', "Authorization: OAuth " . $oauth-&gt;access_token));
-
-$output= curl_exec($curl);
-curl_close($curl);
-</code></pre>
-
-<p>ポイントは以下の２つです。</p>
-
-<p>１）<br/>
-<code>Content-type</code>を、<code>application/x-www-form-urlencoded</code>という、POSTでデータを送信する際の標準タイプを指定しています。<br/>
-通常はデフォルトでこれなのですが、salesforceのAPIにPOSTする場合は明示的に指定してやる必要があるようです。(たぶん)<br/>
-ちなみに、apex restは、<code>multipart/form-data</code>タイプはサポートしていないようです。</p>
-
-<p>２）<br/>
-１のタイプで指定してやると、送信するデータは<code>userid=123&amp;hoge=fugafuga</code>のように、GETと同じ形で取得できるようになるようです。<br/>
-なので送信する際にそのような形に変換してやる必要があるようで、それが以下の記述となります。</p>
-
-<pre><code>curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($POST_DATA));
-</code></pre>
-
-<h3>参考</h3>
-
-<p><a href="http://qiita.com/khirose/items/870ffec6ce4562f54c9d">PHP小ネタ &ndash; PHPのcurlでPOST &ndash; Qiita</a></p>
 ]]></content>
   </entry>
   
