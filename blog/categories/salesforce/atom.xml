@@ -4,7 +4,7 @@
   <title><![CDATA[Category: salesforce | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/salesforce/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2014-12-25T11:34:09+09:00</updated>
+  <updated>2014-12-25T11:35:23+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -60,6 +60,10 @@
 
 <pre><code>http://yourdomain.cs6.force.com/yoursite/servlet/servlet.FileDownload?file=FILE-ID
 </code></pre>
+
+<h3>参考</h3>
+
+<p><a href="https://developer.salesforce.com/forums/ForumsMain?id=906F0000000AURkIAO">Trigger to get download link/url from attachments in salesforce?</a></p>
 ]]></content>
   </entry>
   
