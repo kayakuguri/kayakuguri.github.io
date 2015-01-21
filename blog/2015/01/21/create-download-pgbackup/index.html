@@ -155,8 +155,6 @@ b252 | 2012/02/24 16:08.53 | 5.3KB | HEROKU_POSTGRESQL_PINK
 <p>以下の<code>pg_restore</code>コマンドでインポート出来る。</p>
 
 <pre><code>$ pg_restore --verbose --clean --no-acl --no-owner -h myhost -U myuser -d mydb b001.dump
-
-pg_restore --verbose --clean --no-acl --no-owner -h localhost -U postgres -d mydb latest.dump
 </code></pre>
 
 <p>ちなみに、herokuのPostgresは、9.x系のようで、8.x系でpg_restoreしようとすると、バージョン違いで怒られました。</p>
