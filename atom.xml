@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2014-12-25T11:37:14+09:00</updated>
+  <updated>2015-01-21T11:09:19+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,83 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Heroku Postgresデータベースのデータのバックアップをダウンロードする]]></title>
+    <link href="http://kayakuguri.github.io/blog/2015/01/21/create-download-pgbackup/"/>
+    <updated>2015-01-21T10:39:44+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2015/01/21/create-download-pgbackup</id>
+    <content type="html"><![CDATA[<p>HerokuのPostgresデータベースのバックアップデータをダウンロードする方法。<br/>
+いくつかコマンド叩くだけでした。</p>
+
+<!-- more -->
+
+
+<h3>アドオンのインストール</h3>
+
+<p>何はともあれ、<code>PG Backup</code>のアドオンが必要です。<br/>
+インストール方法は以下。</p>
+
+<pre><code>$ heroku addons:add pgbackups
+</code></pre>
+
+<h3>バックアップの作成</h3>
+
+<p>バックアップの作成は以下のコマンドで。</p>
+
+<pre><code>$ heroku pgbackups:capture
+</code></pre>
+
+<p>現在保持しているバックアップの一覧は以下で確認出来ます。</p>
+
+<pre><code>$ heroku pgbackups
+ID   | Backup Time         | Size  | Database
+-----+---------------------+-------+------------------------
+a226 | 2012/02/22 20:02.19 | 5.3KB | DATABASE_URL
+a227 | 2012/02/23 20:02.19 | 5.3KB | DATABASE_URL
+b251 | 2012/02/24 16:08.02 | 5.3KB | HEROKU_POSTGRESQL_BLACK
+b252 | 2012/02/24 16:08.53 | 5.3KB | HEROKU_POSTGRESQL_PINK
+</code></pre>
+
+<h3>バックアップURLの確認</h3>
+
+<p>バックアップされているファイルのURLは以下で確認できます。</p>
+
+<pre><code>$ heroku pgbackups:url
+</code></pre>
+
+<p>Amazon S3のURLが表示されます。<br/>
+これは、直近のバックアップ分を参照しますが、過去分の場合はIDを指定します。</p>
+
+<pre><code>$ heroku pgbackups:url ID
+</code></pre>
+
+<h3>ファイルのダウンロード</h3>
+
+<p><code>curl</code>を使ってダウンロードします。(wgetでもいいです)</p>
+
+<pre><code>$ curl -o latest.dump `URL`
+</code></pre>
+
+<h3>ダウンロードしたファイルをローカルのDBにインポート</h3>
+
+<p>以下の<code>pg_restore</code>コマンドでインポート出来る。</p>
+
+<pre><code>$ pg_restore --verbose --clean --no-acl --no-owner -h myhost -U myuser -d mydb b001.dump
+
+pg_restore --verbose --clean --no-acl --no-owner -h localhost -U postgres -d mydb latest.dump
+</code></pre>
+
+<p>ちなみに、herokuのPostgresは、9.x系のようで、8.x系でpg_restoreしようとすると、バージョン違いで怒られました。</p>
+
+<blockquote><p>pg_restore: [アーカイバ] ファイルヘッダ内のバージョン(1.12)はサポートされていません</p></blockquote>
+
+<h3>参考</h3>
+
+<p><a href="https://devcenter.heroku.com/articles/heroku-postgres-import-export">Importing and Exporting Heroku Postgres Databases with PG Backups</a><br/>
+<a href="https://devcenter.heroku.com/articles/pgbackups">PG Backups</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[salesforce]メモ&添付ファイルに添付されたファイルのURLを取得する]]></title>
@@ -1338,233 +1415,6 @@ POSTの場合は、以下のように、POSTに設定しAPIを入力します。
 <p><img src="http://kayakuguri.github.io/images/2014/09/apigee10.jpg" alt="API Refarence" /></p>
 
 <p>サインアップするとその他にも色々機能があるようで、もっと使い込めば便利かもしれません。</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[heroku]QuotaGuard Staticを使ってHerokuでのIP固定を試してみる]]></title>
-    <link href="http://kayakuguri.github.io/blog/2014/09/26/static-ip-heroku/"/>
-    <updated>2014-09-26T17:59:42+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2014/09/26/static-ip-heroku</id>
-    <content type="html"><![CDATA[<p>herokuでのIP固定といえば、<a href="https://addons.heroku.com/proximo">Proximo</a>の方が有名っぽいけど、<br/>
-QuotaGuard Staticというのでも同じく固定できるようなので試してみた。</p>
-
-<!-- more -->
-
-
-<p><img src="http://kayakuguri.github.io/images/2014/09/quotaguard1.jpg" alt="QuotaGuard Static add-on" /></p>
-
-<p><a href="https://addons.heroku.com/quotaguardstatic">QuotaGuard Static</a></p>
-
-<p>アプリへのセットアップをコマンドラインからする場合は以下。<br/>
-無料プランがあるので、それで試してみる。</p>
-
-<pre><code>$ heroku addons:add quotaguardstatic
-</code></pre>
-
-<p>以下のように結果が返ってくる。<br/>
-その中にIPアドレスも含まれる。</p>
-
-<pre><code>Adding quotaguardstatic on static-ip-test... done, v4 (free)
-Your static IPs are [54.88.136.216, 54.84.188.199]
-Use `heroku addons:docs quotaguardstatic` to view documentation.
-</code></pre>
-
-<p>Proximoでも同じ仕組のようだけど、<br/>
-入れたアドオンによって指定されたURLを介してアクセスすることで<br/>
-固定IPを実現しているよ。<br/>
-アドオンがプロキシの役目を果たす。<br/>
-このプロキシ経由でのアクセス数に制限があり、その数で値段が変わる仕組み。</p>
-
-<p>そのアクセス用のURLは環境変数に格納されている。</p>
-
-<pre><code>$ heroku config
-QUOTAGUARDSTATIC_URL: http://username:pass@us-east-1-static-brooks.quotaguard.com:9293
-</code></pre>
-
-<p>上記、<code>IPs</code>となっているのは、２つのIPのうちどちらかでアクセスされる、とのこと。<br/>
-負荷分散のよう。<br/>
-一応、公式の理由。</p>
-
-<blockquote><p>We believe all apps should be built for scalability and high availability. Our commitment to this means we only provide load balanced, high availability services. Load balancing our nodes allows one node to fail or be brought down for maintenance with no impact to your application. Each IP you are given represents one proxy node that is running behind a load balancer.</p></blockquote>
-
-<p>IPアドレスはアドオンのダッシュボードからも確認できる。<br/>
-以下、ダッシュボードを開くコマンド</p>
-
-<pre><code>$ heroku addons:open quotaguardstatic
-</code></pre>
-
-<p>公式にPHPでの動作サンプルが載っていたのでそのまま使用して試してみた。<br/>
-以下、転載。</p>
-
-<p><a href="https://devcenter.heroku.com/articles/quotaguardstatic#using-with-php">PHPのサンプル</a></p>
-
-<pre><code>&lt;?php
-
-function lookup(){
-  $quotaguard_env = getenv("QUOTAGUARDSTATIC_URL");
-  $quotaguard = parse_url($quotaguard_env);
-
-  $proxyUrl       = $quotaguard['host'].":".$quotaguard['port'];
-  $proxyAuth       = $quotaguard['user'].":".$quotaguard['pass'];
-
-  $url = "http://ip.jsontest.com/";
-
-  $ch = curl_init();
-  curl_setopt($ch, CURLOPT_URL, $url);
-  curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-  curl_setopt($ch, CURLOPT_PROXY, $proxyUrl);
-  curl_setopt($ch, CURLOPT_PROXYAUTH, CURLAUTH_BASIC);
-  curl_setopt($ch, CURLOPT_PROXYUSERPWD, $proxyAuth);
-  $response = curl_exec($ch);
-  return $response;
-}
-
-$res = lookup();
-print_r($res);
-
-?&gt;
-</code></pre>
-
-<p>ここでアクセスしている<code>http://ip.jsontest.com/</code>のURLは、接続元のIPアドレスをJsonで返してくれるサービスのよう。</p>
-
-<p>アクセスすると、以下のようなJSONが返ってきた。</p>
-
-<pre><code>{"ip": "54.84.188.199"}
-</code></pre>
-
-<p>リロードすると以下のものとランダムに切り替わっているのが確認できる。</p>
-
-<pre><code>{"ip": "54.88.136.216"}
-</code></pre>
-
-<p>管理画面を確認すると、アクセス数と残りアクセス数がわかる。<br/>
-アクセス数は、１月の制限のよう。<br/>
-無料の場合は250/月。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2014/09/quotaguard2.jpg" alt="管理画面" /></p>
-
-<p>冒頭のProximoと比較すべく、料金表を抜き出してみた。</p>
-
-<p><strong>QuotaGuard Static</strong></p>
-
-<table>
-<thead>
-<tr>
-<th>プラン </th>
-<th> 値段(月) </th>
-<th> アクセス数(月) </th>
-<th> 帯域幅</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Starter </td>
-<td> 無料 </td>
-<td> 250 </td>
-<td> 100MB</td>
-</tr>
-<tr>
-<td>Spike </td>
-<td> $5 </td>
-<td> 500 </td>
-<td> 250MB</td>
-</tr>
-<tr>
-<td>Micro </td>
-<td> $19 </td>
-<td> 10,000 </td>
-<td> 1GB</td>
-</tr>
-<tr>
-<td>Medium </td>
-<td> $49 </td>
-<td> 50,000 </td>
-<td> 10GB</td>
-</tr>
-<tr>
-<td>Large </td>
-<td> $89 </td>
-<td> 1000,000 </td>
-<td> 50GB</td>
-</tr>
-<tr>
-<td>Enterprise </td>
-<td> $219 </td>
-<td> 1,000,000 </td>
-<td> 1TB</td>
-</tr>
-<tr>
-<td>Premium </td>
-<td> $399 </td>
-<td> 5,000,000 </td>
-<td> 無制限</td>
-</tr>
-</tbody>
-</table>
-
-
-<p><strong>Proximo</strong></p>
-
-<table>
-<thead>
-<tr>
-<th>プラン </th>
-<th> 値段(月) </th>
-<th> アクセス数(月) </th>
-<th> 帯域幅</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Development </td>
-<td> $5 </td>
-<td> 1,000 </td>
-<td> 500MB</td>
-</tr>
-<tr>
-<td>Starter </td>
-<td> $25 </td>
-<td> 20,000 </td>
-<td> 2GB</td>
-</tr>
-<tr>
-<td>Professional </td>
-<td> $75 </td>
-<td> 200,000 </td>
-<td> 100GB</td>
-</tr>
-<tr>
-<td>Dedicated </td>
-<td> $250 </td>
-<td> 1,000,000 </td>
-<td> 1TB</td>
-</tr>
-<tr>
-<td>Elite </td>
-<td> $500 </td>
-<td> 5,000,000 </td>
-<td> 5TB</td>
-</tr>
-<tr>
-<td>Enterprise </td>
-<td> $1250 </td>
-<td> 無制限 </td>
-<td> 無制限</td>
-</tr>
-</tbody>
-</table>
-
-
-<p>QuotaGuardは無料があるのがやはりお手軽。<br/>
-しかし、安いうちはProximoの方がお得。<br/>
-増えてくるとQuotaGuardの方がお得かも。<br/>
-他の機能もあったりするので一概には言えないけれど。</p>
-
-<h3>参考</h3>
-
-<p><a href="https://devcenter.heroku.com/articles/quotaguardstatic">QuotaGuard Static 公式ドキュメント</a><br/>
-<a href="https://devcenter.heroku.com/articles/proximo">Proximo 公式ドキュメント</a></p>
 ]]></content>
   </entry>
   
