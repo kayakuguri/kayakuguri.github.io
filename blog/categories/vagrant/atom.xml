@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: vagrant | KayaMemo]]></title>
+  <link href="http://kayakuguri.github.io/blog/categories/vagrant/atom.xml" rel="self"/>
+  <link href="http://kayakuguri.github.io/"/>
+  <updated>2015-01-28T14:39:19+09:00</updated>
+  <id>http://kayakuguri.github.io/</id>
+  <author>
+    <name><![CDATA[萱潜]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Vagrantの起動時のシェルスクリプトのメモ。composerとpostgresql9.3]]></title>
+    <link href="http://kayakuguri.github.io/blog/2015/01/28/vagrant-shell-composer-postgresql/"/>
+    <updated>2015-01-28T14:33:11+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2015/01/28/vagrant-shell-composer-postgresql</id>
+    <content type="html"><![CDATA[<p>調べて組み込んだので具体的なコードをメモ。</p>
+
+<!-- more -->
+
+
+<h3>Composer</h3>
+
+<pre><code># Composer
+curl -sS https://getcomposer.org/installer | php
+mv composer.phar /usr/local/bin/composer
+</code></pre>
+
+<h3>PostgreSQL 9.3</h3>
+
+<p>centOS6に標準で入っているPostgreSQLは8.3。<br/>
+なので、9.3を指定して入れる。</p>
+
+<pre><code># postgresql
+# 9.3
+rpm -ivh http://yum.postgresql.org/9.3/redhat/rhel-6-x86_64/pgdg-centos93-9.3-1.noarch.rpm
+yum -y install postgresql93-server
+if [ ! -f /var/lib/pgsql/9.3/data/postgresql.conf ]; then
+    su postgres -c '/usr/pgsql-9.3/bin/initdb --no-locale -D /var/lib/pgsql/9.3/data'
+    if [ -f /vagrant/postgresql.conf ]; then
+        cp -a /vagrant/postgresql.conf /var/lib/pgsql/9.3/data/
+    fi
+fi
+/sbin/service postgresql-9.3 restart
+/sbin/chkconfig postgresql-9.3 on
+</code></pre>
+
+<h3>参考</h3>
+
+<p><a href="http://www.slideshare.net/shin1x1/vagrant-php">Vagrant で作る PHP 開発環境 [実践編]</a></p>
+]]></content>
+  </entry>
+  
+</feed>

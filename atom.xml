@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-01-28T14:31:54+09:00</updated>
+  <updated>2015-01-28T14:39:19+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,48 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Vagrantの起動時のシェルスクリプトのメモ。composerとpostgresql9.3]]></title>
+    <link href="http://kayakuguri.github.io/blog/2015/01/28/vagrant-shell-composer-postgresql/"/>
+    <updated>2015-01-28T14:33:11+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2015/01/28/vagrant-shell-composer-postgresql</id>
+    <content type="html"><![CDATA[<p>調べて組み込んだので具体的なコードをメモ。</p>
+
+<!-- more -->
+
+
+<h3>Composer</h3>
+
+<pre><code># Composer
+curl -sS https://getcomposer.org/installer | php
+mv composer.phar /usr/local/bin/composer
+</code></pre>
+
+<h3>PostgreSQL 9.3</h3>
+
+<p>centOS6に標準で入っているPostgreSQLは8.3。<br/>
+なので、9.3を指定して入れる。</p>
+
+<pre><code># postgresql
+# 9.3
+rpm -ivh http://yum.postgresql.org/9.3/redhat/rhel-6-x86_64/pgdg-centos93-9.3-1.noarch.rpm
+yum -y install postgresql93-server
+if [ ! -f /var/lib/pgsql/9.3/data/postgresql.conf ]; then
+    su postgres -c '/usr/pgsql-9.3/bin/initdb --no-locale -D /var/lib/pgsql/9.3/data'
+    if [ -f /vagrant/postgresql.conf ]; then
+        cp -a /vagrant/postgresql.conf /var/lib/pgsql/9.3/data/
+    fi
+fi
+/sbin/service postgresql-9.3 restart
+/sbin/chkconfig postgresql-9.3 on
+</code></pre>
+
+<h3>参考</h3>
+
+<p><a href="http://www.slideshare.net/shin1x1/vagrant-php">Vagrant で作る PHP 開発環境 [実践編]</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[gitにて以降はこのファイルは変更に含めない指定]]></title>
@@ -1236,140 +1278,6 @@ $ brew install pcre
 </code></pre>
 
 <p>これでようやく起動できた。</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[heroku]herokuでのSSL設定とカスタムサブドメインの適用方法]]></title>
-    <link href="http://kayakuguri.github.io/blog/2014/09/30/heroku-ssl-subdomain/"/>
-    <updated>2014-09-30T19:24:37+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2014/09/30/heroku-ssl-subdomain</id>
-    <content type="html"><![CDATA[<p>herokuでのSSL設定とカスタムサブドメインの設定をさっくりと調べてみた。</p>
-
-<!-- more -->
-
-
-<h2>SSL</h2>
-
-<h3>手順</h3>
-
-<ol>
-<li>プライベートキーを作成</li>
-<li>CSRを作成</li>
-<li>CSRを契約の際に業者に提出</li>
-<li>証明書が発行される</li>
-<li>証明書 + 中間証明書 + プライベートキーをherokuに設定</li>
-</ol>
-
-
-<p>1はローカルPC上にて作成<br/>
-2の作成方法は以下、など。
-<a href="https://jp.globalsign.com/support/ssl/list.php?cat=csr">https://jp.globalsign.com/support/ssl/list.php?cat=csr</a><br/>
-5のみ、heroku上。</p>
-
-<h3>ファイルの準備</h3>
-
-<p>サーバー会社等から取得したデータを保存する。<br/>
-テキストに文字列を貼り付けて保存すればよい。<br/>
-※ファイル名の指定は特になし。拡張子もなんでもいい。</p>
-
-<table>
-<thead>
-<tr>
-<th></th>
-<th align="left"> 項目 </th>
-<th align="left"> ファイル名 </th>
-<th> </th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td></td>
-<td align="left"> 秘密鍵 </td>
-<td align="left"> server.key </td>
-<td></td>
-</tr>
-<tr>
-<td></td>
-<td align="left"> 証明書  </td>
-<td align="left">  server.crt </td>
-<td></td>
-</tr>
-<tr>
-<td></td>
-<td align="left"> 中間CA証明書  </td>
-<td align="left">  chain_ca.pem </td>
-<td></td>
-</tr>
-</tbody>
-</table>
-
-
-<p><a href="http://q.hatena.ne.jp/1188202204">http://q.hatena.ne.jp/1188202204</a></p>
-
-<h3>herokuでの操作</h3>
-
-<p>SSLのアドオン($20/mo)<br/>
-<a href="https://addons.heroku.com/ssl">https://addons.heroku.com/ssl</a></p>
-
-<p>アドオンの追加</p>
-
-<pre><code>$ heroku addons:add ssl:endpoint
-</code></pre>
-
-<p>サーバー証明書と中間証明書を合体させる</p>
-
-<pre><code>$ cat chain_ca.pem &gt;&gt; server.crt
-</code></pre>
-
-<p>プライベートキーのパスフレーズが解除されていない場合は解除する。</p>
-
-<pre><code>$ openssl rsa -in site.key -out server.key
-Enter pass phrase for site.key:
-writing RSA key
-</code></pre>
-
-<p>で、合体させた証明書とキーをアップする。</p>
-
-<pre><code>$ heroku certs:add server.crt server.key
-</code></pre>
-
-<p>アップロード結果で返ってくるURLが証明書が適応されたURLとなる。<br/>
-<code>hokkaido-1212.herokussl.com</code><br/>
-この状態でアクセスすると、<code>No such app</code>と出るがこれで正しい。</p>
-
-<h3>参考</h3>
-
-<p><a href="http://qiita.com/yu1ch1/items/290efb666209354e8fb3">herokuのssl証明書を更新する</a><br/>
-<a href="http://interu.hatenablog.com/entry/2012/07/25/184812">HerokuでカスタムドメインのSSL endpointを利用する方法</a><br/>
-<a href="http://d.hatena.ne.jp/install-memo/20110906/1315291837">SSL証明書のKEYファイル・CSRファイル・CRTファイルのチェック方法</a></p>
-
-<h2>サブドメイン</h2>
-
-<h3>herokuでの操作</h3>
-
-<p>herokuのアプリのSettings内にある、<br/>
-Domains、から設定したいドメインを指定する。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2014/09/Settings___Heroku.jpg" alt="Settings___Heroku" /></p>
-
-<p>契約しているドメイン業者のCNAMEに、適用したいアプリのURLを指定する。<br/>
-例：<code>hoge.herokuapp.com</code></p>
-
-<h3>SSLの場合</h3>
-
-<p>SSLをカスタムドメインで使用したい場合は、上記SSLの項で設定した、<br/>
-<code>hokkaido-1212.herokussl.com</code>のドメインをCNAMEに指定する。</p>
-
-<p>反映後、設定の確認は以下で出来る。</p>
-
-<pre><code>$ heroku certs
-Endpoint                     Common Name(s)            Expires               Trusted
----------------------------  ------------------------  --------------------  -------
-hokkaido-1212.herokussl.com  secure.example.co.jp  2015-06-24 23:59 UTC  True
-</code></pre>
-
-<p>詳細は、<code>heroku certs:info</code>で確認できる。</p>
 ]]></content>
   </entry>
   
