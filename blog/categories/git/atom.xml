@@ -4,7 +4,7 @@
   <title><![CDATA[Category: git | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/git/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-01-23T16:52:16+09:00</updated>
+  <updated>2015-01-28T14:31:54+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,35 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[gitにて以降はこのファイルは変更に含めない指定]]></title>
+    <link href="http://kayakuguri.github.io/blog/2015/01/28/git-skip-worktree/"/>
+    <updated>2015-01-28T14:27:07+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2015/01/28/git-skip-worktree</id>
+    <content type="html"><![CDATA[<p>一度gitにてpushはしたけれど、それ以降は変更を無視する(ローカルとサーバーで内容が違うファイルをなる)設定。<br/>
+いつも忘れるのでメモ。</p>
+
+<!-- more -->
+
+
+<p><code>gitignore</code>だと一度pushしてしまっているので効かない。<br/>
+こんな時は、<code>skip-worktree</code>を使うそう。</p>
+
+<pre><code>$ git update-index --skip-worktree スキップしたいファイル名
+</code></pre>
+
+<p>これを実行すると以降は指定したファイルの変更は検知されない(commitされない)<br/>
+解除するには以下。</p>
+
+<pre><code>$ git update-index --no-skip-worktree スキップしてたファイル名
+</code></pre>
+
+<h4>[参考]</h4>
+
+<p><a href="http://qiita.com/usamik26/items/56d0d3ba7a1300625f92">既に git 管理しているファイルをあえて無視したい &ndash; Qiita</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[herokuからgitのアップグレードを促されたので対応する]]></title>

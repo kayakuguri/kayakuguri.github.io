@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-01-23T16:52:16+09:00</updated>
+  <updated>2015-01-28T14:31:54+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,35 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[gitにて以降はこのファイルは変更に含めない指定]]></title>
+    <link href="http://kayakuguri.github.io/blog/2015/01/28/git-skip-worktree/"/>
+    <updated>2015-01-28T14:27:07+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2015/01/28/git-skip-worktree</id>
+    <content type="html"><![CDATA[<p>一度gitにてpushはしたけれど、それ以降は変更を無視する(ローカルとサーバーで内容が違うファイルをなる)設定。<br/>
+いつも忘れるのでメモ。</p>
+
+<!-- more -->
+
+
+<p><code>gitignore</code>だと一度pushしてしまっているので効かない。<br/>
+こんな時は、<code>skip-worktree</code>を使うそう。</p>
+
+<pre><code>$ git update-index --skip-worktree スキップしたいファイル名
+</code></pre>
+
+<p>これを実行すると以降は指定したファイルの変更は検知されない(commitされない)<br/>
+解除するには以下。</p>
+
+<pre><code>$ git update-index --no-skip-worktree スキップしてたファイル名
+</code></pre>
+
+<h4>[参考]</h4>
+
+<p><a href="http://qiita.com/usamik26/items/56d0d3ba7a1300625f92">既に git 管理しているファイルをあえて無視したい &ndash; Qiita</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Heroku Postgresデータベースのデータのバックアップをダウンロードする]]></title>
@@ -1341,78 +1370,6 @@ hokkaido-1212.herokussl.com  secure.example.co.jp  2015-06-24 23:59 UTC  True
 </code></pre>
 
 <p>詳細は、<code>heroku certs:info</code>で確認できる。</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[apigeeを使用してAPIの動作を確認する]]></title>
-    <link href="http://kayakuguri.github.io/blog/2014/09/30/apigee/"/>
-    <updated>2014-09-30T17:46:34+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2014/09/30/apigee</id>
-    <content type="html"><![CDATA[<p>apigeeというサービスを使用すれば、様々なAPIの動作をブラウザ上から気軽に試せる、<br/>
-ということなので実際に試してみました。</p>
-
-<!-- more -->
-
-
-<p><img src="http://kayakuguri.github.io/images/2014/09/apigee01.jpg" alt="apigee" /></p>
-
-<p><a href="http://apigee.com/about/">apigee</a></p>
-
-<p>トップページからAPIを試すサービスへの動線がわからなかったので、<br/>
-以下から一覧ページに直接アクセスして下さい。<br/>
-(サインアップすれば簡単にアクセス出来ます。)<br/>
-(サインアップしなくても試すことは出来ます。)</p>
-
-<p><a href="https://apigee.com/providers">API Providers</a></p>
-
-<p>この一覧から各サービスのAPIに接続出来るわけですが、<br/>
-今回はsalesforceのsandboxで試してみました。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2014/09/apigee02.jpg" alt="salesforce" /></p>
-
-<p>クリックすると、APIの一覧ページに飛ぶので、とりあえず素通りしてコンソールへ。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2014/09/apigee03.jpg" alt="API Refarence" /></p>
-
-<p>コンソール画面で実際に叩くAPIを指定したりパラメータを設定したり出来ます。<br/>
-このままだと、認証がいらないものしか叩けないので、salesforceと認証させます。</p>
-
-<p><code>Authentication</code>から、<code>OAuth2</code>を選択します。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2014/09/apigee04.jpg" alt="API Refarence" /></p>
-
-<p>すると確認ダイアログが出ますので、<code>Sign in Salesforce Snadbox</code>をクリックしてログインし、認証させます。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2014/09/apigee05.jpg" alt="API Refarence" /></p>
-
-<p>認証後は以下のようになります。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2014/09/apigee06.jpg" alt="API Refarence" /></p>
-
-<p>GETの場合は、この状態で下の入力エリアに叩きたいAPIを入れ、<br/>
-<code>?</code>でパラメータを設定していけば試すことができます。<br/>
-POSTの場合は、以下のように、POSTに設定しAPIを入力します。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2014/09/apigee07.jpg" alt="API Refarence" /></p>
-
-<p>しかしこのままではパラメータを入力出来ません。<br/>
-なので、左側にある三角をクリックし、API一覧を表示させます。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2014/09/apigee08.jpg" alt="API Refarence" /></p>
-
-<p>で、適当にAPIを選択すると、下図のようにタブが出現し、<br/>
-その中の、<code>Body</code>でパラメータを設定する事が出来ます。<br/>
-(ちなみにQueryではGETの値を設定出来ます)</p>
-
-<p><img src="http://kayakuguri.github.io/images/2014/09/apigee09.jpg" alt="API Refarence" /></p>
-
-<p>試しにこれはGETでversionを取得しただけですが、<br/>
-実行すると以下の様な形でレスポンスを取得することができます。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2014/09/apigee10.jpg" alt="API Refarence" /></p>
-
-<p>サインアップするとその他にも色々機能があるようで、もっと使い込めば便利かもしれません。</p>
 ]]></content>
   </entry>
   
