@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-01-28T14:39:19+09:00</updated>
+  <updated>2015-01-29T11:55:26+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,81 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[Herokuアドオン]PostgreSQL Studio]]></title>
+    <link href="http://kayakuguri.github.io/blog/2015/01/29/postgresql-studio/"/>
+    <updated>2015-01-29T11:30:01+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2015/01/29/postgresql-studio</id>
+    <content type="html"><![CDATA[<p>herokuのアドオン、「PostgreSQL Studio」を入れてみた。</p>
+
+<!-- more -->
+
+
+<p><img src="http://kayakuguri.github.io/images/2015/01/postgresqlStdio00.jpg" alt="postgresql studio" /></p>
+
+<h2>概要</h2>
+
+<p>自身のアカウントで管理しているアプリ内に導入されているPostgreSQLの情報を閲覧、管理出来るアドオン。</p>
+
+<h2>インストール</h2>
+
+<p>導入は無料で行えます。<br/>
+というか、無料バージョンしか存在していません。</p>
+
+<pre><code>$ heroku addons:add pgstudio
+</code></pre>
+
+<h2>承認</h2>
+
+<p>herokuのアプリページでアドオンをクリックするとアドオンのトップページへ遷移出来る。<br/>
+PostgreSQL Studioのトップへインストール後に遷移すると、以下のような承認画面が出る。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2015/01/postgresqlStdio01.jpg" alt="authorize" /></p>
+
+<p>内容は、</p>
+
+<blockquote><p>Read-only access to all of your apps and resources, excluding account information. Includes configuration variables, which may include runtime secrets.</p></blockquote>
+
+<p>あなたのアカウント情報を除く全てのアプリに読み取り専用の権限を許可します。<br/>
+そこには、設定情報やランタイム情報も含まれます。</p>
+
+<p>と、アドオンを入れるのは一つのアプリなのに、<strong>全ての</strong>アプリへの接続許可を求められます。<br/>
+この権現の編集は、自身のアカウントページから行えます。<br/>
+<a href="https://dashboard.heroku.com/account">https://dashboard.heroku.com/account</a></p>
+
+<p><img src="http://kayakuguri.github.io/images/2015/01/postgresqlStdio04.jpg" alt="承認設定" /></p>
+
+<p>というのも、自身が管理しているアプリにインストールしている全てのPostgreSQLのデータをこれで管理出来るため、この権現が必要なようです。</p>
+
+<h2>データ閲覧</h2>
+
+<p>承認してアクセスすると、閲覧したいDBの選択画面になるので、任意のものを選択し、Loginします。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2015/01/postgresqlStdio02.jpg" alt="login" /></p>
+
+<p>ログインすると、そのDBの情報を見たり、クエリを実行したり、などが出来ます。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2015/01/postgresqlStdio03.jpg" alt="db情報" /></p>
+
+<p>テーブルの構造はそのままで見ることができるが、データの中身は、SQLを発行しないと見られないよう。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2015/01/postgresqlStdio05.jpg" alt="レコード内容" /></p>
+
+<h2>まとめ</h2>
+
+<p>ローカルにアプリをインストールしたり、自前でphpPGAdminを入れたりせずともアドオンさえ入れていればよいので、すごく楽。<br/>
+ただし、全アプリへのアクセス権限が必要になる＝全てのアプリのデータが閲覧可能、というのは少し怖い。<br/>
+アプリごとの承認ならいいのだけれど。<br/>
+なので、実質は自分のアカウント内のどれかのアプリに一つだけ入れておけばよいことになる。<br/>
+あと、ベータ版なので、動作の不具合や終了などがありえる。</p>
+
+<h2>参考</h2>
+
+<p><a href="https://devcenter.heroku.com/articles/pgstudio">公式ドキュメント</a><br/>
+<a href="https://addons.heroku.com/pgstudio">アドオンページ</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Vagrantの起動時のシェルスクリプトのメモ。composerとpostgresql9.3]]></title>
@@ -1204,80 +1279,6 @@ Listじゃなく、Setでやれば重複が許されなかった。</p>
 
 <blockquote><p>Set は、プリミティブ型の集合であり、順序の指定はなく、要素の重複は許されません。<br/>
 List は、要素の集合です。要素間の順序を保持したい場合に使用します。要素の重複は許されます。</p></blockquote>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Mavericksにアップデートしたらターミナルが起動しなくなった]]></title>
-    <link href="http://kayakuguri.github.io/blog/2014/10/06/zsh-reinstall/"/>
-    <updated>2014-10-06T12:24:35+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2014/10/06/zsh-reinstall</id>
-    <content type="html"><![CDATA[<p>今更ながらですが、Mavericksにアップデートしたらターミナルが起動しなくなりましたよ。<br/>
-これが嫌でアップデートしてなかったのですが、やはり起こってしまったので、対応したメモ。</p>
-
-<!-- more -->
-
-
-<p>まずは、ここの通りに。</p>
-
-<p><a href="http://qiita.com/crispy/items/70367cd7e97dd4e0a60d">Maverickに上げたらターミナルが起動しない問題</a></p>
-
-<p>ターミナルのアプリの環境設定から、<br/>
-<code>起動 -&gt; 開くシェル -&gt; コマンド(完全パス)</code><br/>
-に、<code>/bin/zsh</code>を指定。</p>
-
-<p>これで、ターミナルは動作するようになるので、以下の通りに叩いた。</p>
-
-<pre><code>$ brew update
-$ brew upgrade
-</code></pre>
-
-<p>これがかなり時間がかかった。<br/>
-しかしまだエラーが。</p>
-
-<pre><code>dyld: Library not loaded: /usr/local/lib/libgdbm.4.dylib
-  Referenced from: /usr/local/bin/zsh
-  Reason: image not found
-zsh: trace trap  tmux
-</code></pre>
-
-<p>次は以下を参考。</p>
-
-<p><a href="http://umegusa.hatenablog.jp/entry/2012/07/21/155637">teminalが動かなくなってしまいました</a></p>
-
-<p>最新版は、1.11ってことで、以下で追加</p>
-
-<pre><code>$ wget ftp://ftp.gnu.org/pub/gnu/gdbm/gdbm-1.11.tar.gz 
-$ tar zxfv gdbm-1.11.tar.gz
-</code></pre>
-
-<p>手順に従って、インストール。</p>
-
-<pre><code>$ cd gdbm-1.11
-$ ./configure --prefix=/usr/local
-$ make
-$ make install
-</code></pre>
-
-<p>これで解決したけれど、また別のエラーが。</p>
-
-<pre><code>dyld: Library not loaded: /usr/local/lib/libpcre.1.dylib
-  Referenced from: /usr/local/bin/zsh
-  Reason: image not found
-zsh: trace trap  tmux
-</code></pre>
-
-<p>次は以下を参考</p>
-
-<p><a href="http://chaika.hatenablog.com/entry/2014/06/11/170441">Mac OS10.9にしたらHomebrewで入れていたコマンドとか、いろいろ動かなくなった。</a></p>
-
-<p>最後の方の部分だけを叩かせてもらう。</p>
-
-<pre><code>$ brew uninstall pcre
-$ brew install pcre
-</code></pre>
-
-<p>これでようやく起動できた。</p>
 ]]></content>
   </entry>
   
