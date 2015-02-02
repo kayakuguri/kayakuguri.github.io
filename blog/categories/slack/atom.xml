@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: slack | KayaMemo]]></title>
+  <link href="http://kayakuguri.github.io/blog/categories/slack/atom.xml" rel="self"/>
+  <link href="http://kayakuguri.github.io/"/>
+  <updated>2015-02-02T12:12:34+09:00</updated>
+  <id>http://kayakuguri.github.io/</id>
+  <author>
+    <name><![CDATA[萱潜]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[slackにて入力中にエンターキーを押しても送信しないようにする方法]]></title>
+    <link href="http://kayakuguri.github.io/blog/2015/02/02/slack-sending-enterclick/"/>
+    <updated>2015-02-02T11:53:28+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2015/02/02/slack-sending-enterclick</id>
+    <content type="html"><![CDATA[<p><a href="https://slack.com/">slack</a>、便利ですよね。<br/>
+ただし、入力中に改行を入れようとすると、(macの場合) <code>alt+Enter</code>を押さないといけません。<br/>
+ミスるとたちまち送信されてしまいます。<br/>
+変換の決定でエンターを押したつもりが、英語モードになっていて送信、ということはよくあります。<br/>
+なので、エンターキーを押しても送信しないように出来るかを調べてみました。</p>
+
+<!-- more -->
+
+
+<p>結論から言うと、設定レベルでそういうのはなかったです。<br/>
+ですが、なんとか代替になりそうなものはあったので紹介です。</p>
+
+<p>マークダウン形式での記述でよくあるのですが、```、と点？を３つ繋げると、それ以降はコードとして認識させる事が出来ます。<br/>
+その中での記述はタグであってもそのまま表示されます。<br/>
+slackでもそれが出来るようで、入力欄で点を３つ繋げて挟むとその中身はコードとして表示されます。<br/>
+それを利用して、点３つの間はエンターキーで投稿させない、という設定があったので、<br/>
+それを使って誤送信を防ぐ、というちょっと回りくどいやり方です。</p>
+
+<p>設定は、左下の名前の横からメニューを出して、<code>Preferences</code>をクリック。</p>
+
+<p><img src="/images/2015/02/slack_enter03.jpg" alt="メニュー" /></p>
+
+<p>その中の、<code>Advanced Optons</code>の、<code>When typing code……</code>のチェックを入れる。</p>
+
+<p><img src="/images/2015/02/slack_enter00.jpg" alt="Adovanced Options" /></p>
+
+<p>これでエンターキーを押しても(コード記述中は)送信されなくなります。<br/>
+具体的には、以下のように入力していれば、送信されません。</p>
+
+<p><img src="/images/2015/02/slack_enter01.jpg" alt="入力例" /></p>
+
+<p>これをもう一度点々を入力してエンターキーを押すと、以下のように投稿されてしまいます。</p>
+
+<p><img src="/images/2015/02/slack_enter02.jpg" alt="コードとして投稿" /></p>
+
+<p>なので、通常の文章であれば、先頭に点々をつけて書き出し、<br/>
+投稿する文章が完成したら、先頭の点々を消して、エンターキー→投稿、とすればよいと思います。<br/>
+ちょっと手間がかかりますが、誤送信するよりは、、、といったところでしょうか…。</p>
+]]></content>
+  </entry>
+  
+</feed>
