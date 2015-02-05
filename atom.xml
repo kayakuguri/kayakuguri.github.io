@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-02-05T11:56:01+09:00</updated>
+  <updated>2015-02-05T15:30:08+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,88 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[heroku]One-Off DynoでPHPをバックグラウンドで動作させる]]></title>
+    <link href="http://kayakuguri.github.io/blog/2015/02/05/one-off-dyno-excute-php/"/>
+    <updated>2015-02-05T15:04:19+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2015/02/05/one-off-dyno-excute-php</id>
+    <content type="html"><![CDATA[<p>バッチ処理なんかを動作させるためにバックグラウンドでPHPを起動する方法を調べてみた。</p>
+
+<!-- more -->
+
+
+<h2>PHPをコマンドから実行</h2>
+
+<p>PHPをコマンドラインから実行させるには以下。</p>
+
+<pre><code>$ php hogehoge.php
+</code></pre>
+
+<h2>dynoについて</h2>
+
+<p>dynoの種類なんかについては以下がすごくわかりやすかった。</p>
+
+<p><a href="http://codezine.jp/article/detail/8344">構築・運用の必須知識！  Herokuアプリケーションの実行プラットフォーム「Dyno」を徹底的に理解する
+（1/3）：CodeZine</a></p>
+
+<h2>One-off dynoの起動</h2>
+
+<p>今回使用するのは、One-off dyno。<br/>
+これを起動させる方法は2種類あって、<br/>
+一つは、<a href="https://addons.heroku.com/scheduler">Heroku Scheduler</a>のアドオンを入れて、<br/>
+そこから定期的に実行させる方法。<br/>
+実際にバッチ処理をさせる場合はここに登録する。<br/>
+冒頭のPHPを起動させるコマンドをそのまま登録する。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2015/02/heroku_background02.jpg" alt="Heroku Scheduler" /></p>
+
+<p>実行されたログは<a href="https://addons.heroku.com/papertrail">papertrail</a>上だと以下のような形となる。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2015/02/heroku_background01.jpg" alt="papertrail" /></p>
+
+<p>もう一つはコマンドラインからの実行。<br/>
+これだと任意のタイミングですぐに実行出来るので待たなくてよい。<br/>
+<code>heroku run</code>で、herokuでコマンドを実行出来る。<br/>
+以下、コマンド。</p>
+
+<pre><code>$ heroku run 'php hogehoge.php'
+</code></pre>
+
+<p>コマンドで実行した場合は、ターミナルに標準出力した結果や、<code>echo</code>された内容なんかがそのまま返ってくる。<br/>
+(エラーが出てればわかる)</p>
+
+<h2>メリット</h2>
+
+<p>通常のWeb dynoの場合、リクエストしてからレスポンスがあるまでに30秒以上かかってしまうと、タイムアウトが発生し、<br/>
+heroku側がエラーページを返してしまう。<br/>
+この設定はこちら側ではどうやっても変更不可能なよう。<br/>
+しかし、One-off dynoやworker dynoを使用してバックグラウンド実行させた場合はこの限りではなく、<br/>
+処理によるタイムアウトはない。<br/>
+なので、重いファイルや重い処理も可能。</p>
+
+<p>後は、このアプリをバッチだけに限定して使用する場合、web dynoをゼロにしてしまえる。<br/>
+ブラウザからのアクセスが出来なくなるが、バッチの性質上、不要。むしろアクセス出来ない方が都合がよい。<br/>
+値段も安くすむ(もしくは無料)し。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2015/02/heroku_background03.jpg" alt="web dynoがゼロ" /></p>
+
+<h2>参考</h2>
+
+<p><a href="https://github.com/herokaijp/devcenter/wiki/one-off-dynos">one off dynos · herokaijp/devcenter Wiki · GitHub</a><br/>
+<a href="http://pc-karuma.net/xampp-php-shell/">コマンドラインからPHPを実行 &ndash; XAMPPの使い方 &ndash; PC設定のカルマ</a><br/>
+<a href="http://codezine.jp/article/detail/8344">構築・運用の必須知識！  Herokuアプリケーションの実行プラットフォーム「Dyno」を徹底的に理解する
+（1/3）：CodeZine</a><br/>
+<a href="http://bokukoko.hatenablog.com/entry/2014/09/25/Heroku_%E3%81%AE%E3%82%BF%E3%82%A4%E3%83%A0%E3%82%A2%E3%82%A6%E3%83%88%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6%E8%AA%BF%E3%81%B9%E3%81%9F_%26_%E7%BF%BB%E8%A8%B3">Heroku のタイムアウトについて調べた &amp; 翻訳 &ndash; ボクココ</a></p>
+
+<h2>公式ドキュメント類</h2>
+
+<p><a href="https://devcenter.heroku.com/articles/one-off-dynos">One-Off Dynos</a><br/>
+<a href="https://devcenter.heroku.com/articles/procfile">Process Types and the Procfile</a><br/>
+<a href="https://devcenter.heroku.com/articles/background-jobs-queueing">Worker Dynos, Background Jobs and Queueing</a><br/>
+<a href="https://devcenter.heroku.com/articles/scheduler">Heroku Scheduler</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[heroku]PHPでpapertrailに標準出力で文字列を出力する]]></title>
@@ -1208,72 +1290,6 @@ System.debug(a);  //0.5
 </code></pre>
 
 <p><a href="https://sites.google.com/site/odekakeshimasyo/salesforceapexdatetime">Salesforce Apex 日付 時間 &ndash; おでかけしましょ</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[salesforce]リッチテキストエリアに保存された画像を一般公開する]]></title>
-    <link href="http://kayakuguri.github.io/blog/2014/10/16/forcecom-sites-profile/"/>
-    <updated>2014-10-16T17:45:35+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2014/10/16/forcecom-sites-profile</id>
-    <content type="html"><![CDATA[<p>結論から言うと、権限設定の問題でした。</p>
-
-<!-- more -->
-
-
-<p>具体的にしかかったことは以下です。</p>
-
-<ul>
-<li>キャンペーンの情報をvisualforceでsitesを使って表示</li>
-<li>カスタム項目でリッチテキストエリアを作成し、その画像を表示</li>
-</ul>
-
-
-<p>リッチテキストエリアに保存された内容は以下のような形で取得できました。</p>
-
-<pre><code>&lt;img alt=\"ユーザが追加した画像\" src=\"/my-Home/servlet/rtaImage?eid=701O00000007l1s&amp;amp;feoid=00NO0000001Abk2&amp;amp;refid=0EMO000000004py\" style=\"\"&gt;&lt;/img&gt;
-</code></pre>
-
-<p>これを、公開しているサイトのURLにくっつけてアクセスしてみました。</p>
-
-<p>例：</p>
-
-<blockquote><p><a href="https://my-domain.cs6.force.com/my-Home/servlet/rtaImage?eid=701O00000007l1s&amp;feoid=00NO0000001Abk2&amp;refid=0EMO000000004py">https://my-domain.cs6.force.com/my-Home/servlet/rtaImage?eid=701O00000007l1s&amp;feoid=00NO0000001Abk2&amp;refid=0EMO000000004py</a></p></blockquote>
-
-<p>しかし、以下のような画像が表示されました。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2014/10/rich-text-img.png" alt="not avaiable" /></p>
-
-<p>どうやら権限がないことはわかっていたのですが、どこをどう触っていいやら。<br/>
-いろいろ見たあげく、以下の設定でいけました。</p>
-
-<p><a href="http://www.kokyakukanri.info/salesforce/blog/2010/11/visualforce-3.html">Visualforceページの公開 &ndash; セールスフォースお助け隊ブログ | Salesforce</a></p>
-
-<p>設定 &ndash;> 開発 &ndash;> サイト</p>
-
-<p><img src="http://kayakuguri.github.io/images/2014/10/rich-text-img-2.jpg" alt="サイト" /></p>
-
-<p>公開しているサイトの<code>サイトの表示ラベル</code>をクリック</p>
-
-<p><img src="http://kayakuguri.github.io/images/2014/10/rich-text-img-3.jpg" alt="サイト" /></p>
-
-<p>サイトの詳細で、<code>公開アクセス設定</code>をクリック</p>
-
-<p><img src="http://kayakuguri.github.io/images/2014/10/rich-text-img-4.jpg" alt="サイト" /></p>
-
-<p><code>編集</code>をクリックし、</p>
-
-<p><img src="http://kayakuguri.github.io/images/2014/10/rich-text-img-5.jpg" alt="サイト" /></p>
-
-<p><code>標準オブジェクト権限</code>の<code>キャンペーン</code>の<code>参照</code>をチェックして保存。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2014/10/rich-text-img-6.jpg" alt="サイト" /></p>
-
-<p>これでアクセス出来るようになりました。</p>
-
-<p>今回はキャンペーンオブジェクトの話でしたが、<br/>
-<code>標準オブジェクト権限</code>と<code>カスタムオブジェクト権限</code>が権限設定の箇所なので、<br/>
-その他のオブジェクトについても設定が可能です。</p>
 ]]></content>
   </entry>
   
