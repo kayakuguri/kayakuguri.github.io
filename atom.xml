@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-02-02T12:12:34+09:00</updated>
+  <updated>2015-02-05T11:56:01+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,35 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[heroku]PHPでpapertrailに標準出力で文字列を出力する]]></title>
+    <link href="http://kayakuguri.github.io/blog/2015/02/05/papertrail-php-stdout/"/>
+    <updated>2015-02-05T11:30:39+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2015/02/05/papertrail-php-stdout</id>
+    <content type="html"><![CDATA[<p>herokuでログを見るには、papertrailが基本かと思います。<br/>
+そのpapertrailにPHPから任意の文字列を出力するには標準出力を使う、との事で試してみました。</p>
+
+<!-- more -->
+
+
+<p>方法は以下の通り。</p>
+
+<pre><code>$stdout= fopen( 'php://stdout', 'w' );
+fwrite( $stdout, "hello world to stdout\n" );
+</code></pre>
+
+<p>結果はこんな感じ。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2015/02/php-stdout.jpg" alt="papertrail" /></p>
+
+<p>PHP部分は参考サイトのママです。ありがとうございます。</p>
+
+<h3>参考</h3>
+
+<p><a href="http://nanoappli.com/blog/archives/5212">[PHP]標準エラー出力、標準出力に文字列を出力する</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[slackにて入力中にエンターキーを押しても送信しないようにする方法]]></title>
@@ -1245,59 +1274,6 @@ System.debug(a);  //0.5
 <p>今回はキャンペーンオブジェクトの話でしたが、<br/>
 <code>標準オブジェクト権限</code>と<code>カスタムオブジェクト権限</code>が権限設定の箇所なので、<br/>
 その他のオブジェクトについても設定が可能です。</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[salesforce]SOQLで子リレーションの情報を取得する]]></title>
-    <link href="http://kayakuguri.github.io/blog/2014/10/15/soql-relation/"/>
-    <updated>2014-10-15T17:42:17+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2014/10/15/soql-relation</id>
-    <content type="html"><![CDATA[<p>SOQLにて、あるオブジェクトの子リレーションになっているオブジェクトの情報を取得したい場合の話です。</p>
-
-<!-- more -->
-
-
-<p>子オブジェクトの参照名は、カスタムオブジェクトの場合は、<code>__r</code>となっていて、<br/>
-標準オブジェクトは、お尻に<code>s</code>をつける形となっています。(だいたい)</p>
-
-<p>今回はあまり例で見ることのなかった、<code>campaign</code>、<code>campaignmember</code>で例を示します。</p>
-
-<p>とあるキャンペーンのキャンペーンメンバーのデータを取得する場合、以下のようなSOQLで取得できます。</p>
-
-<pre><code>Select id, (Select cm.id From CampaignMembers cm) From Campaign
-</code></pre>
-
-<p>これを開発者コンソールの、Query Editorで実行してみると、以下の様なデータが取得できます。<br/>
-(1レコード例)</p>
-
-<pre><code>id: 701O00000007osrIAA
-CampaignMembers: [{"Id":"00vO0000002B00XIAS"},{"Id":"00vO0000002B00SIAS"}]
-</code></pre>
-
-<p>これをapex上で使用するには、<code>CampaignMmber</code>が配列で入ってくるので、<br/>
-for文で回して取得してやる必要があります。<br/>
-以下は、３つの<code>campaignID</code>から取得したデータの<code>CampaignMember</code>の<code>status</code>を取得しています。</p>
-
-<pre><code>List&lt;String&gt; campid = new List&lt;String&gt;();
-campid.add('701O00000007orzIAA');
-campid.add('701O00000007osrIAA');
-campid.add('701O00000007l1sIAA');
-String soql_c = 'SELECT id,type, (Select Status From CampaignMembers) FROM Campaign WHERE id=:campid';
-
-List&lt;Campaign&gt; campRes;
-campRes = Database.query(soql_c);
-
-for(Campaign cdata : campRes){
-    for(CampaignMember cmdata : cdata.CampaignMembers){
-        System.debug(cmdata.Status);
-    }
-}
-</code></pre>
-
-<h3>参考</h3>
-
-<p><a href="http://blog.flect.co.jp/salesforce/2010/07/soql-3dd0.html">セールスフォースの豆知識: SOQLでのリレーションの辿り方</a></p>
 ]]></content>
   </entry>
   

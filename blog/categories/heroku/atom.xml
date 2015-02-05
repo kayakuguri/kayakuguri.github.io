@@ -4,7 +4,7 @@
   <title><![CDATA[Category: heroku | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/heroku/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-02-02T12:12:34+09:00</updated>
+  <updated>2015-02-05T11:56:01+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,35 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[heroku]PHPでpapertrailに標準出力で文字列を出力する]]></title>
+    <link href="http://kayakuguri.github.io/blog/2015/02/05/papertrail-php-stdout/"/>
+    <updated>2015-02-05T11:30:39+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2015/02/05/papertrail-php-stdout</id>
+    <content type="html"><![CDATA[<p>herokuでログを見るには、papertrailが基本かと思います。<br/>
+そのpapertrailにPHPから任意の文字列を出力するには標準出力を使う、との事で試してみました。</p>
+
+<!-- more -->
+
+
+<p>方法は以下の通り。</p>
+
+<pre><code>$stdout= fopen( 'php://stdout', 'w' );
+fwrite( $stdout, "hello world to stdout\n" );
+</code></pre>
+
+<p>結果はこんな感じ。</p>
+
+<p><img src="/images/2015/02/php-stdout.jpg" alt="papertrail" /></p>
+
+<p>PHP部分は参考サイトのママです。ありがとうございます。</p>
+
+<h3>参考</h3>
+
+<p><a href="http://nanoappli.com/blog/archives/5212">[PHP]標準エラー出力、標準出力に文字列を出力する</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[Herokuアドオン]PostgreSQL Studio]]></title>
@@ -335,61 +364,6 @@ try{
 
 <p>ライブラリもあったけど、未検証<br/>
 <a href="https://github.com/dg/ftp-php">FTP for PHP</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[herokuアプリとdropboxのファイル同期]]></title>
-    <link href="http://kayakuguri.github.io/blog/2014/11/21/heroku-dropbox-sync/"/>
-    <updated>2014-11-21T20:11:48+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2014/11/21/heroku-dropbox-sync</id>
-    <content type="html"><![CDATA[<p>herokuがdropboxとの同期サービスをベータ版ですが開始したようです。<br/>
-記事：<a href="https://blog.heroku.com/archives/2014/11/19/announcing_beta_dropbox_sync">https://blog.heroku.com/archives/2014/11/19/announcing_beta_dropbox_sync</a><br/>
-ドキュメント：<a href="https://devcenter.heroku.com/articles/dropbox-sync">https://devcenter.heroku.com/articles/dropbox-sync</a></p>
-
-<!-- more -->
-
-
-<p>で、実際に試してみました。</p>
-
-<p>herokuで作成しているアプリの、<code>code</code>からdropboxへの接続が出来ます。</p>
-
-<p><img src="/images/2014/11/dropbox-test1.jpg" alt="" /></p>
-
-<p>少し下に、<code>Connect to Dropbox</code>があるので、クリック。</p>
-
-<p><img src="/images/2014/11/dropbox-test2.jpg" alt="" /></p>
-
-<p>ログインして認証。</p>
-
-<p><img src="/images/2014/11/dropbox-test3.jpg" alt="" />
-<img src="/images/2014/11/dropbox-test4.jpg" alt="" /></p>
-
-<p>認証すると、接続したdropboxの中にフォルダが作成され、そこにアプリ上のソースが一式同期されます。<br/>
-<code>Dropbox/Apps/heroku/アプリ名</code>のフォルダが作成されます。</p>
-
-<p>で、ここにある通り、ここからdropbox内のファイルを使ってdeploy出来ます。<br/>
-メッセージを書いて<code>deploy</code>をクリックすると、書いたメッセージで、<code>commit</code>、<code>push</code>、<code>deploy</code>が実行されます。</p>
-
-<p><img src="/images/2014/11/dropbox-test5.jpg" alt="" /></p>
-
-<p>実行中</p>
-
-<p><img src="/images/2014/11/dropbox-test6.jpg" alt="" /></p>
-
-<p>完了</p>
-
-<p><img src="/images/2014/11/dropbox-test7.jpg" alt="" /></p>
-
-<p>git上でもコミットメッセージが反映されています。</p>
-
-<p><img src="/images/2014/11/dropbox-test8.jpg" alt="" /></p>
-
-<p>シュチエーションとしては、dropboxで同期したディレクトリを他の人とコラボして、<br/>
-その人が更新したファイルをブラウザ上からdeploy出来る、みたいな感じかと。<br/>
-それだと、コラボ相手はgitがいらないので。</p>
-
-<p>dropboxとの接続サービスはいっぱいあるので、他にも組み合わせれば色々出来そう。</p>
 ]]></content>
   </entry>
   
