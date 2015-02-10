@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-02-10T18:05:12+09:00</updated>
+  <updated>2015-02-10T18:09:34+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -39,37 +39,46 @@
 <p>Githubを選択<br/>
 <img src="http://kayakuguri.github.io/images/2015/02/github-heroku02.jpg" alt="Github" /></p>
 
-<p><code>Connect to Github</code>をクリック
-<img src="http://kayakuguri.github.io/images/2015/02/github-heroku03.jpg" alt="Connect to Github" /></p>
+<p><code>Connect to Github</code>をクリック</p>
 
-<p>許可を求められるので、許可。<br/>
-<img src="http://kayakuguri.github.io/images/2015/02/github-heroku04.jpg" alt="認証" /></p>
+<p><img src="http://kayakuguri.github.io/images/2015/02/github-heroku03.jpg" alt="Connect to Github" /></p>
 
-<p>すると、リポジトリを選択出来るようになる。<br/>
-<img src="http://kayakuguri.github.io/images/2015/02/github-heroku05.jpg" alt="リポジトリ選択" /></p>
+<p>許可を求められるので、許可。</p>
 
-<p><code>heroku</code>で検索した結果。今回はサンプルで作った、<code>heroku-deploy-test</code>のリポジトリを選択。<br/>
-<img src="http://kayakuguri.github.io/images/2015/02/github-heroku06.jpg" alt="リポジトリ検索" /></p>
+<p><img src="http://kayakuguri.github.io/images/2015/02/github-heroku04.jpg" alt="認証" /></p>
 
-<p>紐づくとこんな感じ。<br/>
-<img src="http://kayakuguri.github.io/images/2015/02/github-heroku07.jpg" alt="連携済" /></p>
+<p>すると、リポジトリを選択出来るようになる。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2015/02/github-heroku05.jpg" alt="リポジトリ選択" /></p>
+
+<p><code>heroku</code>で検索した結果。今回はサンプルで作った、<code>heroku-deploy-test</code>のリポジトリを選択。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2015/02/github-heroku06.jpg" alt="リポジトリ検索" /></p>
+
+<p>紐づくとこんな感じ。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2015/02/github-heroku07.jpg" alt="連携済" /></p>
 
 <p>連携済の表示の下に、自動でデプロイさせたいブランチを選択する画面と、<br/>
 手動で特定のブランチをデプロイさせる画面があります。<br/>
-今回は<code>master</code>ブランチを選択して自動デプロイを有効にしてみます。<br/>
-<img src="http://kayakuguri.github.io/images/2015/02/github-heroku08.jpg" alt="automatic deploys" /></p>
+今回は<code>master</code>ブランチを選択して自動デプロイを有効にしてみます。</p>
 
-<p>結果。<br/>
-<img src="http://kayakuguri.github.io/images/2015/02/github-heroku09.jpg" alt="automatic deploys" /></p>
+<p><img src="http://kayakuguri.github.io/images/2015/02/github-heroku08.jpg" alt="automatic deploys" /></p>
+
+<p>結果。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2015/02/github-heroku09.jpg" alt="automatic deploys" /></p>
 
 <h2>deploy</h2>
 
 <p>で、実際にgithubの指定したリポジトリにpushしてみると、<br/>
-裏っかわでheorkuにデプロイが走ります。<br/>
-<img src="http://kayakuguri.github.io/images/2015/02/github-heroku10.jpg" alt="heroku deploy" /></p>
+裏っかわでheorkuにデプロイが走ります。</p>
 
-<p>しばらく待つと、デプロイが成功。見事連携されました。<br/>
-<img src="http://kayakuguri.github.io/images/2015/02/github-heroku11.jpg" alt="deploy success" /></p>
+<p><img src="http://kayakuguri.github.io/images/2015/02/github-heroku10.jpg" alt="heroku deploy" /></p>
+
+<p>しばらく待つと、デプロイが成功。見事連携されました。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2015/02/github-heroku11.jpg" alt="deploy success" /></p>
 
 <h2>その他</h2>
 
