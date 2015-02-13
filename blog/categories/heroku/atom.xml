@@ -4,7 +4,7 @@
   <title><![CDATA[Category: heroku | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/heroku/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-02-10T18:33:37+09:00</updated>
+  <updated>2015-02-13T13:03:56+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -196,9 +196,18 @@ fwrite( $stdout, "hello world to stdout\n" );
 
 <p>PHP部分は参考サイトのママです。ありがとうございます。</p>
 
+<p>あと、まとめて以下でも書けるよう。</p>
+
+<pre><code>fputs(STDOUT, "hello world to stdout\n");
+
+//エラーの場合
+fputs(STDERR, "some error");
+</code></pre>
+
 <h3>参考</h3>
 
-<p><a href="http://nanoappli.com/blog/archives/5212">[PHP]標準エラー出力、標準出力に文字列を出力する</a></p>
+<p><a href="http://nanoappli.com/blog/archives/5212">[PHP]標準エラー出力、標準出力に文字列を出力する</a><br/>
+<a href="http://php.net/manual/ja/function.fputs.php">fputs PHPマニュアル</a></p>
 ]]></content>
   </entry>
   

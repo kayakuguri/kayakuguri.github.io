@@ -116,9 +116,18 @@ fwrite( $stdout, "hello world to stdout\n" );
 
 <p>PHP部分は参考サイトのママです。ありがとうございます。</p>
 
+<p>あと、まとめて以下でも書けるよう。</p>
+
+<pre><code>fputs(STDOUT, "hello world to stdout\n");
+
+//エラーの場合
+fputs(STDERR, "some error");
+</code></pre>
+
 <h3>参考</h3>
 
-<p><a href="http://nanoappli.com/blog/archives/5212">[PHP]標準エラー出力、標準出力に文字列を出力する</a></p>
+<p><a href="http://nanoappli.com/blog/archives/5212">[PHP]標準エラー出力、標準出力に文字列を出力する</a><br/>
+<a href="http://php.net/manual/ja/function.fputs.php">fputs PHPマニュアル</a></p>
 
     </div>
 
