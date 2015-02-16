@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: htaccess | KayaMemo]]></title>
+  <link href="http://kayakuguri.github.io/blog/categories/htaccess/atom.xml" rel="self"/>
+  <link href="http://kayakuguri.github.io/"/>
+  <updated>2015-02-16T22:30:10+09:00</updated>
+  <id>http://kayakuguri.github.io/</id>
+  <author>
+    <name><![CDATA[萱潜]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[htaccessによるリダイレクト設定]]></title>
+    <link href="http://kayakuguri.github.io/blog/2015/02/16/redirect-htaccess/"/>
+    <updated>2015-02-16T22:16:01+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2015/02/16/redirect-htaccess</id>
+    <content type="html"><![CDATA[<p><code>.htaccess</code>を使ったリダイレクトをやってみたメモです。</p>
+
+<!-- more -->
+
+
+<p>設定内容</p>
+
+<p><code>
+RewriteEngine on
+RewriteBase /
+RewriteRule .* リダイレクト先URL [R=301,L]
+</code></p>
+
+<p>これを設置した場所と、<code>RewriteBase</code>の有効な範囲なんかの関係がややこしかったです。</p>
+
+<p>まず、<code>RewriteBase</code>は、参考サイトによると、<br/>
+<strong>リダイレクト後のパスにのみ適用</strong>される、との事。<br/>
+さらに、<strong>相対パスの時にしか適用されない</strong>。</p>
+
+<p>それと、設置したディレクトリからの相対パスになるので、<br/>
+上記の設定だと、設置したディレクトリ以下全てのURLがリダイレクトされます。<br/>
+これをドキュメントルートに置くと全てのパスでリダイレクトされます。</p>
+
+<p>htaccessはディレクトリ単位で個別に置けるため、特定のディレクトリだけに適応させる場合は、<br/>
+上記の設定をすれば適応出来ます。</p>
+
+<h3>参考</h3>
+
+<p><a href="http://kana-lier.com/web/redirect/">.htaccessを使ったよく使うリダイレクトまとめ</a><br/>
+<a href="http://www.cherrypieweb.com/weblog/technical/20131017121752.php">.htaccessによるリダイレクト徹底解説</a></p>
+]]></content>
+  </entry>
+  
+</feed>

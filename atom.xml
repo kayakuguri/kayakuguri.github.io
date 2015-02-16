@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-02-13T13:03:56+09:00</updated>
+  <updated>2015-02-16T22:30:10+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,46 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[htaccessによるリダイレクト設定]]></title>
+    <link href="http://kayakuguri.github.io/blog/2015/02/16/redirect-htaccess/"/>
+    <updated>2015-02-16T22:16:01+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2015/02/16/redirect-htaccess</id>
+    <content type="html"><![CDATA[<p><code>.htaccess</code>を使ったリダイレクトをやってみたメモです。</p>
+
+<!-- more -->
+
+
+<p>設定内容</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>RewriteEngine on
+</span><span class='line'>RewriteBase /
+</span><span class='line'>RewriteRule .* リダイレクト先URL [R=301,L]</span></code></pre></td></tr></table></div></figure>
+
+
+<p>これを設置した場所と、<code>RewriteBase</code>の有効な範囲なんかの関係がややこしかったです。</p>
+
+<p>まず、<code>RewriteBase</code>は、参考サイトによると、<br/>
+<strong>リダイレクト後のパスにのみ適用</strong>される、との事。<br/>
+さらに、<strong>相対パスの時にしか適用されない</strong>。</p>
+
+<p>それと、設置したディレクトリからの相対パスになるので、<br/>
+上記の設定だと、設置したディレクトリ以下全てのURLがリダイレクトされます。<br/>
+これをドキュメントルートに置くと全てのパスでリダイレクトされます。</p>
+
+<p>htaccessはディレクトリ単位で個別に置けるため、特定のディレクトリだけに適応させる場合は、<br/>
+上記の設定をすれば適応出来ます。</p>
+
+<h3>参考</h3>
+
+<p><a href="http://kana-lier.com/web/redirect/">.htaccessを使ったよく使うリダイレクトまとめ</a><br/>
+<a href="http://www.cherrypieweb.com/weblog/technical/20131017121752.php">.htaccessによるリダイレクト徹底解説</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[heroku]githubから自動でherokuにデプロイ]]></title>
@@ -1294,36 +1334,6 @@ curl_close($curl);
 <h3>参考</h3>
 
 <p><a href="http://qiita.com/khirose/items/870ffec6ce4562f54c9d">PHP小ネタ &ndash; PHPのcurlでPOST &ndash; Qiita</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[salesforce]sandboxでメールが送られない]]></title>
-    <link href="http://kayakuguri.github.io/blog/2014/10/22/send-mail-setting-sandbox/"/>
-    <updated>2014-10-22T11:49:53+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2014/10/22/send-mail-setting-sandbox</id>
-    <content type="html"><![CDATA[<p>salesfoceのsandboxでワークフローメールを作成していたのですが、<br/>
-何回やってメールが送信されない。<br/>
-ワークフローは間違ってないし、有効化もできてるし……と思っていたら、設定の問題でした。</p>
-
-<!-- more -->
-
-
-<p>ググってみると、<code>メール管理</code>の<code>送信</code>から設定すると書いてあるのですが、そんなが項目ない。
-そもそもの権限の問題かと思っていたら、いつからか名前が変わっているよう。<br/>
-ググってるとよくある……。</p>
-
-<p><code>管理</code>&ndash;><code>メール管理</code>&ndash;><code>配信可能性</code><br/>
-に、あった。配信可能性、って。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2014/10/send_mail_setting.jpg" alt="配信可能性" /></p>
-
-<p>この中で、<code>アクセス権</code>を、<code>システムメールのみ</code>から、<code>すべてのメール</code>に変更し、保存する。<br/>
-これでメールの送信が出来るようになった。</p>
-
-<h3>参考</h3>
-
-<p><a href="http://dackdive.hateblo.jp/entry/2014/01/26/165752"> [salesforce] Sandbox組織だとメール通知ができない問題 &ndash; dackdive&#39;s blog</a></p>
 ]]></content>
   </entry>
   
