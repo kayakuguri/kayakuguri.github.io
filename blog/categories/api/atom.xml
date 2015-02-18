@@ -4,7 +4,7 @@
   <title><![CDATA[Category: api | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/api/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-02-16T22:30:10+09:00</updated>
+  <updated>2015-02-18T21:03:38+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,181 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[apiaryでモック用APIを作成してみる #1]]></title>
+    <link href="http://kayakuguri.github.io/blog/2015/02/18/apiary-vol1/"/>
+    <updated>2015-02-18T18:40:56+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2015/02/18/apiary-vol1</id>
+    <content type="html"><![CDATA[<p>結構昔からあるサービスらしいけれど、<br/>
+以下の記事を見て、実際に使ってみた。<br/>
+<a href="http://dev.classmethod.jp/tool/apiary-start/">[Apiary]Markdownで始めるAPI開発とAPIドキュメント作成</a></p>
+
+<!-- more -->
+
+
+<h2>アカウント作成</h2>
+
+<p>サイトにアクセス。<br/>
+<a href="http://apiary.io/">apiary</a></p>
+
+<p><img src="/images/2015/02/apiary01.jpg" alt="apiary" /></p>
+
+<p><code>Sign Up</code>からアカウント作成。<br/>
+Githubアカウントか、Twitterでのログインも可能なよう。</p>
+
+<p><img src="/images/2015/02/apiary02.jpg" alt="SignUp" /></p>
+
+<p>アカウントを作成すると、まず一つ作ってみよう、って事で、API名を入力してね、ってでる。<br/>
+適当に入力してSAVE。<br/>
+<code>test-api</code>で作ってみた。<br/>
+(名前は他のユーザーと被っていても大丈夫。API名は適当に連番を付けて振り分けられ、公開URLも被らないように作成される)</p>
+
+<p><img src="/images/2015/02/apiary03.jpg" alt="first API" /></p>
+
+<p>作成すると、見本が出来た状態で開く。<br/>
+この左のエディタ画面でMarkDown形式でドキュメントを作成していくと、<br/>
+右側にレンダリング結果が作成され、さらにAPIも自動で生成される。</p>
+
+<p><img src="/images/2015/02/apiary04.jpg" alt="Editor" /></p>
+
+<h2>シンプルなGETのAPIを作ってみる</h2>
+
+<p>チュートリアルがあるので、それを見ながら。<br/>
+<a href="http://apiary.io/blueprint">API Blueprint Tutorial</a></p>
+
+<p>以下、完成markdown</p>
+
+<p>```
+FORMAT: 1A</p>
+
+<h1>Sample API</h1>
+
+<p>サンプルAPI</p>
+
+<h1>Group Sample</h1>
+
+<p>Sampleグループ</p>
+
+<h2>Sample [/list]</h2>
+
+<h3>Sample Get List [GET]</h3>
+
+<ul>
+<li><p>Response 200 (application/json)</p>
+
+<pre><code>  "data":{
+      [{
+          "id":1
+          "name":"taro"
+      },{
+          "id":2
+          "name:"jiro"
+      }]
+  }
+</code></pre>
+
+<p>```</p></li>
+</ul>
+
+
+<h3>コード詳細</h3>
+
+<pre><code>FORMAT: 1A
+</code></pre>
+
+<p>APIのフォーマットをここで指定できるよう。<br/>
+無料版だとあまり関係ないかも。正直、理解出来ていません。
+おまじないと思って…。</p>
+
+<pre><code>#Sample API
+</code></pre>
+
+<p>最初の<code>#</code>でこのAPIのタイトル。</p>
+
+<pre><code>#Group Sample
+</code></pre>
+
+<p>次の<code>#Group</code>で、グルーピングが可能？</p>
+
+<pre><code>##Sample [/list]
+</code></pre>
+
+<p>ここでエンドポイントを指定。<code>[]</code>の前には半角スペースをお忘れなく。</p>
+
+<pre><code>###Sample Get List [GET]
+</code></pre>
+
+<p>エンドポイントの指定のすぐ下で、メソッドの指定。<br/>
+このメソッドの指定部分が、サンプル実行のボタンとして表示されるよう。</p>
+
+<pre><code>+ Response 200 (application/json)
+</code></pre>
+
+<p>レスポンスのコードと型を指定して、その下に実際に返却される値を記述。<br/>
+今回はJSONフォーマットで記述している。<br/>
+コードを指定出来るということは、エラー時の挙動も記述できると思われる(未確認)。</p>
+
+<h3>実行</h3>
+
+<p>以下のエンドポイントにアクセスすると、定義したJSONがそのまま返ってくる。<br/>
+<a href="http://private-0b253-test4095.apiary-mock.com/list">http://private-0b253-test4095.apiary-mock.com/list</a></p>
+
+<p>右側のレンダリングされた画面でも実際に実行結果をヘッダー付きで見られる。</p>
+
+<p><img src="/images/2015/02/apiary05.jpg" alt="Editor" />
+<img src="/images/2015/02/apiary06.jpg" alt="API" /></p>
+
+<p>API部分をクリックすると、詳細が表示され、<code>Call Resource</code>で実際に叩く事が可能。</p>
+
+<p><img src="/images/2015/02/apiary07.jpg" alt="Call Resource" /></p>
+
+<p>結果が、header情報付きで確認出来る。</p>
+
+<p><img src="/images/2015/02/apiary08.jpg" alt="result" /></p>
+
+<h3>サンプルコードの出力</h3>
+
+<p>右側のエリア右上にある、<code>Swith to Example</code>をクリックする。</p>
+
+<p><img src="/images/2015/02/apiary09.jpg" alt="Swith to Example" /></p>
+
+<p>切り替わった後、デフォルトで、<code>Raw</code>が選択されている箇所のプルダウンから、任意の言語を選択すると、<br/>
+その言語でのAPIの叩き方のサンプルコードが表示される。<br/>
+例えばPHPだとこんな感じ。</p>
+
+<p>```
+&lt;?php
+$ch = curl_init();</p>
+
+<p>curl_setopt($ch, CURLOPT_URL, &ldquo;<a href="http://private-0b253-test4095.apiary-mock.com/list">http://private-0b253-test4095.apiary-mock.com/list</a>&rdquo;);
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
+curl_setopt($ch, CURLOPT_HEADER, FALSE);</p>
+
+<p>$response = curl_exec($ch);
+curl_close($ch);</p>
+
+<p>var_dump($response);
+```</p>
+
+<p>他にも様々な種類の言語のサンプルコードが出力可能。</p>
+
+<blockquote><p>cURL、Java、JavaScript、Node.js、Perl、Python、PHP、Ruby<br/>
+Go、C#、Visual Basic、Groovy、Objective-c、Swift、Swift Representor</p></blockquote>
+
+<h2>料金</h2>
+
+<p>気になるお値段は、単純な？範囲だと無料。<br/>
+プライベートな状態での開発をしようとすると有料となるみたい。<br/>
+(値段表を見てもよくわからなかったが)</p>
+
+<p><a href="http://apiary.io/pricing">Pricing &amp; Plans</a></p>
+
+<h2>次回</h2>
+
+<p>次は、POSTの送信を試してみる予定。</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[apigeeを使用してAPIの動作を確認する]]></title>
