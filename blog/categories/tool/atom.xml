@@ -4,7 +4,7 @@
   <title><![CDATA[Category: tool | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/tool/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-02-18T21:03:38+09:00</updated>
+  <updated>2015-02-19T18:33:56+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,39 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[.gitignoreを作成してくれる便利ツール]]></title>
+    <link href="http://kayakuguri.github.io/blog/2015/02/19/gitignore-tool/"/>
+    <updated>2015-02-19T18:21:02+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2015/02/19/gitignore-tool</id>
+    <content type="html"><![CDATA[<p>gitignoreを作成してくれる便利ツールがあったのでメモ。</p>
+
+<!-- more -->
+
+
+<p><img src="/images/2015/02/gitignore_io.jpg" alt="gitignore_io" /></p>
+
+<p>真ん中の検索窓風のエリアに、適応したいgitignoreを入れていくと、インクリメンタルサーチで結果が出てくるので、エンターで追加。<br/>
+<code>PhpStome</code>や<code>cakePHP</code>なんかを追加できる。</p>
+
+<p><img src="/images/2015/02/gitignore_io2.jpg" alt="gitignore_io" /></p>
+
+<p>で、<code>Generate</code>ボタンをクリックすると、作成され、テキストとして直接表示される。<br/>
+ここからコピペなりなんなりで。</p>
+
+<p>ちなみに、ボタンの横の矢印からファイルを直接ダウンロードする事も可能。</p>
+
+<p><img src="/images/2015/02/gitignore_io3.jpg" alt="download file" /></p>
+
+<p>ちょっと迷ったのがMac用の設定で、<code>OSX</code>とすれば設定されます。<br/>
+その他、ドキュメントなどは以下。</p>
+
+<p><a href="https://www.gitignore.io/docs">https://www.gitignore.io/docs</a></p>
+
+<p>いつもgitignoreの設定で迷うのでこれで統一すれば便利かも。</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[apiaryでモック用APIを作成してみる #1]]></title>
