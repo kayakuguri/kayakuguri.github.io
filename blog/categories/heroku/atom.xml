@@ -4,7 +4,7 @@
   <title><![CDATA[Category: heroku | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/heroku/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-02-19T18:34:48+09:00</updated>
+  <updated>2015-02-20T17:07:11+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,50 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[heroku]Heroku PostgresのDBをHeroku PostgresのDBからリストアする]]></title>
+    <link href="http://kayakuguri.github.io/blog/2015/02/20/restore-postgresql/"/>
+    <updated>2015-02-20T16:59:38+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2015/02/20/restore-postgresql</id>
+    <content type="html"><![CDATA[<p>タイトルの通り。<br/>
+別のheroku postgres上にあるDBの内容を、そのまま別のheroku postgresに反映する方法。</p>
+
+<!-- more -->
+
+
+<h2>バックアップ</h2>
+
+<p>以前にも書きましたが、とりあえず現状のものをバックアップ。</p>
+
+<pre><code>$ heroku pgbackups:capture --app 元アプリ名
+</code></pre>
+
+<p>URLは以下で確認。</p>
+
+<pre><code>$ heroku pgbackups:url --app 元アプリ名
+</code></pre>
+
+<p>表示されるamazonのURLをコピーしておく</p>
+
+<h2>リストア</h2>
+
+<p>リストアしたいアプリにheroku postgresを入れておく。<br/>
+環境変数の<code>DATABASE_URL</code>に入っているDBへのリストアが行われる。<br/>
+(アドオンを入れると自動で入っているはず)</p>
+
+<p>上記でコピーしたURLで以下を実行。</p>
+
+<pre><code>$ heroku pgbackups:restore DATABASE 'amazonのURL' --app 新アプリ名
+</code></pre>
+
+<p>完了。</p>
+
+<h2>参考</h2>
+
+<p><a href="https://devcenter.heroku.com/articles/heroku-postgres-import-export">https://devcenter.heroku.com/articles/heroku-postgres-import-export</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[heroku]githubから自動でherokuにデプロイ]]></title>
@@ -283,81 +327,6 @@ PostgreSQL Studioのトップへインストール後に遷移すると、以下
 
 <p><a href="https://devcenter.heroku.com/articles/pgstudio">公式ドキュメント</a><br/>
 <a href="https://addons.heroku.com/pgstudio">アドオンページ</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Heroku Postgresデータベースのデータのバックアップをダウンロードする]]></title>
-    <link href="http://kayakuguri.github.io/blog/2015/01/21/create-download-pgbackup/"/>
-    <updated>2015-01-21T10:39:44+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2015/01/21/create-download-pgbackup</id>
-    <content type="html"><![CDATA[<p>HerokuのPostgresデータベースのバックアップデータをダウンロードする方法。<br/>
-いくつかコマンド叩くだけでした。</p>
-
-<!-- more -->
-
-
-<h3>アドオンのインストール</h3>
-
-<p>何はともあれ、<code>PG Backup</code>のアドオンが必要です。<br/>
-インストール方法は以下。</p>
-
-<pre><code>$ heroku addons:add pgbackups
-</code></pre>
-
-<h3>バックアップの作成</h3>
-
-<p>バックアップの作成は以下のコマンドで。</p>
-
-<pre><code>$ heroku pgbackups:capture
-</code></pre>
-
-<p>現在保持しているバックアップの一覧は以下で確認出来ます。</p>
-
-<pre><code>$ heroku pgbackups
-ID   | Backup Time         | Size  | Database
------+---------------------+-------+------------------------
-a226 | 2012/02/22 20:02.19 | 5.3KB | DATABASE_URL
-a227 | 2012/02/23 20:02.19 | 5.3KB | DATABASE_URL
-b251 | 2012/02/24 16:08.02 | 5.3KB | HEROKU_POSTGRESQL_BLACK
-b252 | 2012/02/24 16:08.53 | 5.3KB | HEROKU_POSTGRESQL_PINK
-</code></pre>
-
-<h3>バックアップURLの確認</h3>
-
-<p>バックアップされているファイルのURLは以下で確認できます。</p>
-
-<pre><code>$ heroku pgbackups:url
-</code></pre>
-
-<p>Amazon S3のURLが表示されます。<br/>
-これは、直近のバックアップ分を参照しますが、過去分の場合はIDを指定します。</p>
-
-<pre><code>$ heroku pgbackups:url ID
-</code></pre>
-
-<h3>ファイルのダウンロード</h3>
-
-<p><code>curl</code>を使ってダウンロードします。(wgetでもいいです)</p>
-
-<pre><code>$ curl -o latest.dump `URL`
-</code></pre>
-
-<h3>ダウンロードしたファイルをローカルのDBにインポート</h3>
-
-<p>以下の<code>pg_restore</code>コマンドでインポート出来る。</p>
-
-<pre><code>$ pg_restore --verbose --clean --no-acl --no-owner -h myhost -U myuser -d mydb b001.dump
-</code></pre>
-
-<p>ちなみに、herokuのPostgresは、9.x系のようで、8.x系でpg_restoreしようとすると、バージョン違いで怒られました。</p>
-
-<blockquote><p>pg_restore: [アーカイバ] ファイルヘッダ内のバージョン(1.12)はサポートされていません</p></blockquote>
-
-<h3>参考</h3>
-
-<p><a href="https://devcenter.heroku.com/articles/heroku-postgres-import-export">Importing and Exporting Heroku Postgres Databases with PG Backups</a><br/>
-<a href="https://devcenter.heroku.com/articles/pgbackups">PG Backups</a></p>
 ]]></content>
   </entry>
   

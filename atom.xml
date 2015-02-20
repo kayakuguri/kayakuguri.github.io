@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-02-19T18:34:48+09:00</updated>
+  <updated>2015-02-20T17:07:11+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,50 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[heroku]Heroku PostgresのDBをHeroku PostgresのDBからリストアする]]></title>
+    <link href="http://kayakuguri.github.io/blog/2015/02/20/restore-postgresql/"/>
+    <updated>2015-02-20T16:59:38+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2015/02/20/restore-postgresql</id>
+    <content type="html"><![CDATA[<p>タイトルの通り。<br/>
+別のheroku postgres上にあるDBの内容を、そのまま別のheroku postgresに反映する方法。</p>
+
+<!-- more -->
+
+
+<h2>バックアップ</h2>
+
+<p>以前にも書きましたが、とりあえず現状のものをバックアップ。</p>
+
+<pre><code>$ heroku pgbackups:capture --app 元アプリ名
+</code></pre>
+
+<p>URLは以下で確認。</p>
+
+<pre><code>$ heroku pgbackups:url --app 元アプリ名
+</code></pre>
+
+<p>表示されるamazonのURLをコピーしておく</p>
+
+<h2>リストア</h2>
+
+<p>リストアしたいアプリにheroku postgresを入れておく。<br/>
+環境変数の<code>DATABASE_URL</code>に入っているDBへのリストアが行われる。<br/>
+(アドオンを入れると自動で入っているはず)</p>
+
+<p>上記でコピーしたURLで以下を実行。</p>
+
+<pre><code>$ heroku pgbackups:restore DATABASE 'amazonのURL' --app 新アプリ名
+</code></pre>
+
+<p>完了。</p>
+
+<h2>参考</h2>
+
+<p><a href="https://devcenter.heroku.com/articles/heroku-postgres-import-export">https://devcenter.heroku.com/articles/heroku-postgres-import-export</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[.gitignoreを作成してくれる便利ツール]]></title>
@@ -1236,64 +1280,6 @@ System.debug(test_dt);
 それだと、コラボ相手はgitがいらないので。</p>
 
 <p>dropboxとの接続サービスはいっぱいあるので、他にも組み合わせれば色々出来そう。</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[salesforce]オブジェクトの詳細ページに作成したVisualForceページを埋め込む]]></title>
-    <link href="http://kayakuguri.github.io/blog/2014/11/21/add-custom-vf-page/"/>
-    <updated>2014-11-21T12:14:39+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2014/11/21/add-custom-vf-page</id>
-    <content type="html"><![CDATA[<p>ページレイアウトで追加するのですが、作成しないと選択肢に出てこないので少し悩みました。</p>
-
-<!-- more -->
-
-
-<p>今回は、サンプルオブジェクト、というオブジェクトを作成しました。<br/>
-今は名前が表示されているだけです。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2014/11/custom_vf01.jpg" alt="詳細画面" /></p>
-
-<p>で、レイアウトの編集画面に行ってみても、VisualForceページの追加タブはありません。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2014/11/custom_vf02.jpg" alt="タブがない" /></p>
-
-<p>なのでまずは、作成したいオブジェクトをコントローラーに指定したpageを作成します。<br/>
-ここでは、<code>hoge__c</code>というオブジェクトにします。<br/>
-<code>standardController="hoge__c"</code>がポイントです。<br/>
-内容は新規で作成したものママです。</p>
-
-<pre><code>&lt;apex:page standardController="hoge__c"&gt;
-&lt;!-- Begin Default Content REMOVE THIS --&gt;
-&lt;h1&gt;Congratulations&lt;/h1&gt;
-This is your new Page
-&lt;!-- End Default Content REMOVE THIS --&gt;
-&lt;/apex:page&gt;
-</code></pre>
-
-<p><img src="http://kayakuguri.github.io/images/2014/11/custom_vf03.jpg" alt="VFページ作成" /></p>
-
-<p>で、再度、サンプルオブジェクトのレイアウト編集画面を見てみると、<br/>
-見事、Visualforceページ、というタブが追加されています。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2014/11/custom_vf04.jpg" alt="タブがある" /></p>
-
-<p>選択すると、先程作成したpageの名前が出てきます。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2014/11/custom_vf05.jpg" alt="ページの選択" /></p>
-
-<p>これを、任意の場所にドラッグ＆ドロップすると、以下のように追加され、ページとして表示できます。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2014/11/custom_vf06.jpg" alt="レイアウトに追加" /></p>
-
-<p>保存して詳細画面を確認すると、見事作成した文章が表示されました。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2014/11/custom_vf07.jpg" alt="追加完了" /></p>
-
-<p>後はVFpageの中身をカスタマイズすれば好きなものを出す事が出来ます。<br/>
-googlemapなんかも思いのまま。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2014/11/custom_vf08.jpg" alt="地図の表示" /></p>
 ]]></content>
   </entry>
   
