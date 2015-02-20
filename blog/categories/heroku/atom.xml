@@ -4,7 +4,7 @@
   <title><![CDATA[Category: heroku | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/heroku/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-02-20T17:07:11+09:00</updated>
+  <updated>2015-02-20T18:07:53+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,74 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[heroku]SSL証明書を更新する]]></title>
+    <link href="http://kayakuguri.github.io/blog/2015/02/20/certs-update/"/>
+    <updated>2015-02-20T17:58:29+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2015/02/20/certs-update</id>
+    <content type="html"><![CDATA[<p>すでにheroku上でsslを導入していて、<br/>
+その証明書を更新する、という前提です。</p>
+
+<!-- more -->
+
+
+<h2>準備</h2>
+
+<p>ファイルの準備は導入の時と同じです。<br/>
+以前に書いたものを参考にどうぞ。</p>
+
+<p><a href="http://kayakuguri.github.io/blog/2014/09/30/heroku-ssl-subdomain/">[heroku]herokuでのSSL設定とカスタムサブドメインの適用方法</a></p>
+
+<p>準備するファイルは、以下の2つです。</p>
+
+<ul>
+<li>server.crt</li>
+<li>server.key</li>
+</ul>
+
+
+<h2>更新</h2>
+
+<p>以下で更新が出来ます。</p>
+
+<pre><code>$ heroku certs:update server.crt server.key
+</code></pre>
+
+<p>SSL導入時点で割り当てられるCNAME用のコモンネームが変わってしまうんじゃないかと思いましたが大丈夫でした。<br/>
+以下、ログ。</p>
+
+<p>```
+Resolving trust chain&hellip; done</p>
+
+<p> !    WARNING: Potentially Destructive Action
+ !    This command will change the certificate of endpoint nagasaki-8466.herokussl.com on app-name.
+ !    To proceed, type &ldquo;app-name&rdquo; or re-run this command with &mdash;confirm app-name</p>
+
+<blockquote><p>app-name
+Updating SSL Endpoint xxx-9999.herokussl.com for app-name&hellip; done
+Updated certificate details:
+Common Name(s): example.com
+Expires At:     (期限)
+Issuer:         (SSL内容)
+Starts At:      (開始日)
+Subject:        (SSL内容)
+SSL certificate is verified by a root authority.
+```</p></blockquote>
+
+<p>途中で重要な変更ってことで、確認が入るので、アプリ名をタイプして実行します。<br/>
+予め、<code>--confirm app-name</code>をつけるとスルー出来るようです。</p>
+
+<p>また、もし間違えてアップしてしまった、などの場合は、もとに戻すコマンドも用意されているようです。</p>
+
+<pre><code>$ heroku certs:rollback
+</code></pre>
+
+<h2>参考</h2>
+
+<p><a href="https://devcenter.heroku.com/articles/ssl-endpoint#update-certificate">https://devcenter.heroku.com/articles/ssl-endpoint#update-certificate</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[heroku]Heroku PostgresのDBをHeroku PostgresのDBからリストアする]]></title>
@@ -252,81 +320,6 @@ fputs(STDERR, "some error");
 
 <p><a href="http://nanoappli.com/blog/archives/5212">[PHP]標準エラー出力、標準出力に文字列を出力する</a><br/>
 <a href="http://php.net/manual/ja/function.fputs.php">fputs PHPマニュアル</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[Herokuアドオン]PostgreSQL Studio]]></title>
-    <link href="http://kayakuguri.github.io/blog/2015/01/29/postgresql-studio/"/>
-    <updated>2015-01-29T11:30:01+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2015/01/29/postgresql-studio</id>
-    <content type="html"><![CDATA[<p>herokuのアドオン、「PostgreSQL Studio」を入れてみた。</p>
-
-<!-- more -->
-
-
-<p><img src="/images/2015/01/postgresqlStdio00.jpg" alt="postgresql studio" /></p>
-
-<h2>概要</h2>
-
-<p>自身のアカウントで管理しているアプリ内に導入されているPostgreSQLの情報を閲覧、管理出来るアドオン。</p>
-
-<h2>インストール</h2>
-
-<p>導入は無料で行えます。<br/>
-というか、無料バージョンしか存在していません。</p>
-
-<pre><code>$ heroku addons:add pgstudio
-</code></pre>
-
-<h2>承認</h2>
-
-<p>herokuのアプリページでアドオンをクリックするとアドオンのトップページへ遷移出来る。<br/>
-PostgreSQL Studioのトップへインストール後に遷移すると、以下のような承認画面が出る。</p>
-
-<p><img src="/images/2015/01/postgresqlStdio01.jpg" alt="authorize" /></p>
-
-<p>内容は、</p>
-
-<blockquote><p>Read-only access to all of your apps and resources, excluding account information. Includes configuration variables, which may include runtime secrets.</p></blockquote>
-
-<p>あなたのアカウント情報を除く全てのアプリに読み取り専用の権限を許可します。<br/>
-そこには、設定情報やランタイム情報も含まれます。</p>
-
-<p>と、アドオンを入れるのは一つのアプリなのに、<strong>全ての</strong>アプリへの接続許可を求められます。<br/>
-この権現の編集は、自身のアカウントページから行えます。<br/>
-<a href="https://dashboard.heroku.com/account">https://dashboard.heroku.com/account</a></p>
-
-<p><img src="/images/2015/01/postgresqlStdio04.jpg" alt="承認設定" /></p>
-
-<p>というのも、自身が管理しているアプリにインストールしている全てのPostgreSQLのデータをこれで管理出来るため、この権現が必要なようです。</p>
-
-<h2>データ閲覧</h2>
-
-<p>承認してアクセスすると、閲覧したいDBの選択画面になるので、任意のものを選択し、Loginします。</p>
-
-<p><img src="/images/2015/01/postgresqlStdio02.jpg" alt="login" /></p>
-
-<p>ログインすると、そのDBの情報を見たり、クエリを実行したり、などが出来ます。</p>
-
-<p><img src="/images/2015/01/postgresqlStdio03.jpg" alt="db情報" /></p>
-
-<p>テーブルの構造はそのままで見ることができるが、データの中身は、SQLを発行しないと見られないよう。</p>
-
-<p><img src="/images/2015/01/postgresqlStdio05.jpg" alt="レコード内容" /></p>
-
-<h2>まとめ</h2>
-
-<p>ローカルにアプリをインストールしたり、自前でphpPGAdminを入れたりせずともアドオンさえ入れていればよいので、すごく楽。<br/>
-ただし、全アプリへのアクセス権限が必要になる＝全てのアプリのデータが閲覧可能、というのは少し怖い。<br/>
-アプリごとの承認ならいいのだけれど。<br/>
-なので、実質は自分のアカウント内のどれかのアプリに一つだけ入れておけばよいことになる。<br/>
-あと、ベータ版なので、動作の不具合や終了などがありえる。</p>
-
-<h2>参考</h2>
-
-<p><a href="https://devcenter.heroku.com/articles/pgstudio">公式ドキュメント</a><br/>
-<a href="https://addons.heroku.com/pgstudio">アドオンページ</a></p>
 ]]></content>
   </entry>
   

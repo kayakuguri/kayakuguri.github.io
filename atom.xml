@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-02-20T17:07:11+09:00</updated>
+  <updated>2015-02-20T18:07:53+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,88 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[heroku]SSL証明書を更新する]]></title>
+    <link href="http://kayakuguri.github.io/blog/2015/02/20/certs-update/"/>
+    <updated>2015-02-20T17:58:29+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2015/02/20/certs-update</id>
+    <content type="html"><![CDATA[<p>すでにheroku上でsslを導入していて、<br/>
+その証明書を更新する、という前提です。</p>
+
+<!-- more -->
+
+
+<h2>準備</h2>
+
+<p>ファイルの準備は導入の時と同じです。<br/>
+以前に書いたものを参考にどうぞ。</p>
+
+<p><a href="http://kayakuguri.github.io/blog/2014/09/30/heroku-ssl-subdomain/">[heroku]herokuでのSSL設定とカスタムサブドメインの適用方法</a></p>
+
+<p>準備するファイルは、以下の2つです。</p>
+
+<ul>
+<li>server.crt</li>
+<li>server.key</li>
+</ul>
+
+
+<h2>更新</h2>
+
+<p>以下で更新が出来ます。</p>
+
+<pre><code>$ heroku certs:update server.crt server.key
+</code></pre>
+
+<p>SSL導入時点で割り当てられるCNAME用のコモンネームが変わってしまうんじゃないかと思いましたが大丈夫でした。<br/>
+以下、ログ。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>Resolving trust chain... done
+</span><span class='line'>
+</span><span class='line'> !    WARNING: Potentially Destructive Action
+</span><span class='line'> !    This command will change the certificate of endpoint nagasaki-8466.herokussl.com on app-name.
+</span><span class='line'> !    To proceed, type "app-name" or re-run this command with --confirm app-name
+</span><span class='line'>
+</span><span class='line'>&gt; app-name
+</span><span class='line'>Updating SSL Endpoint xxx-9999.herokussl.com for app-name... done
+</span><span class='line'>Updated certificate details:
+</span><span class='line'>Common Name(s): example.com
+</span><span class='line'>Expires At:     (期限)
+</span><span class='line'>Issuer:         (SSL内容)
+</span><span class='line'>Starts At:      (開始日)
+</span><span class='line'>Subject:        (SSL内容)
+</span><span class='line'>SSL certificate is verified by a root authority.</span></code></pre></td></tr></table></div></figure>
+
+
+<p>途中で重要な変更ってことで、確認が入るので、アプリ名をタイプして実行します。<br/>
+予め、<code>--confirm app-name</code>をつけるとスルー出来るようです。</p>
+
+<p>また、もし間違えてアップしてしまった、などの場合は、もとに戻すコマンドも用意されているようです。</p>
+
+<pre><code>$ heroku certs:rollback
+</code></pre>
+
+<h2>参考</h2>
+
+<p><a href="https://devcenter.heroku.com/articles/ssl-endpoint#update-certificate">https://devcenter.heroku.com/articles/ssl-endpoint#update-certificate</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[heroku]Heroku PostgresのDBをHeroku PostgresのDBからリストアする]]></title>
@@ -1225,61 +1307,6 @@ System.debug(test_dt);
 </code></pre>
 
 <p>月まで変わると結構クリティカルだと思うので、要注意。</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[herokuアプリとdropboxのファイル同期]]></title>
-    <link href="http://kayakuguri.github.io/blog/2014/11/21/heroku-dropbox-sync/"/>
-    <updated>2014-11-21T20:11:48+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2014/11/21/heroku-dropbox-sync</id>
-    <content type="html"><![CDATA[<p>herokuがdropboxとの同期サービスをベータ版ですが開始したようです。<br/>
-記事：<a href="https://blog.heroku.com/archives/2014/11/19/announcing_beta_dropbox_sync">https://blog.heroku.com/archives/2014/11/19/announcing_beta_dropbox_sync</a><br/>
-ドキュメント：<a href="https://devcenter.heroku.com/articles/dropbox-sync">https://devcenter.heroku.com/articles/dropbox-sync</a></p>
-
-<!-- more -->
-
-
-<p>で、実際に試してみました。</p>
-
-<p>herokuで作成しているアプリの、<code>code</code>からdropboxへの接続が出来ます。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2014/11/dropbox-test1.jpg" alt="" /></p>
-
-<p>少し下に、<code>Connect to Dropbox</code>があるので、クリック。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2014/11/dropbox-test2.jpg" alt="" /></p>
-
-<p>ログインして認証。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2014/11/dropbox-test3.jpg" alt="" />
-<img src="http://kayakuguri.github.io/images/2014/11/dropbox-test4.jpg" alt="" /></p>
-
-<p>認証すると、接続したdropboxの中にフォルダが作成され、そこにアプリ上のソースが一式同期されます。<br/>
-<code>Dropbox/Apps/heroku/アプリ名</code>のフォルダが作成されます。</p>
-
-<p>で、ここにある通り、ここからdropbox内のファイルを使ってdeploy出来ます。<br/>
-メッセージを書いて<code>deploy</code>をクリックすると、書いたメッセージで、<code>commit</code>、<code>push</code>、<code>deploy</code>が実行されます。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2014/11/dropbox-test5.jpg" alt="" /></p>
-
-<p>実行中</p>
-
-<p><img src="http://kayakuguri.github.io/images/2014/11/dropbox-test6.jpg" alt="" /></p>
-
-<p>完了</p>
-
-<p><img src="http://kayakuguri.github.io/images/2014/11/dropbox-test7.jpg" alt="" /></p>
-
-<p>git上でもコミットメッセージが反映されています。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2014/11/dropbox-test8.jpg" alt="" /></p>
-
-<p>シュチエーションとしては、dropboxで同期したディレクトリを他の人とコラボして、<br/>
-その人が更新したファイルをブラウザ上からdeploy出来る、みたいな感じかと。<br/>
-それだと、コラボ相手はgitがいらないので。</p>
-
-<p>dropboxとの接続サービスはいっぱいあるので、他にも組み合わせれば色々出来そう。</p>
 ]]></content>
   </entry>
   
