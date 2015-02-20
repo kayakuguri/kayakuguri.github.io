@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-02-20T18:07:53+09:00</updated>
+  <updated>2015-02-20T18:09:28+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -67,7 +67,7 @@
 </pre></td><td class='code'><pre><code class=''><span class='line'>Resolving trust chain... done
 </span><span class='line'>
 </span><span class='line'> !    WARNING: Potentially Destructive Action
-</span><span class='line'> !    This command will change the certificate of endpoint nagasaki-8466.herokussl.com on app-name.
+</span><span class='line'> !    This command will change the certificate of endpoint xxx-9999.herokussl.herokussl.com on app-name.
 </span><span class='line'> !    To proceed, type "app-name" or re-run this command with --confirm app-name
 </span><span class='line'>
 </span><span class='line'>&gt; app-name
