@@ -4,7 +4,7 @@
   <title><![CDATA[Category: heroku | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/heroku/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-02-20T18:09:28+09:00</updated>
+  <updated>2015-03-03T02:15:07+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,66 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[heroku]herokuでhttpでのアクセスをhttpsへリダイレクトさせる設定]]></title>
+    <link href="http://kayakuguri.github.io/blog/2015/03/03/heroku-force-https/"/>
+    <updated>2015-03-03T02:05:27+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2015/03/03/heroku-force-https</id>
+    <content type="html"><![CDATA[<p>htaccessを使用して、httpでのアクセスを全てhttpsへリダイレクトさせる設定を書いた際に、<br/>
+少し悩んだのでメモ。</p>
+
+<!-- more -->
+
+
+<h2>通常のリダイレクト</h2>
+
+<p>ググるなどして調べるとまず出てくるのがこの方法。<br/>
+実際、vagrantなんかでのローカル環境だとこれで問題なくリダイレクト出来た。</p>
+
+<p><code>
+RewriteEngine On
+RewriteCond %{SERVER_PORT} !^443$
+RewriteRule ^.*$ https://%{SERVER_NAME}%{REQUEST_URI} [L,R]
+</code></p>
+
+<p>もしくはこれ。</p>
+
+<p><code>
+RewriteEngine on
+RewriteCond %{HTTPS} off
+RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [R,L]
+</code></p>
+
+<p><strong>参考サイト</strong><br/>
+<a href="http://takuya-1st.hatenablog.jp/entry/20101217/1292579757">HTTPSを強制する簡単な設定(htaccess)</a><br/>
+<a href="http://sachips.byeto.jp/server/htaccess_http_ssl.html">.htaccessファイルでHTTPアクセスをSSLにリダイレクトする方法とその逆も</a></p>
+
+<p>しかし、全く同じファイルをherokuにアップするとリダイレクトループが発生し、動かなくなってしまった。</p>
+
+<h2>heroku(aws)環境でのリダイレクト</h2>
+
+<p>herokuはaws上で動いています。<br/>
+で、awsなどで使われている負荷分散ための処理、ロードバランサが設定されていると？上記のエラーは起こってしまうようです。</p>
+
+<p><strong>参考ページ</strong><br/>
+<a href="http://qiita.com/tkosuga@github/items/ee51fcd6c047b19856be">apache(htaccess)でリバースプロキシー経由のHTTP/HTTPS転送</a><br/>
+<a href="http://qa.atmarkit.co.jp/q/3221">一部のページでのSSLの設定に困っています</a><br/>
+<a href="http://d.hatena.ne.jp/komiyak/20130807/1375845025">AWS Elastic Load Balancer と Apache を使って HTTPS(SSL) 通信を行うための設定方法</a></p>
+
+<p>これを回避するには、上記参考サイトにもあるように、<code>HTTP:X-Forwarded-Proto</code>を見て転送をかけるかどうかを判断してやることでループしないように出来るみたい。</p>
+
+<p>実際に設定した内容は以下。</p>
+
+<p><code>
+RewriteEngine on
+RewriteCond %{HTTP:X-Forwarded-Proto} ^http$
+RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [R,L]
+</code></p>
+
+<p>これで無事、動作しました。</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[heroku]SSL証明書を更新する]]></title>
@@ -282,44 +342,6 @@ heroku側がエラーページを返してしまう。<br/>
 <a href="https://devcenter.heroku.com/articles/procfile">Process Types and the Procfile</a><br/>
 <a href="https://devcenter.heroku.com/articles/background-jobs-queueing">Worker Dynos, Background Jobs and Queueing</a><br/>
 <a href="https://devcenter.heroku.com/articles/scheduler">Heroku Scheduler</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[heroku]PHPでpapertrailに標準出力で文字列を出力する]]></title>
-    <link href="http://kayakuguri.github.io/blog/2015/02/05/papertrail-php-stdout/"/>
-    <updated>2015-02-05T11:30:39+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2015/02/05/papertrail-php-stdout</id>
-    <content type="html"><![CDATA[<p>herokuでログを見るには、papertrailが基本かと思います。<br/>
-そのpapertrailにPHPから任意の文字列を出力するには標準出力を使う、との事で試してみました。</p>
-
-<!-- more -->
-
-
-<p>方法は以下の通り。</p>
-
-<pre><code>$stdout= fopen( 'php://stdout', 'w' );
-fwrite( $stdout, "hello world to stdout\n" );
-</code></pre>
-
-<p>結果はこんな感じ。</p>
-
-<p><img src="/images/2015/02/php-stdout.jpg" alt="papertrail" /></p>
-
-<p>PHP部分は参考サイトのママです。ありがとうございます。</p>
-
-<p>あと、まとめて以下でも書けるよう。</p>
-
-<pre><code>fputs(STDOUT, "hello world to stdout\n");
-
-//エラーの場合
-fputs(STDERR, "some error");
-</code></pre>
-
-<h3>参考</h3>
-
-<p><a href="http://nanoappli.com/blog/archives/5212">[PHP]標準エラー出力、標準出力に文字列を出力する</a><br/>
-<a href="http://php.net/manual/ja/function.fputs.php">fputs PHPマニュアル</a></p>
 ]]></content>
   </entry>
   

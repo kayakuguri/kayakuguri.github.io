@@ -6,9 +6,9 @@
 	<title>KayaMemo</title>
 
 	
-	<meta name="description" content="ここの流れで作成させて頂きました。
-http://morizyun.github.io/blog/octopress-gitpage-minimum-install-guide/ もう一つ参考。
-http://tokkonopapa.github.io/blog/2011/12/30/ &hellip;">
+	<meta name="description" content="新しい記事を作成 rake new_post['post title'] ※ここでのタイトルに日本語は使えない。また、ページのURLにもなる。
+source/_post/YYYY-MM-DD-title.markdownというデータが出来上がるので、
+中編集して記事を作成。 プレビュー rake &hellip;">
 	
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
@@ -85,6 +85,79 @@ http://tokkonopapa.github.io/blog/2011/12/30/ &hellip;">
 		
 	
 	<div id="content" class="inner">
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2013/11/29/create-post-memo/">
+		
+			Gitblogに投稿するまでの手順メモ</a>
+	</h2>
+	<div class="entry-content">
+		<p><strong>新しい記事を作成</strong></p>
+
+<pre><code>rake new_post['post title']
+</code></pre>
+
+<p>※ここでのタイトルに日本語は使えない。また、ページのURLにもなる。<br/>
+<code>source/_post/YYYY-MM-DD-title.markdown</code>というデータが出来上がるので、<br/>
+中編集して記事を作成。</p>
+
+<p><strong>プレビュー</strong></p>
+
+<pre><code>rake preview
+</code></pre>
+
+<p><a href="http://localhost:4000/">http://localhost:4000/</a>にアクセスすると見れる。<code>Ctrl+c</code>で終了。</p>
+
+<p><strong>記事のアップ</strong></p>
+
+<pre><code>rake generate
+rake deploy
+</code></pre>
+
+<p>または上記２つを１つに</p>
+
+<pre><code>rake gen_deploy
+</code></pre>
+
+<p><strong>ソースをBitbucketにバックアップ</strong></p>
+
+<pre><code>git add -A
+git commit -m "add post"
+git push -u bitbucket source
+</code></pre>
+
+		
+		
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-11-29T13:30:48+09:00" pubdate data-updated="true">Nov 29<span>th</span>, 2013</time></div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/octopress/'>octopress</a>
+
+
+</div>
+	
+</div>
+</article>
 
 
     <article class="post">
