@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-03-03T02:15:07+09:00</updated>
+  <updated>2015-03-04T17:49:50+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,144 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[heroku]herokuのPostgreSQLでバージョンを指定する]]></title>
+    <link href="http://kayakuguri.github.io/blog/2015/03/04/heroku-postgres-version/"/>
+    <updated>2015-03-04T17:38:54+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2015/03/04/heroku-postgres-version</id>
+    <content type="html"><![CDATA[<p>herokuのpostgreSQLを入れる際にバージョンの指定が出来たのでメモ。</p>
+
+<!-- more -->
+
+
+<p><a href="https://devcenter.heroku.com/articles/heroku-postgresql#version-support-and-legacy-infrastructure">Version Support and Legacy Infrastructure &ndash; Heroku Postgres</a></p>
+
+<p>選べるバージョン配下。</p>
+
+<ul>
+<li>9.4(beta)</li>
+<li>9.3(デフォルト)</li>
+<li>9.2</li>
+<li>9.1</li>
+</ul>
+
+
+<p>指定して入れるためにはブラウザ上ではなく、コマンドラインからバージョンを指定して入れてやる必要がある。</p>
+
+<p>まずはそのままデフォルトで入れてみる。<br/>
+アプリを作るところから</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$ heroku create
+</span><span class='line'>Creating fierce-woodland-3392... done, stack is cedar-14
+</span><span class='line'>
+</span><span class='line'>$ heroku addons:add heroku-postgresql --app fierce-woodland-3392
+</span><span class='line'>Adding heroku-postgresql on fierce-woodland-3392... done, v4 (free)
+</span><span class='line'>Attached as HEROKU_POSTGRESQL_CRIMSON_URL
+</span><span class='line'>Database has been created and is available
+</span><span class='line'> ! This database is empty. If upgrading, you can transfer
+</span><span class='line'> ! data from another database with pgbackups:restore.
+</span><span class='line'>Use `heroku addons:docs heroku-postgresql` to view documentation.
+</span><span class='line'>
+</span><span class='line'>$ heroku pg:info --app fierce-woodland-3392
+</span><span class='line'>=== HEROKU_POSTGRESQL_CRIMSON_URL (DATABASE_URL)
+</span><span class='line'>Plan:        Hobby-dev
+</span><span class='line'>Status:      Available
+</span><span class='line'>Connections: 0/20
+</span><span class='line'>PG Version:  9.3.6
+</span><span class='line'>Created:     2015-03-04 08:43 UTC
+</span><span class='line'>Data Size:   6.4 MB
+</span><span class='line'>Tables:      0
+</span><span class='line'>Rows:        0/10000 (In compliance)
+</span><span class='line'>Fork/Follow: Unsupported
+</span><span class='line'>Rollback:    Unsupported</span></code></pre></td></tr></table></div></figure>
+
+
+<p></p>
+
+<p>アプリを作って、postgresqlの無料版を指定なしで入れて、情報を確認している。<br/>
+情報内にある通り、バージョンは、<code>9.3.6</code>。</p>
+
+<p>次に指定ありで。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$ heroku create
+</span><span class='line'>Creating polar-dusk-1475... done, stack is cedar-14
+</span><span class='line'>https://polar-dusk-1475.herokuapp.com/ | https://git.heroku.com/polar-dusk-1475.git
+</span><span class='line'>
+</span><span class='line'>$ heroku addons:add heroku-postgresql --version=9.1 --app polar-dusk-1475
+</span><span class='line'>Adding heroku-postgresql on polar-dusk-1475... done, v4 (free)
+</span><span class='line'>Attached as HEROKU_POSTGRESQL_PURPLE_URL
+</span><span class='line'>Database has been created and is available
+</span><span class='line'> ! This database is empty. If upgrading, you can transfer
+</span><span class='line'> ! data from another database with pgbackups:restore.
+</span><span class='line'>Use `heroku addons:docs heroku-postgresql` to view documentation.
+</span><span class='line'>
+</span><span class='line'>$ heroku pg:info --app polar-dusk-1475
+</span><span class='line'>=== HEROKU_POSTGRESQL_PURPLE_URL (DATABASE_URL)
+</span><span class='line'>Plan:        Hobby-dev
+</span><span class='line'>Status:      Available
+</span><span class='line'>Connections: 0/20
+</span><span class='line'>PG Version:  9.1.11
+</span><span class='line'>Created:     2015-03-04 08:45 UTC
+</span><span class='line'>Data Size:   5.9 MB
+</span><span class='line'>Tables:      0
+</span><span class='line'>Rows:        0/10000 (In compliance)
+</span><span class='line'>Fork/Follow: Unsupported
+</span><span class='line'>Rollback:    Unsupported</span></code></pre></td></tr></table></div></figure>
+
+
+<p>結果は見ての通り。<code>9.1.11</code>で入っている。</p>
+
+<p>実際に指定している箇所は、addonの追加の後ろにオプションとして、<code>--version=9.1</code>を追加してやるだけ。</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[heroku]herokuでhttpでのアクセスをhttpsへリダイレクトさせる設定]]></title>
@@ -1290,47 +1428,6 @@ function reloadAndClose() {
 
 <p><a href="http://blog.livedoor.jp/minoaw/archives/1654198.html">[Salesforce]標準画面からクロスドメインなVisualforce画面を開き、自分を更新させる : minoawのブログ</a><br/>
 ほぼこのまんまです。ありがとうございます。</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Apexのテストで変数部分にテストが通ってくれない時]]></title>
-    <link href="http://kayakuguri.github.io/blog/2014/12/02/apex-json-class-test/"/>
-    <updated>2014-12-02T18:41:35+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2014/12/02/apex-json-class-test</id>
-    <content type="html"><![CDATA[<p>きっと基本を理解してないんだと思いますが、単純な話でした。</p>
-
-<!-- more -->
-
-
-<p>JsonをGETで引き渡して、それをApexクラスにしてapex内で使用するべく、<br/>
-apex2Jsonとして以下のようなクラスを作成していた。</p>
-
-<pre><code>public class Json2Apex{
-    public String user_id;
-    public String dummy;
-
-    public static Json2Apex parse(String json){
-        return (Json2Apex) System.JSON.deserialize(json, Json2Apex.class);
-    }
-}
-</code></pre>
-
-<p>ちゃんとJSONには、<code>user_id</code>と<code>dummy</code>の値を持たせて変換させ、<br/>
-その変数にもきっちりアクセスした状態でも、テストを走らせてみると、<br/>
-<code>parse</code>メソッド部分しか通ってない。<br/>
-全体の行数が少ないので、パーセンテージとしては、<strong>50%</strong>。<br/>
-これでは他のリリースに影響が大なので、調べてみると、単純な事で、<br/>
-<code>{get; set;}</code>をつけろ、ってだけだった。<br/>
-以下のようにつける。</p>
-
-<pre><code>public String user_id{get; set;}
-public String dummy{get; set;}
-</code></pre>
-
-<p>これだけでテストコードも変更することなく通り、無事、100%を達成できました。</p>
-
-<p>参考：<a href="http://salesforce.stackexchange.com/questions/10018/testing-apex-classes-created-by-jsontoapex">http://salesforce.stackexchange.com/questions/10018/testing-apex-classes-created-by-jsontoapex</a></p>
 ]]></content>
   </entry>
   

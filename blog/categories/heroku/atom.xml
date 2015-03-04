@@ -4,7 +4,7 @@
   <title><![CDATA[Category: heroku | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/heroku/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-03-03T02:15:07+09:00</updated>
+  <updated>2015-03-04T17:49:50+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,97 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[heroku]herokuのPostgreSQLでバージョンを指定する]]></title>
+    <link href="http://kayakuguri.github.io/blog/2015/03/04/heroku-postgres-version/"/>
+    <updated>2015-03-04T17:38:54+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2015/03/04/heroku-postgres-version</id>
+    <content type="html"><![CDATA[<p>herokuのpostgreSQLを入れる際にバージョンの指定が出来たのでメモ。</p>
+
+<!-- more -->
+
+
+<p><a href="https://devcenter.heroku.com/articles/heroku-postgresql#version-support-and-legacy-infrastructure">Version Support and Legacy Infrastructure &ndash; Heroku Postgres</a></p>
+
+<p>選べるバージョン配下。</p>
+
+<ul>
+<li>9.4(beta)</li>
+<li>9.3(デフォルト)</li>
+<li>9.2</li>
+<li>9.1</li>
+</ul>
+
+
+<p>指定して入れるためにはブラウザ上ではなく、コマンドラインからバージョンを指定して入れてやる必要がある。</p>
+
+<p>まずはそのままデフォルトで入れてみる。<br/>
+アプリを作るところから</p>
+
+<p>```
+$ heroku create
+Creating fierce-woodland-3392&hellip; done, stack is cedar-14</p>
+
+<p>$ heroku addons:add heroku-postgresql &mdash;app fierce-woodland-3392
+Adding heroku-postgresql on fierce-woodland-3392&hellip; done, v4 (free)
+Attached as HEROKU_POSTGRESQL_CRIMSON_URL
+Database has been created and is available
+ ! This database is empty. If upgrading, you can transfer
+ ! data from another database with pgbackups:restore.
+Use <code>heroku addons:docs heroku-postgresql</code> to view documentation.</p>
+
+<p>$ heroku pg:info &mdash;app fierce-woodland-3392
+=== HEROKU_POSTGRESQL_CRIMSON_URL (DATABASE_URL)
+Plan:        Hobby-dev
+Status:      Available
+Connections: 0/20
+PG Version:  9.3.6
+Created:     2015-03-04 08:43 UTC
+Data Size:   6.4 MB
+Tables:      0
+Rows:        0/10000 (In compliance)
+Fork/Follow: Unsupported
+Rollback:    Unsupported
+```</p>
+
+<p>アプリを作って、postgresqlの無料版を指定なしで入れて、情報を確認している。<br/>
+情報内にある通り、バージョンは、<code>9.3.6</code>。</p>
+
+<p>次に指定ありで。</p>
+
+<p>```
+$ heroku create
+Creating polar-dusk-1475&hellip; done, stack is cedar-14
+<a href="https://polar-dusk-1475.herokuapp.com/">https://polar-dusk-1475.herokuapp.com/</a> | <a href="https://git.heroku.com/polar-dusk-1475.git">https://git.heroku.com/polar-dusk-1475.git</a></p>
+
+<p>$ heroku addons:add heroku-postgresql &mdash;version=9.1 &mdash;app polar-dusk-1475
+Adding heroku-postgresql on polar-dusk-1475&hellip; done, v4 (free)
+Attached as HEROKU_POSTGRESQL_PURPLE_URL
+Database has been created and is available
+ ! This database is empty. If upgrading, you can transfer
+ ! data from another database with pgbackups:restore.
+Use <code>heroku addons:docs heroku-postgresql</code> to view documentation.</p>
+
+<p>$ heroku pg:info &mdash;app polar-dusk-1475
+=== HEROKU_POSTGRESQL_PURPLE_URL (DATABASE_URL)
+Plan:        Hobby-dev
+Status:      Available
+Connections: 0/20
+PG Version:  9.1.11
+Created:     2015-03-04 08:45 UTC
+Data Size:   5.9 MB
+Tables:      0
+Rows:        0/10000 (In compliance)
+Fork/Follow: Unsupported
+Rollback:    Unsupported
+```</p>
+
+<p>結果は見ての通り。<code>9.1.11</code>で入っている。</p>
+
+<p>実際に指定している箇所は、addonの追加の後ろにオプションとして、<code>--version=9.1</code>を追加してやるだけ。</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[heroku]herokuでhttpでのアクセスをhttpsへリダイレクトさせる設定]]></title>
@@ -260,88 +351,6 @@ herokuがgitでのソース管理とはいえ、ソースの管理自体はや�
 <h2>参考</h2>
 
 <p><a href="https://devcenter.heroku.com/articles/github-integration">ドキュメント</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[heroku]One-Off DynoでPHPをバックグラウンドで動作させる]]></title>
-    <link href="http://kayakuguri.github.io/blog/2015/02/05/one-off-dyno-excute-php/"/>
-    <updated>2015-02-05T15:04:19+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2015/02/05/one-off-dyno-excute-php</id>
-    <content type="html"><![CDATA[<p>バッチ処理なんかを動作させるためにバックグラウンドでPHPを起動する方法を調べてみた。</p>
-
-<!-- more -->
-
-
-<h2>PHPをコマンドから実行</h2>
-
-<p>PHPをコマンドラインから実行させるには以下。</p>
-
-<pre><code>$ php hogehoge.php
-</code></pre>
-
-<h2>dynoについて</h2>
-
-<p>dynoの種類なんかについては以下がすごくわかりやすかった。</p>
-
-<p><a href="http://codezine.jp/article/detail/8344">構築・運用の必須知識！  Herokuアプリケーションの実行プラットフォーム「Dyno」を徹底的に理解する
-（1/3）：CodeZine</a></p>
-
-<h2>One-off dynoの起動</h2>
-
-<p>今回使用するのは、One-off dyno。<br/>
-これを起動させる方法は2種類あって、<br/>
-一つは、<a href="https://addons.heroku.com/scheduler">Heroku Scheduler</a>のアドオンを入れて、<br/>
-そこから定期的に実行させる方法。<br/>
-実際にバッチ処理をさせる場合はここに登録する。<br/>
-冒頭のPHPを起動させるコマンドをそのまま登録する。</p>
-
-<p><img src="/images/2015/02/heroku_background02.jpg" alt="Heroku Scheduler" /></p>
-
-<p>実行されたログは<a href="https://addons.heroku.com/papertrail">papertrail</a>上だと以下のような形となる。</p>
-
-<p><img src="/images/2015/02/heroku_background01.jpg" alt="papertrail" /></p>
-
-<p>もう一つはコマンドラインからの実行。<br/>
-これだと任意のタイミングですぐに実行出来るので待たなくてよい。<br/>
-<code>heroku run</code>で、herokuでコマンドを実行出来る。<br/>
-以下、コマンド。</p>
-
-<pre><code>$ heroku run 'php hogehoge.php'
-</code></pre>
-
-<p>コマンドで実行した場合は、ターミナルに標準出力した結果や、<code>echo</code>された内容なんかがそのまま返ってくる。<br/>
-(エラーが出てればわかる)</p>
-
-<h2>メリット</h2>
-
-<p>通常のWeb dynoの場合、リクエストしてからレスポンスがあるまでに30秒以上かかってしまうと、タイムアウトが発生し、<br/>
-heroku側がエラーページを返してしまう。<br/>
-この設定はこちら側ではどうやっても変更不可能なよう。<br/>
-しかし、One-off dynoやworker dynoを使用してバックグラウンド実行させた場合はこの限りではなく、<br/>
-処理によるタイムアウトはない。<br/>
-なので、重いファイルや重い処理も可能。</p>
-
-<p>後は、このアプリをバッチだけに限定して使用する場合、web dynoをゼロにしてしまえる。<br/>
-ブラウザからのアクセスが出来なくなるが、バッチの性質上、不要。むしろアクセス出来ない方が都合がよい。<br/>
-値段も安くすむ(もしくは無料)し。</p>
-
-<p><img src="/images/2015/02/heroku_background03.jpg" alt="web dynoがゼロ" /></p>
-
-<h2>参考</h2>
-
-<p><a href="https://github.com/herokaijp/devcenter/wiki/one-off-dynos">one off dynos · herokaijp/devcenter Wiki · GitHub</a><br/>
-<a href="http://pc-karuma.net/xampp-php-shell/">コマンドラインからPHPを実行 &ndash; XAMPPの使い方 &ndash; PC設定のカルマ</a><br/>
-<a href="http://codezine.jp/article/detail/8344">構築・運用の必須知識！  Herokuアプリケーションの実行プラットフォーム「Dyno」を徹底的に理解する
-（1/3）：CodeZine</a><br/>
-<a href="http://bokukoko.hatenablog.com/entry/2014/09/25/Heroku_%E3%81%AE%E3%82%BF%E3%82%A4%E3%83%A0%E3%82%A2%E3%82%A6%E3%83%88%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6%E8%AA%BF%E3%81%B9%E3%81%9F_%26_%E7%BF%BB%E8%A8%B3">Heroku のタイムアウトについて調べた &amp; 翻訳 &ndash; ボクココ</a></p>
-
-<h2>公式ドキュメント類</h2>
-
-<p><a href="https://devcenter.heroku.com/articles/one-off-dynos">One-Off Dynos</a><br/>
-<a href="https://devcenter.heroku.com/articles/procfile">Process Types and the Procfile</a><br/>
-<a href="https://devcenter.heroku.com/articles/background-jobs-queueing">Worker Dynos, Background Jobs and Queueing</a><br/>
-<a href="https://devcenter.heroku.com/articles/scheduler">Heroku Scheduler</a></p>
 ]]></content>
   </entry>
   
