@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-03-10T20:07:50+09:00</updated>
+  <updated>2015-03-10T20:09:12+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,15 +12,6 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
-  
-  <entry>
-    <title type="html"><![CDATA[test]]></title>
-    <link href="http://kayakuguri.github.io/blog/2015/03/10/test/"/>
-    <updated>2015-03-10T20:07:30+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2015/03/10/test</id>
-    <content type="html"><![CDATA[
-]]></content>
-  </entry>
   
   <entry>
     <title type="html"><![CDATA[ビュー画面に出るチャターフォローボタンを非表示にする]]></title>
@@ -1353,6 +1344,56 @@ try{
 
 <p>ライブラリもあったけど、未検証<br/>
 <a href="https://github.com/dg/ftp-php">FTP for PHP</a></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[selesforce]Chatter系プロファイルのレコードタイプを変更する]]></title>
+    <link href="http://kayakuguri.github.io/blog/2014/12/12/disable-recode-type-chatteruser/"/>
+    <updated>2014-12-12T16:58:54+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2014/12/12/disable-recode-type-chatteruser</id>
+    <content type="html"><![CDATA[<p>レコードタイプの削除時に、chatter系のユーザープロファイルがデフォルトの設定になっているため、無効に出来ない。<br/>
+その解決方法のキャンペーンメンバーオブジェクト版。</p>
+
+<!-- more -->
+
+
+<p>今回はちょっと特殊なキャンペーンメンバーオブジェクトでの説明。</p>
+
+<p>以下のように無効にしようとしてもエラーが出てしまう。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2014/12/inactive_recodetype00.jpg" alt="エラー" /></p>
+
+<p>各プロファイルのデフォルトのレコードタイプの選択はプロファイルの設定画面から編集が可能。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2014/12/inactive_recodetype01.jpg" alt="レコード選択" /></p>
+
+<p>ただし、chatter系のユーザーは、そもそもこの画面へ遷移する方法がない。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2014/12/inactive_recodetype02.jpg" alt="chatter系プロファイル" /></p>
+
+<p>じゃあ、どうするかというと、各プロファイルのレコードタイプの変更ページはURLの形式が決まっており、<br/>
+そこでユーザーのIDの指定を変えてやれば直接遷移が可能だった。</p>
+
+<p>キャンペーンメンバーのURLはコピペすると以下のようになっている。</p>
+
+<blockquote><p><a href="https://cs5.salesforce.com/setup/ui/profilerecordtypeedit.jsp?id=">https://cs5.salesforce.com/setup/ui/profilerecordtypeedit.jsp?id=</a>[<strong>プロファイルのID</strong>]&amp;tid=CampaignMember&amp;pn=<br/>
+02.%25E5%258A%2587%25E5%25A0%25B4%25E3%2582%25B9%25E3%2582%25BF<br/>
+%25E3%2583%2583%25E3%2583%2595%25E7%2594%25A8<br/>
+&amp;retURL=%2F00eO0000000DwhR</p></blockquote>
+
+<p>ここで、<code>プロファイルのID</code>と書いた部分に、変更したいプロファイルのIDを直接書いてやればOK。<br/>
+以下のように接続できる。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2014/12/inactive_recodetype03.jpg" alt="レコード選択" /></p>
+
+<p>これで、変更してやればOK。<br/>
+公式のヘルプページだと、カスタムオブジェクトでの説明だったので、ちょっとハマった。</p>
+
+<h3>参考</h3>
+
+<p><a href="https://help.salesforce.com/apex/HTViewSolution?id=000181693&amp;language=ja">レコードタイプの削除時に Chatter 関連プロファイルに指定されたレコードタイプを外す方法</a><br/>
+<a href="http://tyoshikawa1106.hatenablog.com/entry/2014/01/30/004636">SFDC：レコードタイプを無効にする際にハマった話</a></p>
 ]]></content>
   </entry>
   
