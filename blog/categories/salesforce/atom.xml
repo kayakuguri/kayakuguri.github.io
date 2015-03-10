@@ -4,7 +4,7 @@
   <title><![CDATA[Category: salesforce | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/salesforce/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-03-04T17:49:50+09:00</updated>
+  <updated>2015-03-10T16:21:16+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,45 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[ビュー画面に出るチャターフォローボタンを非表示にする]]></title>
+    <link href="http://kayakuguri.github.io/blog/2015/03/10/chatter-follow/"/>
+    <updated>2015-03-10T16:13:23+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2015/03/10/chatter-follow</id>
+    <content type="html"><![CDATA[<p>キャンペーンやリードなどのビュー画面を表示した時にアクションの列に表示される、<br/>
+緑の＋ボタンは、このリード(やキャンペーンなど)をチャターでフォローする、というボタンなのですが、<br/>
+特に使用しないので非表示にする方法を調べました。</p>
+
+<!-- more -->
+
+
+<p>このボタンを非表示にしたい。</p>
+
+<p><img src="/images/2015/03/chatter1.jpg" alt="チャターフォローボタン" /></p>
+
+<p>これは、フィード追跡、という機能で制御できます。<br/>
+<code>カスタマイズ</code> &ndash;> <code>Chatter</code> &ndash;> <code>フィード追跡</code> を選択。</p>
+
+<p><img src="/images/2015/03/chatter2.jpg" alt="フィード追跡" /></p>
+
+<p>追跡をやめたいオブジェクトを選択します。<br/>
+上部にある、「フィード追跡の有効化」のチェックを外します。</p>
+
+<p><img src="/images/2015/03/chatter3.jpg" alt="" /></p>
+
+<p>保存します。</p>
+
+<p><img src="/images/2015/03/chatter4.jpg" alt="" /></p>
+
+<p>これでビュー画面からボタンが非表示になりました。</p>
+
+<p><img src="/images/2015/03/chatter5.jpg" alt="" /></p>
+
+<p>このフィード追跡機能はフォローしたレコードにどういう変更があった時に通知するか、を設定できるので、<br/>
+上手く使えば便利になるのかもしれません。</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[salesforce]メモ&添付ファイルに添付されたファイルのURLを取得する]]></title>
@@ -245,183 +284,6 @@ This is your new Page
 googlemapなんかも思いのまま。</p>
 
 <p><img src="/images/2014/11/custom_vf08.jpg" alt="地図の表示" /></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Force.com IDE for Eclipse plug-inをインストール]]></title>
-    <link href="http://kayakuguri.github.io/blog/2014/11/13/force-dot-com-ide-for-eclipse/"/>
-    <updated>2014-11-13T17:35:25+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2014/11/13/force-dot-com-ide-for-eclipse</id>
-    <content type="html"><![CDATA[<p>いつのまにやらForce.com IDEの<a href="http://salesforce.stackexchange.com/questions/47653/where-can-i-get-a-standalone-version-of-the-force-com-ide">スタンドアロン版が開発終了してしまっているらしく</a>(未確認)、<br/>
-仕方がないので、Eclipseのインストールからしてみました。</p>
-
-<!-- more -->
-
-
-<p>環境は、macのmavericks(10.9)です。</p>
-
-<h2>Javaのインストール</h2>
-
-<p>まずは、JAVAのバージョンを確認。<br/>
-ターミナルからコマンドで確認できる。</p>
-
-<pre><code>$ java -version
-java version "1.6.0_65"
-Java(TM) SE Runtime Environment (build 1.6.0_65-b14-462-11M4609)
-Java HotSpot(TM) 64-Bit Server VM (build 20.65-b04-462, mixed mode)
-</code></pre>
-
-<p>Force.com IDEは、</p>
-
-<blockquote><p>Java SE Runtime Environment 6 (v1.6) or later</p></blockquote>
-
-<p>となっているんだけど、7以上でないとダメなよう。<br/>
-<a href="https://developer.salesforce.com/forums/?id=906F0000000AbEjIAK">https://developer.salesforce.com/forums/?id=906F0000000AbEjIAK</a><br/>
-なので、以下から7をダウンロード。<br/>
-<a href="http://www.oracle.com/technetwork/java/javase/downloads/jdk7-downloads-1880260.html">http://www.oracle.com/technetwork/java/javase/downloads/jdk7-downloads-1880260.html</a></p>
-
-<p><img src="/images/2014/11/java01.jpg" alt="java" /></p>
-
-<p>中ほどにあるリンクページから、<code>jdk-7u71-macosx-x64.dmg</code>をダウンロード。</p>
-
-<p><img src="/images/2014/11/java02.jpg" alt="java download" /></p>
-
-<p>ダブルクリックしてインストール開始。</p>
-
-<p><img src="/images/2014/11/java03.jpg" alt="java インストール" /></p>
-
-<p>特筆すべき事はなく、次、次、でOK。</p>
-
-<p><img src="/images/2014/11/java04.jpg" alt="java インストール中" /></p>
-
-<p>完了。</p>
-
-<p><img src="/images/2014/11/java05.jpg" alt="java インストール完了" /></p>
-
-<p>再度バージョンを確認。</p>
-
-<pre><code>$ java -version
-java version "1.7.0_71"
-Java(TM) SE Runtime Environment (build 1.7.0_71-b14)
-Java HotSpot(TM) 64-Bit Server VM (build 24.71-b01, mixed mode)
-</code></pre>
-
-<h2>Eclipseのインストール</h2>
-
-<p>ググったら出てくる公式の日本語ページ最下部からインストールの解説ページへ。<br/>
-<a href="https://developer.salesforce.com/page/JP:Force.com_IDE">https://developer.salesforce.com/page/JP:Force.com_IDE</a></p>
-
-<p><img src="/images/2014/11/ide01.jpg" alt="force.com ide 解説" /></p>
-
-<p><a href="https://developer.salesforce.com/page/JP:Force.com_IDE_Installation">https://developer.salesforce.com/page/JP:Force.com_IDE_Installation</a><br/>
-Eclipseのダウンロードページへ。4.2でも4.3でもいい、との事なので、今回は4.3で。</p>
-
-<p><img src="/images/2014/11/ide02.jpg" alt="インストール方法" /></p>
-
-<p>飛び先のページで、<code>Eclipse IDE for Java Developers</code>をダウンロード。<br/>
-自分はmacなので、mac64bit版をダウンロード。</p>
-
-<p><img src="/images/2014/11/ide03.jpg" alt="eclipse ダウンロード" /></p>
-
-<p>次のページでダウンロード開始。</p>
-
-<p><img src="/images/2014/11/ide04.jpg" alt="eclipse ダウンロード" /></p>
-
-<p>ダウンロードは自動で始まる。<br/>
-(寄付してね！画面が表示されるけど、eclipse自体は無料で使える)</p>
-
-<p><img src="/images/2014/11/ide05.jpg" alt="eclipse ダウンロード" /></p>
-
-<p>ダウンロードしたファイル(今回は、<code>eclipse-java-kepler-R-macosx-cocoa-x86_64.tar.gz</code>)をダブルクリックして解凍。<br/>
-macの場合はインストールはなく、解凍して出来たファルダごと、アプリケーションフォルダに突っ込めばOK。<br/>
-(別に入れなくても大丈夫なはず)</p>
-
-<p><img src="/images/2014/11/ide06.jpg" alt="アプリケーションフォルダへ" /></p>
-
-<p>で、起動。<br/>
-ただし、自分の環境(Mavericks)では起動が出来ず、壊れているという表記。<br/>
-これは、Mountain Lionから導入されたGateKeeperによってApp Store以外からインストールしようとした場合に表示される警告、のよう。<br/>
-いきなり実行ファイルがゴミ箱に捨てられるってのがなんともすごい。</p>
-
-<p><img src="/images/2014/11/ide07.jpg" alt="起動失敗" /></p>
-
-<p>以下を参考に、実行を許可して、改めて起動。<br/>
-<a href="http://park1.wakwak.com/~ima/macosx_eclipse0001.html">[OSX]Mountain Lion(10.8)でEclipse4.3(kepler)を日本語化して使う | ごった煮 &ndash; tips about programming and building a server</a></p>
-
-<p>警告は出るけど無視。</p>
-
-<p><img src="/images/2014/11/ide08.jpg" alt="接続警告" /></p>
-
-<p>最初にワークスペースを設定しろ、と言われるので、とりあえずデフォルトのままで起動する。</p>
-
-<p><img src="/images/2014/11/ide09.jpg" alt="ワークスペース" /></p>
-
-<p>起動後、welcomeスクリーンが表示されるが、とりあえずこのまま放置して、<br/>
-上部のメニューから、Help &ndash;> Install New Software を選択。</p>
-
-<p><img src="/images/2014/11/ide10.jpg" alt="Install New Software" /></p>
-
-<p>ネットワークの接続を許可して…、<br/>
-あとは上記公式の解説ページ(英語)と同じ手順となりますが、<br/>
-<code>Add…</code>をクリック。</p>
-
-<p><img src="/images/2014/11/ide11.jpg" alt="Add" /></p>
-
-<p>Nameは適当に。<br/>
-Locationに、<code>http://media.developerforce.com/force-ide/eclipse42</code>と入力。<br/>
-OKをクリック。</p>
-
-<p><img src="/images/2014/11/ide12.jpg" alt="Addリポジトリ" /></p>
-
-<p>結果が表示されるので、リストに表示された、<code>Force.com IDE</code>にチェックを入れ、<br/>
-<code>Next</code>をクリック。</p>
-
-<p><img src="/images/2014/11/ide13.jpg" alt="インストール" /></p>
-
-<p>ダウンロードされ、インストール準備完了。  <br/>
-<code>Next</code>をクリック。</p>
-
-<p><img src="/images/2014/11/ide14.jpg" alt="ダウンロード完了" /></p>
-
-<p>ライセンス情報が表示されるので、一通り目を通してから(通してから…)、<br/>
-<code>I accept the terms of license agreements</code>にチェックを入れて、<code>Finish</code>をクリック。</p>
-
-<p><img src="/images/2014/11/ide15.jpg" alt="ライセンス" /></p>
-
-<p>で、インストールが始まる。</p>
-
-<p><img src="/images/2014/11/ide16.jpg" alt="インストール開始" /></p>
-
-<p>インストール後、再起動が必要、との事なので<code>Yes</code>をクリックして、eclipseを再起動。</p>
-
-<p><img src="/images/2014/11/ide17.jpg" alt="再起動" /></p>
-
-<p>これでインストールは完了したわけだけれども、ウインドウ構成など見た目をForce.com仕様に変更する。<br/>
-上部メニューの、Window &ndash;> Open Perspective &ndash;> Other を選択。</p>
-
-<p><img src="/images/2014/11/ide18.jpg" alt="Perspective" /></p>
-
-<p>Force.comを選択して、OK。</p>
-
-<p><img src="/images/2014/11/ide19.jpg" alt="Force.com選択" /></p>
-
-<p>これで、Force.com IDEのインストールは完了。</p>
-
-<p><img src="/images/2014/11/ide20.jpg" alt="完了！" /></p>
-
-<h2>プロジェクトの作成</h2>
-
-<p>作成は、スタンドアロン版と同じだった。<br/>
-上部メニューから、File &ndash;> New &ndash;> Force.com Project を選択</p>
-
-<p><img src="/images/2014/11/ide21.jpg" alt="プロジェクトの作成" /></p>
-
-<p>プロジェクトの名前と、環境のユーザ名、パスワード、セキュリティトークン(必要なら)と、環境を選択し、Finish。</p>
-
-<p><img src="/images/2014/11/ide22.jpg" alt="接続情報" /></p>
-
-<p>これで開発環境が整った。</p>
 ]]></content>
   </entry>
   
