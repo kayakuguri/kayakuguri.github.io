@@ -4,7 +4,7 @@
   <title><![CDATA[Category: github | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/github/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-03-11T00:39:27+09:00</updated>
+  <updated>2015-03-11T00:44:19+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -33,7 +33,7 @@ Route53でCNAMEの設定をして、Githubページでリダイレクトする�
 
 <h2>Route53の設定</h2>
 
-<p><img src="/images/2015/03/subdomai01.jpg" alt="route53" /></p>
+<p><img src="/images/2015/03/subdomain01.jpg" alt="route53" /></p>
 
 <p>すでに設定している<code>Resouces</code>があるので、そちらをクリック。</p>
 
