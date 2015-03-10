@@ -4,7 +4,7 @@
   <title><![CDATA[Category: github | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/github/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-03-11T00:47:38+09:00</updated>
+  <updated>2015-03-11T00:56:48+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -56,6 +56,8 @@ Route53でCNAMEの設定をして、Githubページでリダイレクトする�
 
 <h2>Github pagesの設定</h2>
 
+<p><strong>このブラウザから作成する方法は間違いでした。下部に正しい方法を記述しています</strong></p>
+
 <p>githubページにアクセスされた際にリダイレクトさせる設定は簡単で、<br/>
 masterリポジトリ直下に<code>CNAME</code>というファイルを設置するだけ。<br/>
 もちろんgitで追加してもいいけれど、ブラウザからGUIで追加してみる。</p>
@@ -80,6 +82,21 @@ masterリポジトリ直下に<code>CNAME</code>というファイルを設置�
 <p>DNSが浸透するまでに少し時間がかかるので気長に待ちましょう。。<br/>
 (反映されるまでページにアクセス出来なくなってしまいますが…)</p>
 
+<h2>正しいCNAMEファイルの作り方</h2>
+
+<p>すみません、上記、ブラウザから<code>CNAME</code>ファイルを作成する方法は間違いでした。<br/>
+というのも、<code>rake gen_deploy</code>した際に<code>source</code>リポジトリからdeployしたデータを<code>master</code>ブランチにpushしているようで、<br/>
+その際にブランチ側でファイルを作成してしまうと差異が出来てpushが出来なくなってしまいました。</p>
+
+<p>なので、以下の方法で強制的にpushを試みると、当然、ブラウザ上で作成したCNAMEが消えてしまいました。<br/>
+<a href="http://qiita.com/takuma7/items/2d6f6e786eb6c0afbefb">Octopressでrake deployした際にrejectedされた場合の対処 &ndash; Qiita</a></p>
+
+<p>なのでローカルで作成してやる必要がありますが、その場所が、<code>source/</code>以下となるようです。<br/>
+<code>source/CNAME</code>でファイルを作成し、同じようにサブドメインのみを記述します。</p>
+
+<p>その状態で<code>gen_deploy</code>してやりブラウザ上で確認すると見事、masterブランチ上の直下にCNAMEファイルが作成されました。<br/>
+これでOKなはず</p>
+
 <h2>参考</h2>
 
 <p>公式のチュートリアルが英語だけど一番わかりやすいかも。<br/>
@@ -87,7 +104,8 @@ masterリポジトリ直下に<code>CNAME</code>というファイルを設置�
 
 <p>その他<br/>
 <a href="http://blog.hello-world.jp.net/git-2/2612/">GitHub Pagesで独自ドメインを使う | hello-world.jp.net</a><br/>
-<a href="http://tech.tanaka733.net/entry/2013/09/15/%E3%81%8A%E5%90%8D%E5%89%8D.com_%E3%81%A7%E5%8F%96%E3%81%A3%E3%81%9F%E3%83%89%E3%83%A1%E3%82%A4%E3%83%B3%E3%82%92_Amazon_Route53%E3%81%A7%E7%AE%A1%E7%90%86%E3%81%97%E3%80%81%E3%82%B5%E3%83%96%E3%83%89">お名前.com で取ったドメインを Amazon Route53で管理し、サブドメインをはてなブログに割り当てるまで &ndash; 銀の光と碧い空</a></p>
+<a href="http://tech.tanaka733.net/entry/2013/09/15/%E3%81%8A%E5%90%8D%E5%89%8D.com_%E3%81%A7%E5%8F%96%E3%81%A3%E3%81%9F%E3%83%89%E3%83%A1%E3%82%A4%E3%83%B3%E3%82%92_Amazon_Route53%E3%81%A7%E7%AE%A1%E7%90%86%E3%81%97%E3%80%81%E3%82%B5%E3%83%96%E3%83%89">お名前.com で取ったドメインを Amazon Route53で管理し、サブドメインをはてなブログに割り当てるまで &ndash; 銀の光と碧い空</a><br/>
+<a href="http://blog.shiroyama.us/blog/2014/02/26/octopress/">エンジニアのブログは Octopress が最適 &ndash; $shiroyama->($blog);</a></p>
 
 <p><a href="http://aws.amazon.com/jp/route53/">Amazon Route53</a></p>
 ]]></content>
