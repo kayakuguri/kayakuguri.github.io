@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-03-17T16:50:31+09:00</updated>
+  <updated>2015-03-17T16:52:08+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -46,29 +46,25 @@
 
 <p>・旧</p>
 
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>$ heroku pgbackups:capture --app sushi</span></code></pre></td></tr></table></div></figure>
-
+<pre><code>$ heroku pgbackups:capture --app sushi
+</code></pre>
 
 <p>・新</p>
 
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>$ heroku pg:backups capture --app sushi</span></code></pre></td></tr></table></div></figure>
-
+<pre><code>$ heroku pg:backups capture --app sushi
+</code></pre>
 
 <h3>バックアップのダウンロード</h3>
 
 <p>・旧</p>
 
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>$ heroku pgbackups:url</span></code></pre></td></tr></table></div></figure>
-
+<pre><code>$ heroku pgbackups:url
+</code></pre>
 
 <p>・新</p>
 
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>$ heroku pg:backups public-url</span></code></pre></td></tr></table></div></figure>
-
+<pre><code>$ heroku pg:backups public-url
+</code></pre>
 
 <p>その他は以下の対応ページにて。<br/>
 <a href="https://devcenter.heroku.com/articles/mapping-pgbackups-commands">Converting PGBackups Add-on Commands | Heroku Dev Center</a></p>
