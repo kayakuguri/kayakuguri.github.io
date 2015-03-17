@@ -4,7 +4,7 @@
   <title><![CDATA[Category: heroku | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/heroku/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-03-11T00:56:48+09:00</updated>
+  <updated>2015-03-17T16:50:31+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,69 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[heroku]PG Backupsのアドオンが廃止されherokuコマンドに組み込まれる]]></title>
+    <link href="http://kayakuguri.github.io/blog/2015/03/17/new-pg-backups/"/>
+    <updated>2015-03-17T16:34:50+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2015/03/17/new-pg-backups</id>
+    <content type="html"><![CDATA[<p>タイトルの通り。<br/>
+今までアドオンとして提供されていたPG Backupsがアドオンとしての提供が廃止され、<br/>
+標準のherokuコマンドに組み込まれた、とのこと。</p>
+
+<!-- more -->
+
+
+<p><a href="https://blog.heroku.com/archives/2015/3/11/pgbackups-levels-up">Heroku | PG Backups Levels Up</a></p>
+
+<h2>スケジューリング</h2>
+
+<p>今まではアドオンの種類で選んでいた定期バックアップですが、時間を指定しての定期バックアップが可能になったとのこと。<br/>
+タイムゾーンも指定できる。</p>
+
+<pre><code>heroku pg:backups schedule HEROKU_POSTGRESQL_GOLD --at="02:00 PDT" --app sushi
+</code></pre>
+
+<p>ちなみにデフォルトで１日に１回のバックアップが行われており、それをあえて止めるには、<code>heroku pg:backups unschedule DATABASE_URL --app sushi</code>とするとのこと。</p>
+
+<h2>コマンド</h2>
+
+<p>旧アドオン時に使用していたコマンドは使えなくなっており、新しく<code>pg:backups</code>が基本になったよう。  <br/>
+以下、抜粋。</p>
+
+<h3>バックアップの作成</h3>
+
+<p>・旧
+<code>
+$ heroku pgbackups:capture --app sushi
+</code></p>
+
+<p>・新
+<code>
+$ heroku pg:backups capture --app sushi
+</code></p>
+
+<h3>バックアップのダウンロード</h3>
+
+<p>・旧
+<code>
+$ heroku pgbackups:url
+</code></p>
+
+<p>・新
+<code>
+$ heroku pg:backups public-url
+</code></p>
+
+<p>その他は以下の対応ページにて。<br/>
+<a href="https://devcenter.heroku.com/articles/mapping-pgbackups-commands">Converting PGBackups Add-on Commands | Heroku Dev Center</a></p>
+
+<h2>参考</h2>
+
+<p><a href="https://devcenter.heroku.com/articles/heroku-postgres-backups">Heroku PGBackups | Heroku Dev Center</a><br/>
+<a href="https://devcenter.heroku.com/articles/heroku-postgresql">Heroku Postgres | Heroku Dev Center</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[heroku]herokuのPostgreSQLでバージョンを指定する]]></title>
@@ -273,84 +336,6 @@ SSL certificate is verified by a root authority.
 <h2>参考</h2>
 
 <p><a href="https://devcenter.heroku.com/articles/heroku-postgres-import-export">https://devcenter.heroku.com/articles/heroku-postgres-import-export</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[heroku]githubから自動でherokuにデプロイ]]></title>
-    <link href="http://kayakuguri.github.io/blog/2015/02/10/heroku-github-sync/"/>
-    <updated>2015-02-10T17:50:51+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2015/02/10/heroku-github-sync</id>
-    <content type="html"><![CDATA[<p>ベータ版だったherokuとgithubの同期が正式リリースされたようです。<br/>
-<a href="https://blog.heroku.com/archives/2015/2/6/heroku_github_integration">Ship Code Faster: Announcing GitHub Integration GA</a></p>
-
-<!-- more -->
-
-
-<p>ベータ版の段階からあったかもなのですが、githubにプッシュしたら自動でherokuにデプロイ出来るようなので、試してみました。</p>
-
-<h2>Githubにリポジトリを作成</h2>
-
-<p>まずは同期させるためにリポジトリを作成します。<br/>
-すでにherokuにあるアプリを同期させる場合は、同じファイルをgithubにアップしておく必要があります。</p>
-
-<h2>Herokuでの設定</h2>
-
-<p>同期させたいアプリを開いたら、<code>deploy</code>のページへアクセス<br/>
-<img src="/images/2015/02/github-heroku01.jpg" alt="deployへ" /></p>
-
-<p>Githubを選択<br/>
-<img src="/images/2015/02/github-heroku02.jpg" alt="Github" /></p>
-
-<p><code>Connect to Github</code>をクリック</p>
-
-<p><img src="/images/2015/02/github-heroku03.jpg" alt="Connect to Github" /></p>
-
-<p>許可を求められるので、許可。</p>
-
-<p><img src="/images/2015/02/github-heroku04.jpg" alt="認証" /></p>
-
-<p>すると、リポジトリを選択出来るようになる。</p>
-
-<p><img src="/images/2015/02/github-heroku05.jpg" alt="リポジトリ選択" /></p>
-
-<p><code>heroku</code>で検索した結果。今回はサンプルで作った、<code>heroku-deploy-test</code>のリポジトリを選択。</p>
-
-<p><img src="/images/2015/02/github-heroku06.jpg" alt="リポジトリ検索" /></p>
-
-<p>紐づくとこんな感じ。</p>
-
-<p><img src="/images/2015/02/github-heroku07.jpg" alt="連携済" /></p>
-
-<p>連携済の表示の下に、自動でデプロイさせたいブランチを選択する画面と、<br/>
-手動で特定のブランチをデプロイさせる画面があります。<br/>
-今回は<code>master</code>ブランチを選択して自動デプロイを有効にしてみます。</p>
-
-<p><img src="/images/2015/02/github-heroku08.jpg" alt="automatic deploys" /></p>
-
-<p>結果。</p>
-
-<p><img src="/images/2015/02/github-heroku09.jpg" alt="automatic deploys" /></p>
-
-<h2>deploy</h2>
-
-<p>で、実際にgithubの指定したリポジトリにpushしてみると、<br/>
-裏っかわでheorkuにデプロイが走ります。</p>
-
-<p><img src="/images/2015/02/github-heroku10.jpg" alt="heroku deploy" /></p>
-
-<p>しばらく待つと、デプロイが成功。見事連携されました。</p>
-
-<p><img src="/images/2015/02/github-heroku11.jpg" alt="deploy success" /></p>
-
-<h2>その他</h2>
-
-<p>CIツールを導入して、そのCIを通ったらherokuにデプロイ、という流れも出来るようで、<br/>
-herokuがgitでのソース管理とはいえ、ソースの管理自体はやりにくかった点をgithub連携することでカバー出来そうです。</p>
-
-<h2>参考</h2>
-
-<p><a href="https://devcenter.heroku.com/articles/github-integration">ドキュメント</a></p>
 ]]></content>
   </entry>
   

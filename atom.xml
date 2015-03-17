@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-03-11T00:56:48+09:00</updated>
+  <updated>2015-03-17T16:50:31+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,73 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[heroku]PG Backupsのアドオンが廃止されherokuコマンドに組み込まれる]]></title>
+    <link href="http://kayakuguri.github.io/blog/2015/03/17/new-pg-backups/"/>
+    <updated>2015-03-17T16:34:50+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2015/03/17/new-pg-backups</id>
+    <content type="html"><![CDATA[<p>タイトルの通り。<br/>
+今までアドオンとして提供されていたPG Backupsがアドオンとしての提供が廃止され、<br/>
+標準のherokuコマンドに組み込まれた、とのこと。</p>
+
+<!-- more -->
+
+
+<p><a href="https://blog.heroku.com/archives/2015/3/11/pgbackups-levels-up">Heroku | PG Backups Levels Up</a></p>
+
+<h2>スケジューリング</h2>
+
+<p>今まではアドオンの種類で選んでいた定期バックアップですが、時間を指定しての定期バックアップが可能になったとのこと。<br/>
+タイムゾーンも指定できる。</p>
+
+<pre><code>heroku pg:backups schedule HEROKU_POSTGRESQL_GOLD --at="02:00 PDT" --app sushi
+</code></pre>
+
+<p>ちなみにデフォルトで１日に１回のバックアップが行われており、それをあえて止めるには、<code>heroku pg:backups unschedule DATABASE_URL --app sushi</code>とするとのこと。</p>
+
+<h2>コマンド</h2>
+
+<p>旧アドオン時に使用していたコマンドは使えなくなっており、新しく<code>pg:backups</code>が基本になったよう。  <br/>
+以下、抜粋。</p>
+
+<h3>バックアップの作成</h3>
+
+<p>・旧</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$ heroku pgbackups:capture --app sushi</span></code></pre></td></tr></table></div></figure>
+
+
+<p>・新</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$ heroku pg:backups capture --app sushi</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>バックアップのダウンロード</h3>
+
+<p>・旧</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$ heroku pgbackups:url</span></code></pre></td></tr></table></div></figure>
+
+
+<p>・新</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$ heroku pg:backups public-url</span></code></pre></td></tr></table></div></figure>
+
+
+<p>その他は以下の対応ページにて。<br/>
+<a href="https://devcenter.heroku.com/articles/mapping-pgbackups-commands">Converting PGBackups Add-on Commands | Heroku Dev Center</a></p>
+
+<h2>参考</h2>
+
+<p><a href="https://devcenter.heroku.com/articles/heroku-postgres-backups">Heroku PGBackups | Heroku Dev Center</a><br/>
+<a href="https://devcenter.heroku.com/articles/heroku-postgresql">Heroku Postgres | Heroku Dev Center</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[AWS Route53を使用してGithubページにサブドメインを設定する]]></title>
@@ -1338,110 +1405,6 @@ git version 2.2.1
 
 <p>無事、アップグレード完了。<br/>
 herokuコマンドを叩いても注意は出なくなりました。</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[HerokuからPHPでFTPにファイルをアップしてみる]]></title>
-    <link href="http://kayakuguri.github.io/blog/2014/12/16/heroku-php-ftp/"/>
-    <updated>2014-12-16T19:10:31+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2014/12/16/heroku-php-ftp</id>
-    <content type="html"><![CDATA[<p>herokuのPHPから、FTPプロトコルで接続し、<br/>
-同じディレクトリにあるファイルをアップロードしてみた。</p>
-
-<!-- more -->
-
-
-<p><code>ftp_put</code>を使用するば、接続後にアップロードが出来るよう。<br/>
-<a href="http://php.net/manual/ja/function.ftp-put.php">http://php.net/manual/ja/function.ftp-put.php</a></p>
-
-<p>以下のPHPを書いて、herokuにアップしてみた。</p>
-
-<pre><code>ini_set( 'display_errors', 1 );
-
-$ftp_server = 'ホスト名';
-$ftp_user_name = 'ユーザー名';
-$ftp_user_pass = 'パスワード';
-
-$file = 'somefile.txt';
-$remote_file = '/ディレクトリ/readme.txt';
-
-// 接続を確立する
-$conn_id = ftp_connect($ftp_server);
-
-// ユーザー名とパスワードでログインする
-$login_result = ftp_login($conn_id, $ftp_user_name, $ftp_user_pass);
-
-//パッシブモードをオンにする
-ftp_pasv($conn_id, true);
-
-// ファイルをアップロードする
-if (ftp_put($conn_id, $remote_file, $file, FTP_ASCII)) {
- echo "successfully uploaded $file\n";
-} else {
- echo "There was a problem while uploading $file\n";
-}       
-
-// 接続を閉じる
-ftp_close($conn_id);
-</code></pre>
-
-<p>ローカルではこれで動いていたのだが、herokuにアップすると、以下のエラーが出て動作しなかった。</p>
-
-<blockquote><p>Fatal error: Call to undefined function ftp_connect() in /app/index.php on line 17</p></blockquote>
-
-<p><code>phpinfo</code>で確認してみると、<code>FTP support</code>がなかったので、これでエラーが出ていたよう。<br/>
-<a href="http://d.hatena.ne.jp/kasahi/20090206/1234198797">http://d.hatena.ne.jp/kasahi/20090206/1234198797</a></p>
-
-<h3>追記</h3>
-
-<p><code>FTP support</code>は、composerの設定で後から追加できた。<br/>
-<code>composert.json</code>に以下を記述してdeployするとFTPサポートが追加される。</p>
-
-<pre><code>{
-    "require": {
-        "ext-ftp":"*"
-    }
-}
-</code></pre>
-
-<p>composerで追加できるオプションは以下にある。<br/>
-<a href="https://devcenter.heroku.com/articles/php-support#extensions">https://devcenter.heroku.com/articles/php-support#extensions</a></p>
-
-<p>追加した上で、1つ目のPHPを試してみると、無事、アップロードできました。</p>
-
-<hr />
-
-<p>他に方法がないか探してみると、どうやら、<code>CURL</code>でも出来る、とのこと。<br/>
-<a href="http://d.hatena.ne.jp/calpo/20110216/p1">PHPでPASV(passiveモード)なFTP</a></p>
-
-<p>以下を書いてherokuにアップしてみたところ、無事、アップロードされた。</p>
-
-<pre><code>$remote_file = 'ftp://ユーザー:パスワード@ホスト名/ディレクトリ/readme.txt';
-$local_file = 'somefile.txt';
-
-try{
-    $fp = fopen($local_file, "r");
-    $ch = curl_init();
-    curl_setopt($ch, CURLOPT_FTP_USE_EPSV, false);
-    curl_setopt($ch, CURLOPT_UPLOAD, true);
-    curl_setopt($ch, CURLOPT_URL, $remote_file);
-    curl_setopt($ch, CURLOPT_INFILE, $fp);
-    curl_setopt($ch, CURLOPT_INFILESIZE, filesize($local_file));
-    curl_exec($ch);
-    curl_close($ch);
-    echo 'success';
-} catch (Exception $e) {
-    var_dump($e);
-}
-</code></pre>
-
-<h3>参考URL</h3>
-
-<p><a href="http://loumo.jp/wp/archive/20090813164314/">PHP の cURL を使って FTP を行う。</a></p>
-
-<p>ライブラリもあったけど、未検証<br/>
-<a href="https://github.com/dg/ftp-php">FTP for PHP</a></p>
 ]]></content>
   </entry>
   
