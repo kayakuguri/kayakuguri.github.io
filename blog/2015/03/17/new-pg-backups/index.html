@@ -124,26 +124,20 @@
 
 <h3>バックアップの作成</h3>
 
-<p>・旧</p>
+<pre><code>//旧
+$ heroku pgbackups:capture --app sushi
 
-<pre><code>$ heroku pgbackups:capture --app sushi
-</code></pre>
-
-<p>・新</p>
-
-<pre><code>$ heroku pg:backups capture --app sushi
+//新
+$ heroku pg:backups capture --app sushi
 </code></pre>
 
 <h3>バックアップのダウンロード</h3>
 
-<p>・旧</p>
+<pre><code>//旧
+$ heroku pgbackups:url
 
-<pre><code>$ heroku pgbackups:url
-</code></pre>
-
-<p>・新</p>
-
-<pre><code>$ heroku pg:backups public-url
+//新
+$ heroku pg:backups public-url
 </code></pre>
 
 <p>その他は以下の対応ページにて。<br/>
