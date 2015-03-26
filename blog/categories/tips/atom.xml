@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: tips | KayaMemo]]></title>
+  <link href="http://kayakuguri.github.io/blog/categories/tips/atom.xml" rel="self"/>
+  <link href="http://kayakuguri.github.io/"/>
+  <updated>2015-03-26T14:31:00+09:00</updated>
+  <id>http://kayakuguri.github.io/</id>
+  <author>
+    <name><![CDATA[萱潜]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[command+Qという危険なショートカットを変更する]]></title>
+    <link href="http://kayakuguri.github.io/blog/2015/03/26/cmd-q/"/>
+    <updated>2015-03-26T14:22:21+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2015/03/26/cmd-q</id>
+    <content type="html"><![CDATA[<p>Chromeを使用している時に、タブを閉じようとショートカットである、<code>cmd + w</code>を押したつもりが、<br/>
+手が滑って横の<code>Q</code>を押してしまいブラウザが落ちる…。</p>
+
+<!-- more -->
+
+
+<p>そんな事が結構あって、その度に机に突っ伏していたので、<br/>
+ショートカットを変更出来ないものかと思い、調べて実行してみました。</p>
+
+<p>まずは現状の確認。<br/>
+以下の通り、アプリを閉じるショートカットは、<code>cmd+q</code>です。</p>
+
+<p><img src="/images/2015/03/comd_q_01.jpg" alt="cmd+q" /></p>
+
+<p>これを変更するには、<code>システム環境設定</code>から、<code>キーボード</code>を選択。</p>
+
+<p><img src="/images/2015/03/comd_q_02.jpg" alt="キーボード" /></p>
+
+<p><code>ショートカット</code>のタブを選択し、<code>アプリケーション</code>のメニューを選択。<br/>
+その下に出る、<code>+</code>をクリックして、ショートカットを追加。</p>
+
+<p><img src="/images/2015/03/comd_q_03.jpg" alt="アプリケーション" /></p>
+
+<p>ここで出てくる入力エリアにショートカットの名前を入力するが、<br/>
+現状設定されているメニュー名を正確に入力する必要がある。<br/>
+Chromeを終了の場合は、以下。</p>
+
+<pre><code>Google Chrome を終了
+</code></pre>
+
+<p><img src="/images/2015/03/comd_q_04.jpg" alt="メニュー名" /></p>
+
+<p><code>アプリケーション</code>は、<code>Google Chrome</code>を選択し、<br/>
+入力欄には、上記のメニュー名を入力。<br/>
+ショートカットには、今回は、<code>option+command+Q</code>を設定。</p>
+
+<p><img src="/images/2015/03/comd_q_05.jpg" alt="設定" /></p>
+
+<p><code>追加</code>をクリックして追加すると、設定完了。<br/>
+chrome側を見てもきっちり設定されている。</p>
+
+<p><img src="/images/2015/03/comd_q_06.jpg" alt="ショートカット" /></p>
+
+<p>これで押し間違いの悲劇がなくなりました。</p>
+]]></content>
+  </entry>
+  
+</feed>
