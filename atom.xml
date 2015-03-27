@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-03-26T14:31:00+09:00</updated>
+  <updated>2015-03-27T20:02:24+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,146 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[salesforce]Apex REST作成時のtips]]></title>
+    <link href="http://kayakuguri.github.io/blog/2015/03/27/apex-rest-tips/"/>
+    <updated>2015-03-27T19:45:44+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2015/03/27/apex-rest-tips</id>
+    <content type="html"><![CDATA[<p>最近よくApexRESTを作成していて、<br/>
+その中でちょっとしたtipsというかメモをメモっておきます。</p>
+
+<!-- more -->
+
+
+<h2>エンドポイント</h2>
+
+<p>エンドポイントの指定には以下のように書きます。</p>
+
+<pre><code>@RestResource(urlMapping='/User/Login')
+</code></pre>
+
+<p>この時に、<code>*</code>を使う事も出来ます。</p>
+
+<pre><code>@RestResource(urlMapping='/User/*')
+</code></pre>
+
+<p>なので、ここにユーザーIDを入れたりして、そのIDを取得することで、<br/>
+よりREST APIらしい(?)挙動でAPIを作成する事が出来ます。<br/>
+apex側で送信されたIDを取得するには、以下のように<code>/</code>で区切って取得します。</p>
+
+<pre><code>String accountId = req.requestURI.substring(req.requestURI.lastIndexOf('/')+1);
+</code></pre>
+
+<p>公式のドキュメントに正にこのままの内容が載っていました。</p>
+
+<p><a href="https://www.salesforce.com/us/developer/docs/apexcode/Content/apex_rest_code_sample_basic.htm">Apex REST Basic Code Sample</a></p>
+
+<h2>JSON</h2>
+
+<p>返却するJSONの形式ですが、クラスの入れ子や、<code>List</code>を活用することで<br/>
+かなり自由度高く作成出来ます。</p>
+
+<p>例えば、以下のようなJSONを返すとします。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>"success":1,
+</span><span class='line'>"User" : {
+</span><span class='line'>  "user_id": xxx,
+</span><span class='line'>  "hobby":[
+</span><span class='line'>      {"name":"映画", "level":"3"},
+</span><span class='line'>      {"name":"サッカー", "level":"1"}
+</span><span class='line'>  ]
+</span><span class='line'>},
+</span><span class='line'>"request_time": "2015-3-27 12:33"</span></code></pre></td></tr></table></div></figure>
+
+
+<p>この場合、以下のようにクラスを複数作り、入れ子構造を作る事で作成出来ます。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>global class UserData{
+</span><span class='line'>  global String user_id;
+</span><span class='line'>  global HobbyData hobby
+</span><span class='line'>}
+</span><span class='line'>global class HobbyData{
+</span><span class='line'>  global String name;
+</span><span class='line'>  global String level;
+</span><span class='line'>}
+</span><span class='line'>global class resultData{
+</span><span class='line'>  global Integer success;
+</span><span class='line'>  global UserData User;
+</span><span class='line'>  global String request_time;
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<p>作成するときは以下のような感じで。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>List&lt;HobbyData&gt; hobbies = new List&lt;HobbyData&gt;();
+</span><span class='line'>HobbyData hobby1 = new HobbyData();
+</span><span class='line'>hobby1.name = '映画';
+</span><span class='line'>hobby1.level = '3';
+</span><span class='line'>hobbies.add(hobby1);
+</span><span class='line'>HobbyData hobby2 = new HobbyData();
+</span><span class='line'>hobby2.name = 'サッカー';
+</span><span class='line'>hobby2.level = '1';
+</span><span class='line'>hobbies.add(hobby2);
+</span><span class='line'>
+</span><span class='line'>UserData user = new UserData();
+</span><span class='line'>user.user_id = 'xxx';
+</span><span class='line'>user.hobby = hobbies;
+</span><span class='line'>
+</span><span class='line'>resultData result = new resultData();
+</span><span class='line'>result.success = 1;
+</span><span class='line'>result.User = user;
+</span><span class='line'>result.request_time = '2015-3-27 12:33';
+</span><span class='line'>
+</span><span class='line'>return result;</span></code></pre></td></tr></table></div></figure>
+
+
+<p>地道な作業にはなりますが、これでわりかし綺麗なJSONが返せました。<br/>
+もっと簡単な方法があったらまた書きます。</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[command+Qという危険なショートカットを変更する]]></title>
@@ -1322,60 +1462,6 @@ b252 | 2012/02/24 16:08.53 | 5.3KB | HEROKU_POSTGRESQL_PINK
 
 <p><a href="https://devcenter.heroku.com/articles/heroku-postgres-import-export">Importing and Exporting Heroku Postgres Databases with PG Backups</a><br/>
 <a href="https://devcenter.heroku.com/articles/pgbackups">PG Backups</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[salesforce]メモ&添付ファイルに添付されたファイルのURLを取得する]]></title>
-    <link href="http://kayakuguri.github.io/blog/2014/12/25/get-attachment-url/"/>
-    <updated>2014-12-25T11:21:42+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2014/12/25/get-attachment-url</id>
-    <content type="html"><![CDATA[<p>オブジェクトの、「メモ＆添付ファイル」で添付されたファイルを公開URLを使用してダウンロードリンクを作成したい。</p>
-
-<!-- more -->
-
-
-<p>添付ファイルの名前などはSOQLで取得できるが、そのファイルへのリンクURLそのものは取得出来ない。<br/>
-けれど、以下のURLを組み立てる事で、ダウンロードは出来るよう。</p>
-
-<pre><code>https://cs6.salesforce.com/servlet/servlet.FileDownload?file=FILE_ID
-</code></pre>
-
-<p>これさえわかれば後は公開URLに適用させてやればよい。<br/>
-その際に参照権限を与えておかないといけない。<br/>
-その方法は以前書いた画像の表示とほぼ同じ。<br/>
-<a href="http://kayakuguri.github.io/blog/2014/10/16/forcecom-sites-profile/">[Salesforce]リッチテキストエリアに保存された画像を一般公開する</a></p>
-
-<p>まずは、サイトの設定から、</p>
-
-<p><img src="http://kayakuguri.github.io/images/2014/12/attach01.jpg" alt="" /></p>
-
-<p>表示ラベルをクリックして詳細を表示し、</p>
-
-<p><img src="http://kayakuguri.github.io/images/2014/12/attach02.jpg" alt="" /></p>
-
-<p>公開アクセス設定から、</p>
-
-<p><img src="http://kayakuguri.github.io/images/2014/12/attach03.jpg" alt="" /></p>
-
-<p>プロファイルの編集を選んで、</p>
-
-<p><img src="http://kayakuguri.github.io/images/2014/12/attach04.jpg" alt="" /></p>
-
-<p>添付ファイルをダウンロードさせたいオブジェクトの権限に参照を与えてやる。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2014/12/attach05.jpg" alt="" /></p>
-
-<p>後は、項目レベルセキュリティの設定で個別な参照権限の設定が必要かと思ったが、これだけでいけた。</p>
-
-<p>設定後は以下のようなアドレスになる。</p>
-
-<pre><code>http://yourdomain.cs6.force.com/yoursite/servlet/servlet.FileDownload?file=FILE-ID
-</code></pre>
-
-<h3>参考</h3>
-
-<p><a href="https://developer.salesforce.com/forums/ForumsMain?id=906F0000000AURkIAO">Trigger to get download link/url from attachments in salesforce?</a></p>
 ]]></content>
   </entry>
   

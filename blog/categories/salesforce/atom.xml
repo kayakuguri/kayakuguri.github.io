@@ -4,7 +4,7 @@
   <title><![CDATA[Category: salesforce | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/salesforce/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-03-26T14:31:00+09:00</updated>
+  <updated>2015-03-27T20:02:24+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,119 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[salesforce]Apex REST作成時のtips]]></title>
+    <link href="http://kayakuguri.github.io/blog/2015/03/27/apex-rest-tips/"/>
+    <updated>2015-03-27T19:45:44+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2015/03/27/apex-rest-tips</id>
+    <content type="html"><![CDATA[<p>最近よくApexRESTを作成していて、<br/>
+その中でちょっとしたtipsというかメモをメモっておきます。</p>
+
+<!-- more -->
+
+
+<h2>エンドポイント</h2>
+
+<p>エンドポイントの指定には以下のように書きます。</p>
+
+<pre><code>@RestResource(urlMapping='/User/Login')
+</code></pre>
+
+<p>この時に、<code>*</code>を使う事も出来ます。</p>
+
+<pre><code>@RestResource(urlMapping='/User/*')
+</code></pre>
+
+<p>なので、ここにユーザーIDを入れたりして、そのIDを取得することで、<br/>
+よりREST APIらしい(?)挙動でAPIを作成する事が出来ます。<br/>
+apex側で送信されたIDを取得するには、以下のように<code>/</code>で区切って取得します。</p>
+
+<pre><code>String accountId = req.requestURI.substring(req.requestURI.lastIndexOf('/')+1);
+</code></pre>
+
+<p>公式のドキュメントに正にこのままの内容が載っていました。</p>
+
+<p><a href="https://www.salesforce.com/us/developer/docs/apexcode/Content/apex_rest_code_sample_basic.htm">Apex REST Basic Code Sample</a></p>
+
+<h2>JSON</h2>
+
+<p>返却するJSONの形式ですが、クラスの入れ子や、<code>List</code>を活用することで<br/>
+かなり自由度高く作成出来ます。</p>
+
+<p>例えば、以下のようなJSONを返すとします。</p>
+
+<p>```
+&ldquo;success&rdquo;:1,
+&ldquo;User&rdquo; : {</p>
+
+<pre><code>"user_id": xxx,
+"hobby":[
+    {"name":"映画", "level":"3"},
+    {"name":"サッカー", "level":"1"}
+]
+</code></pre>
+
+<p>},
+&ldquo;request_time&rdquo;: &ldquo;2015-3-27 12:33&rdquo;
+```</p>
+
+<p>この場合、以下のようにクラスを複数作り、入れ子構造を作る事で作成出来ます。</p>
+
+<p>```
+global class UserData{</p>
+
+<pre><code>global String user_id;
+global HobbyData hobby
+</code></pre>
+
+<p>}
+global class HobbyData{</p>
+
+<pre><code>global String name;
+global String level;
+</code></pre>
+
+<p>}
+global class resultData{</p>
+
+<pre><code>global Integer success;
+global UserData User;
+global String request_time;
+</code></pre>
+
+<p>}
+```</p>
+
+<p>作成するときは以下のような感じで。</p>
+
+<p>```
+List<HobbyData> hobbies = new List<HobbyData>();
+HobbyData hobby1 = new HobbyData();
+hobby1.name = &lsquo;映画&rsquo;;
+hobby1.level = &lsquo;3&rsquo;;
+hobbies.add(hobby1);
+HobbyData hobby2 = new HobbyData();
+hobby2.name = &lsquo;サッカー&rsquo;;
+hobby2.level = &lsquo;1&rsquo;;
+hobbies.add(hobby2);</p>
+
+<p>UserData user = new UserData();
+user.user_id = &lsquo;xxx&rsquo;;
+user.hobby = hobbies;</p>
+
+<p>resultData result = new resultData();
+result.success = 1;
+result.User = user;
+result.request_time = &lsquo;2015-3-27 12:33&rsquo;;</p>
+
+<p>return result;
+```</p>
+
+<p>地道な作業にはなりますが、これでわりかし綺麗なJSONが返せました。<br/>
+もっと簡単な方法があったらまた書きます。</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[ビュー画面に出るチャターフォローボタンを非表示にする]]></title>
@@ -226,64 +339,6 @@ function reloadAndClose() {
 
 <p><a href="http://blog.livedoor.jp/minoaw/archives/1654198.html">[Salesforce]標準画面からクロスドメインなVisualforce画面を開き、自分を更新させる : minoawのブログ</a><br/>
 ほぼこのまんまです。ありがとうございます。</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[salesforce]オブジェクトの詳細ページに作成したVisualForceページを埋め込む]]></title>
-    <link href="http://kayakuguri.github.io/blog/2014/11/21/add-custom-vf-page/"/>
-    <updated>2014-11-21T12:14:39+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2014/11/21/add-custom-vf-page</id>
-    <content type="html"><![CDATA[<p>ページレイアウトで追加するのですが、作成しないと選択肢に出てこないので少し悩みました。</p>
-
-<!-- more -->
-
-
-<p>今回は、サンプルオブジェクト、というオブジェクトを作成しました。<br/>
-今は名前が表示されているだけです。</p>
-
-<p><img src="/images/2014/11/custom_vf01.jpg" alt="詳細画面" /></p>
-
-<p>で、レイアウトの編集画面に行ってみても、VisualForceページの追加タブはありません。</p>
-
-<p><img src="/images/2014/11/custom_vf02.jpg" alt="タブがない" /></p>
-
-<p>なのでまずは、作成したいオブジェクトをコントローラーに指定したpageを作成します。<br/>
-ここでは、<code>hoge__c</code>というオブジェクトにします。<br/>
-<code>standardController="hoge__c"</code>がポイントです。<br/>
-内容は新規で作成したものママです。</p>
-
-<pre><code>&lt;apex:page standardController="hoge__c"&gt;
-&lt;!-- Begin Default Content REMOVE THIS --&gt;
-&lt;h1&gt;Congratulations&lt;/h1&gt;
-This is your new Page
-&lt;!-- End Default Content REMOVE THIS --&gt;
-&lt;/apex:page&gt;
-</code></pre>
-
-<p><img src="/images/2014/11/custom_vf03.jpg" alt="VFページ作成" /></p>
-
-<p>で、再度、サンプルオブジェクトのレイアウト編集画面を見てみると、<br/>
-見事、Visualforceページ、というタブが追加されています。</p>
-
-<p><img src="/images/2014/11/custom_vf04.jpg" alt="タブがある" /></p>
-
-<p>選択すると、先程作成したpageの名前が出てきます。</p>
-
-<p><img src="/images/2014/11/custom_vf05.jpg" alt="ページの選択" /></p>
-
-<p>これを、任意の場所にドラッグ＆ドロップすると、以下のように追加され、ページとして表示できます。</p>
-
-<p><img src="/images/2014/11/custom_vf06.jpg" alt="レイアウトに追加" /></p>
-
-<p>保存して詳細画面を確認すると、見事作成した文章が表示されました。</p>
-
-<p><img src="/images/2014/11/custom_vf07.jpg" alt="追加完了" /></p>
-
-<p>後はVFpageの中身をカスタマイズすれば好きなものを出す事が出来ます。<br/>
-googlemapなんかも思いのまま。</p>
-
-<p><img src="/images/2014/11/custom_vf08.jpg" alt="地図の表示" /></p>
 ]]></content>
   </entry>
   
