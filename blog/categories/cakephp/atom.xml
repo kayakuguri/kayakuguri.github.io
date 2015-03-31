@@ -4,7 +4,7 @@
   <title><![CDATA[Category: cakephp | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/cakephp/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-03-31T21:13:56+09:00</updated>
+  <updated>2015-03-31T21:15:25+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -18,7 +18,7 @@
     <link href="http://kayakuguri.github.io/blog/2015/03/31/cake-php-validates/"/>
     <updated>2015-03-31T21:06:40+09:00</updated>
     <id>http://kayakuguri.github.io/blog/2015/03/31/cake-php-validates</id>
-    <content type="html"><![CDATA[<p>最近cakephpを触るようになりました。ようやく。
+    <content type="html"><![CDATA[<p>最近cakephpを触るようになりました。ようやく。<br/>
 で、コントローラーから明示的にバリデーションにかける方法を調べたのでメモ。</p>
 
 <!-- more -->
