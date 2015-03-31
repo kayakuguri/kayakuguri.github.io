@@ -4,7 +4,7 @@
   <title><![CDATA[Category: cakephp | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/cakephp/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-03-31T21:15:25+09:00</updated>
+  <updated>2015-03-31T21:16:01+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -42,9 +42,8 @@ var $validate = array(</p>
 <p>で、次に<code>View</code>で入力欄を作成します。<br/>
 作成の際に、先程作ったルールの<code>password</code>を<code>type</code>として指定してやります。</p>
 
-<p><code>
-&lt;?php echo $this-&gt;Form-&gt;input('User.password', array('type' =&gt; 'password', 'value' =&gt; '','label' =&gt; false)); ?&gt;
-</code></p>
+<pre><code>&lt;?php echo $this-&gt;Form-&gt;input('User.password', array('type' =&gt; 'password', 'value' =&gt; '','label' =&gt; false)); ?&gt;
+</code></pre>
 
 <p>HTMLは以下のように表示されます。</p>
 

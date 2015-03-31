@@ -124,9 +124,8 @@
 <p>で、次に<code>View</code>で入力欄を作成します。<br/>
 作成の際に、先程作ったルールの<code>password</code>を<code>type</code>として指定してやります。</p>
 
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;?php echo $this-&gt;Form-&gt;input('User.password', array('type' =&gt; 'password', 'value' =&gt; '','label' =&gt; false)); ?&gt;</span></code></pre></td></tr></table></div></figure>
-
+<pre><code>&lt;?php echo $this-&gt;Form-&gt;input('User.password', array('type' =&gt; 'password', 'value' =&gt; '','label' =&gt; false)); ?&gt;
+</code></pre>
 
 <p>HTMLは以下のように表示されます。</p>
 
