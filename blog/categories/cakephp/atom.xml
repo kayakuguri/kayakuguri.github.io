@@ -4,7 +4,7 @@
   <title><![CDATA[Category: cakephp | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/cakephp/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-03-31T21:16:01+09:00</updated>
+  <updated>2015-03-31T21:19:03+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -47,7 +47,7 @@ var $validate = array(</p>
 
 <p>HTMLは以下のように表示されます。</p>
 
-<pre><code>&lt;input name="data[User][password]" value="" type="password" id="UserPassword" class="form-error" required="required"&gt;
+<pre><code>&lt;input name="data[User][password]" value="" type="password" id="UserPassword" required="required"&gt;
 </code></pre>
 
 <p>最後に<code>Controller</code>からバリデーションにデータを送信します。<br/>
@@ -64,6 +64,10 @@ if(!$this->User->validates()){</p>
 ```</p>
 
 <p>これで8文字以下で送信するとエラーが表示されます。</p>
+
+<h3>参考</h3>
+
+<p><a href="http://book.cakephp.org/2.0/ja/models/data-validation/validating-data-from-the-controller.html">http://book.cakephp.org/2.0/ja/models/data-validation/validating-data-from-the-controller.html</a></p>
 ]]></content>
   </entry>
   
