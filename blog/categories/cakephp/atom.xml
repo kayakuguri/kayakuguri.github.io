@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: cakephp | KayaMemo]]></title>
+  <link href="http://kayakuguri.github.io/blog/categories/cakephp/atom.xml" rel="self"/>
+  <link href="http://kayakuguri.github.io/"/>
+  <updated>2015-03-31T21:13:56+09:00</updated>
+  <id>http://kayakuguri.github.io/</id>
+  <author>
+    <name><![CDATA[萱潜]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[[CakePHP]手動でフォームのバリデーションチェックにかける]]></title>
+    <link href="http://kayakuguri.github.io/blog/2015/03/31/cake-php-validates/"/>
+    <updated>2015-03-31T21:06:40+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2015/03/31/cake-php-validates</id>
+    <content type="html"><![CDATA[<p>最近cakephpを触るようになりました。ようやく。
+で、コントローラーから明示的にバリデーションにかける方法を調べたのでメモ。</p>
+
+<!-- more -->
+
+
+<p>まず準備として、<code>Model</code>にルールを記述します。<br/>
+今回は<code>User</code>というモデル内に記述したとします。</p>
+
+<p>```
+var $validate = array(</p>
+
+<pre><code>'password' =&gt; array(
+    'rule' =&gt; array('minLength', 8),
+    'message' =&gt; 'パスワードは8文字以上で入力してください'
+)
+</code></pre>
+
+<p>);
+```</p>
+
+<p>で、次に<code>View</code>で入力欄を作成します。<br/>
+作成の際に、先程作ったルールの<code>password</code>を<code>type</code>として指定してやります。</p>
+
+<p><code>
+&lt;?php echo $this-&gt;Form-&gt;input('User.password', array('type' =&gt; 'password', 'value' =&gt; '','label' =&gt; false)); ?&gt;
+</code></p>
+
+<p>HTMLは以下のように表示されます。</p>
+
+<pre><code>&lt;input name="data[User][password]" value="" type="password" id="UserPassword" class="form-error" required="required"&gt;
+</code></pre>
+
+<p>最後に<code>Controller</code>からバリデーションにデータを送信します。<br/>
+記述する箇所は、フォームを送信した後に実行されるアクション内です。</p>
+
+<p>```
+$this->User->set($this->request->data); //モデルにデータをセット
+if(!$this->User->validates()){</p>
+
+<pre><code>//エラー時の挙動
+</code></pre>
+
+<p>}
+```</p>
+
+<p>これで8文字以下で送信するとエラーが表示されます。</p>
+]]></content>
+  </entry>
+  
+</feed>

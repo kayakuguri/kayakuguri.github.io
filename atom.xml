@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-03-27T20:02:24+09:00</updated>
+  <updated>2015-03-31T21:13:56+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,63 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[CakePHP]手動でフォームのバリデーションチェックにかける]]></title>
+    <link href="http://kayakuguri.github.io/blog/2015/03/31/cake-php-validates/"/>
+    <updated>2015-03-31T21:06:40+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2015/03/31/cake-php-validates</id>
+    <content type="html"><![CDATA[<p>最近cakephpを触るようになりました。ようやく。
+で、コントローラーから明示的にバリデーションにかける方法を調べたのでメモ。</p>
+
+<!-- more -->
+
+
+<p>まず準備として、<code>Model</code>にルールを記述します。<br/>
+今回は<code>User</code>というモデル内に記述したとします。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>var $validate = array(
+</span><span class='line'>  'password' =&gt; array(
+</span><span class='line'>        'rule' =&gt; array('minLength', 8),
+</span><span class='line'>        'message' =&gt; 'パスワードは8文字以上で入力してください'
+</span><span class='line'>    )
+</span><span class='line'>);</span></code></pre></td></tr></table></div></figure>
+
+
+<p>で、次に<code>View</code>で入力欄を作成します。<br/>
+作成の際に、先程作ったルールの<code>password</code>を<code>type</code>として指定してやります。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;?php echo $this-&gt;Form-&gt;input('User.password', array('type' =&gt; 'password', 'value' =&gt; '','label' =&gt; false)); ?&gt;</span></code></pre></td></tr></table></div></figure>
+
+
+<p>HTMLは以下のように表示されます。</p>
+
+<pre><code>&lt;input name="data[User][password]" value="" type="password" id="UserPassword" class="form-error" required="required"&gt;
+</code></pre>
+
+<p>最後に<code>Controller</code>からバリデーションにデータを送信します。<br/>
+記述する箇所は、フォームを送信した後に実行されるアクション内です。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$this-&gt;User-&gt;set($this-&gt;request-&gt;data); //モデルにデータをセット
+</span><span class='line'>if(!$this-&gt;User-&gt;validates()){
+</span><span class='line'>  //エラー時の挙動
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<p>これで8文字以下で送信するとエラーが表示されます。</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[salesforce]Apex REST作成時のtips]]></title>
@@ -1387,81 +1444,6 @@ fi
 <h4>[参考]</h4>
 
 <p><a href="http://qiita.com/usamik26/items/56d0d3ba7a1300625f92">既に git 管理しているファイルをあえて無視したい &ndash; Qiita</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Heroku Postgresデータベースのデータのバックアップをダウンロードする]]></title>
-    <link href="http://kayakuguri.github.io/blog/2015/01/21/create-download-pgbackup/"/>
-    <updated>2015-01-21T10:39:44+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2015/01/21/create-download-pgbackup</id>
-    <content type="html"><![CDATA[<p>HerokuのPostgresデータベースのバックアップデータをダウンロードする方法。<br/>
-いくつかコマンド叩くだけでした。</p>
-
-<!-- more -->
-
-
-<h3>アドオンのインストール</h3>
-
-<p>何はともあれ、<code>PG Backup</code>のアドオンが必要です。<br/>
-インストール方法は以下。</p>
-
-<pre><code>$ heroku addons:add pgbackups
-</code></pre>
-
-<h3>バックアップの作成</h3>
-
-<p>バックアップの作成は以下のコマンドで。</p>
-
-<pre><code>$ heroku pgbackups:capture
-</code></pre>
-
-<p>現在保持しているバックアップの一覧は以下で確認出来ます。</p>
-
-<pre><code>$ heroku pgbackups
-ID   | Backup Time         | Size  | Database
------+---------------------+-------+------------------------
-a226 | 2012/02/22 20:02.19 | 5.3KB | DATABASE_URL
-a227 | 2012/02/23 20:02.19 | 5.3KB | DATABASE_URL
-b251 | 2012/02/24 16:08.02 | 5.3KB | HEROKU_POSTGRESQL_BLACK
-b252 | 2012/02/24 16:08.53 | 5.3KB | HEROKU_POSTGRESQL_PINK
-</code></pre>
-
-<h3>バックアップURLの確認</h3>
-
-<p>バックアップされているファイルのURLは以下で確認できます。</p>
-
-<pre><code>$ heroku pgbackups:url
-</code></pre>
-
-<p>Amazon S3のURLが表示されます。<br/>
-これは、直近のバックアップ分を参照しますが、過去分の場合はIDを指定します。</p>
-
-<pre><code>$ heroku pgbackups:url ID
-</code></pre>
-
-<h3>ファイルのダウンロード</h3>
-
-<p><code>curl</code>を使ってダウンロードします。(wgetでもいいです)</p>
-
-<pre><code>$ curl -o latest.dump `URL`
-</code></pre>
-
-<h3>ダウンロードしたファイルをローカルのDBにインポート</h3>
-
-<p>以下の<code>pg_restore</code>コマンドでインポート出来る。</p>
-
-<pre><code>$ pg_restore --verbose --clean --no-acl --no-owner -h myhost -U myuser -d mydb b001.dump
-</code></pre>
-
-<p>ちなみに、herokuのPostgresは、9.x系のようで、8.x系でpg_restoreしようとすると、バージョン違いで怒られました。</p>
-
-<blockquote><p>pg_restore: [アーカイバ] ファイルヘッダ内のバージョン(1.12)はサポートされていません</p></blockquote>
-
-<h3>参考</h3>
-
-<p><a href="https://devcenter.heroku.com/articles/heroku-postgres-import-export">Importing and Exporting Heroku Postgres Databases with PG Backups</a><br/>
-<a href="https://devcenter.heroku.com/articles/pgbackups">PG Backups</a></p>
 ]]></content>
   </entry>
   
