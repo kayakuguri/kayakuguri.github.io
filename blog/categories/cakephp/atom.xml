@@ -4,7 +4,7 @@
   <title><![CDATA[Category: cakephp | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/cakephp/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-03-31T21:19:03+09:00</updated>
+  <updated>2015-04-01T19:31:01+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,48 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[CakePHP]Transitionコンポーネントでバリデーションを効かせるモデルを指定]]></title>
+    <link href="http://kayakuguri.github.io/blog/2015/04/01/cakephp-transition-validate/"/>
+    <updated>2015-04-01T19:22:30+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2015/04/01/cakephp-transition-validate</id>
+    <content type="html"><![CDATA[<p>またバリデーションネタ。<br/>
+cakephpでフォーム作成の際に、Transitionコンポーネントを使用するとすこぶる便利。<br/>
+以下が使い方としてはわかりやすかった。<br/>
+<a href="http://endoyuta.com/2013/05/18/cakephp-transition%E3%82%B3%E3%83%B3%E3%83%9D%E3%83%BC%E3%83%8D%E3%83%B3%E3%83%881-0/">cakePHP Transitionコンポーネント &ndash; Logicky Blog</a></p>
+
+<!-- more -->
+
+
+<p>で、その中で、入力画面から確認画面に遷移する際に指定したバリデーションルールを適用させたかった。<br/>
+たいていのサイトでは、<code>$this-&gt;Transition-&gt;checkData('xxx')</code>を使えばよい、と書いてあったのだが、それだと効かなかった。<br/>
+原因を探していると、どうやら使用しているコントローラーで複数のモデルを使用していると効かないよう。<br/>
+そんなときは<code>checkData</code>の第２引数でモデルを明示的に指定してやると効くようになった。</p>
+
+<p>```
+class FormController extends AppController
+{</p>
+
+<pre><code>public $uses = array('User', 'Hoge', 'Fuga');
+
+public function input(){
+    $this-&gt;Transition-&gt;checkData('confirm','Hoge');
+    ...
+}
+</code></pre>
+
+<p>}
+```</p>
+
+<p>上記のように書くと、<code>Hoge</code>モデルで記述したバリデーションが適用される。<br/>
+ここを配列にして複数のモデルを指定してやることも可能だそう。</p>
+
+<p><a href="http://d.hatena.ne.jp/kunit/20101005#1286265311">[PHP][CakePHP] Transitionコンポーネント &ndash; checkData() について</a></p>
+
+<p>それにしてもこのコンポーネントはびっくりするくらい便利。ほんとに。</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[CakePHP]手動でフォームのバリデーションチェックにかける]]></title>

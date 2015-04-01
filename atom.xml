@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-03-31T21:19:03+09:00</updated>
+  <updated>2015-04-01T19:31:01+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,53 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[CakePHP]Transitionコンポーネントでバリデーションを効かせるモデルを指定]]></title>
+    <link href="http://kayakuguri.github.io/blog/2015/04/01/cakephp-transition-validate/"/>
+    <updated>2015-04-01T19:22:30+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2015/04/01/cakephp-transition-validate</id>
+    <content type="html"><![CDATA[<p>またバリデーションネタ。<br/>
+cakephpでフォーム作成の際に、Transitionコンポーネントを使用するとすこぶる便利。<br/>
+以下が使い方としてはわかりやすかった。<br/>
+<a href="http://endoyuta.com/2013/05/18/cakephp-transition%E3%82%B3%E3%83%B3%E3%83%9D%E3%83%BC%E3%83%8D%E3%83%B3%E3%83%881-0/">cakePHP Transitionコンポーネント &ndash; Logicky Blog</a></p>
+
+<!-- more -->
+
+
+<p>で、その中で、入力画面から確認画面に遷移する際に指定したバリデーションルールを適用させたかった。<br/>
+たいていのサイトでは、<code>$this-&gt;Transition-&gt;checkData('xxx')</code>を使えばよい、と書いてあったのだが、それだと効かなかった。<br/>
+原因を探していると、どうやら使用しているコントローラーで複数のモデルを使用していると効かないよう。<br/>
+そんなときは<code>checkData</code>の第２引数でモデルを明示的に指定してやると効くようになった。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>class FormController extends AppController
+</span><span class='line'>{
+</span><span class='line'>  public $uses = array('User', 'Hoge', 'Fuga');
+</span><span class='line'>  
+</span><span class='line'>  public function input(){
+</span><span class='line'>      $this-&gt;Transition-&gt;checkData('confirm','Hoge');
+</span><span class='line'>      ...
+</span><span class='line'>  }
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<p>上記のように書くと、<code>Hoge</code>モデルで記述したバリデーションが適用される。<br/>
+ここを配列にして複数のモデルを指定してやることも可能だそう。</p>
+
+<p><a href="http://d.hatena.ne.jp/kunit/20101005#1286265311">[PHP][CakePHP] Transitionコンポーネント &ndash; checkData() について</a></p>
+
+<p>それにしてもこのコンポーネントはびっくりするくらい便利。ほんとに。</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[CakePHP]手動でフォームのバリデーションチェックにかける]]></title>
@@ -1418,35 +1465,6 @@ fi
 <h3>参考</h3>
 
 <p><a href="http://www.slideshare.net/shin1x1/vagrant-php">Vagrant で作る PHP 開発環境 [実践編]</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[gitにて以降はこのファイルは変更に含めない指定]]></title>
-    <link href="http://kayakuguri.github.io/blog/2015/01/28/git-skip-worktree/"/>
-    <updated>2015-01-28T14:27:07+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2015/01/28/git-skip-worktree</id>
-    <content type="html"><![CDATA[<p>一度gitにてpushはしたけれど、それ以降は変更を無視する(ローカルとサーバーで内容が違うファイルをなる)設定。<br/>
-いつも忘れるのでメモ。</p>
-
-<!-- more -->
-
-
-<p><code>gitignore</code>だと一度pushしてしまっているので効かない。<br/>
-こんな時は、<code>skip-worktree</code>を使うそう。</p>
-
-<pre><code>$ git update-index --skip-worktree スキップしたいファイル名
-</code></pre>
-
-<p>これを実行すると以降は指定したファイルの変更は検知されない(commitされない)<br/>
-解除するには以下。</p>
-
-<pre><code>$ git update-index --no-skip-worktree スキップしてたファイル名
-</code></pre>
-
-<h4>[参考]</h4>
-
-<p><a href="http://qiita.com/usamik26/items/56d0d3ba7a1300625f92">既に git 管理しているファイルをあえて無視したい &ndash; Qiita</a></p>
 ]]></content>
   </entry>
   
