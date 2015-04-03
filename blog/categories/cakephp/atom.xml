@@ -4,7 +4,7 @@
   <title><![CDATA[Category: cakephp | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/cakephp/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-04-03T14:50:31+09:00</updated>
+  <updated>2015-04-03T14:52:24+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -65,7 +65,7 @@ $this-&gt;params['named']['param2'];
 
 <h2>ルーティング</h2>
 
-<p>このままだとURLが上長になるので、ルーティングを設定して、スッキリさせる。<br/>
+<p>このままだとURLが冗長になるので、ルーティングを設定して、スッキリさせる。<br/>
 さらに予めパラメータ名を指定してやる。</p>
 
 <h4>ルーティング</h4>
