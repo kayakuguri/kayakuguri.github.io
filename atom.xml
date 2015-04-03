@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-04-01T19:31:01+09:00</updated>
+  <updated>2015-04-03T14:50:31+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,90 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[CakePHP]URLからパラメータを受け取る]]></title>
+    <link href="http://kayakuguri.github.io/blog/2015/04/03/cakephp-routing-params/"/>
+    <updated>2015-04-03T14:37:52+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2015/04/03/cakephp-routing-params</id>
+    <content type="html"><![CDATA[<p>cake記法？で書かれたURLからパラメータを取得するメモ。</p>
+
+<!-- more -->
+
+
+<h2>コントローラーのみで制御</h2>
+
+<p>cakephpでのURLの基本は以下。</p>
+
+<blockquote><p>コントローラー名/アクション名</p></blockquote>
+
+<p>これにパラメータをつけたければ、その後ろに並べるのみ。</p>
+
+<blockquote><p>コントローラー名/アクション名/パラメータ1/パラメータ2</p></blockquote>
+
+<p>このパラメータを取得する方法は以下。</p>
+
+<pre><code>//URL - ctrl/act/param1/param2
+
+$this-&gt;params['pass'][0]; //param1
+$this-&gt;params['pass'][1]; //param2
+</code></pre>
+
+<p>で、指定の名前を付けたい場合は、以下のように。</p>
+
+<blockquote><p>コントローラー名/アクション/パラメータ名1:パラメータ/パラメータ名2:パラメータ</p></blockquote>
+
+<pre><code>//URL - ctrl/act/param1:hoge/param2:fuga
+
+$this-&gt;params['named']['param1'];
+$this-&gt;params['named']['param2'];
+</code></pre>
+
+<p>で、View側でこのリンクを作る方法は以下。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;?php echo $this-&gt;Html-&gt;link('リンクテキスト', array(
+</span><span class='line'>  'controller' =&gt; 'ctrl',
+</span><span class='line'>  'action' =&gt; 'act',
+</span><span class='line'>  'param1' =&gt; 'hoge'
+</span><span class='line'>)) ?&gt;</span></code></pre></td></tr></table></div></figure>
+
+
+<p></p>
+
+<p>これで上記の、<code>/ctrl/act/param1:hoge</code>が生成される</p>
+
+<h2>ルーティング</h2>
+
+<p>このままだとURLが上長になるので、ルーティングを設定して、スッキリさせる。<br/>
+さらに予めパラメータ名を指定してやる。</p>
+
+<h4>ルーティング</h4>
+
+<pre><code>Router::connect('/ctrl/act/:param1', array('controller' =&gt; 'ctrl', 'action' =&gt; 'act'));
+</code></pre>
+
+<p>こうすると、上記で記述したリンクを貼ると、以下のURLが生成される。</p>
+
+<pre><code>/ctrl/act/hoge
+</code></pre>
+
+<p>これを取得するには以下。</p>
+
+<pre><code>$this-&gt;params['param1']
+</code></pre>
+
+<p>これの方が見た目も取得方法もすっきりしててよさげ。</p>
+
+<h2>参考</h2>
+
+<p><a href="http://creazy.net/2009/05/cakephp_routing.html">http://creazy.net/2009/05/cakephp_routing.html</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[CakePHP]Transitionコンポーネントでバリデーションを効かせるモデルを指定]]></title>
@@ -1423,48 +1507,6 @@ PostgreSQL Studioのトップへインストール後に遷移すると、以下
 
 <p><a href="https://devcenter.heroku.com/articles/pgstudio">公式ドキュメント</a><br/>
 <a href="https://addons.heroku.com/pgstudio">アドオンページ</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Vagrantの起動時のシェルスクリプトのメモ。composerとpostgresql9.3]]></title>
-    <link href="http://kayakuguri.github.io/blog/2015/01/28/vagrant-shell-composer-postgresql/"/>
-    <updated>2015-01-28T14:33:11+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2015/01/28/vagrant-shell-composer-postgresql</id>
-    <content type="html"><![CDATA[<p>調べて組み込んだので具体的なコードをメモ。</p>
-
-<!-- more -->
-
-
-<h3>Composer</h3>
-
-<pre><code># Composer
-curl -sS https://getcomposer.org/installer | php
-mv composer.phar /usr/local/bin/composer
-</code></pre>
-
-<h3>PostgreSQL 9.3</h3>
-
-<p>centOS6に標準で入っているPostgreSQLは8.3。<br/>
-なので、9.3を指定して入れる。</p>
-
-<pre><code># postgresql
-# 9.3
-rpm -ivh http://yum.postgresql.org/9.3/redhat/rhel-6-x86_64/pgdg-centos93-9.3-1.noarch.rpm
-yum -y install postgresql93-server
-if [ ! -f /var/lib/pgsql/9.3/data/postgresql.conf ]; then
-    su postgres -c '/usr/pgsql-9.3/bin/initdb --no-locale -D /var/lib/pgsql/9.3/data'
-    if [ -f /vagrant/postgresql.conf ]; then
-        cp -a /vagrant/postgresql.conf /var/lib/pgsql/9.3/data/
-    fi
-fi
-/sbin/service postgresql-9.3 restart
-/sbin/chkconfig postgresql-9.3 on
-</code></pre>
-
-<h3>参考</h3>
-
-<p><a href="http://www.slideshare.net/shin1x1/vagrant-php">Vagrant で作る PHP 開発環境 [実践編]</a></p>
 ]]></content>
   </entry>
   
