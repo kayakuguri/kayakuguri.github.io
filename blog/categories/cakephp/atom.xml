@@ -4,7 +4,7 @@
   <title><![CDATA[Category: cakephp | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/cakephp/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-04-03T14:52:24+09:00</updated>
+  <updated>2015-04-06T13:19:23+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,102 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[CakaPHP]ラジオボタンの必須チェック]]></title>
+    <link href="http://kayakuguri.github.io/blog/2015/04/06/cakephp-radio-validation/"/>
+    <updated>2015-04-06T12:58:39+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2015/04/06/cakephp-radio-validation</id>
+    <content type="html"><![CDATA[<p>またもやバリデーションネタ。<br/>
+ラジオボタンにたいして未選択のチェックを入れる方法。</p>
+
+<!-- more -->
+
+
+<p>モデルのバリデーションルールに、<code>'required' =&gt; true</code>とかを入れればよいだけかとおもいきや、なかなか一筋縄ではいかなった。</p>
+
+<h3>&lsquo;required&rsquo; => true</h3>
+
+<p><code>'required' =&gt; true</code>を設定しただけではバリデーションルールが適用されないよう。<br/>
+ルールを同時に設定する必要があるとか。<br/>
+このオプションの意味は、指定のキーデータがない場合にチェックされるよう。(たぶん)</p>
+
+<p>ルールには空だとエラー、ということで、<code>notEmpty</code>を追加。<br/>
+これで必須のチェックのみは完了。</p>
+
+<h3>required属性</h3>
+
+<p>モデルでバリデーションを指定すると、自動的にinputタグの属性に、<code>required</code>が追加されてしまう。<br/>
+このまま送信しようとすると、Chrome限定だと思うが、エラーが出た送信出来ない。</p>
+
+<blockquote><p>An invalid form control with name=&lsquo;xxx&rsquo; is not focusable.</p></blockquote>
+
+<p>Chromeでは<code>required</code>属性が入ったinputでデータがなかった場合は、吹き出しのようなものを出すような仕様になっているが、<br/>
+radioボタンの場合はその吹き出しを出す場所がなくてエラーになってしまうみたい。</p>
+
+<h4>回避方法</h4>
+
+<p>回避方法はいくつかあるよう。</p>
+
+<p>１）<br/>
+なのでradioボタンの場合はこの属性を入れてはいけない。<br/>
+cakeの場合、オプションに<code>'required' =&gt; false</code>を指定してやることで出さないように出来た。</p>
+
+<p>２）<br/>
+<code>form</code>タグの生成時に<code>novalidate</code>をtrueでセットしてやればその中のinputタグには、<code>required</code>属性がつかなくなるよう。<br/>
+全部にセット出来るという意味ではこれが一番お手軽かも。</p>
+
+<h3>ソース</h3>
+
+<p>最終的なソースの抜粋は以下。</p>
+
+<h4>モデル</h4>
+
+<p>```
+&lsquo;radio_data&rsquo; => array(</p>
+
+<pre><code>array(
+    'rule' =&gt; 'notEmpty',
+    'message' =&gt; '選択して下さい'
+),
+</code></pre>
+
+<p>)
+```</p>
+
+<h4>ビュー</h4>
+
+<p>```
+&lt;?php echo $this->Form->input(&lsquo;radio_data&rsquo;, array(</p>
+
+<pre><code>'type' =&gt; 'radio',
+'options' =&gt; array('OK', 'NG'),
+'required' =&gt; false
+</code></pre>
+
+<p>));?>
+```</p>
+
+<p>もしくは、</p>
+
+<p>```
+&lt;?php echo $this->Form->create(&lsquo;Model&rsquo;, array(&lsquo;novalidate&rsquo; => true));  ?>
+<del>中略</del>
+&lt;?php echo $this->Form->input(&lsquo;radio_data&rsquo;, array(</p>
+
+<pre><code>'type' =&gt; 'radio',
+'options' =&gt; array('OK', 'NG'),
+</code></pre>
+
+<p>));?>
+```</p>
+
+<h3>参考</h3>
+
+<p><a href="http://stackoverflow.com/questions/7168645/invalid-form-control-only-in-google-chrome">html &ndash; &quot;Invalid form control&quot; only in Google Chrome &ndash; Stack Overflow</a><br/>
+<a href="http://d.hatena.ne.jp/cakephper/20130211/1360589926">CakePHP2.3からinputタグにhtml5のrequired属性がつくようになった &ndash; cakephperの日記(CakePHP, Laravel, PHP)</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[CakePHP]URLからパラメータを受け取る]]></title>

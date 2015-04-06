@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-04-03T14:52:24+09:00</updated>
+  <updated>2015-04-06T13:19:23+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,107 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[CakaPHP]ラジオボタンの必須チェック]]></title>
+    <link href="http://kayakuguri.github.io/blog/2015/04/06/cakephp-radio-validation/"/>
+    <updated>2015-04-06T12:58:39+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2015/04/06/cakephp-radio-validation</id>
+    <content type="html"><![CDATA[<p>またもやバリデーションネタ。<br/>
+ラジオボタンにたいして未選択のチェックを入れる方法。</p>
+
+<!-- more -->
+
+
+<p>モデルのバリデーションルールに、<code>'required' =&gt; true</code>とかを入れればよいだけかとおもいきや、なかなか一筋縄ではいかなった。</p>
+
+<h3>&lsquo;required&rsquo; => true</h3>
+
+<p><code>'required' =&gt; true</code>を設定しただけではバリデーションルールが適用されないよう。<br/>
+ルールを同時に設定する必要があるとか。<br/>
+このオプションの意味は、指定のキーデータがない場合にチェックされるよう。(たぶん)</p>
+
+<p>ルールには空だとエラー、ということで、<code>notEmpty</code>を追加。<br/>
+これで必須のチェックのみは完了。</p>
+
+<h3>required属性</h3>
+
+<p>モデルでバリデーションを指定すると、自動的にinputタグの属性に、<code>required</code>が追加されてしまう。<br/>
+このまま送信しようとすると、Chrome限定だと思うが、エラーが出た送信出来ない。</p>
+
+<blockquote><p>An invalid form control with name=&lsquo;xxx&rsquo; is not focusable.</p></blockquote>
+
+<p>Chromeでは<code>required</code>属性が入ったinputでデータがなかった場合は、吹き出しのようなものを出すような仕様になっているが、<br/>
+radioボタンの場合はその吹き出しを出す場所がなくてエラーになってしまうみたい。</p>
+
+<h4>回避方法</h4>
+
+<p>回避方法はいくつかあるよう。</p>
+
+<p>１）<br/>
+なのでradioボタンの場合はこの属性を入れてはいけない。<br/>
+cakeの場合、オプションに<code>'required' =&gt; false</code>を指定してやることで出さないように出来た。</p>
+
+<p>２）<br/>
+<code>form</code>タグの生成時に<code>novalidate</code>をtrueでセットしてやればその中のinputタグには、<code>required</code>属性がつかなくなるよう。<br/>
+全部にセット出来るという意味ではこれが一番お手軽かも。</p>
+
+<h3>ソース</h3>
+
+<p>最終的なソースの抜粋は以下。</p>
+
+<h4>モデル</h4>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>'radio_data' =&gt; array(
+</span><span class='line'>    array(
+</span><span class='line'>        'rule' =&gt; 'notEmpty',
+</span><span class='line'>        'message' =&gt; '選択して下さい'
+</span><span class='line'>    ),
+</span><span class='line'>)</span></code></pre></td></tr></table></div></figure>
+
+
+<h4>ビュー</h4>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;?php echo $this-&gt;Form-&gt;input('radio_data', array(
+</span><span class='line'>  'type' =&gt; 'radio',
+</span><span class='line'>  'options' =&gt; array('OK', 'NG'),
+</span><span class='line'>  'required' =&gt; false
+</span><span class='line'>));?&gt;</span></code></pre></td></tr></table></div></figure>
+
+
+<p>もしくは、</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;?php echo $this-&gt;Form-&gt;create('Model', array('novalidate' =&gt; true));  ?&gt;
+</span><span class='line'>~~~中略~~~
+</span><span class='line'>&lt;?php echo $this-&gt;Form-&gt;input('radio_data', array(
+</span><span class='line'>  'type' =&gt; 'radio',
+</span><span class='line'>  'options' =&gt; array('OK', 'NG'),
+</span><span class='line'>));?&gt;</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>参考</h3>
+
+<p><a href="http://stackoverflow.com/questions/7168645/invalid-form-control-only-in-google-chrome">html &ndash; &quot;Invalid form control&quot; only in Google Chrome &ndash; Stack Overflow</a><br/>
+<a href="http://d.hatena.ne.jp/cakephper/20130211/1360589926">CakePHP2.3からinputタグにhtml5のrequired属性がつくようになった &ndash; cakephperの日記(CakePHP, Laravel, PHP)</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[CakePHP]URLからパラメータを受け取る]]></title>
@@ -1432,81 +1533,6 @@ slackでもそれが出来るようで、入力欄で点を３つ繋げて挟む
 <p>なので、通常の文章であれば、先頭に点々をつけて書き出し、<br/>
 投稿する文章が完成したら、先頭の点々を消して、エンターキー→投稿、とすればよいと思います。<br/>
 ちょっと手間がかかりますが、誤送信するよりは、、、といったところでしょうか…。</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[Herokuアドオン]PostgreSQL Studio]]></title>
-    <link href="http://kayakuguri.github.io/blog/2015/01/29/postgresql-studio/"/>
-    <updated>2015-01-29T11:30:01+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2015/01/29/postgresql-studio</id>
-    <content type="html"><![CDATA[<p>herokuのアドオン、「PostgreSQL Studio」を入れてみた。</p>
-
-<!-- more -->
-
-
-<p><img src="http://kayakuguri.github.io/images/2015/01/postgresqlStdio00.jpg" alt="postgresql studio" /></p>
-
-<h2>概要</h2>
-
-<p>自身のアカウントで管理しているアプリ内に導入されているPostgreSQLの情報を閲覧、管理出来るアドオン。</p>
-
-<h2>インストール</h2>
-
-<p>導入は無料で行えます。<br/>
-というか、無料バージョンしか存在していません。</p>
-
-<pre><code>$ heroku addons:add pgstudio
-</code></pre>
-
-<h2>承認</h2>
-
-<p>herokuのアプリページでアドオンをクリックするとアドオンのトップページへ遷移出来る。<br/>
-PostgreSQL Studioのトップへインストール後に遷移すると、以下のような承認画面が出る。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2015/01/postgresqlStdio01.jpg" alt="authorize" /></p>
-
-<p>内容は、</p>
-
-<blockquote><p>Read-only access to all of your apps and resources, excluding account information. Includes configuration variables, which may include runtime secrets.</p></blockquote>
-
-<p>あなたのアカウント情報を除く全てのアプリに読み取り専用の権限を許可します。<br/>
-そこには、設定情報やランタイム情報も含まれます。</p>
-
-<p>と、アドオンを入れるのは一つのアプリなのに、<strong>全ての</strong>アプリへの接続許可を求められます。<br/>
-この権現の編集は、自身のアカウントページから行えます。<br/>
-<a href="https://dashboard.heroku.com/account">https://dashboard.heroku.com/account</a></p>
-
-<p><img src="http://kayakuguri.github.io/images/2015/01/postgresqlStdio04.jpg" alt="承認設定" /></p>
-
-<p>というのも、自身が管理しているアプリにインストールしている全てのPostgreSQLのデータをこれで管理出来るため、この権現が必要なようです。</p>
-
-<h2>データ閲覧</h2>
-
-<p>承認してアクセスすると、閲覧したいDBの選択画面になるので、任意のものを選択し、Loginします。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2015/01/postgresqlStdio02.jpg" alt="login" /></p>
-
-<p>ログインすると、そのDBの情報を見たり、クエリを実行したり、などが出来ます。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2015/01/postgresqlStdio03.jpg" alt="db情報" /></p>
-
-<p>テーブルの構造はそのままで見ることができるが、データの中身は、SQLを発行しないと見られないよう。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2015/01/postgresqlStdio05.jpg" alt="レコード内容" /></p>
-
-<h2>まとめ</h2>
-
-<p>ローカルにアプリをインストールしたり、自前でphpPGAdminを入れたりせずともアドオンさえ入れていればよいので、すごく楽。<br/>
-ただし、全アプリへのアクセス権限が必要になる＝全てのアプリのデータが閲覧可能、というのは少し怖い。<br/>
-アプリごとの承認ならいいのだけれど。<br/>
-なので、実質は自分のアカウント内のどれかのアプリに一つだけ入れておけばよいことになる。<br/>
-あと、ベータ版なので、動作の不具合や終了などがありえる。</p>
-
-<h2>参考</h2>
-
-<p><a href="https://devcenter.heroku.com/articles/pgstudio">公式ドキュメント</a><br/>
-<a href="https://addons.heroku.com/pgstudio">アドオンページ</a></p>
 ]]></content>
   </entry>
   
