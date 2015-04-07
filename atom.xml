@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-04-06T13:19:23+09:00</updated>
+  <updated>2015-04-07T14:53:07+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,57 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[salesforce]テスト実行時に組織化の全てのデータにアクセスする]]></title>
+    <link href="http://kayakuguri.github.io/blog/2015/04/07/sf-seealldata-test/"/>
+    <updated>2015-04-07T14:40:33+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2015/04/07/sf-seealldata-test</id>
+    <content type="html"><![CDATA[<p>salesforceでテストコードを実行させる場合、通常であればデータはテスト用にコード内で作成する必要があります。<br/>
+しかし、組織内のデータを直接使用してテストした場合もあります。あります。<br/>
+そんな時のメモ。</p>
+
+<!-- more -->
+
+
+<p>テストアノテーションメソッドを以下のようにすればよいだけ。</p>
+
+<pre><code>@isTest(SeeAllData=true)
+</code></pre>
+
+<p>これで組織化にある全データを使用してテストの実行が行えます。<br/>
+ですが、もちろんsandboxと本番環境に差異がある場合はsandboxで通ったテストが本番では通らない、カバー率が低い、ということがありえますので注意です。</p>
+
+<p>これを使用するシュチエーションとしては、活動履歴(<code>ActivityHistory</code>)を使用する場合があります。<br/>
+活動履歴は直接SOQLでは作成できず、テストコード内で作成したデータには紐付いて作成されません。<br/>
+要するに、テスト実行する手段がない、よう。<br/>
+その際に上記メソッドを使う事で組織内に作成されたデータを使用してのテストが必要になってきます。</p>
+
+<p>もともとsalesforceは<code>Spring '12</code>リリースまでは(<code>API 24.0</code>より古いもの)では全データにアクセスが出来たよう。<br/>
+それだと組織内のデータに依存してしまって上手くテスト実行が出来ない、という状態だったため、デフォルトでは組織内のデータにはアクセス出来ないように変更されたようです。<br/>
+で、アクセスしたい場合は上記のコードを書けばよい、と。<br/>
+上手く使えばテストが非常に落になりそうです(違う)。</p>
+
+<p>上記メソッドを使用しなくても以下のデータは組織内のデータを使用してテスト実行が可能なようです。</p>
+
+<ul>
+<li>User</li>
+<li>Profile</li>
+<li>Organization</li>
+<li>RecordType</li>
+<li>ApexClass</li>
+<li>ApexTrigger</li>
+<li>ApexComponent</li>
+<li>ApexPage</li>
+</ul>
+
+
+<h3>参考</h3>
+
+<p><a href="http://dackdive.hateblo.jp/entry/2014/07/05/100926">[Salesforce]活動履歴(ActivityHistory)がテストで取得できない？ &ndash; dackdive&#39;s blog</a><br/>
+<a href="http://blog.flect.co.jp/salesforce/2012/05/post-9aec.html">セールスフォースの豆知識: テストメソッドがアクセスできるデータが変わりました</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[CakaPHP]ラジオボタンの必須チェック]]></title>
@@ -1487,52 +1538,6 @@ fputs(STDERR, "some error");
 
 <p><a href="http://nanoappli.com/blog/archives/5212">[PHP]標準エラー出力、標準出力に文字列を出力する</a><br/>
 <a href="http://php.net/manual/ja/function.fputs.php">fputs PHPマニュアル</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[slackにて入力中にエンターキーを押しても送信しないようにする方法]]></title>
-    <link href="http://kayakuguri.github.io/blog/2015/02/02/slack-sending-enterclick/"/>
-    <updated>2015-02-02T11:53:28+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2015/02/02/slack-sending-enterclick</id>
-    <content type="html"><![CDATA[<p><a href="https://slack.com/">slack</a>、便利ですよね。<br/>
-ただし、入力中に改行を入れようとすると、(macの場合) <code>alt+Enter</code>を押さないといけません。<br/>
-ミスるとたちまち送信されてしまいます。<br/>
-変換の決定でエンターを押したつもりが、英語モードになっていて送信、ということはよくあります。<br/>
-なので、エンターキーを押しても送信しないように出来るかを調べてみました。</p>
-
-<!-- more -->
-
-
-<p>結論から言うと、設定レベルでそういうのはなかったです。<br/>
-ですが、なんとか代替になりそうなものはあったので紹介です。</p>
-
-<p>マークダウン形式での記述でよくあるのですが、&#8220;`、と点？を３つ繋げると、それ以降はコードとして認識させる事が出来ます。<br/>
-その中での記述はタグであってもそのまま表示されます。<br/>
-slackでもそれが出来るようで、入力欄で点を３つ繋げて挟むとその中身はコードとして表示されます。<br/>
-それを利用して、点３つの間はエンターキーで投稿させない、という設定があったので、<br/>
-それを使って誤送信を防ぐ、というちょっと回りくどいやり方です。</p>
-
-<p>設定は、左下の名前の横からメニューを出して、<code>Preferences</code>をクリック。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2015/02/slack_enter03.jpg" alt="メニュー" /></p>
-
-<p>その中の、<code>Advanced Optons</code>の、<code>When typing code……</code>のチェックを入れる。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2015/02/slack_enter00.jpg" alt="Adovanced Options" /></p>
-
-<p>これでエンターキーを押しても(コード記述中は)送信されなくなります。<br/>
-具体的には、以下のように入力していれば、送信されません。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2015/02/slack_enter01.jpg" alt="入力例" /></p>
-
-<p>これをもう一度点々を入力してエンターキーを押すと、以下のように投稿されてしまいます。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2015/02/slack_enter02.jpg" alt="コードとして投稿" /></p>
-
-<p>なので、通常の文章であれば、先頭に点々をつけて書き出し、<br/>
-投稿する文章が完成したら、先頭の点々を消して、エンターキー→投稿、とすればよいと思います。<br/>
-ちょっと手間がかかりますが、誤送信するよりは、、、といったところでしょうか…。</p>
 ]]></content>
   </entry>
   
