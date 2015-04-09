@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-04-07T14:53:07+09:00</updated>
+  <updated>2015-04-09T13:12:05+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,48 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[heroku]ssl設定時のエラーについてのメモ]]></title>
+    <link href="http://kayakuguri.github.io/blog/2015/04/09/ssl-error/"/>
+    <updated>2015-04-09T13:03:29+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2015/04/09/ssl-error</id>
+    <content type="html"><![CDATA[<p>簡単な事だったのですが、情報が見つけられなかったのでメモ。</p>
+
+<!-- more -->
+
+
+<p>herokuにsslを適用させる場合、証明書と秘密鍵をアドオンにアップロードします。<br/>
+具体的には以下のコマンド。</p>
+
+<pre><code>$ heroku certs:add 証明書 秘密鍵
+</code></pre>
+
+<p>その際に、以下のエラーが返って来た。</p>
+
+<blockquote><p>Unable to parse certificate. Please ensure the certificate is in PEM format.</p></blockquote>
+
+<p>内容は特に間違っているとは思えず、何度見返しても正しい。</p>
+
+<p>結局原因は、有効期間前、というなんとも単純な事だった。<br/>
+取得した時点ではまだ開始前の状態で、期限前。<br/>
+あまり期限を先にして取得することってないのか、ググっても特に出てこず。<br/>
+期限外だったらそう怒ってくれればいいのに、上記のエラー内容ではその事が特にわからなかったのもハマりポイントでした。</p>
+
+<p>ちなみに有効期間の確認は以下。</p>
+
+<pre><code>$ openssl x509 -in 証明書 -noout -dates
+</code></pre>
+
+<p>以下のような形で返ってくる。</p>
+
+<pre><code>notBefore=Apr  8 15:00:00 2015 GMT
+notAfter=Apr  8 14:59:59 2016 GMT
+</code></pre>
+
+<p>期間内だと問題なくアップ出来ました。</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[salesforce]テスト実行時に組織化の全てのデータにアクセスする]]></title>
@@ -1500,44 +1542,6 @@ heroku側がエラーページを返してしまう。<br/>
 <a href="https://devcenter.heroku.com/articles/procfile">Process Types and the Procfile</a><br/>
 <a href="https://devcenter.heroku.com/articles/background-jobs-queueing">Worker Dynos, Background Jobs and Queueing</a><br/>
 <a href="https://devcenter.heroku.com/articles/scheduler">Heroku Scheduler</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[heroku]PHPでpapertrailに標準出力で文字列を出力する]]></title>
-    <link href="http://kayakuguri.github.io/blog/2015/02/05/papertrail-php-stdout/"/>
-    <updated>2015-02-05T11:30:39+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2015/02/05/papertrail-php-stdout</id>
-    <content type="html"><![CDATA[<p>herokuでログを見るには、papertrailが基本かと思います。<br/>
-そのpapertrailにPHPから任意の文字列を出力するには標準出力を使う、との事で試してみました。</p>
-
-<!-- more -->
-
-
-<p>方法は以下の通り。</p>
-
-<pre><code>$stdout= fopen( 'php://stdout', 'w' );
-fwrite( $stdout, "hello world to stdout\n" );
-</code></pre>
-
-<p>結果はこんな感じ。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2015/02/php-stdout.jpg" alt="papertrail" /></p>
-
-<p>PHP部分は参考サイトのママです。ありがとうございます。</p>
-
-<p>あと、まとめて以下でも書けるよう。</p>
-
-<pre><code>fputs(STDOUT, "hello world to stdout\n");
-
-//エラーの場合
-fputs(STDERR, "some error");
-</code></pre>
-
-<h3>参考</h3>
-
-<p><a href="http://nanoappli.com/blog/archives/5212">[PHP]標準エラー出力、標準出力に文字列を出力する</a><br/>
-<a href="http://php.net/manual/ja/function.fputs.php">fputs PHPマニュアル</a></p>
 ]]></content>
   </entry>
   

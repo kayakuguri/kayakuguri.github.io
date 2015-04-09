@@ -4,7 +4,7 @@
   <title><![CDATA[Category: heroku | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/heroku/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-04-07T14:53:07+09:00</updated>
+  <updated>2015-04-09T13:12:05+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,48 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[heroku]ssl設定時のエラーについてのメモ]]></title>
+    <link href="http://kayakuguri.github.io/blog/2015/04/09/ssl-error/"/>
+    <updated>2015-04-09T13:03:29+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2015/04/09/ssl-error</id>
+    <content type="html"><![CDATA[<p>簡単な事だったのですが、情報が見つけられなかったのでメモ。</p>
+
+<!-- more -->
+
+
+<p>herokuにsslを適用させる場合、証明書と秘密鍵をアドオンにアップロードします。<br/>
+具体的には以下のコマンド。</p>
+
+<pre><code>$ heroku certs:add 証明書 秘密鍵
+</code></pre>
+
+<p>その際に、以下のエラーが返って来た。</p>
+
+<blockquote><p>Unable to parse certificate. Please ensure the certificate is in PEM format.</p></blockquote>
+
+<p>内容は特に間違っているとは思えず、何度見返しても正しい。</p>
+
+<p>結局原因は、有効期間前、というなんとも単純な事だった。<br/>
+取得した時点ではまだ開始前の状態で、期限前。<br/>
+あまり期限を先にして取得することってないのか、ググっても特に出てこず。<br/>
+期限外だったらそう怒ってくれればいいのに、上記のエラー内容ではその事が特にわからなかったのもハマりポイントでした。</p>
+
+<p>ちなみに有効期間の確認は以下。</p>
+
+<pre><code>$ openssl x509 -in 証明書 -noout -dates
+</code></pre>
+
+<p>以下のような形で返ってくる。</p>
+
+<pre><code>notBefore=Apr  8 15:00:00 2015 GMT
+notAfter=Apr  8 14:59:59 2016 GMT
+</code></pre>
+
+<p>期間内だと問題なくアップ出来ました。</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[heroku]PG Backupsのアドオンが廃止されherokuコマンドに組み込まれる]]></title>
@@ -286,50 +328,6 @@ SSL certificate is verified by a root authority.
 <h2>参考</h2>
 
 <p><a href="https://devcenter.heroku.com/articles/ssl-endpoint#update-certificate">https://devcenter.heroku.com/articles/ssl-endpoint#update-certificate</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[heroku]Heroku PostgresのDBをHeroku PostgresのDBからリストアする]]></title>
-    <link href="http://kayakuguri.github.io/blog/2015/02/20/restore-postgresql/"/>
-    <updated>2015-02-20T16:59:38+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2015/02/20/restore-postgresql</id>
-    <content type="html"><![CDATA[<p>タイトルの通り。<br/>
-別のheroku postgres上にあるDBの内容を、そのまま別のheroku postgresに反映する方法。</p>
-
-<!-- more -->
-
-
-<h2>バックアップ</h2>
-
-<p>以前にも書きましたが、とりあえず現状のものをバックアップ。</p>
-
-<pre><code>$ heroku pgbackups:capture --app 元アプリ名
-</code></pre>
-
-<p>URLは以下で確認。</p>
-
-<pre><code>$ heroku pgbackups:url --app 元アプリ名
-</code></pre>
-
-<p>表示されるamazonのURLをコピーしておく</p>
-
-<h2>リストア</h2>
-
-<p>リストアしたいアプリにheroku postgresを入れておく。<br/>
-環境変数の<code>DATABASE_URL</code>に入っているDBへのリストアが行われる。<br/>
-(アドオンを入れると自動で入っているはず)</p>
-
-<p>上記でコピーしたURLで以下を実行。</p>
-
-<pre><code>$ heroku pgbackups:restore DATABASE 'amazonのURL' --app 新アプリ名
-</code></pre>
-
-<p>完了。</p>
-
-<h2>参考</h2>
-
-<p><a href="https://devcenter.heroku.com/articles/heroku-postgres-import-export">https://devcenter.heroku.com/articles/heroku-postgres-import-export</a></p>
 ]]></content>
   </entry>
   
