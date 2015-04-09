@@ -4,7 +4,7 @@
   <title><![CDATA[Category: saleforce | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/saleforce/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-04-09T13:12:05+09:00</updated>
+  <updated>2015-04-09T13:13:53+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -19,7 +19,7 @@
     <updated>2015-04-07T14:40:33+09:00</updated>
     <id>http://kayakuguri.github.io/blog/2015/04/07/sf-seealldata-test</id>
     <content type="html"><![CDATA[<p>salesforceでテストコードを実行させる場合、通常であればデータはテスト用にコード内で作成する必要があります。<br/>
-しかし、組織内のデータを直接使用してテストした場合もあります。あります。<br/>
+しかし、組織内のデータを直接使用してテストしたい場合もあります。あります。<br/>
 そんな時のメモ。</p>
 
 <!-- more -->
