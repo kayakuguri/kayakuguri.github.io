@@ -4,7 +4,7 @@
   <title><![CDATA[Category: apex | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/apex/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-04-09T13:13:53+09:00</updated>
+  <updated>2015-04-10T11:08:08+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,52 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[apex]Date型のフォーマット]]></title>
+    <link href="http://kayakuguri.github.io/blog/2015/04/10/format-date/"/>
+    <updated>2015-04-10T10:55:07+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2015/04/10/format-date</id>
+    <content type="html"><![CDATA[<p>何回かググっているので、備忘録。</p>
+
+<!-- more -->
+
+
+<p>Date型のフォーマットは一応用意されているが、フォーマット内容を指定が出来ないよう。</p>
+
+<p><code>
+Date d = Date.newInstance(2015, 4, 10);
+System.debug(d); //2015-04-10 00:00:00
+String d_str = d.format();
+System.debug(d_str); //2015/04/10
+</code></p>
+
+<p><code>format('yyyy-MM-dd')</code>とか書くと怒られる。<br/>
+<a href="https://www.salesforce.com/us/developer/docs/apexcode/Content/apex_methods_system_date.htm#apex_System_Date_format">Date Class &ndash; format()</a></p>
+
+<p>代わりにDatetime型の場合はフォーマットを指定して出力が可能。<br/>
+なので、Date型のものをフォーマット指定して出力したい場合は、一度Datetime型に変換してやる必要がある。</p>
+
+<p>apexのDatetime型の扱いには注意が必要で、そのまま変換してDatetime型のまま使用しているとタイムゾーンが標準時になって９時間戻ってしまう。<br/>
+ただしそれをフォーマットして文字列にするとまた元に戻る。
+指定するならする、しないならしない、で統一しているとややこしくならなくてすみそう。</p>
+
+<p><code>
+Date d = Date.newInstance(2015, 4, 10);
+System.debug(d);  //2015-04-10 00:00:00
+Datetime dt = Datetime.newInstance(d.year(), d.month(), d.day());
+System.debug(dt);  //2015-04-09 15:00:00
+String dt_str = dt.format('yyyy-MM-dd');
+System.debug(dt_str);  //2015-04-10
+</code></p>
+
+<h3>参考</h3>
+
+<p><a href="https://www.salesforce.com/us/developer/docs/apexcode/Content/apex_methods_system_date.htm#apex_System_Date_format">Date Class &ndash; format()</a><br/>
+<a href="https://www.salesforce.com/us/developer/docs/apexcode/Content/apex_methods_system_datetime.htm#apex_System_Datetime_format_2">Datetime Class &ndash; format(string)</a><br/>
+<a href="http://stackoverflow.com/questions/11834873/salesforce-apex-validating-date-for-format-and-value">validation &ndash; Salesforce Apex: Validating date for format and value &ndash; Stack Overflow</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[salesforce]Apex REST作成時のtips]]></title>
@@ -300,59 +346,6 @@ curl_close($curl);
 <h3>参考</h3>
 
 <p><a href="http://qiita.com/khirose/items/870ffec6ce4562f54c9d">PHP小ネタ &ndash; PHPのcurlでPOST &ndash; Qiita</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[apexで割り算をしたら整数になった]]></title>
-    <link href="http://kayakuguri.github.io/blog/2014/10/21/apex-decimal/"/>
-    <updated>2014-10-21T16:44:39+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2014/10/21/apex-decimal</id>
-    <content type="html"><![CDATA[<p>タイトル通り、apex上で割り算をしたら整数になってしまったんですね。<br/>
-単純に型付け言語による仕様だったのですが、ちょっとハマったのでメモ。</p>
-
-<!-- more -->
-
-
-<p>最初、記述したのが以下のコード</p>
-
-<pre><code>Decimal a = 1 / 2;
-System.debug(a);  //0
-</code></pre>
-
-<p>これだと、<code>0</code>が出力されます。<br/>
-<code>Decimal</code>は小数まで表示できる型なのになんで？？？<br/>
-と思ったんですが、計算している、<code>1</code>とか<code>2</code>が、<code>Integer</code>型、ってことなんですね。<br/>
-なので、これを<code>Decimal</code>型にしてやると計算できます。</p>
-
-<pre><code>Decimal a = Decimal.valueOf(1) / Decimal.valueOf(2);
-System.debug(a);  //0.5
-</code></pre>
-
-<p>しかし数字を書きたいだけなのにいちいちキャストするのはめんどう。<br/>
-なので、以下でも大丈夫。</p>
-
-<pre><code>Decimal a = 1.0 / 2.0;
-System.debug(a);  //0.5
-</code></pre>
-
-<p>小数点をつけると<code>Decimal</code>型になるようです。</p>
-
-<p>ちなみにやりたかったことは、<code>Datetime</code>型の現在時間を日本時間(GMT+9)で表示することです。</p>
-
-<pre><code>Datetime.now() + (9.0/24.0)
-</code></pre>
-
-<p><code>Datetime</code>型の足し算は1日単位で行われるため、24で割ると時間になります。<br/>
-しかし、小数点にしないと<code>0</code>になってしまい計算できませんでした。<br/>
-<code>format</code>をつかってフォーマットしてしまうと文字列になってしまうため、足し算で対応しています。</p>
-
-<p>・<code>format</code>を使った場合</p>
-
-<pre><code>Datetime.now().format('yyyy-MM-dd hh:mm', 'JST');
-</code></pre>
-
-<p><a href="https://sites.google.com/site/odekakeshimasyo/salesforceapexdatetime">Salesforce Apex 日付 時間 &ndash; おでかけしましょ</a></p>
 ]]></content>
   </entry>
   
