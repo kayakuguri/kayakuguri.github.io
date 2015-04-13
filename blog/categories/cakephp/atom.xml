@@ -4,7 +4,7 @@
   <title><![CDATA[Category: cakephp | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/cakephp/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-04-10T11:08:08+09:00</updated>
+  <updated>2015-04-13T15:46:55+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,63 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[CakePHP]400系エラーが発生した場合にトップページにリダイレクトさせる]]></title>
+    <link href="http://kayakuguri.github.io/blog/2015/04/13/cake-php-404-redirect/"/>
+    <updated>2015-04-13T15:35:00+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2015/04/13/cake-php-404-redirect</id>
+    <content type="html"><![CDATA[<p>ググると色々と方法が出てくるので今更ですが、<br/>
+記事によって微妙に違ったので、最終的に上手くいったものをメモ。</p>
+
+<!-- more -->
+
+
+<p>cakephpがエラーをハンドリングしているControllerは以下。<br/>
+<code>/lib/Cake/Error/ExceptionRenderer.php</code></p>
+
+<p>この中の、219行目あたりにある、<code>error400</code>の処理が400系エラー時の処理にあたる。<br/>
+なので、これをオーバーライドしてやる形でリダイレクト処理を書く。<br/>
+(直接編集してもいいが、コアシステムになるのでなるべく触らないほうがよさげ)</p>
+
+<p>まずエラーの際の処理をオーバーライドするためのクラスファイルを作成。<br/>
+<code>/lib/Cake/Error/AppExceptionRenderer.php</code></p>
+
+<p>```
+&lt;?php
+App::uses(&lsquo;ExceptionRenderer&rsquo;, &lsquo;Error&rsquo;);</p>
+
+<p>class AppExceptionRenderer extends ExceptionRenderer {</p>
+
+<pre><code>public function error400($error) { // 400番台のエラー時に呼ばれるメソッドを上書き
+    $this-&gt;controller-&gt;redirect(array('controller' =&gt; 'users', 'action' =&gt; 'index'), 301);
+}
+</code></pre>
+
+<p>}
+```</p>
+
+<p>この時に注意点は、<code>redirect</code>関数を呼び出すときに、<code>$this-&gt;controller</code>経由で呼び出さないとエラーになってしまった。<br/>
+<code>$this-&gt;redirect()</code>ではダメだった。</p>
+
+<p>で、coreクラスでエラー時に呼び出すクラスを作成したクラスに変更。</p>
+
+<p><code>/app/Config/core.php</code> 79行目付近</p>
+
+<p><code>
+'renderer' =&gt; 'ExceptionRenderer',
+↓↓
+'renderer' =&gt; 'AppExceptionRenderer',
+</code></p>
+
+<p>後はコントローラーなどがないページへアクセスすれば、指定のページにリダイレクトが発生する。</p>
+
+<h3>参考</h3>
+
+<p><a href="https://www.markernet.co.jp/blog/2014/06/12/post-1622/">CakePHP2.Xで404 Not Foundエラーをリダイレクトする方法 | WEB制作ブログ</a><br/>
+<a href="http://studio-faust.com/programming/258/">CakePHP2 404エラーの場合にトップページにリダイレクト | Web Studio Faust</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[CakaPHP]ラジオボタンの必須チェック]]></title>

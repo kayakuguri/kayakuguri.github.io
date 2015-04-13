@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-04-10T11:08:08+09:00</updated>
+  <updated>2015-04-13T15:46:55+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,69 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[CakePHP]400系エラーが発生した場合にトップページにリダイレクトさせる]]></title>
+    <link href="http://kayakuguri.github.io/blog/2015/04/13/cake-php-404-redirect/"/>
+    <updated>2015-04-13T15:35:00+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2015/04/13/cake-php-404-redirect</id>
+    <content type="html"><![CDATA[<p>ググると色々と方法が出てくるので今更ですが、<br/>
+記事によって微妙に違ったので、最終的に上手くいったものをメモ。</p>
+
+<!-- more -->
+
+
+<p>cakephpがエラーをハンドリングしているControllerは以下。<br/>
+<code>/lib/Cake/Error/ExceptionRenderer.php</code></p>
+
+<p>この中の、219行目あたりにある、<code>error400</code>の処理が400系エラー時の処理にあたる。<br/>
+なので、これをオーバーライドしてやる形でリダイレクト処理を書く。<br/>
+(直接編集してもいいが、コアシステムになるのでなるべく触らないほうがよさげ)</p>
+
+<p>まずエラーの際の処理をオーバーライドするためのクラスファイルを作成。<br/>
+<code>/lib/Cake/Error/AppExceptionRenderer.php</code></p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;?php
+</span><span class='line'>App::uses('ExceptionRenderer', 'Error');
+</span><span class='line'>
+</span><span class='line'>class AppExceptionRenderer extends ExceptionRenderer {
+</span><span class='line'>    public function error400($error) { // 400番台のエラー時に呼ばれるメソッドを上書き
+</span><span class='line'>        $this-&gt;controller-&gt;redirect(array('controller' =&gt; 'users', 'action' =&gt; 'index'), 301);
+</span><span class='line'>    }
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<p>この時に注意点は、<code>redirect</code>関数を呼び出すときに、<code>$this-&gt;controller</code>経由で呼び出さないとエラーになってしまった。<br/>
+<code>$this-&gt;redirect()</code>ではダメだった。</p>
+
+<p>で、coreクラスでエラー時に呼び出すクラスを作成したクラスに変更。</p>
+
+<p><code>/app/Config/core.php</code> 79行目付近</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>'renderer' =&gt; 'ExceptionRenderer',
+</span><span class='line'>↓↓
+</span><span class='line'>'renderer' =&gt; 'AppExceptionRenderer',</span></code></pre></td></tr></table></div></figure>
+
+
+<p>後はコントローラーなどがないページへアクセスすれば、指定のページにリダイレクトが発生する。</p>
+
+<h3>参考</h3>
+
+<p><a href="https://www.markernet.co.jp/blog/2014/06/12/post-1622/">CakePHP2.Xで404 Not Foundエラーをリダイレクトする方法 | WEB制作ブログ</a><br/>
+<a href="http://studio-faust.com/programming/258/">CakePHP2 404エラーの場合にトップページにリダイレクト | Web Studio Faust</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[apex]Date型のフォーマット]]></title>
@@ -1436,84 +1499,6 @@ Go、C#、Visual Basic、Groovy、Objective-c、Swift、Swift Representor</p></b
 
 <p><a href="http://kana-lier.com/web/redirect/">.htaccessを使ったよく使うリダイレクトまとめ</a><br/>
 <a href="http://www.cherrypieweb.com/weblog/technical/20131017121752.php">.htaccessによるリダイレクト徹底解説</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[heroku]githubから自動でherokuにデプロイ]]></title>
-    <link href="http://kayakuguri.github.io/blog/2015/02/10/heroku-github-sync/"/>
-    <updated>2015-02-10T17:50:51+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2015/02/10/heroku-github-sync</id>
-    <content type="html"><![CDATA[<p>ベータ版だったherokuとgithubの同期が正式リリースされたようです。<br/>
-<a href="https://blog.heroku.com/archives/2015/2/6/heroku_github_integration">Ship Code Faster: Announcing GitHub Integration GA</a></p>
-
-<!-- more -->
-
-
-<p>ベータ版の段階からあったかもなのですが、githubにプッシュしたら自動でherokuにデプロイ出来るようなので、試してみました。</p>
-
-<h2>Githubにリポジトリを作成</h2>
-
-<p>まずは同期させるためにリポジトリを作成します。<br/>
-すでにherokuにあるアプリを同期させる場合は、同じファイルをgithubにアップしておく必要があります。</p>
-
-<h2>Herokuでの設定</h2>
-
-<p>同期させたいアプリを開いたら、<code>deploy</code>のページへアクセス<br/>
-<img src="http://kayakuguri.github.io/images/2015/02/github-heroku01.jpg" alt="deployへ" /></p>
-
-<p>Githubを選択<br/>
-<img src="http://kayakuguri.github.io/images/2015/02/github-heroku02.jpg" alt="Github" /></p>
-
-<p><code>Connect to Github</code>をクリック</p>
-
-<p><img src="http://kayakuguri.github.io/images/2015/02/github-heroku03.jpg" alt="Connect to Github" /></p>
-
-<p>許可を求められるので、許可。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2015/02/github-heroku04.jpg" alt="認証" /></p>
-
-<p>すると、リポジトリを選択出来るようになる。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2015/02/github-heroku05.jpg" alt="リポジトリ選択" /></p>
-
-<p><code>heroku</code>で検索した結果。今回はサンプルで作った、<code>heroku-deploy-test</code>のリポジトリを選択。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2015/02/github-heroku06.jpg" alt="リポジトリ検索" /></p>
-
-<p>紐づくとこんな感じ。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2015/02/github-heroku07.jpg" alt="連携済" /></p>
-
-<p>連携済の表示の下に、自動でデプロイさせたいブランチを選択する画面と、<br/>
-手動で特定のブランチをデプロイさせる画面があります。<br/>
-今回は<code>master</code>ブランチを選択して自動デプロイを有効にしてみます。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2015/02/github-heroku08.jpg" alt="automatic deploys" /></p>
-
-<p>結果。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2015/02/github-heroku09.jpg" alt="automatic deploys" /></p>
-
-<h2>deploy</h2>
-
-<p>で、実際にgithubの指定したリポジトリにpushしてみると、<br/>
-裏っかわでheorkuにデプロイが走ります。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2015/02/github-heroku10.jpg" alt="heroku deploy" /></p>
-
-<p>しばらく待つと、デプロイが成功。見事連携されました。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2015/02/github-heroku11.jpg" alt="deploy success" /></p>
-
-<h2>その他</h2>
-
-<p>CIツールを導入して、そのCIを通ったらherokuにデプロイ、という流れも出来るようで、<br/>
-herokuがgitでのソース管理とはいえ、ソースの管理自体はやりにくかった点をgithub連携することでカバー出来そうです。</p>
-
-<h2>参考</h2>
-
-<p><a href="https://devcenter.heroku.com/articles/github-integration">ドキュメント</a></p>
 ]]></content>
   </entry>
   
