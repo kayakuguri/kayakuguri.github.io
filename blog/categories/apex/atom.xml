@@ -4,7 +4,7 @@
   <title><![CDATA[Category: apex | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/apex/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-04-13T15:46:55+09:00</updated>
+  <updated>2015-04-14T18:35:43+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,124 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[apex]トリガーのインサートエラーのテストコードを書く]]></title>
+    <link href="http://kayakuguri.github.io/blog/2015/04/14/apex-test-trigger/"/>
+    <updated>2015-04-14T17:31:36+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2015/04/14/apex-test-trigger</id>
+    <content type="html"><![CDATA[<p>言われてみれば当たり前なんですが、メモ。</p>
+
+<!-- more -->
+
+
+<p>レコードがインサートされた際にデータ内容をチェックして、間違っていればエラーを返す、というトリガーを作成した。<br/>
+要するに、自前のバリデーションチェックみたいなもの。<br/>
+このテストコードを書いた際に、そのエラー部分も通るように作ってしまうと、テストコード自体がエラーになってしまってチェック出来なかった。</p>
+
+<p>で、解決策としては単純で、<code>try〜catch</code>を使う。</p>
+
+<p>以下、例。</p>
+
+<h3>apex</h3>
+
+<p>```
+trigger SampleLeadTrigger on Lead (before insert) {</p>
+
+<pre><code>for(Lead obj : Trigger.New){
+    if(obj.LastName == 'test'){
+        obj.addError('testという名前は使えません');
+        continue;
+    }
+}
+</code></pre>
+
+<p>}
+```</p>
+
+<p>姓に、<code>test</code>という文字列の使用をエラーとするトリガーです。</p>
+
+<h3>テストコード</h3>
+
+<p>以下にようにそのままテストコードを書いてみます。</p>
+
+<p>```
+@isTest
+private class Test_SampleLeadTrigger {</p>
+
+<pre><code>static testMethod void excute(){
+    Lead test_obj = new Lead();
+    test_obj.Company = 'hoge co.';
+    test_obj.LastName = 'test';
+
+    insert test_obj;
+}
+</code></pre>
+
+<p>}
+```</p>
+
+<p>すると、以下のようなエラーが出てしまい、テストコードが実行できません。</p>
+
+<blockquote><p>18:14:44:833 FATAL_ERROR System.DmlException: Insert failed. First exception on row 0; first error: FIELD_CUSTOM_VALIDATION_EXCEPTION, testという名前は使えません: []</p></blockquote>
+
+<p>なので、<code>insert</code>する部分を<code>try-catch</code>で例外をキャッチするようにします。</p>
+
+<p>```
+@isTest
+private class Test_SampleLeadTrigger {</p>
+
+<pre><code>static testMethod void excute(){
+    Lead test_obj = new Lead();
+    test_obj.Company = 'hoge co.';
+    test_obj.LastName = 'test';
+
+    try{
+        insert test_obj;
+    }catch(Exception e){
+
+    }
+}
+</code></pre>
+
+<p>}
+```</p>
+
+<p>これでエラーで止まらなくなるので実行は出来るようになります。<br/>
+catchの部分は今回で言えば、<code>DmlException</code>なので、それでもよいですが、より広いエラーで、<code>Exception</code>にしています。<br/>
+この辺はあまり深く追求してません。。</p>
+
+<p>で、これだとテストは通りますが、テストの意味はあまりないと思うので、意図したエラーが返ってくるかを確認するために、以下のように変更します。</p>
+
+<p><code>try-catch</code>部分</p>
+
+<p>```
+try{</p>
+
+<pre><code>insert test_obj;
+</code></pre>
+
+<p>}catch(Exception e){</p>
+
+<pre><code>Boolean expectedExceptionThrown =  e.getMessage().contains('testという名前は使えません') ? true : false;
+System.AssertEquals(expectedExceptionThrown, true);
+</code></pre>
+
+<p>}
+```</p>
+
+<p>これで指定したエラーが返ってきたかどうかがチェックできます。<br/>
+もし指定したエラー以外のものが返ってきた場合は以下のようなエラーが出てテストコードが実行できなくなってしまうので間違いに気付くことが出来ます。</p>
+
+<blockquote><p>System.AssertException: Assertion Failed: Expected: false, Actual: true</p></blockquote>
+
+<p>（<code>e.getMessage()</code>は、 System.DmlException:〜の文言を含んだ内容となるので、<code>contains</code>関数で指定の文字列が<strong>含まれている</strong>かどうかをチェックしている。）</p>
+
+<h3>参考</h3>
+
+<p><a href="https://developer.salesforce.com/forums/ForumsMain?id=906F00000008xGuIAI">How do I test for an exception(&lsquo;addError&rsquo;) in a Trigger ? &ndash; Salesforce Developer Community</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[apex]Date型のフォーマット]]></title>
@@ -252,100 +370,6 @@ System.debug(test_dt);
 </code></pre>
 
 <p>月まで変わると結構クリティカルだと思うので、要注意。</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[salesforce]apex Rest APIでPOSTでデータを送信する]]></title>
-    <link href="http://kayakuguri.github.io/blog/2014/10/27/apex-rest-post/"/>
-    <updated>2014-10-27T18:49:51+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2014/10/27/apex-rest-post</id>
-    <content type="html"><![CDATA[<p>getでは送信したデータはすぐに取得できたのですが、<br/>
-postでの送信方法とデータ取得方法がわからずに迷走しまいした。<br/>
-結論は、送信側の話、だったのですが。</p>
-
-<!-- more -->
-
-
-<p>GETの場合は以下のコードで取得可能でした。<br/>
-簡単。</p>
-
-<p>送信データ</p>
-
-<pre><code>?userid=123&amp;name=hoge
-</code></pre>
-
-<p>apex</p>
-
-<pre><code>@RestResource(urlMapping='/GetDataSample/test')
-
-global with sharing class GetDataSampleAPI {
-    @HttpGet
-    global static String doGet(){
-        RestRequest req = RestContext.request;
-        String userid = req.params.get('userid');
-        String name = req.params.get('hoge');
-    }
-}
-</code></pre>
-
-<p>実は、POSTの場合も、apexのコードは全く同じで取得する事が出来ました。<br/>
-以下、取得出来たコードです。</p>
-
-<pre><code>@RestResource(urlMapping='/GetDataSample/test')
-
-global with sharing class GetDataSampleAPI {
-    @HttpPost
-    global static String doPost(){
-        RestRequest req = RestContext.request;
-        String userid = req.params.get('userid');
-        String name = req.params.get('hoge');
-    }
-}
-</code></pre>
-
-<p>ただし、送信する際にヘッダーを正しく指定してやったり、送信形式に注意してやる必要がありました。<br/>
-PHPのcurlで実装していたのですが、大いに迷走していたのは、salesforce側の話ではなく、<br/>
-PHPでの送信方法の問題でしたとさ…。</p>
-
-<p>送信出来たコード<br/>
-(<a href="https://github.com/nkjm/Force.com-OAuth-Toolkit-for-PHP">このライブラリ</a>を使用して送信する前提)</p>
-
-<pre><code>$url = "$oauth-&gt;instance_url/services/apexrest/GetDataSample/test";
-$curl = curl_init($url);
-
-$POST_DATA = array(
-    'userid' =&gt; '123',
-    'hoge' =&gt; 'fugafuga'
-);
-
-curl_setopt($curl, CURLOPT_POST, TRUE);
-curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($POST_DATA));
-curl_setopt($curl, CURLOPT_HEADER, false);
-curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-curl_setopt($curl, CURLOPT_HTTPHEADER, array('Content-type: application/x-www-form-urlencoded;charset=UTF-8', "Authorization: OAuth " . $oauth-&gt;access_token));
-
-$output= curl_exec($curl);
-curl_close($curl);
-</code></pre>
-
-<p>ポイントは以下の２つです。</p>
-
-<p>１）<br/>
-<code>Content-type</code>を、<code>application/x-www-form-urlencoded</code>という、POSTでデータを送信する際の標準タイプを指定しています。<br/>
-通常はデフォルトでこれなのですが、salesforceのAPIにPOSTする場合は明示的に指定してやる必要があるようです。(たぶん)<br/>
-ちなみに、apex restは、<code>multipart/form-data</code>タイプはサポートしていないようです。</p>
-
-<p>２）<br/>
-１のタイプで指定してやると、送信するデータは<code>userid=123&amp;hoge=fugafuga</code>のように、GETと同じ形で取得できるようになるようです。<br/>
-なので送信する際にそのような形に変換してやる必要があるようで、それが以下の記述となります。</p>
-
-<pre><code>curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($POST_DATA));
-</code></pre>
-
-<h3>参考</h3>
-
-<p><a href="http://qiita.com/khirose/items/870ffec6ce4562f54c9d">PHP小ネタ &ndash; PHPのcurlでPOST &ndash; Qiita</a></p>
 ]]></content>
   </entry>
   
