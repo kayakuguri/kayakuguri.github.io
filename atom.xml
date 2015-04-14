@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-04-14T18:40:55+09:00</updated>
+  <updated>2015-04-14T18:42:41+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,143 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[apex]トリガーのインサートエラーのテストコードを書く]]></title>
+    <link href="http://kayakuguri.github.io/blog/2015/04/14/apex-test-trigger/"/>
+    <updated>2015-04-14T17:31:36+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2015/04/14/apex-test-trigger</id>
+    <content type="html"><![CDATA[<p>言われてみれば当たり前なんですが、メモ。</p>
+
+<!-- more -->
+
+
+<p>レコードがインサートされた際にデータ内容をチェックして、間違っていればエラーを返す、というトリガーを作成した。<br/>
+要するに、自前のバリデーションチェックみたいなもの。<br/>
+このテストコードを書いた際に、そのエラー部分も通るように作ってしまうと、テストコード自体がエラーになってしまってチェック出来なかった。</p>
+
+<p>で、解決策としては単純で、<code>try〜catch</code>を使う。</p>
+
+<p>以下、例。</p>
+
+<h3>apex</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>trigger SampleLeadTrigger on Lead (before insert) {
+</span><span class='line'>    for(Lead obj : Trigger.New){
+</span><span class='line'>        if(obj.LastName == 'test'){
+</span><span class='line'>            obj.addError('testという名前は使えません');
+</span><span class='line'>            continue;
+</span><span class='line'>        }
+</span><span class='line'>    }
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<p>姓に、<code>test</code>という文字列の使用をエラーとするトリガーです。</p>
+
+<h3>テストコード</h3>
+
+<p>以下にようにそのままテストコードを書いてみます。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>@isTest
+</span><span class='line'>private class Test_SampleLeadTrigger {
+</span><span class='line'>    static testMethod void excute(){
+</span><span class='line'>        Lead test_obj = new Lead();
+</span><span class='line'>        test_obj.Company = 'hoge co.';
+</span><span class='line'>        test_obj.LastName = 'test';
+</span><span class='line'>        
+</span><span class='line'>        insert test_obj;
+</span><span class='line'>    }
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<p>すると、以下のようなエラーが出てしまい、テストコードが実行できません。</p>
+
+<blockquote><p>18:14:44:833 FATAL_ERROR System.DmlException: Insert failed. First exception on row 0; first error: FIELD_CUSTOM_VALIDATION_EXCEPTION, testという名前は使えません: []</p></blockquote>
+
+<p>なので、<code>insert</code>する部分を<code>try-catch</code>で例外をキャッチするようにします。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>@isTest
+</span><span class='line'>private class Test_SampleLeadTrigger {
+</span><span class='line'>    static testMethod void excute(){
+</span><span class='line'>        Lead test_obj = new Lead();
+</span><span class='line'>        test_obj.Company = 'hoge co.';
+</span><span class='line'>        test_obj.LastName = 'test';
+</span><span class='line'>        
+</span><span class='line'>        try{
+</span><span class='line'>          insert test_obj;
+</span><span class='line'>        }catch(Exception e){
+</span><span class='line'>            
+</span><span class='line'>        }
+</span><span class='line'>    }
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<p>これでエラーで止まらなくなるので実行は出来るようになります。<br/>
+catchの部分は今回で言えば、<code>DmlException</code>なので、それでもよいですが、より広いエラーで、<code>Exception</code>にしています。<br/>
+この辺はあまり深く追求してません。。</p>
+
+<p>で、これだとテストは通りますが、テストの意味はあまりないと思うので、意図したエラーが返ってくるかを確認するために、以下のように変更します。</p>
+
+<p><code>try-catch</code>部分</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>try{
+</span><span class='line'>    insert test_obj;
+</span><span class='line'>}catch(Exception e){
+</span><span class='line'>    Boolean expectedExceptionThrown =  e.getMessage().contains('testという名前は使えません') ? true : false;
+</span><span class='line'>  System.AssertEquals(expectedExceptionThrown, true);
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<p>これで指定したエラーが返ってきたかどうかがチェックできます。<br/>
+もし指定したエラー以外のものが返ってきた場合は以下のようなエラーが出てテストコードが実行できなくなってしまうので間違いに気付くことが出来ます。</p>
+
+<blockquote><p>System.AssertException: Assertion Failed: Expected: false, Actual: true</p></blockquote>
+
+<p>（<code>e.getMessage()</code>は、 System.DmlException:〜の文言を含んだ内容となるので、<code>contains</code>関数で指定の文字列が<strong>含まれている</strong>かどうかをチェックしている。）</p>
+
+<h3>参考</h3>
+
+<p><a href="https://developer.salesforce.com/forums/ForumsMain?id=906F00000008xGuIAI">How do I test for an exception(&lsquo;addError&rsquo;) in a Trigger ? &ndash; Salesforce Developer Community</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[CakePHP]400系エラーが発生した場合にトップページにリダイレクトさせる]]></title>
@@ -1459,46 +1596,6 @@ Go、C#、Visual Basic、Groovy、Objective-c、Swift、Swift Representor</p></b
 <h2>次回</h2>
 
 <p>次は、POSTの送信を試してみる予定。</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[htaccessによるリダイレクト設定]]></title>
-    <link href="http://kayakuguri.github.io/blog/2015/02/16/redirect-htaccess/"/>
-    <updated>2015-02-16T22:16:01+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2015/02/16/redirect-htaccess</id>
-    <content type="html"><![CDATA[<p><code>.htaccess</code>を使ったリダイレクトをやってみたメモです。</p>
-
-<!-- more -->
-
-
-<p>設定内容</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>RewriteEngine on
-</span><span class='line'>RewriteBase /
-</span><span class='line'>RewriteRule .* リダイレクト先URL [R=301,L]</span></code></pre></td></tr></table></div></figure>
-
-
-<p>これを設置した場所と、<code>RewriteBase</code>の有効な範囲なんかの関係がややこしかったです。</p>
-
-<p>まず、<code>RewriteBase</code>は、参考サイトによると、<br/>
-<strong>リダイレクト後のパスにのみ適用</strong>される、との事。<br/>
-さらに、<strong>相対パスの時にしか適用されない</strong>。</p>
-
-<p>それと、設置したディレクトリからの相対パスになるので、<br/>
-上記の設定だと、設置したディレクトリ以下全てのURLがリダイレクトされます。<br/>
-これをドキュメントルートに置くと全てのパスでリダイレクトされます。</p>
-
-<p>htaccessはディレクトリ単位で個別に置けるため、特定のディレクトリだけに適応させる場合は、<br/>
-上記の設定をすれば適応出来ます。</p>
-
-<h3>参考</h3>
-
-<p><a href="http://kana-lier.com/web/redirect/">.htaccessを使ったよく使うリダイレクトまとめ</a><br/>
-<a href="http://www.cherrypieweb.com/weblog/technical/20131017121752.php">.htaccessによるリダイレクト徹底解説</a></p>
 ]]></content>
   </entry>
   
