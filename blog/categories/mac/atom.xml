@@ -4,7 +4,7 @@
   <title><![CDATA[Category: mac | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/mac/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-04-14T18:42:41+09:00</updated>
+  <updated>2015-04-15T20:24:21+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,77 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[mac]macのPHPのバージョンをアップデートする]]></title>
+    <link href="http://kayakuguri.github.io/blog/2015/04/15/mac-update-php/"/>
+    <updated>2015-04-15T20:15:38+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2015/04/15/mac-update-php</id>
+    <content type="html"><![CDATA[<p>とあるSDKをcomposer経由でインストールしようとすると、PHPのバージョンが古い、と怒られてしまった。<br/>
+なので、macで5.6にしたメモ。</p>
+
+<!-- more -->
+
+
+<p>アップデート前。</p>
+
+<p><code>
+$ php -v
+PHP 5.4.38 (cli) (built: Mar 19 2015 14:49:15)
+Copyright (c) 1997-2014 The PHP Group
+Zend Engine v2.4.0, Copyright (c) 1998-2014 Zend Technologies
+</code></p>
+
+<hr />
+
+<p>基本的に以下のママ。<br/>
+<code>homebrew</code>でインストールした。</p>
+
+<p><a href="http://takemaru123.hatenablog.jp/entry/2014/11/27/224037">macにhomebrewでPHP5.6環境をインストールしてみる &ndash; たけまるの日記</a></p>
+
+<p>まず、xcode-selectをインストールしておく。<br/>
+(Xcode自体がインストールされていない場合はインストールが必要)<br/>
+(理由はわかてない)</p>
+
+<pre><code>$ xcode-select --install
+</code></pre>
+
+<p>すると、以下のメッセージが表示されて、ダイアログが表示された。</p>
+
+<blockquote><p>xcode-select: note: install requested for command line developer tools</p></blockquote>
+
+<p><img src="/images/2015/04/mac_php_update_1.png" alt="ダイアログ" /></p>
+
+<p>インストール、を押すと規約同意画面に進み、インストールが始まる。</p>
+
+<p><img src="/images/2015/04/mac_php_update_2.png" alt="規約同意" /><br/>
+<img src="/images/2015/04/mac_php_update_3.png" alt="インストール中" /></p>
+
+<p>インストール後に以下でhomebrewのリポジトリを作成。<br/>
+(ここもよくわかってない)</p>
+
+<pre><code>$ brew tap homebrew/php
+$ brew tap homebrew/dupes
+</code></pre>
+
+<p>で、いよいよPHP5.6のインストール。</p>
+
+<pre><code>$ brew install php56 --with-apxs2=/usr/sbin/apxs
+~~~~~
+==&gt; Summary
+🍺  /usr/local/Cellar/php56/5.6.7: 500 files, 51M
+</code></pre>
+
+<p>で、ターミナルを再起動すると、無事、アップデートされました。</p>
+
+<p><code>
+$ php -v
+PHP 5.6.7 (cli) (built: Mar 22 2015 19:03:55)
+Copyright (c) 1997-2015 The PHP Group
+Zend Engine v2.6.0, Copyright (c) 1998-2015 Zend Technologies
+</code></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Mavericksにアップデートしたらターミナルが起動しなくなった]]></title>

@@ -4,7 +4,7 @@
   <title><![CDATA[Category: php | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/php/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-04-14T18:42:41+09:00</updated>
+  <updated>2015-04-15T20:24:21+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,77 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[mac]macのPHPのバージョンをアップデートする]]></title>
+    <link href="http://kayakuguri.github.io/blog/2015/04/15/mac-update-php/"/>
+    <updated>2015-04-15T20:15:38+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2015/04/15/mac-update-php</id>
+    <content type="html"><![CDATA[<p>とあるSDKをcomposer経由でインストールしようとすると、PHPのバージョンが古い、と怒られてしまった。<br/>
+なので、macで5.6にしたメモ。</p>
+
+<!-- more -->
+
+
+<p>アップデート前。</p>
+
+<p><code>
+$ php -v
+PHP 5.4.38 (cli) (built: Mar 19 2015 14:49:15)
+Copyright (c) 1997-2014 The PHP Group
+Zend Engine v2.4.0, Copyright (c) 1998-2014 Zend Technologies
+</code></p>
+
+<hr />
+
+<p>基本的に以下のママ。<br/>
+<code>homebrew</code>でインストールした。</p>
+
+<p><a href="http://takemaru123.hatenablog.jp/entry/2014/11/27/224037">macにhomebrewでPHP5.6環境をインストールしてみる &ndash; たけまるの日記</a></p>
+
+<p>まず、xcode-selectをインストールしておく。<br/>
+(Xcode自体がインストールされていない場合はインストールが必要)<br/>
+(理由はわかてない)</p>
+
+<pre><code>$ xcode-select --install
+</code></pre>
+
+<p>すると、以下のメッセージが表示されて、ダイアログが表示された。</p>
+
+<blockquote><p>xcode-select: note: install requested for command line developer tools</p></blockquote>
+
+<p><img src="/images/2015/04/mac_php_update_1.png" alt="ダイアログ" /></p>
+
+<p>インストール、を押すと規約同意画面に進み、インストールが始まる。</p>
+
+<p><img src="/images/2015/04/mac_php_update_2.png" alt="規約同意" /><br/>
+<img src="/images/2015/04/mac_php_update_3.png" alt="インストール中" /></p>
+
+<p>インストール後に以下でhomebrewのリポジトリを作成。<br/>
+(ここもよくわかってない)</p>
+
+<pre><code>$ brew tap homebrew/php
+$ brew tap homebrew/dupes
+</code></pre>
+
+<p>で、いよいよPHP5.6のインストール。</p>
+
+<pre><code>$ brew install php56 --with-apxs2=/usr/sbin/apxs
+~~~~~
+==&gt; Summary
+🍺  /usr/local/Cellar/php56/5.6.7: 500 files, 51M
+</code></pre>
+
+<p>で、ターミナルを再起動すると、無事、アップデートされました。</p>
+
+<p><code>
+$ php -v
+PHP 5.6.7 (cli) (built: Mar 22 2015 19:03:55)
+Copyright (c) 1997-2015 The PHP Group
+Zend Engine v2.6.0, Copyright (c) 1998-2015 Zend Technologies
+</code></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Facebookのphp-sdk-v4をcomposerを使ってインストールした時のメモ]]></title>
@@ -314,123 +385,6 @@ XAMPP でインストールされたphp.exeの場所を指定します。</p>
 <p>そんだけ。</p>
 
 <p><a href="http://www.smarty.net/docs/ja/language.escaping.tpl">Smarty の構文解析を回避する | Smarty</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[herokuでPHP環境の構築]]></title>
-    <link href="http://kayakuguri.github.io/blog/2014/06/11/heroku-php/"/>
-    <updated>2014-06-11T16:35:35+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2014/06/11/heroku-php</id>
-    <content type="html"><![CDATA[<p>herokuがphpを公式にサポートしました。<br/>
-以前に<a href="http://kayakuguri.github.io/blog/2014/02/18/create-php-heroku-mbstring/">ビルドパックのを使用した環境の構築方法</a>を書きましたが、<br/>
-公式の作成方法も試してみました。</p>
-
-<!-- more -->
-
-
-<p><a href="https://devcenter.heroku.com/articles/php-support">Heroku PHP Support | Heroku Dev Center</a></p>
-
-<p>herokuでは基本、アップされたファイルからherokuが自動的に判定して環境を構築してくれます。<br/>
-で、PHPの場合は、<br/>
-<code>composer.json</code><br/>
-ファイルがルートにあれば、PHP環境と判定されて構築してくれる。</p>
-
-<p>現時点では作成されるバージョンはデフォルトでは、以下。</p>
-
-<blockquote><p>By default, Heroku runs PHP 5.5 (5.5.12, 64-bit).</p></blockquote>
-
-<p>バージョンを指定してやる場合は<code>composer.json</code>に以下のように記述。</p>
-
-<pre><code>{
-  "require": {
-    "php": "~5.5.12"
-  }
-}
-</code></pre>
-
-<p>ただし、サポートしているバージョンは以下のみ。</p>
-
-<ul>
-<li>5.5.11</li>
-<li>5.5.12</li>
-<li>5.5.13</li>
-</ul>
-
-
-<p>facebookが開発したというphpを高速に動作させる環境である、HipHop VMもサポートされており、<br/>
-(実験的に、と書いてあるので使用には注意)<br/>
-これもデフォルトではバージョンは以下。</p>
-
-<blockquote><p>HipHop VM (HHVM) (3.1.0, 64-bit)</p></blockquote>
-
-<p>使用する場合は以下のように記述。</p>
-
-<pre><code>{
-  "require": {
-    "hhvm": "~3.1.0"
-  }
-}
-</code></pre>
-
-<p>サポートしているバージョンは以下。</p>
-
-<ul>
-<li>3.0.1</li>
-<li>3.1.0</li>
-</ul>
-
-
-<hr />
-
-<p>mbStringはデフォルトでは有効になっていないので、以下のように記述することで有効に出来る。</p>
-
-<pre><code>{
-    "require": {
-        "ext-mbstring": "*"
-    }
-}
-</code></pre>
-
-<p>デプロイ結果</p>
-
-<pre><code>-----&gt; PHP app detected
------&gt; Setting up runtime environment...
-       - PHP 5.5.12
-       - Apache 2.4.9
-       - Nginx 1.4.6
------&gt; Installing PHP extensions:
-       - opcache (automatic; bundled, using 'ext-opcache.ini')
-       - mbstring (composer.json; bundled)
-. . .
-</code></pre>
-
-<p>デフォルトで有効になっている環境や拡張機能は以下を参考。<br/>
-<a href="https://devcenter.heroku.com/articles/php-support#php-5-5">https://devcenter.heroku.com/articles/php-support#php-5-5</a></p>
-
-<p>拡張機能はリストのカッコ内の単語を、<code>ext-</code>をつけて並べていく。<br/>
-ちなみに、<code>*</code>の部分はバージョンを指定する箇所で、<code>*</code>は自動で指定されるようになる。<br/>
-ドキュメント内には、<code>*</code>での指定が推奨されている。<br/>
-理由は、PHPのバージョンアップとは別に、各機能のバージョンアップが不定期に行われる可能性があるから、だそう。</p>
-
-<blockquote><p>It is strongly recommended that you use “*” as the version selector when specifying extensions, as their version numbers can be extremely inconsistent (most of them report their version as “0”) and Heroku will sometimes update extensions outside the regular PHP update cycles.</p></blockquote>
-
-<p>　</p>
-
-<hr />
-
-<p>ドキュメントルートの設定は、<code>Procfile</code>で指定する事ができる。<br/>
-<code>Procfile</code>ファイルは、heroku起動時に実行してくれるファイル。<br/>
-拡張子もなしで、<code>Procfile</code>という名前のファイルをルートに設置することで動作する。<br/>
-<a href="https://devcenter.heroku.com/articles/procfile">Process Types and the Procfile | Heroku Dev Center</a></p>
-
-<p>PHPを動作させるwebサーバを、Apacheか、Nginxを指定出来る。<br/>
-Apacheで動作させ、ドキュメントルートを<code>public/</code>にする場合は以下の記述を<code>Procfile</code>に追加する。</p>
-
-<pre><code>web: vendor/bin/heroku-php-apache2 public/
-</code></pre>
-
-<p>これで、public/がwebのドキュメントルートになる。</p>
 ]]></content>
   </entry>
   
