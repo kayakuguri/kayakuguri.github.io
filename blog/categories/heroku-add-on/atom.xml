@@ -4,7 +4,7 @@
   <title><![CDATA[Category: heroku-add-on | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/heroku-add-on/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-04-16T16:25:52+09:00</updated>
+  <updated>2015-04-16T17:13:39+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,237 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[Herokuアドオン]TransloaditでFTPアップロード]]></title>
+    <link href="http://kayakuguri.github.io/blog/2015/04/16/heroku-transloadit-2/"/>
+    <updated>2015-04-16T17:08:38+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2015/04/16/heroku-transloadit-2</id>
+    <content type="html"><![CDATA[<p>アップロード先をFTPに指定する方法と、<br/>
+その内容をテンプレート化するまでのメモ。</p>
+
+<!-- more -->
+
+
+<p><code>steps</code>内の<code>robot</code>で、<code>/ftp/store</code>を指定する。<br/>
+詳しいパラメータは以下。</p>
+
+<p><a href="https://transloadit.com/docs/conversion-robots/#export-to-your-ftp-server-with-the-ftpexport-robot">6.3 Export to your FTP Server with the /ftp/export robot</a></p>
+
+<p>設定ファイル部分は以下のようにした。</p>
+
+<p>```
+$transloadit->createAssemblyForm([</p>
+
+<pre><code>'params' =&gt; [
+    'steps' =&gt; [
+        'export' =&gt; [
+            'use' =&gt; ':original',
+            'robot' =&gt; '/ftp/store',
+            'user' =&gt; 'ユーザー名',
+            'password' =&gt; 'パスワード',
+            'host' =&gt; 'ホスト名',
+            'path' =&gt; '/ディレクトリ/test.jpg'
+        ]
+    ],
+    'redirect_url' =&gt; $redirectUrl
+]
+</code></pre>
+
+<p>]);
+```</p>
+
+<p>フォームから入力されたファイルがアップロードされる。</p>
+
+<table>
+<thead>
+<tr>
+<th></th>
+<th> 項目 </th>
+<th> 内容 </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td></td>
+<td> <code>export</code> </td>
+<td> ここは名前をつけているだけなので、なんでもよい。 | </td>
+</tr>
+<tr>
+<td></td>
+<td> <code>use</code> </td>
+<td> どの時点のファイルを使用するか。<code>:original</code>だとオリジナルのファイル。複数のパターンを指定する場合は配列で指定する。<br>ただし、その場合、パスは１つしか指定出来ないので、後に書いたほうが上書きされる。<br>(２つ書かないといけないと思われる)   |</td>
+</tr>
+<tr>
+<td></td>
+<td> <code>user</code> </td>
+<td> ユーザー名 |</td>
+</tr>
+<tr>
+<td></td>
+<td> <code>password</code> </td>
+<td> パスワード |</td>
+</tr>
+<tr>
+<td></td>
+<td> <code>host</code> </td>
+<td> ホスト |</td>
+</tr>
+<tr>
+<td></td>
+<td> <code>path</code> </td>
+<td> 保存先のパス。ファイル名まで指定しないといけない。|</td>
+</tr>
+</tbody>
+</table>
+
+
+<p>ファイル名は、<code>${file.url_name}</code>と指定することで、ユーザーが選択したファイル名でアップロード出来る。<br/>
+この書き方の種類は以下にあった。<br/>
+<a href="https://transloadit.com/docs/conversion-robots/#available-job-variables">https://transloadit.com/docs/conversion-robots/#available-job-variables</a></p>
+
+<p>実行後は即時にアップロードされるわけではなく、多少の処理が必要になるよう。<br/>
+なので実際にはキューを出している状態。<br/>
+数秒後にサーバー上にアップロードが行われる。</p>
+
+<p><img src="/images/2015/04/transloadit05.jpg" alt="Executing" /></p>
+
+<p>なので、クライアント側で完了を検知するには、transloaditから通知させるか(まだよくわかってない)、<br/>
+定期的に確認しにいくか、などの処理が必要と思われる。</p>
+
+<h2>テンプレート化</h2>
+
+<p>上記の設定内容をテンプレート化して保存してみる。<br/>
+テンプレート化することによってアカウント情報などをソース上から分離出来、セキュリティを高める効果があるよう。</p>
+
+<p>herokuのアドオンからtranloaditの管理画面に遷移後、<code>TEMPLATES</code>を選択。<br/>
+<code>+NES</code>をクリック。</p>
+
+<p><img src="/images/2015/04/transloadit06.jpg" alt="Executing" /></p>
+
+<p>で、以下のようにテンプレートを作成する。</p>
+
+<p>```
+{
+  &ldquo;steps&rdquo;: {</p>
+
+<pre><code>"export": {
+  "use": ":original",
+  "robot": "/ftp/store",
+  "user": "ユーザー名",
+  "password": "パスワード",
+  "host": "ホスト名",
+  "path": "/ディレクトリ/${file.url_name}"
+}
+</code></pre>
+
+<p>  }
+}
+```</p>
+
+<p>適当に名前をつけて保存。<br/>
+保存後、テンプレートの一覧画面から、IDを確認できるようになるので、これを覚えておく。</p>
+
+<p><img src="/images/2015/04/transloadit07.jpg" alt="Template list" /></p>
+
+<p>で、このIDを使用して以下のように書き換える。</p>
+
+<p>```
+$transloadit->createAssemblyForm([</p>
+
+<pre><code>'params' =&gt; [
+    'template_id' =&gt; 'テンプレートのID',
+    'redirect_url' =&gt; $redirectUrl
+]
+</code></pre>
+
+<p>]);
+```</p>
+
+<p>これで実行すると上記のテンプレートが使用されて、FTPアップロードが行われる。<br/>
+テンプレートを使用してアップロードした場合は、結果のリストにもその旨が表示される。</p>
+
+<p><img src="/images/2015/04/transloadit08.jpg" alt="Assemblies" /></p>
+
+<h2>コード</h2>
+
+<p>```
+&lt;?php
+require &lsquo;../vendor/autoload.php&rsquo;;</p>
+
+<p>use transloadit\Transloadit;
+$transloadit = new Transloadit([</p>
+
+<pre><code>'key' =&gt; getenv('TRANSLOADIT_AUTH_KEY'),
+'secret' =&gt; getenv('TRANSLOADIT_SECRET_KEY')
+</code></pre>
+
+<p>]);</p>
+
+<p>$response = Transloadit::response();
+if ($response) {</p>
+
+<pre><code>echo '&lt;h1&gt;Assembly status:&lt;/h1&gt;';
+echo '&lt;pre&gt;';
+print_r($response);
+echo '&lt;/pre&gt;';
+exit;
+</code></pre>
+
+<p>}</p>
+
+<p>$redirectUrl = sprintf(</p>
+
+<pre><code>'http://%s%s',
+$_SERVER['HTTP_HOST'],
+$_SERVER['REQUEST_URI']
+</code></pre>
+
+<p>);</p>
+
+<p>echo $transloadit->createAssemblyForm([</p>
+
+<pre><code>'params' =&gt; [
+    'template_id' =&gt; 'テンプレートのID',
+    'redirect_url' =&gt; $redirectUrl
+]
+</code></pre>
+
+<p>]);</p>
+
+<p>?></p>
+
+<p>&lt;!DOCTYPE html>
+<html lang="ja">
+<head></p>
+
+<pre><code>&lt;meta charset="utf-8"&gt;
+</code></pre>
+
+<p></head>
+<body></p>
+
+<p><form method="post" action="upload_select_sample.php"></p>
+
+<pre><code>&lt;input name="example_upload" type="file" accept="image/*,video/*"&gt;
+&lt;input type="submit" value="Upload"&gt;
+</code></pre>
+
+<p></form></p>
+
+<p></body>
+</html>
+```</p>
+
+<hr />
+
+<h2>参考</h2>
+
+<p><a href="https://transloadit.com/demos/ftp-store/store-uploaded-files">Store the originally uploaded files on your FTP server | Transloadit</a><br/>
+<a href="https://transloadit.com/docs/#how-to-use-a-template">How to use a template</a><br/>
+<a href="https://transloadit.com/docs/conversion-robots/#available-job-variables">Available job variables</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[Herokuアドオン]Transloaditアドオンを使ってPHPでファイルアップロード]]></title>
