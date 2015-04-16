@@ -145,47 +145,14 @@
 
 <p>フォームから入力されたファイルがアップロードされる。</p>
 
-<table>
-<thead>
-<tr>
-<th></th>
-<th> 項目 </th>
-<th> 内容 </th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td></td>
-<td> <code>export</code> </td>
-<td> ここは名前をつけているだけなので、なんでもよい。 | </td>
-</tr>
-<tr>
-<td></td>
-<td> <code>use</code> </td>
-<td> どの時点のファイルを使用するか。<code>:original</code>だとオリジナルのファイル。複数のパターンを指定する場合は配列で指定する。<br>ただし、その場合、パスは１つしか指定出来ないので、後に書いたほうが上書きされる。<br>(２つ書かないといけないと思われる)   |</td>
-</tr>
-<tr>
-<td></td>
-<td> <code>user</code> </td>
-<td> ユーザー名 |</td>
-</tr>
-<tr>
-<td></td>
-<td> <code>password</code> </td>
-<td> パスワード |</td>
-</tr>
-<tr>
-<td></td>
-<td> <code>host</code> </td>
-<td> ホスト |</td>
-</tr>
-<tr>
-<td></td>
-<td> <code>path</code> </td>
-<td> 保存先のパス。ファイル名まで指定しないといけない。|</td>
-</tr>
-</tbody>
-</table>
+<ul>
+<li> <code>export</code>：ここは名前をつけているだけなので、なんでもよい。</li>
+<li><code>use</code>：どの時点のファイルを使用するか。<code>:original</code>だとオリジナルのファイル。複数のパターンを指定する場合は配列で指定する。<br>ただし、その場合、パスは１つしか指定出来ないので、後に書いたほうが上書きされる。<br>(２つ書かないといけないと思われる)</li>
+<li><code>user</code>：ユーザー名</li>
+<li><code>password</code>：パスワード</li>
+<li><code>host</code>：ホスト</li>
+<li><code>path</code>：保存先のパス。ファイル名まで指定しないといけない</li>
+</ul>
 
 
 <p>ファイル名は、<code>${file.url_name}</code>と指定することで、ユーザーが選択したファイル名でアップロード出来る。<br/>
