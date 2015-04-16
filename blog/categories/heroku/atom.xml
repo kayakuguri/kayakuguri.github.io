@@ -4,7 +4,7 @@
   <title><![CDATA[Category: heroku | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/heroku/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-04-16T11:19:08+09:00</updated>
+  <updated>2015-04-16T16:25:52+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -290,6 +290,23 @@ transloadit\TransloaditResponse Object
 <p>ファイル名をクリックする事で詳細を確認出来る。<br/>
 ファイルの確認やダウンロードもここから可能。<br/>
 <img src="/images/2015/04/transloadit04.jpg" alt="詳細" /></p>
+
+<p>アップロードされたファイルは上記からダウンロード可能だが、この保存ファイルは一時的なもののよう。<br/>
+24時間後には消える。らしい。</p>
+
+<blockquote><p>Please keep in mind that we store files only for 24 hours after they were created. To persist your files, please use one of our <a href="https://transloadit.com/docs/conversion-robots/#file-export-robots">file export robots</a>.</p></blockquote>
+
+<p>なので、<code>file export robots</code>を使用してどこかしらにエクスポートしてやる必要がある。<br/>
+エクスポート先として用意されているものは以下のよう。</p>
+
+<ul>
+<li>Amazon S3</li>
+<li>SFTP</li>
+<li>FTP</li>
+<li>Rackspace</li>
+<li>YouTube</li>
+</ul>
+
 
 <h2>参考</h2>
 
