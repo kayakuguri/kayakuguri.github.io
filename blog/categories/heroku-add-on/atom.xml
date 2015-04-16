@@ -4,7 +4,7 @@
   <title><![CDATA[Category: heroku-add-on | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/heroku-add-on/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-04-15T20:24:21+09:00</updated>
+  <updated>2015-04-16T11:14:44+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,293 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[Herokuアドオン]Transloaditアドオンを使ってPHPでファイルアップロード]]></title>
+    <link href="http://kayakuguri.github.io/blog/2015/04/16/heroku-transloadit-1/"/>
+    <updated>2015-04-16T10:32:46+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2015/04/16/heroku-transloadit-1</id>
+    <content type="html"><![CDATA[<p>動画をアップロード + エンコードしてくれるというTransloaditのherokuアドオンを使ってみた。</p>
+
+<!-- more -->
+
+
+<h2>herokuへのインストール</h2>
+
+<p>無料プランがあるので、とりあえずそれで。</p>
+
+<pre><code>$ heroku addons:add transloadit:sandbox
+</code></pre>
+
+<p>無料プランの場合は、Encoding Volumeが1GB、の制限がある。</p>
+
+<p>transloaditの料金体系は少しややこしくなっているようで、<br/>
+無料のsandboxプランだと、トータルで1GBになっているよう。</p>
+
+<p><a href="https://addons.heroku.com/transloadit">Transloadit | Add-ons | Heroku</a><br/>
+<img src="/images/2015/04/transloadit01.jpg" alt="heroku料金" /></p>
+
+<p>herokuアドオンバージョンじゃない、通常？のプランだと値段が違う。</p>
+
+<p><a href="https://transloadit.com/pricing/">Pricing &amp; Signup | Transloadit</a><br/>
+<img src="/images/2015/04/transloadit01.jpg" alt="公式料金" /></p>
+
+<p>この1GBとうのは何が含まれるかというと、公式で説明があった。<br/>
+エンコードした場合、する前とした後と両方のサイズが合算されてカウントされるよう。</p>
+
+<p>例えば、0.8MBの画像ファイルをエンコードして0.2MBしたとすれば、それで1MBを使用した事になる。<br/>
+で、これを1024回繰り返すと、1GBになるので無料枠は終了。</p>
+
+<p>ファイルの閲覧自体には加算されないよう。</p>
+
+<h2>PHP SDKのインストール</h2>
+
+<p>公式どおり、Composerでインストールする。</p>
+
+<p>```
+{
+  &ldquo;require&rdquo;: {</p>
+
+<pre><code>"transloadit/php-sdk": "dev-master"
+</code></pre>
+
+<p>  }
+}
+```</p>
+
+<p>ローカルで<code>composer install</code>しておく。<br/>
+この際、php5.6以上でないとインストール出来ないので注意。<br/>
+(自分の環境ではphp5.4だったので、<a href="http://kayamemo.mrlittlebig.com/blog/2015/04/15/mac-update-php/">アップデートした</a>)</p>
+
+<h2>ファイルのアップロード</h2>
+
+<p>公式に載っていたママだけど、<br/>
+アクセスするとheroku上の同じディレクトリに置いたファイルをアップロードするだけ、のサンプルを実行してみる。</p>
+
+<p><strong>PHP全コード</strong></p>
+
+<p>```
+&lt;?php
+require &lsquo;../vendor/autoload.php&rsquo;;</p>
+
+<p>use transloadit\Transloadit;
+$transloadit = new Transloadit(array(</p>
+
+<pre><code>'key' =&gt; getenv('TRANSLOADIT_AUTH_KEY'),
+'secret' =&gt; getenv('TRANSLOADIT_SECRET_KEY')
+</code></pre>
+
+<p>));</p>
+
+<p>$response = $transloadit->createAssembly(array(</p>
+
+<pre><code>'files' =&gt; array(dirname(__FILE__).'/160x160.png'),
+'params' =&gt; array(
+    'steps' =&gt; array(
+        'resize' =&gt; array(
+            'robot' =&gt; '/image/resize',
+            'width' =&gt; 100,
+            'height' =&gt; 100,
+        )
+    )
+),
+</code></pre>
+
+<p>));</p>
+
+<p>// Show the results of the assembly we spawned
+echo &lsquo;<pre>&rsquo;;
+print_r($response);
+echo &lsquo;</pre>&rsquo;;
+```</p>
+
+<p><strong>レスポンス</strong></p>
+
+<p>```
+transloadit\TransloaditResponse Object
+(</p>
+
+<pre><code>[data] =&gt; Array
+    (
+        [ok] =&gt; ASSEMBLY_EXECUTING
+        [message] =&gt; The assembly is currently being executed.
+        [assembly_id] =&gt; id
+        [parent_id] =&gt; 
+        [account_id] =&gt; id
+        [template_id] =&gt; 
+        [instance] =&gt; xxx.transloadit.com
+        [assembly_url] =&gt; http://api2.karima.transloadit.com/assemblies/xxx
+        [assembly_ssl_url] =&gt; https://karima.transloadit.com/assemblies/xxx
+        [bytes_received] =&gt; 1107
+        [bytes_expected] =&gt; 1107
+        [upload_duration] =&gt; 1.477
+        [client_agent] =&gt; Transloadit PHP SDK v2.0.0
+        [client_ip] =&gt; 10.166.13.48
+        [client_referer] =&gt; 
+        [start_date] =&gt; 2015/04/16 01:29:02 GMT
+        [is_infinite] =&gt; 
+        [has_dupe_jobs] =&gt; 
+        [execution_start] =&gt; 2015/04/16 01:29:03 GMT
+        [execution_duration] =&gt; 0.002
+        [notify_start] =&gt; 
+        [notify_url] =&gt; 
+        [notify_status] =&gt; 
+        [notify_response_code] =&gt; 
+        [notify_duration] =&gt; 
+        [last_job_completed] =&gt; 
+        [fields] =&gt; Array
+            (
+            )
+
+        [running_jobs] =&gt; Array
+            (
+            )
+
+        [bytes_usage] =&gt; 0
+        [executing_jobs] =&gt; Array
+            (
+                [0] =&gt; resize
+            )
+
+        [started_jobs] =&gt; Array
+            (
+                [0] =&gt; resize:::original
+            )
+
+        [parent_assembly_status] =&gt; 
+        [params] =&gt; {"steps":{"resize":{"robot":"/image/resize","width":100,"height":100}},"auth":{"key":"****","expires":"2015/04/16 03:29:01+00:00"}}
+        [template] =&gt; 
+        [uploads] =&gt; Array
+            (
+                [0] =&gt; Array
+                    (
+                        [id] =&gt; xxx
+                        [name] =&gt; 160x160.png
+                        [basename] =&gt; 160x160
+                        [ext] =&gt; png
+                        [size] =&gt; 494
+                        [mime] =&gt; image/png
+                        [type] =&gt; image
+                        [field] =&gt; file_1
+                        [md5hash] =&gt; xxx
+                        [original_id] =&gt; xxx
+                        [original_basename] =&gt; 160x160
+                        [original_md5hash] =&gt; xxx
+                        [url] =&gt; http://tmp.transloadit.com.s3.amazonaws.com/xxx.png
+                        [ssl_url] =&gt; https://s3.amazonaws.com/tmp.transloadit.com/xxx.png
+                        [meta] =&gt; Array
+                            (
+                                [width] =&gt; 160
+                                [height] =&gt; 160
+                                [date_recorded] =&gt; 
+                                [date_file_created] =&gt; 
+                                [date_file_modified] =&gt; 2015/04/16 01:29:02 GMT
+                                [title] =&gt; 
+                                [description] =&gt; 
+                                [location] =&gt; 
+                                [aspect_ratio] =&gt; 1
+                                [city] =&gt; 
+                                [state] =&gt; 
+                                [country] =&gt; 
+                                [country_code] =&gt; 
+                                [keywords] =&gt; 
+                                [aperture] =&gt; 
+                                [exposure_compensation] =&gt; 
+                                [exposure_mode] =&gt; 
+                                [exposure_time] =&gt; 
+                                [flash] =&gt; 
+                                [focal_length] =&gt; 
+                                [f_number] =&gt; 
+                                [iso] =&gt; 
+                                [light_value] =&gt; 
+                                [metering_mode] =&gt; 
+                                [shutter_speed] =&gt; 
+                                [white_balance] =&gt; 
+                                [device_name] =&gt; 
+                                [device_vendor] =&gt; 
+                                [device_software] =&gt; 
+                                [latitude] =&gt; 
+                                [longitude] =&gt; 
+                                [orientation] =&gt; 
+                                [has_clipping_path] =&gt; 
+                                [creator] =&gt; 
+                                [author] =&gt; 
+                                [copyright] =&gt; 
+                                [copyright_notice] =&gt; 
+                                [frame_count] =&gt; 1
+                                [colorspace] =&gt; Gray
+                                [average_color] =&gt; #686868
+                            )
+
+                    )
+
+            )
+
+        [results] =&gt; Array
+            (
+            )
+
+    )
+
+[curlInfo] =&gt; Array
+    (
+        [url] =&gt; https://karima.transloadit.com/assemblies
+        [content_type] =&gt; application/json; charset=utf-8
+        [http_code] =&gt; 200
+        [header_size] =&gt; 371
+        [request_size] =&gt; 220
+        [filetime] =&gt; -1
+        [ssl_verify_result] =&gt; 0
+        [redirect_count] =&gt; 0
+        [total_time] =&gt; 1.91859
+        [namelookup_time] =&gt; 0.012709
+        [connect_time] =&gt; 0.421413
+        [pretransfer_time] =&gt; 0.435759
+        [size_upload] =&gt; 1107
+        [size_download] =&gt; 2527
+        [speed_download] =&gt; 1317
+        [speed_upload] =&gt; 576
+        [download_content_length] =&gt; -1
+        [upload_content_length] =&gt; 1107
+        [starttransfer_time] =&gt; 0.43577
+        [redirect_time] =&gt; 0
+        [redirect_url] =&gt; 
+        [primary_ip] =&gt; 10.234.41.26
+        [certinfo] =&gt; Array
+            (
+            )
+
+        [primary_port] =&gt; 443
+        [local_ip] =&gt; 172.18.203.90
+        [local_port] =&gt; 41591
+    )
+
+[curlErrorNumber] =&gt; 0
+[curlErrorMessage] =&gt; 
+</code></pre>
+
+<p>)
+```</p>
+
+<p>画像のURLはレスポンスの、<code>data &gt; uploads &gt; url(ssl_url)</code>に入っている。</p>
+
+<h2>結果</h2>
+
+<p>herokuのアドオンからTransloadit上で確認すると以下のようにファイルがアップロードされていた。<br/>
+<img src="/images/2015/04/transloadit03.jpg" alt="結果" /></p>
+
+<p>ファイル名をクリックする事で詳細を確認出来る。<br/>
+ファイルの確認やダウンロードもここから可能。<br/>
+<img src="/images/2015/04/transloadit04.jpg" alt="詳細" /></p>
+
+<h2>参考</h2>
+
+<p><a href="https://addons.heroku.com/transloadit">Transloadit | Add-ons | Heroku</a><br/>
+<a href="https://devcenter.heroku.com/articles/transloadit">Transloadit | Heroku Dev Center</a><br/>
+<a href="https://transloadit.com/">File upload processing web service | Transloadit</a><br/>
+<a href="https://github.com/transloadit/php-sdk">transloadit/php-sdk</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[Herokuアドオン]PostgreSQL Studio]]></title>

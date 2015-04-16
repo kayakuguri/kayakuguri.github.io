@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-04-15T20:24:21+09:00</updated>
+  <updated>2015-04-16T11:14:44+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,473 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[Herokuアドオン]Transloaditアドオンを使ってPHPでファイルアップロード]]></title>
+    <link href="http://kayakuguri.github.io/blog/2015/04/16/heroku-transloadit-1/"/>
+    <updated>2015-04-16T10:32:46+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2015/04/16/heroku-transloadit-1</id>
+    <content type="html"><![CDATA[<p>動画をアップロード + エンコードしてくれるというTransloaditのherokuアドオンを使ってみた。</p>
+
+<!-- more -->
+
+
+<h2>herokuへのインストール</h2>
+
+<p>無料プランがあるので、とりあえずそれで。</p>
+
+<pre><code>$ heroku addons:add transloadit:sandbox
+</code></pre>
+
+<p>無料プランの場合は、Encoding Volumeが1GB、の制限がある。</p>
+
+<p>transloaditの料金体系は少しややこしくなっているようで、<br/>
+無料のsandboxプランだと、トータルで1GBになっているよう。</p>
+
+<p><a href="https://addons.heroku.com/transloadit">Transloadit | Add-ons | Heroku</a><br/>
+<img src="http://kayakuguri.github.io/images/2015/04/transloadit01.jpg" alt="heroku料金" /></p>
+
+<p>herokuアドオンバージョンじゃない、通常？のプランだと値段が違う。</p>
+
+<p><a href="https://transloadit.com/pricing/">Pricing &amp; Signup | Transloadit</a><br/>
+<img src="http://kayakuguri.github.io/images/2015/04/transloadit01.jpg" alt="公式料金" /></p>
+
+<p>この1GBとうのは何が含まれるかというと、公式で説明があった。<br/>
+エンコードした場合、する前とした後と両方のサイズが合算されてカウントされるよう。</p>
+
+<p>例えば、0.8MBの画像ファイルをエンコードして0.2MBしたとすれば、それで1MBを使用した事になる。<br/>
+で、これを1024回繰り返すと、1GBになるので無料枠は終了。</p>
+
+<p>ファイルの閲覧自体には加算されないよう。</p>
+
+<h2>PHP SDKのインストール</h2>
+
+<p>公式どおり、Composerでインストールする。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>{
+</span><span class='line'>  "require": {
+</span><span class='line'>    "transloadit/php-sdk": "dev-master"
+</span><span class='line'>  }
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<p>ローカルで<code>composer install</code>しておく。<br/>
+この際、php5.6以上でないとインストール出来ないので注意。<br/>
+(自分の環境ではphp5.4だったので、<a href="http://kayamemo.mrlittlebig.com/blog/2015/04/15/mac-update-php/">アップデートした</a>)</p>
+
+<h2>ファイルのアップロード</h2>
+
+<p>公式に載っていたママだけど、<br/>
+アクセスするとheroku上の同じディレクトリに置いたファイルをアップロードするだけ、のサンプルを実行してみる。</p>
+
+<p><strong>PHP全コード</strong></p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;?php
+</span><span class='line'>require '../vendor/autoload.php';
+</span><span class='line'>
+</span><span class='line'>use transloadit\Transloadit;
+</span><span class='line'>$transloadit = new Transloadit(array(
+</span><span class='line'>    'key' =&gt; getenv('TRANSLOADIT_AUTH_KEY'),
+</span><span class='line'>    'secret' =&gt; getenv('TRANSLOADIT_SECRET_KEY')
+</span><span class='line'>));
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'>$response = $transloadit-&gt;createAssembly(array(
+</span><span class='line'>    'files' =&gt; array(dirname(__FILE__).'/160x160.png'),
+</span><span class='line'>    'params' =&gt; array(
+</span><span class='line'>        'steps' =&gt; array(
+</span><span class='line'>            'resize' =&gt; array(
+</span><span class='line'>                'robot' =&gt; '/image/resize',
+</span><span class='line'>                'width' =&gt; 100,
+</span><span class='line'>                'height' =&gt; 100,
+</span><span class='line'>            )
+</span><span class='line'>        )
+</span><span class='line'>    ),
+</span><span class='line'>));
+</span><span class='line'>
+</span><span class='line'>// Show the results of the assembly we spawned
+</span><span class='line'>echo '&lt;pre&gt;';
+</span><span class='line'>print_r($response);
+</span><span class='line'>echo '&lt;/pre&gt;';</span></code></pre></td></tr></table></div></figure>
+
+
+<p><strong>レスポンス</strong></p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+<span class='line-number'>61</span>
+<span class='line-number'>62</span>
+<span class='line-number'>63</span>
+<span class='line-number'>64</span>
+<span class='line-number'>65</span>
+<span class='line-number'>66</span>
+<span class='line-number'>67</span>
+<span class='line-number'>68</span>
+<span class='line-number'>69</span>
+<span class='line-number'>70</span>
+<span class='line-number'>71</span>
+<span class='line-number'>72</span>
+<span class='line-number'>73</span>
+<span class='line-number'>74</span>
+<span class='line-number'>75</span>
+<span class='line-number'>76</span>
+<span class='line-number'>77</span>
+<span class='line-number'>78</span>
+<span class='line-number'>79</span>
+<span class='line-number'>80</span>
+<span class='line-number'>81</span>
+<span class='line-number'>82</span>
+<span class='line-number'>83</span>
+<span class='line-number'>84</span>
+<span class='line-number'>85</span>
+<span class='line-number'>86</span>
+<span class='line-number'>87</span>
+<span class='line-number'>88</span>
+<span class='line-number'>89</span>
+<span class='line-number'>90</span>
+<span class='line-number'>91</span>
+<span class='line-number'>92</span>
+<span class='line-number'>93</span>
+<span class='line-number'>94</span>
+<span class='line-number'>95</span>
+<span class='line-number'>96</span>
+<span class='line-number'>97</span>
+<span class='line-number'>98</span>
+<span class='line-number'>99</span>
+<span class='line-number'>100</span>
+<span class='line-number'>101</span>
+<span class='line-number'>102</span>
+<span class='line-number'>103</span>
+<span class='line-number'>104</span>
+<span class='line-number'>105</span>
+<span class='line-number'>106</span>
+<span class='line-number'>107</span>
+<span class='line-number'>108</span>
+<span class='line-number'>109</span>
+<span class='line-number'>110</span>
+<span class='line-number'>111</span>
+<span class='line-number'>112</span>
+<span class='line-number'>113</span>
+<span class='line-number'>114</span>
+<span class='line-number'>115</span>
+<span class='line-number'>116</span>
+<span class='line-number'>117</span>
+<span class='line-number'>118</span>
+<span class='line-number'>119</span>
+<span class='line-number'>120</span>
+<span class='line-number'>121</span>
+<span class='line-number'>122</span>
+<span class='line-number'>123</span>
+<span class='line-number'>124</span>
+<span class='line-number'>125</span>
+<span class='line-number'>126</span>
+<span class='line-number'>127</span>
+<span class='line-number'>128</span>
+<span class='line-number'>129</span>
+<span class='line-number'>130</span>
+<span class='line-number'>131</span>
+<span class='line-number'>132</span>
+<span class='line-number'>133</span>
+<span class='line-number'>134</span>
+<span class='line-number'>135</span>
+<span class='line-number'>136</span>
+<span class='line-number'>137</span>
+<span class='line-number'>138</span>
+<span class='line-number'>139</span>
+<span class='line-number'>140</span>
+<span class='line-number'>141</span>
+<span class='line-number'>142</span>
+<span class='line-number'>143</span>
+<span class='line-number'>144</span>
+<span class='line-number'>145</span>
+<span class='line-number'>146</span>
+<span class='line-number'>147</span>
+<span class='line-number'>148</span>
+<span class='line-number'>149</span>
+<span class='line-number'>150</span>
+<span class='line-number'>151</span>
+<span class='line-number'>152</span>
+<span class='line-number'>153</span>
+<span class='line-number'>154</span>
+<span class='line-number'>155</span>
+<span class='line-number'>156</span>
+<span class='line-number'>157</span>
+<span class='line-number'>158</span>
+<span class='line-number'>159</span>
+<span class='line-number'>160</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>transloadit\TransloaditResponse Object
+</span><span class='line'>(
+</span><span class='line'>    [data] =&gt; Array
+</span><span class='line'>        (
+</span><span class='line'>            [ok] =&gt; ASSEMBLY_EXECUTING
+</span><span class='line'>            [message] =&gt; The assembly is currently being executed.
+</span><span class='line'>            [assembly_id] =&gt; id
+</span><span class='line'>            [parent_id] =&gt; 
+</span><span class='line'>            [account_id] =&gt; id
+</span><span class='line'>            [template_id] =&gt; 
+</span><span class='line'>            [instance] =&gt; xxx.transloadit.com
+</span><span class='line'>            [assembly_url] =&gt; http://api2.karima.transloadit.com/assemblies/xxx
+</span><span class='line'>            [assembly_ssl_url] =&gt; https://karima.transloadit.com/assemblies/xxx
+</span><span class='line'>            [bytes_received] =&gt; 1107
+</span><span class='line'>            [bytes_expected] =&gt; 1107
+</span><span class='line'>            [upload_duration] =&gt; 1.477
+</span><span class='line'>            [client_agent] =&gt; Transloadit PHP SDK v2.0.0
+</span><span class='line'>            [client_ip] =&gt; 10.166.13.48
+</span><span class='line'>            [client_referer] =&gt; 
+</span><span class='line'>            [start_date] =&gt; 2015/04/16 01:29:02 GMT
+</span><span class='line'>            [is_infinite] =&gt; 
+</span><span class='line'>            [has_dupe_jobs] =&gt; 
+</span><span class='line'>            [execution_start] =&gt; 2015/04/16 01:29:03 GMT
+</span><span class='line'>            [execution_duration] =&gt; 0.002
+</span><span class='line'>            [notify_start] =&gt; 
+</span><span class='line'>            [notify_url] =&gt; 
+</span><span class='line'>            [notify_status] =&gt; 
+</span><span class='line'>            [notify_response_code] =&gt; 
+</span><span class='line'>            [notify_duration] =&gt; 
+</span><span class='line'>            [last_job_completed] =&gt; 
+</span><span class='line'>            [fields] =&gt; Array
+</span><span class='line'>                (
+</span><span class='line'>                )
+</span><span class='line'>
+</span><span class='line'>            [running_jobs] =&gt; Array
+</span><span class='line'>                (
+</span><span class='line'>                )
+</span><span class='line'>
+</span><span class='line'>            [bytes_usage] =&gt; 0
+</span><span class='line'>            [executing_jobs] =&gt; Array
+</span><span class='line'>                (
+</span><span class='line'>                    [0] =&gt; resize
+</span><span class='line'>                )
+</span><span class='line'>
+</span><span class='line'>            [started_jobs] =&gt; Array
+</span><span class='line'>                (
+</span><span class='line'>                    [0] =&gt; resize:::original
+</span><span class='line'>                )
+</span><span class='line'>
+</span><span class='line'>            [parent_assembly_status] =&gt; 
+</span><span class='line'>            [params] =&gt; {"steps":{"resize":{"robot":"/image/resize","width":100,"height":100}},"auth":{"key":"****","expires":"2015/04/16 03:29:01+00:00"}}
+</span><span class='line'>            [template] =&gt; 
+</span><span class='line'>            [uploads] =&gt; Array
+</span><span class='line'>                (
+</span><span class='line'>                    [0] =&gt; Array
+</span><span class='line'>                        (
+</span><span class='line'>                            [id] =&gt; xxx
+</span><span class='line'>                            [name] =&gt; 160x160.png
+</span><span class='line'>                            [basename] =&gt; 160x160
+</span><span class='line'>                            [ext] =&gt; png
+</span><span class='line'>                            [size] =&gt; 494
+</span><span class='line'>                            [mime] =&gt; image/png
+</span><span class='line'>                            [type] =&gt; image
+</span><span class='line'>                            [field] =&gt; file_1
+</span><span class='line'>                            [md5hash] =&gt; xxx
+</span><span class='line'>                            [original_id] =&gt; xxx
+</span><span class='line'>                            [original_basename] =&gt; 160x160
+</span><span class='line'>                            [original_md5hash] =&gt; xxx
+</span><span class='line'>                            [url] =&gt; http://tmp.transloadit.com.s3.amazonaws.com/xxx.png
+</span><span class='line'>                            [ssl_url] =&gt; https://s3.amazonaws.com/tmp.transloadit.com/xxx.png
+</span><span class='line'>                            [meta] =&gt; Array
+</span><span class='line'>                                (
+</span><span class='line'>                                    [width] =&gt; 160
+</span><span class='line'>                                    [height] =&gt; 160
+</span><span class='line'>                                    [date_recorded] =&gt; 
+</span><span class='line'>                                    [date_file_created] =&gt; 
+</span><span class='line'>                                    [date_file_modified] =&gt; 2015/04/16 01:29:02 GMT
+</span><span class='line'>                                    [title] =&gt; 
+</span><span class='line'>                                    [description] =&gt; 
+</span><span class='line'>                                    [location] =&gt; 
+</span><span class='line'>                                    [aspect_ratio] =&gt; 1
+</span><span class='line'>                                    [city] =&gt; 
+</span><span class='line'>                                    [state] =&gt; 
+</span><span class='line'>                                    [country] =&gt; 
+</span><span class='line'>                                    [country_code] =&gt; 
+</span><span class='line'>                                    [keywords] =&gt; 
+</span><span class='line'>                                    [aperture] =&gt; 
+</span><span class='line'>                                    [exposure_compensation] =&gt; 
+</span><span class='line'>                                    [exposure_mode] =&gt; 
+</span><span class='line'>                                    [exposure_time] =&gt; 
+</span><span class='line'>                                    [flash] =&gt; 
+</span><span class='line'>                                    [focal_length] =&gt; 
+</span><span class='line'>                                    [f_number] =&gt; 
+</span><span class='line'>                                    [iso] =&gt; 
+</span><span class='line'>                                    [light_value] =&gt; 
+</span><span class='line'>                                    [metering_mode] =&gt; 
+</span><span class='line'>                                    [shutter_speed] =&gt; 
+</span><span class='line'>                                    [white_balance] =&gt; 
+</span><span class='line'>                                    [device_name] =&gt; 
+</span><span class='line'>                                    [device_vendor] =&gt; 
+</span><span class='line'>                                    [device_software] =&gt; 
+</span><span class='line'>                                    [latitude] =&gt; 
+</span><span class='line'>                                    [longitude] =&gt; 
+</span><span class='line'>                                    [orientation] =&gt; 
+</span><span class='line'>                                    [has_clipping_path] =&gt; 
+</span><span class='line'>                                    [creator] =&gt; 
+</span><span class='line'>                                    [author] =&gt; 
+</span><span class='line'>                                    [copyright] =&gt; 
+</span><span class='line'>                                    [copyright_notice] =&gt; 
+</span><span class='line'>                                    [frame_count] =&gt; 1
+</span><span class='line'>                                    [colorspace] =&gt; Gray
+</span><span class='line'>                                    [average_color] =&gt; #686868
+</span><span class='line'>                                )
+</span><span class='line'>
+</span><span class='line'>                        )
+</span><span class='line'>
+</span><span class='line'>                )
+</span><span class='line'>
+</span><span class='line'>            [results] =&gt; Array
+</span><span class='line'>                (
+</span><span class='line'>                )
+</span><span class='line'>
+</span><span class='line'>        )
+</span><span class='line'>
+</span><span class='line'>    [curlInfo] =&gt; Array
+</span><span class='line'>        (
+</span><span class='line'>            [url] =&gt; https://karima.transloadit.com/assemblies
+</span><span class='line'>            [content_type] =&gt; application/json; charset=utf-8
+</span><span class='line'>            [http_code] =&gt; 200
+</span><span class='line'>            [header_size] =&gt; 371
+</span><span class='line'>            [request_size] =&gt; 220
+</span><span class='line'>            [filetime] =&gt; -1
+</span><span class='line'>            [ssl_verify_result] =&gt; 0
+</span><span class='line'>            [redirect_count] =&gt; 0
+</span><span class='line'>            [total_time] =&gt; 1.91859
+</span><span class='line'>            [namelookup_time] =&gt; 0.012709
+</span><span class='line'>            [connect_time] =&gt; 0.421413
+</span><span class='line'>            [pretransfer_time] =&gt; 0.435759
+</span><span class='line'>            [size_upload] =&gt; 1107
+</span><span class='line'>            [size_download] =&gt; 2527
+</span><span class='line'>            [speed_download] =&gt; 1317
+</span><span class='line'>            [speed_upload] =&gt; 576
+</span><span class='line'>            [download_content_length] =&gt; -1
+</span><span class='line'>            [upload_content_length] =&gt; 1107
+</span><span class='line'>            [starttransfer_time] =&gt; 0.43577
+</span><span class='line'>            [redirect_time] =&gt; 0
+</span><span class='line'>            [redirect_url] =&gt; 
+</span><span class='line'>            [primary_ip] =&gt; 10.234.41.26
+</span><span class='line'>            [certinfo] =&gt; Array
+</span><span class='line'>                (
+</span><span class='line'>                )
+</span><span class='line'>
+</span><span class='line'>            [primary_port] =&gt; 443
+</span><span class='line'>            [local_ip] =&gt; 172.18.203.90
+</span><span class='line'>            [local_port] =&gt; 41591
+</span><span class='line'>        )
+</span><span class='line'>
+</span><span class='line'>    [curlErrorNumber] =&gt; 0
+</span><span class='line'>    [curlErrorMessage] =&gt; 
+</span><span class='line'>)</span></code></pre></td></tr></table></div></figure>
+
+
+<p>画像のURLはレスポンスの、<code>data &gt; uploads &gt; url(ssl_url)</code>に入っている。</p>
+
+<h2>結果</h2>
+
+<p>herokuのアドオンからTransloadit上で確認すると以下のようにファイルがアップロードされていた。<br/>
+<img src="http://kayakuguri.github.io/images/2015/04/transloadit03.jpg" alt="結果" /></p>
+
+<p>ファイル名をクリックする事で詳細を確認出来る。<br/>
+ファイルの確認やダウンロードもここから可能。<br/>
+<img src="http://kayakuguri.github.io/images/2015/04/transloadit04.jpg" alt="詳細" /></p>
+
+<h2>参考</h2>
+
+<p><a href="https://addons.heroku.com/transloadit">Transloadit | Add-ons | Heroku</a><br/>
+<a href="https://devcenter.heroku.com/articles/transloadit">Transloadit | Heroku Dev Center</a><br/>
+<a href="https://transloadit.com/">File upload processing web service | Transloadit</a><br/>
+<a href="https://github.com/transloadit/php-sdk">transloadit/php-sdk</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[mac]macのPHPのバージョンをアップデートする]]></title>
@@ -1442,39 +1909,6 @@ masterリポジトリ直下に<code>CNAME</code>というファイルを設置�
 <h2>参考</h2>
 
 <p><a href="https://devcenter.heroku.com/articles/heroku-postgres-import-export">https://devcenter.heroku.com/articles/heroku-postgres-import-export</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[.gitignoreを作成してくれる便利ツール]]></title>
-    <link href="http://kayakuguri.github.io/blog/2015/02/19/gitignore-tool/"/>
-    <updated>2015-02-19T18:21:02+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2015/02/19/gitignore-tool</id>
-    <content type="html"><![CDATA[<p>gitignoreを作成してくれる便利ツールがあったのでメモ。</p>
-
-<!-- more -->
-
-
-<p><img src="http://kayakuguri.github.io/images/2015/02/gitignore_io.jpg" alt="gitignore_io" /></p>
-
-<p>真ん中の検索窓風のエリアに、適応したいgitignoreを入れていくと、インクリメンタルサーチで結果が出てくるので、エンターで追加。<br/>
-<code>PhpStome</code>や<code>cakePHP</code>なんかを追加できる。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2015/02/gitignore_io2.jpg" alt="gitignore_io" /></p>
-
-<p>で、<code>Generate</code>ボタンをクリックすると、作成され、テキストとして直接表示される。<br/>
-ここからコピペなりなんなりで。</p>
-
-<p>ちなみに、ボタンの横の矢印からファイルを直接ダウンロードする事も可能。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2015/02/gitignore_io3.jpg" alt="download file" /></p>
-
-<p>ちょっと迷ったのがMac用の設定で、<code>OSX</code>とすれば設定されます。<br/>
-その他、ドキュメントなどは以下。</p>
-
-<p><a href="https://www.gitignore.io/docs">https://www.gitignore.io/docs</a></p>
-
-<p>いつもgitignoreの設定で迷うのでこれで統一すれば便利かも。</p>
 ]]></content>
   </entry>
   
