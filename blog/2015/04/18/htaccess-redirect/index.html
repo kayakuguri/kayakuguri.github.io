@@ -1,0 +1,322 @@
+
+<!DOCTYPE HTML>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>htaccessを使ったリダイレクトを学ぶ - KayaMemo</title>
+
+	
+	<meta name="description" content="<!-- google_ad_client = "ca-pub-0887267957680144"; /* kayakuguri top */ google_ad_slot = "1210228675"; google_ad_width = 468; google_ad_height = 60 &hellip;">
+	
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+	<link href="/atom.xml" rel="alternate" title="KayaMemo" type="application/atom+xml">
+	<link rel="canonical" href="">
+	<link href="/favicon.png" rel="shortcut icon">
+	<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+	<script async="true" src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+	
+<meta property="og:title" content="htaccessを使ったリダイレクトを学ぶ - KayaMemo" />
+<meta property="og:type" content="article" />
+<meta property="og:description" content="<!-- google_ad_client = "ca-pub-0887267957680144"; /* kayakuguri top */ google_ad_slot = "1210228675"; google_ad_width = 468; google_ad_height = 60 &hellip;" />
+
+<meta property="og:url" content="" />
+<meta property="og:image" content="http://kayakuguri.github.io/images/about_me.jpg" />
+<meta property="og:author" content="kayakuguri" />
+<meta property="og:site_name" content="KayaMemo" />
+<meta property="og:locale" content="ja_JP" />
+<meta property="fb:app_id" content="509051419202319" />
+</head>
+
+
+<body>
+	<header id="header" class="inner"><h1><a href="/">KayaMemo</a></h1>
+<nav id="main-nav"><ul class="main">
+	<li><a href="/">Blog</a></li>
+	<li><a href="/blog/archives">Archives</a></li>
+</ul>
+</nav>
+<nav id="mobile-nav">
+	<div class="alignleft menu">
+		<a class="button">Menu</a>
+		<div class="container"><ul class="main">
+	<li><a href="/">Blog</a></li>
+	<li><a href="/blog/archives">Archives</a></li>
+</ul>
+</div>
+	</div>
+	<div class="alignright search">
+		<a class="button"></a>
+		<div class="container">
+			<form action="http://google.com/search" method="get">
+				<input type="text" name="q" results="0">
+				<input type="hidden" name="q" value="site:kayakuguri.github.io">
+			</form>
+		</div>
+	</div>
+</nav>
+<nav id="sub-nav" class="alignright">
+	<div class="social">
+		
+		
+		
+		
+    
+		
+		
+		
+		
+		
+		<a class="rss" href="/atom.xml" title="RSS">RSS</a>
+		
+    
+	</div>
+	<form class="search" action="http://google.com/search" method="get">
+		<input class="alignright" type="text" name="q" results="0">
+		<input type="hidden" name="q" value="site:kayakuguri.github.io">
+	</form>
+</nav>
+
+</header>
+	
+		
+	
+	<div id="content" class="inner"><article class="post">
+	<h2 class="title">Htaccessを使ったリダイレクトを学ぶ</h2>
+	<div class="entry-content">
+        <div class="adArea">
+    <script type="text/javascript"><!--
+    google_ad_client = "ca-pub-0887267957680144";
+    /* kayakuguri top */
+    google_ad_slot = "1210228675";
+    google_ad_width = 468;
+    google_ad_height = 60;
+    //-->
+    </script>
+    <script type="text/javascript"
+            src="//pagead2.googlesyndication.com/pagead/show_ads.js">
+    </script>
+</div>
+        <p>htaccessを使ったリダイレクトはたまに設定するけれど、いつもよくわからないままだったのでちょっと調べてみた。</p>
+
+<!-- more -->
+
+
+<h2>やりたかった事</h2>
+
+<p>今回やりたかった事は、<br/>
+特定のサブドメインにアクセスがあった場合に、別のサブドメインに転送する、というもの。<br/>
+<code>hoge.sample.com</code>を、<code>redirect.sample.com</code>にリダイレクトするとする。</p>
+
+<p>なので今回はこれを実現する部分のみの調査となってます。</p>
+
+<h2>RewriteCond</h2>
+
+<p>書式はこんな感じ。</p>
+
+<pre><code>RewriteCond %変数名(テスト文字列) 条件パターン(正規表現) [フラグ]
+</code></pre>
+
+<p>変数名は、<code>{}</code>で囲んで記述する。<br/>
+特定のサブドメインにアクセスがあったら、という条件なので、変数は、<br/>
+<code>HTTP_HOST</code>を使用。<code>HTTP_HOST</code>はホスト名、<br/>
+例えば、<code>http://test.example.com/test.html</code>というアドレスにアクセスがあった場合は、<code>test.example.com</code>のみを取得する。<br/>
+変数を入れると以下。</p>
+
+<pre><code>RewriteCond %{HTTP_HOST} 条件パターン(正規表現) [フラグ]
+</code></pre>
+
+<p>条件パターンはこの場合は特定のサブドメイン、というものだけなので、そのまま書けば良い。</p>
+
+<pre><code>RewriteCond %{HTTP_HOST} ^hoge.sample.com$ [フラグ]
+</code></pre>
+
+<p>ただしそのままとは言っても全くそのままではなく、先頭と末尾の指定がいるよう。<br/>
+<code>^</code>が行頭を表す記号。<code>$</code>が行末を表す記号。となる。</p>
+
+<p>残ったフラグ、は、AND、OR、大文字小文字の区別、を記述する。<br/>
+RewriteCondを複数行指定し、ここに条件を書くことになる。</p>
+
+<pre><code>RewriteCond %{xx} ^条件1$ [OR]
+RewriteCond %{oo} ^条件2$
+</code></pre>
+
+<p>こうすれば、条件１か条件２がヒットすれば、となる。</p>
+
+<p>大文字小文字の区別は、<strong>区別しない場合に</strong><code>NC</code>と書く。<br/>
+デフォルトでは区別する。<br/>
+今回は区別するってことで指定なしで。</p>
+
+<h2>RewriteRule</h2>
+
+<p>書式はこんな感じ。</p>
+
+<pre><code>RewriteRule URL書換＆転送の記述 [オプション]
+</code></pre>
+
+<p>今回はドキュメントルートにアクセスされたら、指定のサブドメインにリダイレクト、となるので、以下のように。</p>
+
+<pre><code>RewriteRule ^/$ http://redirect.sample.com
+</code></pre>
+
+<p>行頭行末で<code>/</code>を囲んで、ドキュメントルートを指定。<br/>
+リダイレクト先に別のサブドメインを指定。<br/>
+ただし、ドキュメントルートの指定は<code>/</code>で始める場合と始めない場合があるよう。<br/>
+<a href="http://weblabo.oscasierra.net/apache-rewrite-base/">ApacheのRewriteを設定する前に知っておくべきこと | WEB ARCH LABO</a></p>
+
+<p>サーバー環境によって変わってくるって事はわかった。<br/>
+今回はどうやら<code>/</code>は必要ないようだったのでなしで設定した。</p>
+
+<p>あとはオプション。<br/>
+リダイレクトの方法は今回は恒久的なリダイレクト、ってことで、<code>301</code>を指定。
+<a href="https://www.suzukikenichi.com/blog/difference-between-301-redirect-and-302-redirect/">301リダイレクトと302リダイレクトの違い | 海外SEO情報ブログ</a><br/>
+特に理由がない限りは301でよさそう。</p>
+
+<p>もう一つ、オプションとして、<code>L</code>をつけておく。<br/>
+<code>L</code>をつけておくとこのルールが適用された場合はこれ以降のルールは使用しない、という設定となる。<br/>
+その他のオプションについては以下。<br/>
+<a href="http://blog.dawgsdk.org/weblog/archives/411011">Apache : mod_rewriteリファレンス &ndash; dawgsdk.org</a></p>
+
+<p>最終的なルールは以下。</p>
+
+<pre><code>RewriteRule ^$ https://ssl.cp.4143.com [R=301,L]
+</code></pre>
+
+<p>今回は使用していないが、もし複数のルールが合った場合はどうなるかと言うと、条件に対しては一つしかルールは設定出来ないよう。</p>
+
+<pre><code>RewriteCond 条件1
+RewriteRule ルール1
+RewriteRule ルール2
+</code></pre>
+
+<p>上記のような記述があった場合、条件1が満たされる場合はルール1が適応され、それ以外はルール2が適応される。<br/>
+なので条件を指定する場合は、<code>RewriteCond</code>と<code>RewriteRule</code>をセットで書く必要がある。</p>
+
+<h2>結果</h2>
+
+<p>完成。</p>
+
+<pre><code>RewriteCond %{HTTP_HOST} ^cp.4143.com$
+RewriteRule ^$ https://ssl.cp.4143.com [R=301,L]
+</code></pre>
+
+<h2>最終的な記述</h2>
+
+<pre><code>&lt;IfModule mod_rewrite.c&gt;
+    RewriteEngine on
+    RewriteBase /
+    RewriteCond %{HTTP_HOST} ^cp.4143.com$
+    RewriteRule ^$ https://ssl.cp.4143.com [R=301,L]
+&lt;/IfModule&gt;
+</code></pre>
+
+<h2>参考</h2>
+
+<p><a href="http://weblabo.oscasierra.net/apache-rewritecond-base/">Apache RewriteCond の基礎知識 | WEB ARCH LABO</a><br/>
+<a href="http://www.ksknet.net/apache/rewritecond_rew.html">RewriteCond &ndash; RewriteRuleの条件を設定</a><br/>
+<a href="http://noshirossi.blog.fc2.com/blog-entry-203.html">.htaccess　mod_rewriteで画像直リンク禁止 &ndash; 趣味を綴る日記</a><br/>
+<a href="http://blog.livedoor.jp/tak_bon/archives/6508443.html">ステム覚書帳 : [Apache]RewriteCondとRewriteRuleは抱き合わせで</a></p>
+
+    </div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-04-18T00:30:30+09:00" pubdate data-updated="true">Apr 18<span>th</span>, 2015</time></div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/htaccess/'>htaccess</a>
+
+
+</div>
+	
+</div>
+</article>
+
+	<div class="share">
+	<div class="addthis_toolbox addthis_default_style ">
+		
+        <div id="fb-root"></div>
+<script>(function(d, s, id) {
+    var js, fjs = d.getElementsByTagName(s)[0];
+    if (d.getElementById(id)) return;
+    js = d.createElement(s); js.id = id;
+    js.src = "//connect.facebook.net/ja_JP/all.js#xfbml=1&appId=509051419202319";
+    fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+        <div class="fb-like" data-href="http://kayakuguri.github.io/blog/2015/04/18/htaccess-redirect/" data-layout="button_count" data-action="like" data-show-faces="true" data-share="false"></div>
+		
+		
+		
+		<a class="addthis_button_google_plusone" g:plusone:size="medium"></a>
+		
+		
+        
+        <a href="http://b.hatena.ne.jp/entry/http://kayakuguri.github.io/blog/2015/04/18/htaccess-redirect/" class="hatena-bookmark-button" data-hatena-bookmark-title="htaccessを使ったリダイレクトを学ぶ - KayaMemo" data-hatena-bookmark-layout="standard-noballoon" data-hatena-bookmark-lang="ja" title="このエントリーをはてなブックマークに追加">
+<img src="http://b.st-hatena.com/images/entry-button/button-only@2x.png" alt="このエントリーをはてなブックマークに追加" width="20" height="20" style="border: none;" /></a>
+<script type="text/javascript" src="http://b.st-hatena.com/js/bookmark_button.js" charset="utf-8" async="async"></script>
+        
+	</div>
+	
+</div>
+
+
+<div class="share">
+    <script type="text/javascript"><!--
+    google_ad_client = "ca-pub-0887267957680144";
+    /* kayakuguri git */
+    google_ad_slot = "2041160274";
+    google_ad_width = 336;
+    google_ad_height = 280;
+    //-->
+    </script>
+    <script type="text/javascript"
+            src="//pagead2.googlesyndication.com/pagead/show_ads.js">
+    </script>
+</div>
+</div>
+	<footer id="footer" class="inner">Copyright &copy; 2015
+
+    萱潜
+
+</footer>
+	<script src="/javascripts/slash.js"></script>
+<script src="/javascripts/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+	$('.fancybox').fancybox();
+})(jQuery);
+</script> <!-- Delete or comment this line to disable Fancybox -->
+
+
+
+
+	<script type="text/javascript">
+		var _gaq = _gaq || [];
+		_gaq.push(['_setAccount', 'UA-3730932-4']);
+		_gaq.push(['_trackPageview']);
+
+		(function() {
+			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+		})();
+	</script>
+
+
+
+</body>
+</html>
