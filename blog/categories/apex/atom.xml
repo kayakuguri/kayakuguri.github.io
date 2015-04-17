@@ -4,7 +4,7 @@
   <title><![CDATA[Category: apex | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/apex/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-04-16T17:16:11+09:00</updated>
+  <updated>2015-04-17T14:48:32+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,131 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[apex][SF]InboundEmailHandlerを使ったリードの作成]]></title>
+    <link href="http://kayakuguri.github.io/blog/2015/04/17/inboundemailhandler-apex/"/>
+    <updated>2015-04-17T14:47:20+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2015/04/17/inboundemailhandler-apex</id>
+    <content type="html"><![CDATA[<p>salesforceでメールを受け取って、そのメールアドレスでリードを作る方法と、<br/>
+エラーで返信するときの方法。</p>
+
+<!-- more -->
+
+
+<h2>apex</h2>
+
+<p>メールサービスを作成する際にapexクラスを指定するので、先に作成しておきます。</p>
+
+<p>例えば今回は、送信元のメールアドレスを使用してリードを作成するとします。<br/>
+また、すでに登録されているメールアドレスの場合、エラーメールを返信するとします。</p>
+
+<p>```
+global class MailCreateLead implements Messaging.InboundEmailHandler {</p>
+
+<pre><code>global Messaging.InboundEmailResult handleInboundEmail(Messaging.InboundEmail email, Messaging.InboundEnvelope envelope) {
+    Messaging.InboundEmailResult result = new Messaging.InboundEmailresult();
+
+    //メールが重複しているかどうかをチェック
+    String mail_str = email.fromAddress;
+    List&lt;Lead&gt; check = [SELECT id FROM Lead WHERE Email=:mail_str LIMIT 1];
+    if(check.size() != 0){
+        result.message = '送信されたメールアドレスはすでに登録済です。';
+        result.success = false;
+    }else{
+        Lead l = new Lead();
+        l.Company = '-'; //(必須)
+        l.LastName = (email.fromName == null) ? 'メール会員' : email.fromName;
+        l.Email = email.fromAddress;
+        insert l;
+        result.success = true;
+    }
+
+    return result;
+}
+</code></pre>
+
+<p>}
+```</p>
+
+<p><code>Messaging.InboundEmailResult</code>を返却するが、<code>success</code>がfalseの場合は、<br/>
+受信を拒否し、設定されたエラーメッセージ(<code>message</code>)を送信元のメールアドレスに返す。<br/>
+この時返信されるメールは、<code>noreply@salesforce.com</code>となっており、これは変更できないっぽい。</p>
+
+<p>重複していない場合は、送信元のメールアドレスと名前(あれば)を使用してリードを作っている。</p>
+
+<h3>テストコード</h3>
+
+<p>```
+@isTest
+public class MailCreateLead_Test {</p>
+
+<pre><code>//正常時
+private static testMethod void execute_success() {
+    Test.startTest();
+
+    Messaging.InboundEmail email = new Messaging.InboundEmail() ;
+    Messaging.InboundEnvelope env = new Messaging.InboundEnvelope();
+    email.subject = 'Test Success';
+    email.fromname = 'FirstName LastName';
+    email.fromAddress = 'someaddress@email.com';
+    email.plainTextBody = '';
+
+    MailServiceToCreateLead emailService = new MailServiceToCreateLead();
+    Messaging.InboundEmailResult res = emailService.handleInboundEmail(email, env);
+
+    Test.stopTest();
+}
+
+//エラー時
+private static testMethod void execute_fail(){
+    //重複チェック
+    Lead le = new Lead();
+    le.Company = '-';
+    le.LastName = 'failed test';
+    le.Email = 'test@test.com';
+    Insert le;
+
+    Test.startTest();
+
+    Messaging.InboundEmail email = new Messaging.InboundEmail() ;
+    Messaging.InboundEnvelope env = new Messaging.InboundEnvelope();
+    email.subject = 'Test Failed';
+    email.fromname = 'FirstName LastName';
+    email.fromAddress = 'test@test.com'; //上記メールアドレスと被せる
+    email.plainTextBody = '';
+    MailServiceToCreateLead emailService = new MailServiceToCreateLead();
+    Messaging.InboundEmailResult res = emailService.handleInboundEmail(email, env);
+
+    Test.stopTest();
+}
+</code></pre>
+
+<p>}
+```</p>
+
+<h2>メールサービス</h2>
+
+<p><code>設定 &gt; 開発 &gt; メールサービス</code>から作成します。</p>
+
+<p><img src="/images/2015/04/inboundemailhandler01.jpg" alt="メールサービス" /></p>
+
+<p>設定内容は、サービス名と、先程作成したapexクラスを指定してやるくらいです。</p>
+
+<p><img src="/images/2015/04/inboundemailhandler02.jpg" alt="新規作成" /></p>
+
+<p>作成後、ユニークなメールアドレスが割り当てられるので、<br/>
+そのアドレス宛てに送信するとメールサービスが起動します。</p>
+
+<p><img src="/images/2015/04/inboundemailhandler03.jpg" alt="設定内容" /></p>
+
+<h2>参考</h2>
+
+<p><a href="https://help.salesforce.com/HTViewHelpDoc?id=code_inbound_email.htm&amp;language=ja">InboundEmail &#12458;&#12502;&#12472;&#12455;&#12463;&#12488;&#12398;&#20351;&#29992;</a><br/>
+<a href="https://developer.salesforce.com/page/An_Introduction_To_Email_Services_on_Force.com">An Introduction To Email Services on Force.com &ndash; developer.force.com</a><br/>
+<a href="http://tyoshikawa1106.hatenablog.com/entry/2013/07/31/213518">SFDC：Messaging.InboundEmailHandlerについて &ndash; tyoshikawa1106のブログ</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[apex]トリガーのインサートエラーのテストコードを書く]]></title>
@@ -328,48 +453,6 @@ public String dummy{get; set;}
 <p>これだけでテストコードも変更することなく通り、無事、100%を達成できました。</p>
 
 <p>参考：<a href="http://salesforce.stackexchange.com/questions/10018/testing-apex-classes-created-by-jsontoapex">http://salesforce.stackexchange.com/questions/10018/testing-apex-classes-created-by-jsontoapex</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[文字列をDatetime型に変換する時の注意点]]></title>
-    <link href="http://kayakuguri.github.io/blog/2014/12/01/apex-datetime-gmt/"/>
-    <updated>2014-12-01T12:53:59+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2014/12/01/apex-datetime-gmt</id>
-    <content type="html"><![CDATA[<p>apexにて、文字列からDatetime型に変更した際の注意点。</p>
-
-<!-- more -->
-
-
-<p>例えば、日本で作業してる場合は、<code>GMT+9</code>となり、標準時より9時間プラス、となる。<br/>
-文字列からdatetime型に変更する際にはいくつか方法があるが、<code>valueOf</code>が簡単。<br/>
-しかし例えば以下のようにすると意図しない時間が帰って来てしまう</p>
-
-<pre><code>String test_str = '2014-12-1 05:30:18';
-Datetime test_dt = Datetime.valueOf(test_str);
-System.debug(test_dt);
-
-//出力
-// 2014-11-30 20:30:18
-</code></pre>
-
-<p>特に顕著な例だけど、月が変わってしまっている。<br/>
-なぜかというと、Datetime型に変換する際に、(なぜか)GMTが考慮されて、標準時に戻して出力されるよう。<br/>
-日本は+9時間なので、標準時は-9時間。<br/>
-なので、指定した時間よりも９時間マイナスされた日時が返却される仕様。<br/>
-このため、日付が変わり、その結果、月も変わってしまったという現象が起こる。<br/>
-それを回避するにはちゃんとメソッドが用意されていて、<code>valueOfGmt</code>を使う。<br/>
-これだと、設定しているGMTを使って(要するに入力された時間そのまま)、Datetimeを作成してくれる。</p>
-
-<pre><code>String test_str = '2014-12-1 05:30:18';
-Datetime test_dt = Datetime.valueOfGmt(test_str);
-System.debug(test_dt);
-
-//出力
-// 2014-12-1 05:30:18
-</code></pre>
-
-<p>月まで変わると結構クリティカルだと思うので、要注意。</p>
 ]]></content>
   </entry>
   

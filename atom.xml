@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-04-16T17:16:11+09:00</updated>
+  <updated>2015-04-17T14:48:32+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,187 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[apex][SF]InboundEmailHandlerを使ったリードの作成]]></title>
+    <link href="http://kayakuguri.github.io/blog/2015/04/17/inboundemailhandler-apex/"/>
+    <updated>2015-04-17T14:47:20+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2015/04/17/inboundemailhandler-apex</id>
+    <content type="html"><![CDATA[<p>salesforceでメールを受け取って、そのメールアドレスでリードを作る方法と、<br/>
+エラーで返信するときの方法。</p>
+
+<!-- more -->
+
+
+<h2>apex</h2>
+
+<p>メールサービスを作成する際にapexクラスを指定するので、先に作成しておきます。</p>
+
+<p>例えば今回は、送信元のメールアドレスを使用してリードを作成するとします。<br/>
+また、すでに登録されているメールアドレスの場合、エラーメールを返信するとします。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>global class MailCreateLead implements Messaging.InboundEmailHandler {
+</span><span class='line'>  global Messaging.InboundEmailResult handleInboundEmail(Messaging.InboundEmail email, Messaging.InboundEnvelope envelope) {
+</span><span class='line'>      Messaging.InboundEmailResult result = new Messaging.InboundEmailresult();
+</span><span class='line'>      
+</span><span class='line'>      //メールが重複しているかどうかをチェック
+</span><span class='line'>      String mail_str = email.fromAddress;
+</span><span class='line'>      List&lt;Lead&gt; check = [SELECT id FROM Lead WHERE Email=:mail_str LIMIT 1];
+</span><span class='line'>      if(check.size() != 0){
+</span><span class='line'>          result.message = '送信されたメールアドレスはすでに登録済です。';
+</span><span class='line'>          result.success = false;
+</span><span class='line'>      }else{
+</span><span class='line'>          Lead l = new Lead();
+</span><span class='line'>          l.Company = '-'; //(必須)
+</span><span class='line'>          l.LastName = (email.fromName == null) ? 'メール会員' : email.fromName;
+</span><span class='line'>          l.Email = email.fromAddress;
+</span><span class='line'>          insert l;
+</span><span class='line'>          result.success = true;
+</span><span class='line'>      }
+</span><span class='line'>      
+</span><span class='line'>      return result;
+</span><span class='line'>  }
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<p><code>Messaging.InboundEmailResult</code>を返却するが、<code>success</code>がfalseの場合は、<br/>
+受信を拒否し、設定されたエラーメッセージ(<code>message</code>)を送信元のメールアドレスに返す。<br/>
+この時返信されるメールは、<code>noreply@salesforce.com</code>となっており、これは変更できないっぽい。</p>
+
+<p>重複していない場合は、送信元のメールアドレスと名前(あれば)を使用してリードを作っている。</p>
+
+<h3>テストコード</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>@isTest
+</span><span class='line'>public class MailCreateLead_Test {
+</span><span class='line'>  //正常時
+</span><span class='line'>  private static testMethod void execute_success() {
+</span><span class='line'>      Test.startTest();
+</span><span class='line'>      
+</span><span class='line'>      Messaging.InboundEmail email = new Messaging.InboundEmail() ;
+</span><span class='line'>        Messaging.InboundEnvelope env = new Messaging.InboundEnvelope();
+</span><span class='line'>        email.subject = 'Test Success';
+</span><span class='line'>        email.fromname = 'FirstName LastName';
+</span><span class='line'>        email.fromAddress = 'someaddress@email.com';
+</span><span class='line'>        email.plainTextBody = '';
+</span><span class='line'>        
+</span><span class='line'>        MailServiceToCreateLead emailService = new MailServiceToCreateLead();
+</span><span class='line'>        Messaging.InboundEmailResult res = emailService.handleInboundEmail(email, env);
+</span><span class='line'>        
+</span><span class='line'>        Test.stopTest();
+</span><span class='line'>  }
+</span><span class='line'>  
+</span><span class='line'>  //エラー時
+</span><span class='line'>  private static testMethod void execute_fail(){
+</span><span class='line'>      //重複チェック
+</span><span class='line'>      Lead le = new Lead();
+</span><span class='line'>        le.Company = '-';
+</span><span class='line'>        le.LastName = 'failed test';
+</span><span class='line'>        le.Email = 'test@test.com';
+</span><span class='line'>        Insert le;
+</span><span class='line'>        
+</span><span class='line'>        Test.startTest();
+</span><span class='line'>        
+</span><span class='line'>        Messaging.InboundEmail email = new Messaging.InboundEmail() ;
+</span><span class='line'>        Messaging.InboundEnvelope env = new Messaging.InboundEnvelope();
+</span><span class='line'>        email.subject = 'Test Failed';
+</span><span class='line'>        email.fromname = 'FirstName LastName';
+</span><span class='line'>        email.fromAddress = 'test@test.com'; //上記メールアドレスと被せる
+</span><span class='line'>        email.plainTextBody = '';
+</span><span class='line'>        MailServiceToCreateLead emailService = new MailServiceToCreateLead();
+</span><span class='line'>        Messaging.InboundEmailResult res = emailService.handleInboundEmail(email, env);
+</span><span class='line'>        
+</span><span class='line'>        Test.stopTest();
+</span><span class='line'>  }
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>メールサービス</h2>
+
+<p><code>設定 &gt; 開発 &gt; メールサービス</code>から作成します。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2015/04/inboundemailhandler01.jpg" alt="メールサービス" /></p>
+
+<p>設定内容は、サービス名と、先程作成したapexクラスを指定してやるくらいです。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2015/04/inboundemailhandler02.jpg" alt="新規作成" /></p>
+
+<p>作成後、ユニークなメールアドレスが割り当てられるので、<br/>
+そのアドレス宛てに送信するとメールサービスが起動します。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2015/04/inboundemailhandler03.jpg" alt="設定内容" /></p>
+
+<h2>参考</h2>
+
+<p><a href="https://help.salesforce.com/HTViewHelpDoc?id=code_inbound_email.htm&amp;language=ja">InboundEmail &#12458;&#12502;&#12472;&#12455;&#12463;&#12488;&#12398;&#20351;&#29992;</a><br/>
+<a href="https://developer.salesforce.com/page/An_Introduction_To_Email_Services_on_Force.com">An Introduction To Email Services on Force.com &ndash; developer.force.com</a><br/>
+<a href="http://tyoshikawa1106.hatenablog.com/entry/2013/07/31/213518">SFDC：Messaging.InboundEmailHandlerについて &ndash; tyoshikawa1106のブログ</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[Herokuアドオン]TransloaditでFTPアップロード]]></title>
@@ -2047,88 +2228,6 @@ masterリポジトリ直下に<code>CNAME</code>というファイルを設置�
 
 
 <p>これで無事、動作しました。</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[heroku]SSL証明書を更新する]]></title>
-    <link href="http://kayakuguri.github.io/blog/2015/02/20/certs-update/"/>
-    <updated>2015-02-20T17:58:29+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2015/02/20/certs-update</id>
-    <content type="html"><![CDATA[<p>すでにheroku上でsslを導入していて、<br/>
-その証明書を更新する、という前提です。</p>
-
-<!-- more -->
-
-
-<h2>準備</h2>
-
-<p>ファイルの準備は導入の時と同じです。<br/>
-以前に書いたものを参考にどうぞ。</p>
-
-<p><a href="http://kayakuguri.github.io/blog/2014/09/30/heroku-ssl-subdomain/">[heroku]herokuでのSSL設定とカスタムサブドメインの適用方法</a></p>
-
-<p>準備するファイルは、以下の2つです。</p>
-
-<ul>
-<li>server.crt</li>
-<li>server.key</li>
-</ul>
-
-
-<h2>更新</h2>
-
-<p>以下で更新が出来ます。</p>
-
-<pre><code>$ heroku certs:update server.crt server.key
-</code></pre>
-
-<p>SSL導入時点で割り当てられるCNAME用のコモンネームが変わってしまうんじゃないかと思いましたが大丈夫でした。<br/>
-以下、ログ。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>Resolving trust chain... done
-</span><span class='line'>
-</span><span class='line'> !    WARNING: Potentially Destructive Action
-</span><span class='line'> !    This command will change the certificate of endpoint xxx-9999.herokussl.herokussl.com on app-name.
-</span><span class='line'> !    To proceed, type "app-name" or re-run this command with --confirm app-name
-</span><span class='line'>
-</span><span class='line'>&gt; app-name
-</span><span class='line'>Updating SSL Endpoint xxx-9999.herokussl.com for app-name... done
-</span><span class='line'>Updated certificate details:
-</span><span class='line'>Common Name(s): example.com
-</span><span class='line'>Expires At:     (期限)
-</span><span class='line'>Issuer:         (SSL内容)
-</span><span class='line'>Starts At:      (開始日)
-</span><span class='line'>Subject:        (SSL内容)
-</span><span class='line'>SSL certificate is verified by a root authority.</span></code></pre></td></tr></table></div></figure>
-
-
-<p>途中で重要な変更ってことで、確認が入るので、アプリ名をタイプして実行します。<br/>
-予め、<code>--confirm app-name</code>をつけるとスルー出来るようです。</p>
-
-<p>また、もし間違えてアップしてしまった、などの場合は、もとに戻すコマンドも用意されているようです。</p>
-
-<pre><code>$ heroku certs:rollback
-</code></pre>
-
-<h2>参考</h2>
-
-<p><a href="https://devcenter.heroku.com/articles/ssl-endpoint#update-certificate">https://devcenter.heroku.com/articles/ssl-endpoint#update-certificate</a></p>
 ]]></content>
   </entry>
   
