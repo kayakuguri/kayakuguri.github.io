@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-04-20T12:10:47+09:00</updated>
+  <updated>2015-04-20T15:49:35+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,65 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[apex][SF]ApexRESTのテストコードでのパラメータの渡し方]]></title>
+    <link href="http://kayakuguri.github.io/blog/2015/04/20/rest-apex-test/"/>
+    <updated>2015-04-20T15:43:39+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2015/04/20/rest-apex-test</id>
+    <content type="html"><![CDATA[<p>いくつくか方法があるような。<br/>
+そのうち一番楽だったものを。</p>
+
+<!-- more -->
+
+
+<p>例えば以下のようなクラスを作ったとする。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>@RestResource(urlMapping='/user/*')
+</span><span class='line'>global with sharing class userInfo_API {
+</span><span class='line'>  @HttpPost
+</span><span class='line'>  global static ResultData doPost(){
+</span><span class='line'>      RestRequest req = RestContext.request;
+</span><span class='line'>      String user_id = req.params.get('user_id');
+</span><span class='line'>      
+</span><span class='line'>      //何らかの処理
+</span><span class='line'>  }
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<p>この場合、<code>user_id</code>を渡すためには以下のように記述します。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>@isTest
+</span><span class='line'>private class Test_userInfo_API {
+</span><span class='line'>  static testMethod void postTest(){
+</span><span class='line'>      RestRequest req = new RestRequest();
+</span><span class='line'>      req.addParameter('user_id', 'ユーザーID');
+</span><span class='line'>      userInfo_API.doPost();
+</span><span class='line'>  }
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<p><code>RestRequest</code>のパラメータにセットしておくだけでOKなよう。</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[github page build failedしたメモ]]></title>
@@ -2107,104 +2166,6 @@ $ heroku pg:backups public-url
 
 <p><a href="https://devcenter.heroku.com/articles/heroku-postgres-backups">Heroku PGBackups | Heroku Dev Center</a><br/>
 <a href="https://devcenter.heroku.com/articles/heroku-postgresql">Heroku Postgres | Heroku Dev Center</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[AWS Route53を使用してGithubページにサブドメインを設定する]]></title>
-    <link href="http://kayakuguri.github.io/blog/2015/03/10/set-subdomain/"/>
-    <updated>2015-03-10T23:51:46+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2015/03/10/set-subdomain</id>
-    <content type="html"><![CDATA[<p>長らくgithub.ioのデフォルトドメインで運用してきましたが、<br/>
-この度ふと思い立ってサブドメインを割り当ててみました。</p>
-
-<!-- more -->
-
-
-<p>もともとherokuで作成したブログに独自ドメインを割り当てており、<br/>
-そのDNS設定にRoute53を使用していたので、今回もそれを使用してみる。<br/>
-(というか、外部サービスを使用している事になるので、それしかできない)</p>
-
-<p>簡単に全体の流れを説明すると、<br/>
-Route53でCNAMEの設定をして、Githubページでリダイレクトする設定をかける、だけ。</p>
-
-<h2>Route53の設定</h2>
-
-<p><img src="http://kayakuguri.github.io/images/2015/03/subdomain01.jpg" alt="route53" /></p>
-
-<p>すでに設定している<code>Resouces</code>があるので、そちらをクリック。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2015/03/subdomain02.jpg" alt="Resouces" /></p>
-
-<p>設定しているドメインをクリック</p>
-
-<p><img src="http://kayakuguri.github.io/images/2015/03/subdomain03.jpg" alt="Domain Name" /></p>
-
-<p>新しくCNAMEレコードを作成するので<code>Create Record Set</code>をクリック</p>
-
-<p><img src="http://kayakuguri.github.io/images/2015/03/subdomain04.jpg" alt="Create Record" /></p>
-
-<p>右側に設定画面が表示されるので、設定するサブドメイン、TypeはCNAME、valueにgithub.ioのデフォルトドメインを入れる。<br/>
-設定できたら、<code>Create</code>をクリックして作成。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2015/03/subdomain05.jpg" alt="Create" /></p>
-
-<p>これでRoute53の設定は完了</p>
-
-<h2>Github pagesの設定</h2>
-
-<p><strong>このブラウザから作成する方法は間違いでした。下部に正しい方法を記述しています</strong></p>
-
-<p>githubページにアクセスされた際にリダイレクトさせる設定は簡単で、<br/>
-masterリポジトリ直下に<code>CNAME</code>というファイルを設置するだけ。<br/>
-もちろんgitで追加してもいいけれど、ブラウザからGUIで追加してみる。</p>
-
-<p>設定したいGithubページのリポジトリに行き、masterブランチを選択し、+マークをクリック。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2015/03/subdomain06.jpg" alt="Create file" /></p>
-
-<p>名前は<strong>大文字</strong>で<code>CNAME</code>。<br/>
-内容は、設定したいサブドメイン。<code>http://</code>は必要なし。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2015/03/subdomain07.jpg" alt="CNAME" /></p>
-
-<p>正しく設定されたかどうかを確認するには、リポジトリの<code>setting</code>をクリック。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2015/03/subdomain08.jpg" alt="setting" /></p>
-
-<p><code>GitHub Pages</code>の欄で設定したドメインが表示されていればOK。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2015/03/subdomain09.jpg" alt="github pages" /></p>
-
-<p>DNSが浸透するまでに少し時間がかかるので気長に待ちましょう。。<br/>
-(反映されるまでページにアクセス出来なくなってしまいますが…)</p>
-
-<h2>正しいCNAMEファイルの作り方</h2>
-
-<p>すみません、上記、ブラウザから<code>CNAME</code>ファイルを作成する方法は間違いでした。<br/>
-というのも、<code>rake gen_deploy</code>した際に<code>source</code>リポジトリからdeployしたデータを<code>master</code>ブランチにpushしているようで、<br/>
-その際にブランチ側でファイルを作成してしまうと差異が出来てpushが出来なくなってしまいました。</p>
-
-<p>なので、以下の方法で強制的にpushを試みると、当然、ブラウザ上で作成したCNAMEが消えてしまいました。<br/>
-<a href="http://qiita.com/takuma7/items/2d6f6e786eb6c0afbefb">Octopressでrake deployした際にrejectedされた場合の対処 &ndash; Qiita</a></p>
-
-<p>なのでローカルで作成してやる必要がありますが、その場所が、<code>source/</code>以下となるようです。<br/>
-<code>source/CNAME</code>でファイルを作成し、同じようにサブドメインのみを記述します。</p>
-
-<p>その状態で<code>gen_deploy</code>してやりブラウザ上で確認すると見事、masterブランチ上の直下にCNAMEファイルが作成されました。<br/>
-これでOKなはず</p>
-
-<h2>参考</h2>
-
-<p>公式のチュートリアルが英語だけど一番わかりやすいかも。<br/>
-<a href="https://help.github.com/articles/adding-a-cname-file-to-your-repository/">Adding a CNAME file to your repository</a></p>
-
-<p>その他<br/>
-<a href="http://blog.hello-world.jp.net/git-2/2612/">GitHub Pagesで独自ドメインを使う | hello-world.jp.net</a><br/>
-<a href="http://tech.tanaka733.net/entry/2013/09/15/%E3%81%8A%E5%90%8D%E5%89%8D.com_%E3%81%A7%E5%8F%96%E3%81%A3%E3%81%9F%E3%83%89%E3%83%A1%E3%82%A4%E3%83%B3%E3%82%92_Amazon_Route53%E3%81%A7%E7%AE%A1%E7%90%86%E3%81%97%E3%80%81%E3%82%B5%E3%83%96%E3%83%89">お名前.com で取ったドメインを Amazon Route53で管理し、サブドメインをはてなブログに割り当てるまで &ndash; 銀の光と碧い空</a><br/>
-<a href="http://blog.shiroyama.us/blog/2014/02/26/octopress/">エンジニアのブログは Octopress が最適 &ndash; $shiroyama->($blog);</a></p>
-
-<p><a href="http://aws.amazon.com/jp/route53/">Amazon Route53</a></p>
 ]]></content>
   </entry>
   

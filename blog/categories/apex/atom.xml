@@ -4,7 +4,7 @@
   <title><![CDATA[Category: apex | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/apex/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-04-20T12:10:47+09:00</updated>
+  <updated>2015-04-20T15:49:35+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,55 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[apex][SF]ApexRESTのテストコードでのパラメータの渡し方]]></title>
+    <link href="http://kayakuguri.github.io/blog/2015/04/20/rest-apex-test/"/>
+    <updated>2015-04-20T15:43:39+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2015/04/20/rest-apex-test</id>
+    <content type="html"><![CDATA[<p>いくつくか方法があるような。<br/>
+そのうち一番楽だったものを。</p>
+
+<!-- more -->
+
+
+<p>例えば以下のようなクラスを作ったとする。</p>
+
+<p>```
+@RestResource(urlMapping=&lsquo;/user/*&rsquo;)
+global with sharing class userInfo_API {</p>
+
+<pre><code>@HttpPost
+global static ResultData doPost(){
+    RestRequest req = RestContext.request;
+    String user_id = req.params.get('user_id');
+
+    //何らかの処理
+}
+</code></pre>
+
+<p>}
+```</p>
+
+<p>この場合、<code>user_id</code>を渡すためには以下のように記述します。</p>
+
+<p>```
+@isTest
+private class Test_userInfo_API {</p>
+
+<pre><code>static testMethod void postTest(){
+    RestRequest req = new RestRequest();
+    req.addParameter('user_id', 'ユーザーID');
+    userInfo_API.doPost();
+}
+</code></pre>
+
+<p>}
+```</p>
+
+<p><code>RestRequest</code>のパラメータにセットしておくだけでOKなよう。</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[apex][SF]InboundEmailHandlerを使ったリードの作成]]></title>
@@ -412,47 +461,6 @@ result.request_time = &lsquo;2015-3-27 12:33&rsquo;;</p>
 
 <p>地道な作業にはなりますが、これでわりかし綺麗なJSONが返せました。<br/>
 もっと簡単な方法があったらまた書きます。</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Apexのテストで変数部分にテストが通ってくれない時]]></title>
-    <link href="http://kayakuguri.github.io/blog/2014/12/02/apex-json-class-test/"/>
-    <updated>2014-12-02T18:41:35+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2014/12/02/apex-json-class-test</id>
-    <content type="html"><![CDATA[<p>きっと基本を理解してないんだと思いますが、単純な話でした。</p>
-
-<!-- more -->
-
-
-<p>JsonをGETで引き渡して、それをApexクラスにしてapex内で使用するべく、<br/>
-apex2Jsonとして以下のようなクラスを作成していた。</p>
-
-<pre><code>public class Json2Apex{
-    public String user_id;
-    public String dummy;
-
-    public static Json2Apex parse(String json){
-        return (Json2Apex) System.JSON.deserialize(json, Json2Apex.class);
-    }
-}
-</code></pre>
-
-<p>ちゃんとJSONには、<code>user_id</code>と<code>dummy</code>の値を持たせて変換させ、<br/>
-その変数にもきっちりアクセスした状態でも、テストを走らせてみると、<br/>
-<code>parse</code>メソッド部分しか通ってない。<br/>
-全体の行数が少ないので、パーセンテージとしては、<strong>50%</strong>。<br/>
-これでは他のリリースに影響が大なので、調べてみると、単純な事で、<br/>
-<code>{get; set;}</code>をつけろ、ってだけだった。<br/>
-以下のようにつける。</p>
-
-<pre><code>public String user_id{get; set;}
-public String dummy{get; set;}
-</code></pre>
-
-<p>これだけでテストコードも変更することなく通り、無事、100%を達成できました。</p>
-
-<p>参考：<a href="http://salesforce.stackexchange.com/questions/10018/testing-apex-classes-created-by-jsontoapex">http://salesforce.stackexchange.com/questions/10018/testing-apex-classes-created-by-jsontoapex</a></p>
 ]]></content>
   </entry>
   
