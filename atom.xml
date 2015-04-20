@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-04-20T12:06:51+09:00</updated>
+  <updated>2015-04-20T12:10:47+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,58 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[github page build failedしたメモ]]></title>
+    <link href="http://kayakuguri.github.io/blog/2015/04/20/githubpage-failed/"/>
+    <updated>2015-04-20T12:10:05+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2015/04/20/githubpage-failed</id>
+    <content type="html"><![CDATA[<p>このページはGithub pageで作成しているのですが、いつものように記事を書いてdeployしたところ、反映されない。<br/>
+しばらくするとビルド失敗の通知がメールで来た。</p>
+
+<!-- more -->
+
+
+<h2>通知</h2>
+
+<p>以下、メールの内容。</p>
+
+<blockquote><p>The page build failed with the following error:</p>
+
+<p>page build timed out</p>
+
+<p>If you have any questions you can contact us by replying to this email.</p></blockquote>
+
+<p>全くもって情報がない…。</p>
+
+<h2>調査</h2>
+
+<p>とりあえず、公式のトラブルシューティングは以下。<br/>
+<a href="https://help.github.com/articles/troubleshooting-github-pages-build-failures/">Troubleshooting GitHub Pages build failures &ndash; User Documentation</a></p>
+
+<p>ググって以下のページを読んでいると以下の情報が。<br/>
+<a href="http://dekokun.github.io/posts/2012-07-29-4.html">GitHub Pagesでのビルド失敗</a></p>
+
+<blockquote><p>どうも、markdownの中に“+”で始まる行が3連続するとJekyllのビルドが失敗するらしい</p></blockquote>
+
+<p>つい先日まで問題がなかったことを見ると、今日更新しようとした記事に原因があるとしか思えない。<br/>
+ということは記述したマークダウンの内容に何か問題があるのかもしれない。</p>
+
+<h2>検証</h2>
+
+<p>というわけで書いた記事の中身を消してデプロイしてみる。<br/>
+……<br/>
+無事、デプロイできた。記事も見れた。<br/>
+どうやらどこかの記述がダメなよう。</p>
+
+<p>内容を徐々に付け足しながら何回かデプロイして確認してみると……結局全て通った。<br/>
+どうやら単純に何かの処理で時間がたまたまかかってタイムアウトになってしまっただけのよう。</p>
+
+<h2>結果</h2>
+
+<p>結局何も問題はなかったけれど、メモとして残しておく。</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[CakePHP]ページタイトルを設定する]]></title>
@@ -2153,45 +2205,6 @@ masterリポジトリ直下に<code>CNAME</code>というファイルを設置�
 <a href="http://blog.shiroyama.us/blog/2014/02/26/octopress/">エンジニアのブログは Octopress が最適 &ndash; $shiroyama->($blog);</a></p>
 
 <p><a href="http://aws.amazon.com/jp/route53/">Amazon Route53</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[ビュー画面に出るチャターフォローボタンを非表示にする]]></title>
-    <link href="http://kayakuguri.github.io/blog/2015/03/10/chatter-follow/"/>
-    <updated>2015-03-10T16:13:23+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2015/03/10/chatter-follow</id>
-    <content type="html"><![CDATA[<p>キャンペーンやリードなどのビュー画面を表示した時にアクションの列に表示される、<br/>
-緑の＋ボタンは、このリード(やキャンペーンなど)をチャターでフォローする、というボタンなのですが、<br/>
-特に使用しないので非表示にする方法を調べました。</p>
-
-<!-- more -->
-
-
-<p>このボタンを非表示にしたい。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2015/03/chatter1.jpg" alt="チャターフォローボタン" /></p>
-
-<p>これは、フィード追跡、という機能で制御できます。<br/>
-<code>カスタマイズ</code> &ndash;> <code>Chatter</code> &ndash;> <code>フィード追跡</code> を選択。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2015/03/chatter2.jpg" alt="フィード追跡" /></p>
-
-<p>追跡をやめたいオブジェクトを選択します。<br/>
-上部にある、「フィード追跡の有効化」のチェックを外します。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2015/03/chatter3.jpg" alt="" /></p>
-
-<p>保存します。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2015/03/chatter4.jpg" alt="" /></p>
-
-<p>これでビュー画面からボタンが非表示になりました。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2015/03/chatter5.jpg" alt="" /></p>
-
-<p>このフィード追跡機能はフォローしたレコードにどういう変更があった時に通知するか、を設定できるので、<br/>
-上手く使えば便利になるのかもしれません。</p>
 ]]></content>
   </entry>
   

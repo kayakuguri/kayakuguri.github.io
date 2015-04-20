@@ -4,7 +4,7 @@
   <title><![CDATA[Category: github | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/github/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-04-20T12:06:51+09:00</updated>
+  <updated>2015-04-20T12:10:47+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,58 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[github page build failedしたメモ]]></title>
+    <link href="http://kayakuguri.github.io/blog/2015/04/20/githubpage-failed/"/>
+    <updated>2015-04-20T12:10:05+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2015/04/20/githubpage-failed</id>
+    <content type="html"><![CDATA[<p>このページはGithub pageで作成しているのですが、いつものように記事を書いてdeployしたところ、反映されない。<br/>
+しばらくするとビルド失敗の通知がメールで来た。</p>
+
+<!-- more -->
+
+
+<h2>通知</h2>
+
+<p>以下、メールの内容。</p>
+
+<blockquote><p>The page build failed with the following error:</p>
+
+<p>page build timed out</p>
+
+<p>If you have any questions you can contact us by replying to this email.</p></blockquote>
+
+<p>全くもって情報がない…。</p>
+
+<h2>調査</h2>
+
+<p>とりあえず、公式のトラブルシューティングは以下。<br/>
+<a href="https://help.github.com/articles/troubleshooting-github-pages-build-failures/">Troubleshooting GitHub Pages build failures &ndash; User Documentation</a></p>
+
+<p>ググって以下のページを読んでいると以下の情報が。<br/>
+<a href="http://dekokun.github.io/posts/2012-07-29-4.html">GitHub Pagesでのビルド失敗</a></p>
+
+<blockquote><p>どうも、markdownの中に“+”で始まる行が3連続するとJekyllのビルドが失敗するらしい</p></blockquote>
+
+<p>つい先日まで問題がなかったことを見ると、今日更新しようとした記事に原因があるとしか思えない。<br/>
+ということは記述したマークダウンの内容に何か問題があるのかもしれない。</p>
+
+<h2>検証</h2>
+
+<p>というわけで書いた記事の中身を消してデプロイしてみる。<br/>
+……<br/>
+無事、デプロイできた。記事も見れた。<br/>
+どうやらどこかの記述がダメなよう。</p>
+
+<p>内容を徐々に付け足しながら何回かデプロイして確認してみると……結局全て通った。<br/>
+どうやら単純に何かの処理で時間がたまたまかかってタイムアウトになってしまっただけのよう。</p>
+
+<h2>結果</h2>
+
+<p>結局何も問題はなかったけれど、メモとして残しておく。</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[AWS Route53を使用してGithubページにサブドメインを設定する]]></title>
