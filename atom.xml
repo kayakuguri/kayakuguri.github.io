@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-04-20T15:49:35+09:00</updated>
+  <updated>2015-04-20T15:57:56+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -58,10 +58,12 @@
 <span class='line-number'>6</span>
 <span class='line-number'>7</span>
 <span class='line-number'>8</span>
+<span class='line-number'>9</span>
 </pre></td><td class='code'><pre><code class=''><span class='line'>@isTest
 </span><span class='line'>private class Test_userInfo_API {
 </span><span class='line'>  static testMethod void postTest(){
 </span><span class='line'>      RestRequest req = new RestRequest();
+</span><span class='line'>      RestContext.request = req;
 </span><span class='line'>      req.addParameter('user_id', 'ユーザーID');
 </span><span class='line'>      userInfo_API.doPost();
 </span><span class='line'>  }
@@ -69,6 +71,21 @@
 
 
 <p><code>RestRequest</code>のパラメータにセットしておくだけでOKなよう。</p>
+
+<p>余談。<br/>
+APIのクラスのみを実行させようとしてもエラーが出る。</p>
+
+<blockquote><p>System.NullPointerException: Attempt to de-reference a null object</p></blockquote>
+
+<p>なのでテストメソッド内では最低限以下は必要。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>RestRequest req = new RestRequest();
+</span><span class='line'>RestContext.request = req;
+</span><span class='line'>userInfo_API.doPost();</span></code></pre></td></tr></table></div></figure>
+
 ]]></content>
   </entry>
   

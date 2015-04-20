@@ -4,7 +4,7 @@
   <title><![CDATA[Category: apex | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/apex/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-04-20T15:49:35+09:00</updated>
+  <updated>2015-04-20T15:57:56+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -50,6 +50,7 @@ private class Test_userInfo_API {</p>
 
 <pre><code>static testMethod void postTest(){
     RestRequest req = new RestRequest();
+    RestContext.request = req;
     req.addParameter('user_id', 'ユーザーID');
     userInfo_API.doPost();
 }
@@ -59,6 +60,19 @@ private class Test_userInfo_API {</p>
 ```</p>
 
 <p><code>RestRequest</code>のパラメータにセットしておくだけでOKなよう。</p>
+
+<p>余談。<br/>
+APIのクラスのみを実行させようとしてもエラーが出る。</p>
+
+<blockquote><p>System.NullPointerException: Attempt to de-reference a null object</p></blockquote>
+
+<p>なのでテストメソッド内では最低限以下は必要。</p>
+
+<p><code>
+RestRequest req = new RestRequest();
+RestContext.request = req;
+userInfo_API.doPost();
+</code></p>
 ]]></content>
   </entry>
   
