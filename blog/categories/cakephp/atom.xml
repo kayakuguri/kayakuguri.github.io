@@ -4,7 +4,7 @@
   <title><![CDATA[Category: cakephp | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/cakephp/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-04-20T12:05:41+09:00</updated>
+  <updated>2015-04-20T12:06:51+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -39,7 +39,8 @@
 <p>```
 <title></p>
 
-<pre><code>&lt;?php echo $title_for_layout; ?&gt;
+<pre><code>&lt;?php echo $cakeDescription ?&gt;:
+&lt;?php echo $title_for_layout; ?&gt;
 </code></pre>
 
 <p></title>
