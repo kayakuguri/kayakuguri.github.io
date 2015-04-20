@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-04-20T12:03:24+09:00</updated>
+  <updated>2015-04-20T12:04:29+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -35,6 +35,12 @@
 
 <p>ちなみデフォルトテンプレートの初期設定は以下になっているよう。<br/>
 <a href="http://ameblo.jp/itboy/entry-11510932141.html">http://ameblo.jp/itboy/entry-11510932141.html</a></p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;title&gt;
+</span><span class='line'>&lt;/title&gt;</span></code></pre></td></tr></table></div></figure>
+
 
 <h2>参考</h2>
 
