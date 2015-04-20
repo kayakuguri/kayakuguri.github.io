@@ -105,6 +105,17 @@
 
 <p>cakephpでタイトルの設定をするべくググっていると、どうやら以下で変更が出来る、とのこと。</p>
 
+<pre><code>$this-&gt;set('title_for_layout', 'ページタイトル');
+</code></pre>
+
+<p>しかし一向に反映されない。<br/>
+それもそのはずで、デフォルトのテンプレート内の<code>title</code>タグ部分を変更してしまっていて、<br/>
+固定にしていたので変更が効かなかった。<br/>
+そもそも、<code>$this-&gt;set</code>はviewに変数セットするためだけの関数なので、View側と記述を合わせれば<code>title_for_layout</code>である必要がない、ということになる。</p>
+
+<p>ちなみデフォルトテンプレートの初期設定は以下になっているよう。<br/>
+<a href="http://ameblo.jp/itboy/entry-11510932141.html">http://ameblo.jp/itboy/entry-11510932141.html</a></p>
+
 <h2>参考</h2>
 
 <p><a href="http://book.cakephp.org/2.0/ja/views.html#view-layouts">ビュー &mdash; CakePHP Cookbook 2.x ドキュメント &ndash; レイアウト</a><br/>
