@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-04-20T12:00:05+09:00</updated>
+  <updated>2015-04-20T12:02:15+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -14,11 +14,22 @@
 
   
   <entry>
-    <title type="html"><![CDATA[cakephp_pagetitle]]></title>
+    <title type="html"><![CDATA[[CakePHP]ページタイトルを設定する]]></title>
     <link href="http://kayakuguri.github.io/blog/2015/04/20/cakephp-pagetitle/"/>
-    <updated>2015-04-20T11:59:11+09:00</updated>
+    <updated>2015-04-20T11:16:52+09:00</updated>
     <id>http://kayakuguri.github.io/blog/2015/04/20/cakephp-pagetitle</id>
-    <content type="html"><![CDATA[
+    <content type="html"><![CDATA[<p>変な所でハマってしまったのでメモ。</p>
+
+<!-- more -->
+
+
+<p>cakephpでタイトルの設定をするべくググっていると、どうやら以下で変更が出来る、とのこと。</p>
+
+<h2>参考</h2>
+
+<p><a href="http://book.cakephp.org/2.0/ja/views.html#view-layouts">ビュー &mdash; CakePHP Cookbook 2.x ドキュメント &ndash; レイアウト</a><br/>
+<a href="http://www.t-net.ne.jp/~cyfis/cakephp/controller/pageTitle.html">ページタイトルを設定する &ndash; CakePHPの部屋</a><br/>
+<a href="http://satoshi14.hatenablog.com/entry/2013/05/13/125421">CakePHP ページタイトルを一括管理する方法 &ndash; Autumn Like Blog</a></p>
 ]]></content>
   </entry>
   

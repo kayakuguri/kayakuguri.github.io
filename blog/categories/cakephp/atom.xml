@@ -4,7 +4,7 @@
   <title><![CDATA[Category: cakephp | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/cakephp/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-04-20T12:00:05+09:00</updated>
+  <updated>2015-04-20T12:02:15+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,26 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[CakePHP]ページタイトルを設定する]]></title>
+    <link href="http://kayakuguri.github.io/blog/2015/04/20/cakephp-pagetitle/"/>
+    <updated>2015-04-20T11:16:52+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2015/04/20/cakephp-pagetitle</id>
+    <content type="html"><![CDATA[<p>変な所でハマってしまったのでメモ。</p>
+
+<!-- more -->
+
+
+<p>cakephpでタイトルの設定をするべくググっていると、どうやら以下で変更が出来る、とのこと。</p>
+
+<h2>参考</h2>
+
+<p><a href="http://book.cakephp.org/2.0/ja/views.html#view-layouts">ビュー &mdash; CakePHP Cookbook 2.x ドキュメント &ndash; レイアウト</a><br/>
+<a href="http://www.t-net.ne.jp/~cyfis/cakephp/controller/pageTitle.html">ページタイトルを設定する &ndash; CakePHPの部屋</a><br/>
+<a href="http://satoshi14.hatenablog.com/entry/2013/05/13/125421">CakePHP ページタイトルを一括管理する方法 &ndash; Autumn Like Blog</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[CakePHP]400系エラーが発生した場合にトップページにリダイレクトさせる]]></title>
@@ -283,64 +303,6 @@ public function input(){
 <p><a href="http://d.hatena.ne.jp/kunit/20101005#1286265311">[PHP][CakePHP] Transitionコンポーネント &ndash; checkData() について</a></p>
 
 <p>それにしてもこのコンポーネントはびっくりするくらい便利。ほんとに。</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[CakePHP]手動でフォームのバリデーションチェックにかける]]></title>
-    <link href="http://kayakuguri.github.io/blog/2015/03/31/cake-php-validates/"/>
-    <updated>2015-03-31T21:06:40+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2015/03/31/cake-php-validates</id>
-    <content type="html"><![CDATA[<p>最近cakephpを触るようになりました。ようやく。<br/>
-で、コントローラーから明示的にバリデーションにかける方法を調べたのでメモ。</p>
-
-<!-- more -->
-
-
-<p>まず準備として、<code>Model</code>にルールを記述します。<br/>
-今回は<code>User</code>というモデル内に記述したとします。</p>
-
-<p>```
-var $validate = array(</p>
-
-<pre><code>'password' =&gt; array(
-    'rule' =&gt; array('minLength', 8),
-    'message' =&gt; 'パスワードは8文字以上で入力してください'
-)
-</code></pre>
-
-<p>);
-```</p>
-
-<p>で、次に<code>View</code>で入力欄を作成します。<br/>
-作成の際に、先程作ったルールの<code>password</code>を<code>type</code>として指定してやります。</p>
-
-<pre><code>&lt;?php echo $this-&gt;Form-&gt;input('User.password', array('type' =&gt; 'password', 'value' =&gt; '','label' =&gt; false)); ?&gt;
-</code></pre>
-
-<p>HTMLは以下のように表示されます。</p>
-
-<pre><code>&lt;input name="data[User][password]" value="" type="password" id="UserPassword" required="required"&gt;
-</code></pre>
-
-<p>最後に<code>Controller</code>からバリデーションにデータを送信します。<br/>
-記述する箇所は、フォームを送信した後に実行されるアクション内です。</p>
-
-<p>```
-$this->User->set($this->request->data); //モデルにデータをセット
-if(!$this->User->validates()){</p>
-
-<pre><code>//エラー時の挙動
-</code></pre>
-
-<p>}
-```</p>
-
-<p>これで8文字以下で送信するとエラーが表示されます。</p>
-
-<h3>参考</h3>
-
-<p><a href="http://book.cakephp.org/2.0/ja/models/data-validation/validating-data-from-the-controller.html">http://book.cakephp.org/2.0/ja/models/data-validation/validating-data-from-the-controller.html</a></p>
 ]]></content>
   </entry>
   
