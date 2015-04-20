@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-04-18T00:32:08+09:00</updated>
+  <updated>2015-04-20T11:24:56+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,47 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[CakePHP]ページタイトルを設定する]]></title>
+    <link href="http://kayakuguri.github.io/blog/2015/04/20/cakephp-pagetitle/"/>
+    <updated>2015-04-20T11:16:52+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2015/04/20/cakephp-pagetitle</id>
+    <content type="html"><![CDATA[<p>変な所でハマってしまったのでメモ。</p>
+
+<!-- more -->
+
+
+<p>cakephpでタイトルの設定をするべくググっていると、どうやら以下で変更が出来る、とのこと。</p>
+
+<pre><code>$this-&gt;set('title_for_layout', 'ページタイトル');
+</code></pre>
+
+<p>しかし一向に反映されない。<br/>
+それもそのはずで、デフォルトのテンプレート内の<code>title</code>タグ部分を変更してしまっていて、<br/>
+固定にしていたので変更が効かなかった。<br/>
+そもそも、<code>$this-&gt;set</code>はviewに変数セットするためだけの関数なので、View側と記述を合わせれば<code>title_for_layout</code>である必要がない、ということになる。</p>
+
+<p>ちなみデフォルトテンプレートの初期設定は以下になっているよう。<br/>
+<a href="http://ameblo.jp/itboy/entry-11510932141.html">http://ameblo.jp/itboy/entry-11510932141.html</a></p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;title&gt;
+</span><span class='line'>    &lt;?php echo $cakeDescription ?&gt;:
+</span><span class='line'>    &lt;?php echo $title_for_layout; ?&gt;
+</span><span class='line'>&lt;/title&gt;</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>参考</h2>
+
+<p><a href="http://book.cakephp.org/2.0/ja/views.html#view-layouts">ビュー &mdash; CakePHP Cookbook 2.x ドキュメント &ndash; レイアウト</a><br/>
+<a href="http://www.t-net.ne.jp/~cyfis/cakephp/controller/pageTitle.html">ページタイトルを設定する &ndash; CakePHPの部屋</a><br/>
+<a href="http://satoshi14.hatenablog.com/entry/2013/05/13/125421">CakePHP ページタイトルを一括管理する方法 &ndash; Autumn Like Blog</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[htaccessを使ったリダイレクトを学ぶ]]></title>
@@ -2151,144 +2192,6 @@ masterリポジトリ直下に<code>CNAME</code>というファイルを設置�
 
 <p>このフィード追跡機能はフォローしたレコードにどういう変更があった時に通知するか、を設定できるので、<br/>
 上手く使えば便利になるのかもしれません。</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[heroku]herokuのPostgreSQLでバージョンを指定する]]></title>
-    <link href="http://kayakuguri.github.io/blog/2015/03/04/heroku-postgres-version/"/>
-    <updated>2015-03-04T17:38:54+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2015/03/04/heroku-postgres-version</id>
-    <content type="html"><![CDATA[<p>herokuのpostgreSQLを入れる際にバージョンの指定が出来たのでメモ。</p>
-
-<!-- more -->
-
-
-<p><a href="https://devcenter.heroku.com/articles/heroku-postgresql#version-support-and-legacy-infrastructure">Version Support and Legacy Infrastructure &ndash; Heroku Postgres</a></p>
-
-<p>選べるバージョン配下。</p>
-
-<ul>
-<li>9.4(beta)</li>
-<li>9.3(デフォルト)</li>
-<li>9.2</li>
-<li>9.1</li>
-</ul>
-
-
-<p>指定して入れるためにはブラウザ上ではなく、コマンドラインからバージョンを指定して入れてやる必要がある。</p>
-
-<p>まずはそのままデフォルトで入れてみる。<br/>
-アプリを作るところから</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>$ heroku create
-</span><span class='line'>Creating fierce-woodland-3392... done, stack is cedar-14
-</span><span class='line'>
-</span><span class='line'>$ heroku addons:add heroku-postgresql --app fierce-woodland-3392
-</span><span class='line'>Adding heroku-postgresql on fierce-woodland-3392... done, v4 (free)
-</span><span class='line'>Attached as HEROKU_POSTGRESQL_CRIMSON_URL
-</span><span class='line'>Database has been created and is available
-</span><span class='line'> ! This database is empty. If upgrading, you can transfer
-</span><span class='line'> ! data from another database with pgbackups:restore.
-</span><span class='line'>Use `heroku addons:docs heroku-postgresql` to view documentation.
-</span><span class='line'>
-</span><span class='line'>$ heroku pg:info --app fierce-woodland-3392
-</span><span class='line'>=== HEROKU_POSTGRESQL_CRIMSON_URL (DATABASE_URL)
-</span><span class='line'>Plan:        Hobby-dev
-</span><span class='line'>Status:      Available
-</span><span class='line'>Connections: 0/20
-</span><span class='line'>PG Version:  9.3.6
-</span><span class='line'>Created:     2015-03-04 08:43 UTC
-</span><span class='line'>Data Size:   6.4 MB
-</span><span class='line'>Tables:      0
-</span><span class='line'>Rows:        0/10000 (In compliance)
-</span><span class='line'>Fork/Follow: Unsupported
-</span><span class='line'>Rollback:    Unsupported</span></code></pre></td></tr></table></div></figure>
-
-
-<p></p>
-
-<p>アプリを作って、postgresqlの無料版を指定なしで入れて、情報を確認している。<br/>
-情報内にある通り、バージョンは、<code>9.3.6</code>。</p>
-
-<p>次に指定ありで。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>$ heroku create
-</span><span class='line'>Creating polar-dusk-1475... done, stack is cedar-14
-</span><span class='line'>https://polar-dusk-1475.herokuapp.com/ | https://git.heroku.com/polar-dusk-1475.git
-</span><span class='line'>
-</span><span class='line'>$ heroku addons:add heroku-postgresql --version=9.1 --app polar-dusk-1475
-</span><span class='line'>Adding heroku-postgresql on polar-dusk-1475... done, v4 (free)
-</span><span class='line'>Attached as HEROKU_POSTGRESQL_PURPLE_URL
-</span><span class='line'>Database has been created and is available
-</span><span class='line'> ! This database is empty. If upgrading, you can transfer
-</span><span class='line'> ! data from another database with pgbackups:restore.
-</span><span class='line'>Use `heroku addons:docs heroku-postgresql` to view documentation.
-</span><span class='line'>
-</span><span class='line'>$ heroku pg:info --app polar-dusk-1475
-</span><span class='line'>=== HEROKU_POSTGRESQL_PURPLE_URL (DATABASE_URL)
-</span><span class='line'>Plan:        Hobby-dev
-</span><span class='line'>Status:      Available
-</span><span class='line'>Connections: 0/20
-</span><span class='line'>PG Version:  9.1.11
-</span><span class='line'>Created:     2015-03-04 08:45 UTC
-</span><span class='line'>Data Size:   5.9 MB
-</span><span class='line'>Tables:      0
-</span><span class='line'>Rows:        0/10000 (In compliance)
-</span><span class='line'>Fork/Follow: Unsupported
-</span><span class='line'>Rollback:    Unsupported</span></code></pre></td></tr></table></div></figure>
-
-
-<p>結果は見ての通り。<code>9.1.11</code>で入っている。</p>
-
-<p>実際に指定している箇所は、addonの追加の後ろにオプションとして、<code>--version=9.1</code>を追加してやるだけ。</p>
 ]]></content>
   </entry>
   
