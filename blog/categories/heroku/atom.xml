@@ -4,7 +4,7 @@
   <title><![CDATA[Category: heroku | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/heroku/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-04-21T11:10:53+09:00</updated>
+  <updated>2015-04-21T11:24:01+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,41 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[herokuをデプロイするためにgitに空でコミットする]]></title>
+    <link href="http://kayakuguri.github.io/blog/2015/04/21/git-allow-empty/"/>
+    <updated>2015-04-21T11:14:17+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2015/04/21/git-allow-empty</id>
+    <content type="html"><![CDATA[<p>小ネタ。<br/>
+タイトル通り。</p>
+
+<!-- more -->
+
+
+<p>herokuはgitにてpushした時にのみ、deployが走る。<br/>
+しかし、アドオンを追加した時など、ファイルの変更はないけれどデプロイだけしたい場合がたまにある。<br/>
+そんな時にはファイルを無駄に少しだけ触ったりしていたのだけれど、空でコミット出来る事が出来ると知ったので、メモ。</p>
+
+<pre><code>$ git commit -m "for deploy heroku" --allow-empty
+</code></pre>
+
+<p>これでコミットしておいてpushすると無事、デプロイ出来る。</p>
+
+<p>以下、検証。</p>
+
+<pre><code>$ git push heroku master
+Everything up-to-date
+$ git commit -m "for deploy heroku" --allow-empty
+[master 069260f] for deploy heroku
+$ git push heroku master
+Counting objects: 1, done.
+Writing objects: 100% (1/1), 190 bytes | 0 bytes/s, done.
+.....
+  0022947..069260f  master -&gt; master
+</code></pre>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[Herokuアドオン]TransloaditでFTPアップロード]]></title>
@@ -611,97 +646,6 @@ $ heroku pg:backups public-url
 
 <p><a href="https://devcenter.heroku.com/articles/heroku-postgres-backups">Heroku PGBackups | Heroku Dev Center</a><br/>
 <a href="https://devcenter.heroku.com/articles/heroku-postgresql">Heroku Postgres | Heroku Dev Center</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[heroku]herokuのPostgreSQLでバージョンを指定する]]></title>
-    <link href="http://kayakuguri.github.io/blog/2015/03/04/heroku-postgres-version/"/>
-    <updated>2015-03-04T17:38:54+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2015/03/04/heroku-postgres-version</id>
-    <content type="html"><![CDATA[<p>herokuのpostgreSQLを入れる際にバージョンの指定が出来たのでメモ。</p>
-
-<!-- more -->
-
-
-<p><a href="https://devcenter.heroku.com/articles/heroku-postgresql#version-support-and-legacy-infrastructure">Version Support and Legacy Infrastructure &ndash; Heroku Postgres</a></p>
-
-<p>選べるバージョン配下。</p>
-
-<ul>
-<li>9.4(beta)</li>
-<li>9.3(デフォルト)</li>
-<li>9.2</li>
-<li>9.1</li>
-</ul>
-
-
-<p>指定して入れるためにはブラウザ上ではなく、コマンドラインからバージョンを指定して入れてやる必要がある。</p>
-
-<p>まずはそのままデフォルトで入れてみる。<br/>
-アプリを作るところから</p>
-
-<p>```
-$ heroku create
-Creating fierce-woodland-3392&hellip; done, stack is cedar-14</p>
-
-<p>$ heroku addons:add heroku-postgresql &mdash;app fierce-woodland-3392
-Adding heroku-postgresql on fierce-woodland-3392&hellip; done, v4 (free)
-Attached as HEROKU_POSTGRESQL_CRIMSON_URL
-Database has been created and is available
- ! This database is empty. If upgrading, you can transfer
- ! data from another database with pgbackups:restore.
-Use <code>heroku addons:docs heroku-postgresql</code> to view documentation.</p>
-
-<p>$ heroku pg:info &mdash;app fierce-woodland-3392
-=== HEROKU_POSTGRESQL_CRIMSON_URL (DATABASE_URL)
-Plan:        Hobby-dev
-Status:      Available
-Connections: 0/20
-PG Version:  9.3.6
-Created:     2015-03-04 08:43 UTC
-Data Size:   6.4 MB
-Tables:      0
-Rows:        0/10000 (In compliance)
-Fork/Follow: Unsupported
-Rollback:    Unsupported
-```</p>
-
-<p>アプリを作って、postgresqlの無料版を指定なしで入れて、情報を確認している。<br/>
-情報内にある通り、バージョンは、<code>9.3.6</code>。</p>
-
-<p>次に指定ありで。</p>
-
-<p>```
-$ heroku create
-Creating polar-dusk-1475&hellip; done, stack is cedar-14
-<a href="https://polar-dusk-1475.herokuapp.com/">https://polar-dusk-1475.herokuapp.com/</a> | <a href="https://git.heroku.com/polar-dusk-1475.git">https://git.heroku.com/polar-dusk-1475.git</a></p>
-
-<p>$ heroku addons:add heroku-postgresql &mdash;version=9.1 &mdash;app polar-dusk-1475
-Adding heroku-postgresql on polar-dusk-1475&hellip; done, v4 (free)
-Attached as HEROKU_POSTGRESQL_PURPLE_URL
-Database has been created and is available
- ! This database is empty. If upgrading, you can transfer
- ! data from another database with pgbackups:restore.
-Use <code>heroku addons:docs heroku-postgresql</code> to view documentation.</p>
-
-<p>$ heroku pg:info &mdash;app polar-dusk-1475
-=== HEROKU_POSTGRESQL_PURPLE_URL (DATABASE_URL)
-Plan:        Hobby-dev
-Status:      Available
-Connections: 0/20
-PG Version:  9.1.11
-Created:     2015-03-04 08:45 UTC
-Data Size:   5.9 MB
-Tables:      0
-Rows:        0/10000 (In compliance)
-Fork/Follow: Unsupported
-Rollback:    Unsupported
-```</p>
-
-<p>結果は見ての通り。<code>9.1.11</code>で入っている。</p>
-
-<p>実際に指定している箇所は、addonの追加の後ろにオプションとして、<code>--version=9.1</code>を追加してやるだけ。</p>
 ]]></content>
   </entry>
   

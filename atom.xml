@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-04-21T11:10:53+09:00</updated>
+  <updated>2015-04-21T11:24:01+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,41 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[herokuをデプロイするためにgitに空でコミットする]]></title>
+    <link href="http://kayakuguri.github.io/blog/2015/04/21/git-allow-empty/"/>
+    <updated>2015-04-21T11:14:17+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2015/04/21/git-allow-empty</id>
+    <content type="html"><![CDATA[<p>小ネタ。<br/>
+タイトル通り。</p>
+
+<!-- more -->
+
+
+<p>herokuはgitにてpushした時にのみ、deployが走る。<br/>
+しかし、アドオンを追加した時など、ファイルの変更はないけれどデプロイだけしたい場合がたまにある。<br/>
+そんな時にはファイルを無駄に少しだけ触ったりしていたのだけれど、空でコミット出来る事が出来ると知ったので、メモ。</p>
+
+<pre><code>$ git commit -m "for deploy heroku" --allow-empty
+</code></pre>
+
+<p>これでコミットしておいてpushすると無事、デプロイ出来る。</p>
+
+<p>以下、検証。</p>
+
+<pre><code>$ git push heroku master
+Everything up-to-date
+$ git commit -m "for deploy heroku" --allow-empty
+[master 069260f] for deploy heroku
+$ git push heroku master
+Counting objects: 1, done.
+Writing objects: 100% (1/1), 190 bytes | 0 bytes/s, done.
+.....
+  0022947..069260f  master -&gt; master
+</code></pre>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Laravel5をpostgresqlでHerokuにデプロイ]]></title>
@@ -2288,58 +2323,6 @@ apex側で送信されたIDを取得するには、以下のように<code>/</co
 
 <p>地道な作業にはなりますが、これでわりかし綺麗なJSONが返せました。<br/>
 もっと簡単な方法があったらまた書きます。</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[command+Qという危険なショートカットを変更する]]></title>
-    <link href="http://kayakuguri.github.io/blog/2015/03/26/cmd-q/"/>
-    <updated>2015-03-26T14:22:21+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2015/03/26/cmd-q</id>
-    <content type="html"><![CDATA[<p>Chromeを使用している時に、タブを閉じようとショートカットである、<code>cmd + w</code>を押したつもりが、<br/>
-手が滑って横の<code>Q</code>を押してしまいブラウザが落ちる…。</p>
-
-<!-- more -->
-
-
-<p>そんな事が結構あって、その度に机に突っ伏していたので、<br/>
-ショートカットを変更出来ないものかと思い、調べて実行してみました。</p>
-
-<p>まずは現状の確認。<br/>
-以下の通り、アプリを閉じるショートカットは、<code>cmd+q</code>です。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2015/03/comd_q_01.jpg" alt="cmd+q" /></p>
-
-<p>これを変更するには、<code>システム環境設定</code>から、<code>キーボード</code>を選択。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2015/03/comd_q_02.jpg" alt="キーボード" /></p>
-
-<p><code>ショートカット</code>のタブを選択し、<code>アプリケーション</code>のメニューを選択。<br/>
-その下に出る、<code>+</code>をクリックして、ショートカットを追加。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2015/03/comd_q_03.jpg" alt="アプリケーション" /></p>
-
-<p>ここで出てくる入力エリアにショートカットの名前を入力するが、<br/>
-現状設定されているメニュー名を正確に入力する必要がある。<br/>
-Chromeを終了の場合は、以下。</p>
-
-<pre><code>Google Chrome を終了
-</code></pre>
-
-<p><img src="http://kayakuguri.github.io/images/2015/03/comd_q_04.jpg" alt="メニュー名" /></p>
-
-<p><code>アプリケーション</code>は、<code>Google Chrome</code>を選択し、<br/>
-入力欄には、上記のメニュー名を入力。<br/>
-ショートカットには、今回は、<code>option+command+Q</code>を設定。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2015/03/comd_q_05.jpg" alt="設定" /></p>
-
-<p><code>追加</code>をクリックして追加すると、設定完了。<br/>
-chrome側を見てもきっちり設定されている。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2015/03/comd_q_06.jpg" alt="ショートカット" /></p>
-
-<p>これで押し間違いの悲劇がなくなりました。</p>
 ]]></content>
   </entry>
   
