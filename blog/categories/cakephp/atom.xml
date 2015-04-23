@@ -4,7 +4,7 @@
   <title><![CDATA[Category: cakephp | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/cakephp/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-04-21T11:24:01+09:00</updated>
+  <updated>2015-04-23T17:31:41+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,257 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[CakePhp]ログイン処理を外部APIを使用して実装する]]></title>
+    <link href="http://kayakuguri.github.io/blog/2015/04/23/cakephp-custom-authenticate/"/>
+    <updated>2015-04-23T17:30:59+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2015/04/23/cakephp-custom-authenticate</id>
+    <content type="html"><![CDATA[<p>DBからの情報取得ではなく、外部のAPIにアクセスして認証したかったので<br/>
+Authコンポーネントをカスタマイズしてみた。</p>
+
+<!-- more -->
+
+
+<p>画面遷移としては、ユーザー名(メールアドレス)とパスワードを入力し、<br/>
+APIに接続してOKならログインする、というもの。</p>
+
+<h2>Authenticate</h2>
+
+<p>おーせんてぃけーと。<br/>
+上記で書いた通り、フォームから送信されたユーザー名とパスワードを使用してログインするので、<br/>
+<code>FormAuthenticate</code>を継承する。<br/>
+オーバーライドする関数は、<code>authenticate</code>と<code>_findUser</code>。</p>
+
+<p><code>/app/Controller/Component/Auth/UseAPIAuthenticate.php</code></p>
+
+<p>```
+&lt;?php
+App::uses(&lsquo;FormAuthenticate&rsquo;, &lsquo;Controller/Component/Auth&rsquo;);</p>
+
+<p>class UseAPIAuthenticate extends FormAuthenticate {</p>
+
+<pre><code>public function authenticate(CakeRequest $request, CakeResponse $response)
+{
+    //コンポーネントの設定を読み込む
+    $userModel = $this-&gt;settings['userModel'];
+    list(, $model) = pluginSplit($userModel);
+    $fields = $this-&gt;settings['fields'];
+    if (!$this-&gt;_checkFields($request, $model, $fields)) {
+        return false;
+    }
+
+    return $this-&gt;_findUser(
+        $request-&gt;data[$model][$fields['username']],
+        $request-&gt;data[$model][$fields['password']]
+    );
+}
+
+public function _findUser($username, $password = null)
+{
+    // ログイン実施
+    $this-&gt;user = null;
+    $ret = ClassRegistry::init('Api')-&gt;login($username, $password);
+    if (! $ret) {
+        //なんらかのログインエラー
+        return false;
+    }
+
+    //ユーザーデータ。中身はニーズに合わせて
+    $result = Array(
+        "username" =&gt; $username,
+        "result" =&gt; $ret
+    );
+    return $result;
+}
+</code></pre>
+
+<p>}
+```</p>
+
+<p>APIに接続する処理は、Apiというモデルに記述しているとする。<br/>
+コンポーネントからモデルを使用するのはあまりよくないともどこかで見たが、標準のAuthコンポーネントも使用していたのでよしとする。<br/>
+その際の使用方法は以下のようになる。</p>
+
+<pre><code>ClassRegistry::init('Api')
+</code></pre>
+
+<p>ログイン成功後、返却するデータの中身は、配列である必要があるよう。<br/>
+<code>true</code>とだけ返してても認証されなかった。</p>
+
+<h2>AppController</h2>
+
+<p>AppControllerにて、上記のAuthコンポーネントの設定を書く。</p>
+
+<p><code>/app/Controller/AppController.php</code></p>
+
+<p>```
+&lt;?php
+App::uses(&lsquo;Controller&rsquo;, &lsquo;Controller&rsquo;);</p>
+
+<p>class AppController extends Controller {</p>
+
+<pre><code>public $uses = array('User', 'Api');
+
+public $components = array(
+    'Session',
+    'Auth' =&gt; array(
+        'authenticate' =&gt; array(
+            'UseAPI' =&gt; array(
+                'userModel' =&gt; 'User',
+                'fields' =&gt; array(
+                    'username' =&gt; 'email'
+                )
+            )
+        )
+    )
+);
+
+....略....
+</code></pre>
+
+<p>}
+```</p>
+
+<p>作成したクラスファイル名が、<code>UseAPIAuthenticate</code>の場合は、<code>UseAPI</code>と、Authenticateを引いて指定する。<br/>
+これは実際にCakeのAuthコンポーネント内で、以下のように指定されているため。</p>
+
+<p><code>/lib/Cake/Controller/Component/AuthComponent.php</code> 795行目</p>
+
+<pre><code>$className = $class . 'Authenticate';
+</code></pre>
+
+<p>で、使用するモデルは、<code>User</code>とし、今回はメールアドレスでのログインということで、<code>username</code>に<code>email</code>を使用する指定をしている。</p>
+
+<h2>UsersController</h2>
+
+<p>で、ログインページで実行される処理を<code>UsersController</code>に書く。</p>
+
+<p>```
+&lt;?php
+App::uses(&lsquo;AppController&rsquo;, &lsquo;Controller&rsquo;);
+class UsersController extends AppController
+{</p>
+
+<pre><code>public $uses = array('User', 'Api');
+
+public function beforeFilter()
+{
+    $this-&gt;Auth-&gt;allow('login', ...認証除外ページ);
+    parent::beforeFilter();
+}
+
+/**
+ * ログイン
+ */
+public function login()
+{
+    //POST値がある？
+    if (! $this-&gt;request-&gt;is('post')) {
+        // ログインフォームを表示
+        $this-&gt;logout(); //ログアウトしてログインページを表示させる処理
+        return;
+    }
+
+    /// authコンポーネント使用
+    //ログイン
+    $result = $this-&gt;Auth-&gt;login(); //trueかfalseが返ってくる
+    $data = $this-&gt;Auth-&gt;user(); //UseAPIAuthenticateで設定したユーザーデータを取得出来る
+
+    if (!$result) {
+        $this-&gt;Session-&gt;setFlash(__('ユーザ名もしくはパスワードが正しくありません'));
+        return;
+    }
+
+    //トップページへ
+    $this-&gt;redirect(array('action' =&gt; 'index'));
+}
+
+....略....
+</code></pre>
+
+<p>}
+```</p>
+
+<p><code>$this-&gt;Auth-&gt;login()</code>とするだけでフォームで入力された内容が引き継がれてログイン処理が行われる。<br/>
+実際の処理は、<code>/lib/Cake/Controller/Component/AuthComponent.php</code>で行われている。<br/>
+ログインの結果は、trueかfalesで返ってくるのでfalseの場合はエラーを表示している。<br/>
+ログイン成功時にセットしたユーザーデータは、<code>$this-&gt;Auth-&gt;user()</code>で取得できる。</p>
+
+<h2>Model</h2>
+
+<p>実際にAPIを使用してログインしている箇所は側だけ。中身は割愛。</p>
+
+<p><code>/app/Model/Api.php</code></p>
+
+<p>```
+&lt;?php
+App::uses(&lsquo;AppModel&rsquo;, &lsquo;Model&rsquo;);
+class Sf extends AppModel
+{</p>
+
+<pre><code>public function login($email, $pw)
+{
+    //何かしらAPIへの接続処理
+
+    return $result;
+}
+</code></pre>
+
+<p>}
+```</p>
+
+<h2>View</h2>
+
+<p>最後はビュー。フォーム部分だけ。</p>
+
+<p>```
+&lt;?php echo $this->Form->create(&lsquo;User&rsquo;, array(&lsquo;novalidate&rsquo; => true)); ?></p>
+
+<pre><code>&lt;label&gt;
+    ログインID&lt;br&gt;
+    &lt;?php echo $this-&gt;Form-&gt;input('User.email', array(
+        'label' =&gt; false,
+        'placeholder' =&gt; ''
+    )); ?&gt;
+&lt;/label&gt;
+
+&lt;label&gt;
+    パスワード&lt;br&gt;
+    &lt;?php echo $this-&gt;Form-&gt;input('User.password', array(
+        'type' =&gt; 'password',
+        'value' =&gt; '',
+        'label' =&gt; false,
+        'placeholder' =&gt; ''
+    )); ?&gt;
+&lt;/label&gt;
+&lt;?php echo $this-&gt;Session-&gt;flash(); // エラーメッセージ ?&gt;
+
+&lt;?php echo $this-&gt;Form-&gt;submit('ログイン', array(
+    'class' =&gt; 'input-submit',
+    'div' =&gt; false
+)); ?&gt;
+</code></pre>
+
+<p>&lt;?php echo $this->Form->end() ?>
+```</p>
+
+<p>nameにあたる、<code>User.email</code>の部分はCompnentの設定に合わせる。<br/>
+ちなみに、formタグにある、<code>'novalidate' =&gt; true</code>は、<br/>
+何も指定しない場合は勝手に、<code>required="required"</code>がついてしまうので、それを付けない設定を一括で指定している。<br/>
+バリデーションは他でまとめてしているのでついてないほうがなにかとやりやすい。</p>
+
+<h2>まとめ</h2>
+
+<p>最初は自前でクッキーなどをチェックしていたのだが、<br/>
+ページ遷移時の認証機構をcakephpが一括して受け持ってくれるのはかなり楽だった。</p>
+
+<h2>参考</h2>
+
+<p><a href="http://book.cakephp.org/2.0/ja/core-libraries/components/authentication.html#id6">カスタム認証オブジェクトの作成 &ndash; 認証 &mdash; CakePHP Cookbook 2.x ドキュメント</a><br/>
+<a href="http://qiita.com/gold1/items/94938956ed02d939b7f2">CakePHP 2.4 md5 で Auth認証 &ndash; Qiita</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[CakePHP]ページタイトルを設定する]]></title>
@@ -282,48 +533,6 @@ $this-&gt;params['named']['param2'];
 <h2>参考</h2>
 
 <p><a href="http://creazy.net/2009/05/cakephp_routing.html">http://creazy.net/2009/05/cakephp_routing.html</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[CakePHP]Transitionコンポーネントでバリデーションを効かせるモデルを指定]]></title>
-    <link href="http://kayakuguri.github.io/blog/2015/04/01/cakephp-transition-validate/"/>
-    <updated>2015-04-01T19:22:30+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2015/04/01/cakephp-transition-validate</id>
-    <content type="html"><![CDATA[<p>またバリデーションネタ。<br/>
-cakephpでフォーム作成の際に、Transitionコンポーネントを使用するとすこぶる便利。<br/>
-以下が使い方としてはわかりやすかった。<br/>
-<a href="http://endoyuta.com/2013/05/18/cakephp-transition%E3%82%B3%E3%83%B3%E3%83%9D%E3%83%BC%E3%83%8D%E3%83%B3%E3%83%881-0/">cakePHP Transitionコンポーネント &ndash; Logicky Blog</a></p>
-
-<!-- more -->
-
-
-<p>で、その中で、入力画面から確認画面に遷移する際に指定したバリデーションルールを適用させたかった。<br/>
-たいていのサイトでは、<code>$this-&gt;Transition-&gt;checkData('xxx')</code>を使えばよい、と書いてあったのだが、それだと効かなかった。<br/>
-原因を探していると、どうやら使用しているコントローラーで複数のモデルを使用していると効かないよう。<br/>
-そんなときは<code>checkData</code>の第２引数でモデルを明示的に指定してやると効くようになった。</p>
-
-<p>```
-class FormController extends AppController
-{</p>
-
-<pre><code>public $uses = array('User', 'Hoge', 'Fuga');
-
-public function input(){
-    $this-&gt;Transition-&gt;checkData('confirm','Hoge');
-    ...
-}
-</code></pre>
-
-<p>}
-```</p>
-
-<p>上記のように書くと、<code>Hoge</code>モデルで記述したバリデーションが適用される。<br/>
-ここを配列にして複数のモデルを指定してやることも可能だそう。</p>
-
-<p><a href="http://d.hatena.ne.jp/kunit/20101005#1286265311">[PHP][CakePHP] Transitionコンポーネント &ndash; checkData() について</a></p>
-
-<p>それにしてもこのコンポーネントはびっくりするくらい便利。ほんとに。</p>
 ]]></content>
   </entry>
   
