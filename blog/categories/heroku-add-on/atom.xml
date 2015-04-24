@@ -4,7 +4,7 @@
   <title><![CDATA[Category: heroku-add-on | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/heroku-add-on/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-04-24T13:11:58+09:00</updated>
+  <updated>2015-04-24T13:14:13+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -105,8 +105,8 @@ CSVでもダウンロード化。</p>
             'use' =&gt; ['encode_video', 'thumb'],
             'robot' =&gt; '/s3/store',
             'bucket' =&gt; 'movie-upload-sample',
-            'key' =&gt; 'AKIAJDSACD3L3V466OIA',
-            'secret' =&gt; 'RBpdQG13HoE14pzl2pd97RdcDLGhNSc0/ast7d4L',
+            'key' =&gt; 'アクセスキー',
+            'secret' =&gt; 'シークレットキー',
             'path' =&gt; '${previous_step.name}/${unique_prefix}/${file.id}.${file.ext}'
         ]
     ],
