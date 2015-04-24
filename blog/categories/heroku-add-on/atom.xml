@@ -4,7 +4,7 @@
   <title><![CDATA[Category: heroku-add-on | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/heroku-add-on/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-04-23T17:31:41+09:00</updated>
+  <updated>2015-04-24T13:11:58+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,233 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[Herokuアドオン]TransloaditでAWS S3にアップロード]]></title>
+    <link href="http://kayakuguri.github.io/blog/2015/04/24/heroku-transloadit-3/"/>
+    <updated>2015-04-24T12:41:32+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2015/04/24/heroku-transloadit-3</id>
+    <content type="html"><![CDATA[<p>アップロードした動画をS3にエクスポートしてみた。</p>
+
+<!-- more -->
+
+
+<h2>AWS</h2>
+
+<h4>バケットを作る</h4>
+
+<p>まずはawsにてバケットを作る。</p>
+
+<p><code>movie-upload-sample</code>で作った。<br/>
+(アンダースコアを入れると怒られた)</p>
+
+<p><img src="/images/2015/04/aws01.png" alt="" /></p>
+
+<p><img src="/images/2015/04/aws02.png" alt="" /></p>
+
+<h4>アクセスキーとシークレットキー</h4>
+
+<p><img src="/images/2015/04/aws03.png" alt="" /></p>
+
+<p><code>s3upload</code>で、作成した。</p>
+
+<p><img src="/images/2015/04/aws04.png" alt="" /></p>
+
+<p>作成後、アクセスキーとシークレットキーを確認できる。<br/>
+CSVでもダウンロード化。</p>
+
+<p><img src="/images/2015/04/aws05.png" alt="" /></p>
+
+<p>ただし、シークレットアクセスキーを確認できるのはこの状態が最後らしく、そのまま閉じようとしたら警告された。</p>
+
+<p><img src="/images/2015/04/aws06.png" alt="" /></p>
+
+<p>確かに作成したユーザー情報を見ても確認は出来なかった。<br/>
+忘れてしまったりした場合は再度アクセスキーの作成が必要なよう。<br/>
+(セキュリティ的にはある程度の頻度で変更することがオススメされている)</p>
+
+<p>次に権限を付与。<br/>
+作成したユーザーをクリックして、アクセス許可 &ndash;> ポリシーのアタッチ、をクリック。</p>
+
+<p><img src="/images/2015/04/aws07.png" alt="" /></p>
+
+<p><code>AmazonS3FullAccess</code>を選択して、ポリシーのアタッチ。</p>
+
+<p><img src="/images/2015/04/aws08.png" alt="" /></p>
+
+<p>アタッチされた。</p>
+
+<p><img src="/images/2015/04/aws09.png" alt="" /></p>
+
+<p>これでS3にアップロードする準備が整った。</p>
+
+<h2>Transloaditテンプレート</h2>
+
+<p>作成したバケットやIAMの情報をテンプレートに埋め込んでいく。<br/>
+その時、アップするpathを選択できる。</p>
+
+<h3>path</h3>
+
+<p>ドキュメントを見ていると、以下のようにするのが推奨？されていた。<br/>
+<code>${previous_step.name}/${unique_prefix}/${file.id}.${file.ext}</code><br/>
+出力例：<code>video-step-name/a8/d3eeeb67479f11f8b091b04f6181ad.png</code></p>
+
+<p>とりあえずこのままアップロードしてみた。<br/>
+アップロードしたテンプレートは以下。</p>
+
+<pre><code>'params' =&gt; [
+    'steps' =&gt; [
+        'encode_video' =&gt; [
+            'use' =&gt; ':original',
+            'robot' =&gt; '/video/encode',
+            'preset' =&gt; 'android'
+        ],
+        'thumb' =&gt; [
+            'user' =&gt; 'encode_video',
+            'robot' =&gt; '/video/thumbs',
+            'count' =&gt; 1,
+            'offsets' =&gt; [1],
+            'width'=&gt; 100,
+            'height'=&gt; 100,
+        ],
+        'export' =&gt; [
+            'use' =&gt; ['encode_video', 'thumb'],
+            'robot' =&gt; '/s3/store',
+            'bucket' =&gt; 'movie-upload-sample',
+            'key' =&gt; 'AKIAJDSACD3L3V466OIA',
+            'secret' =&gt; 'RBpdQG13HoE14pzl2pd97RdcDLGhNSc0/ast7d4L',
+            'path' =&gt; '${previous_step.name}/${unique_prefix}/${file.id}.${file.ext}'
+        ]
+    ],
+    'redirect_url' =&gt; $redirectUrl,
+]
+</code></pre>
+
+<p>awsを見ると以下のようにアップロードされていた。</p>
+
+<p><strong>動画</strong><br/>
+<img src="/images/2015/04/aws10.png" alt="" /><br/>
+<strong>サムネイル</strong><br/>
+<img src="/images/2015/04/aws11.png" alt="" /></p>
+
+<p>ユニーク、なのだが、<code>${unique_prefix}</code>が戻り値にも含まれておらず、アップロード側から知ることが出来ないっぽい。<br/>
+<code>file.id</code>は、UUIDになっているとのことなのでユニークなよう。<br/>
+これを利用して以下のようにする。</p>
+
+<pre><code>${previous_step.name}/${file.id}.${file.ext}
+</code></pre>
+
+<p>これで以下の様なURLで参照出来るようになる。</p>
+
+<pre><code>https://{bucket}.s3.amazonaws.com/movie-upload-sample/encode_video/{id}.mp4
+https://{bucket}.s3.amazonaws.com/movie-upload-sample/thumb/{id}.jpg
+</code></pre>
+
+<p>ちなみに、エクスポートを使用した場合は、<br/>
+transloaditの管理画面から処理済のファイルへのアクセスも、指定したS3へのファイルが参照されるようになるよう。<br/>
+(S3だけでなく、FTPなどでも同様)</p>
+
+<h2>全コード</h2>
+
+<pre><code>&lt;?php
+
+require 'vendor/autoload.php';
+
+use transloadit\Transloadit;
+$transloadit = new Transloadit([
+    'key' =&gt; getenv('TRANSLOADIT_AUTH_KEY'),
+    'secret' =&gt; getenv('TRANSLOADIT_SECRET_KEY')
+]);
+
+$response = Transloadit::response();
+if ($response) {
+    echo '&lt;h1&gt;Assembly status:&lt;/h1&gt;';
+    echo '&lt;pre&gt;';
+    print_r($response);
+    echo '&lt;/pre&gt;';
+    exit;
+}
+
+$redirectUrl = sprintf(
+    'http://%s%s',
+    $_SERVER['HTTP_HOST'],
+    $_SERVER['REQUEST_URI']
+);
+
+echo $transloadit-&gt;createAssemblyForm([
+    'params' =&gt; [
+        'steps' =&gt; [
+            'encode_video' =&gt; [
+                'use' =&gt; ':original',
+                'robot' =&gt; '/video/encode',
+                'preset' =&gt; 'android'
+            ],
+            'thumb' =&gt; [
+                'user' =&gt; 'encode_video',
+                'robot' =&gt; '/video/thumbs',
+                'count' =&gt; 1,
+                'offsets' =&gt; [1],
+                'width'=&gt; 100,
+                'height'=&gt; 100,
+            ],
+            'export' =&gt; [
+                'use' =&gt; ['encode_video', 'thumb'],
+                'robot' =&gt; '/s3/store',
+                'bucket' =&gt; 'movie-upload-sample',
+                'key' =&gt; 'アクセスキー',
+                'secret' =&gt; 'シークレットキー',
+                'path' =&gt; '${previous_step.name}/${file.id}.${file.ext}'
+            ]
+        ],
+        'redirect_url' =&gt; $redirectUrl
+    ]
+]);
+?&gt;
+
+&lt;!DOCTYPE html&gt;
+&lt;html lang="ja"&gt;
+&lt;head&gt;
+    &lt;meta charset="utf-8"&gt;
+    &lt;link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css"&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;div class="container"&gt;
+    &lt;h1&gt;Pick a video to encode for iPhone / Android.&lt;/h1&gt;
+    &lt;form&gt;
+        &lt;div class="form-group"&gt;
+            &lt;label for="exampleInputFile"&gt;File input&lt;/label&gt;
+            &lt;input name="example_upload" id="exampleInputFile" type="file"&gt;
+            &lt;p class="help-block"&gt;Upload video, NOW.&lt;/p&gt;
+        &lt;/div&gt;
+        &lt;input type="submit" class="btn btn-danger btn-lg" value="Upload"&gt;
+    &lt;/form&gt;
+&lt;/div&gt;
+
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+
+<h2>余談</h2>
+
+<p>ちなみに、transloaditのエンコードタイプには、プリセットでiPhoneとアンドロイドどちらも用意されているけれど、<br/>
+今回試してみたところではどちらも同じ内容のようだった。<br/>
+<code>ffmpeg</code>で読み込ませてみた内容は以下。<br/>
+(videoとaudioだけ抽出)</p>
+
+<pre><code>Stream #0:0(und): Video: h264 (Constrained Baseline) (avc1 / 0x31637661), yuv420p, 480x320, 523 kb/s, 25 fps, 25 tbr, 25 tbn, 50 tbc (default)
+Stream #0:1(und): Audio: aac (LC) (mp4a / 0x6134706D), 48000 Hz, mono, fltp, 82 kb/s (default)
+</code></pre>
+
+<h2>参考</h2>
+
+<p><a href="https://transloadit.com/demos/video-encode/encode-for-iphone">Encode a video for the iPhone and strip sound | Transloadit</a><br/>
+<a href="https://transloadit.com/demos/video-encode/encode-for-android">Encode a video for Android | Transloadit</a><br/>
+<a href="https://transloadit.com/demos/s3-store/store-encoding-and-thumbnails">Encode a video, extract 8 thumbnails and store everything in your S3 bucket | Transloadit</a><br/>
+<a href="http://joppot.info/2014/06/14/1621">awsのs3を操作する為のaccess keyとsecret keyを取得する(IAM)</a><br/>
+<a href="https://transloadit.com/docs/conversion-robots/#export-to-amazon-s3-with-the-s3store-bot">Export to Amazon S3 with the /s3/store bot | Transloadit</a><br/>
+<a href="https://transloadit.com/docs/#assembly-variables">#Assembly variables | Integration | Transloadit</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[Herokuアドオン]TransloaditでFTPアップロード]]></title>
