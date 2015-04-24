@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-04-24T13:14:13+09:00</updated>
+  <updated>2015-04-24T16:23:19+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,198 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[AWSアカウントのセキュリティ設定を実施]]></title>
+    <link href="http://kayakuguri.github.io/blog/2015/04/24/aws-account-security/"/>
+    <updated>2015-04-24T16:22:32+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2015/04/24/aws-account-security</id>
+    <content type="html"><![CDATA[<p>awsはアカウントだけ作ってあまり活用はしてなかったのだけれど、<br/>
+一つ前の記事でS3を使ったりした際にアカウントのセキュリティ云々があったので設定をしてみた。</p>
+
+<!-- more -->
+
+
+<p>まず、アカウントを作っただけの状態ではルートのアカウントだけが設定された状態。<br/>
+この状態でアイパスが漏れたら<strong>何でもやりたい放題</strong>。<br/>
+怖すぎます。</p>
+
+<p>設定前のセキュリティ状況。<br/>
+<strong>何もしてません</strong></p>
+
+<p><img src="http://kayakuguri.github.io/images/2015/04/iam01.png" alt="" /></p>
+
+<h2>2段階認証</h2>
+
+<h3>Authy</h3>
+
+<p>まずは2段階認証。<br/>
+iPhoneアプリ「Authy」というアプリを使ってみる。</p>
+
+<p>ダウンロードして起動し、電話番号とメールアドレスを入力。
+SNSか電話で取得したPINコードを入力してアクティベート。</p>
+
+<h3>AWSで設定</h3>
+
+<p><code>サービス-&gt;IAM</code>のセキュリティステータスから、<br/>
+ルートアカウントのMFAをアクティブ化、を開き、MFAの管理、をクリック。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2015/04/iam02.png" alt="" /></p>
+
+<p>仮想MFAデバイス、を選択して、次のステップ、へ。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2015/04/iam03.png" alt="" /></p>
+
+<p>デバイスはインストールしてるので、チェックをつけて次のステップへ。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2015/04/iam04.png" alt="" /></p>
+
+<p>QRコードが表示される。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2015/04/iam05.png" alt="" /></p>
+
+<h3>アプリの設定</h3>
+
+<p>初めての起動だったので、ど真ん中にある<code>+</code>をタップ。<br/>
+バックアップのためのパスワードを設定するように言われるので、入力。<br/>
+するとQRコードを読み取る画面になるので、上記QRコードをスキャン。</p>
+
+<p>スキャン後、<code>Done</code>で完了。</p>
+
+<p>その後、6桁の数字が、30秒ごとに切り替わるので、<br/>
+先程のQRコードの画面で、2つの異なる数字を入力します。</p>
+
+<p>無事、完了。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2015/04/iam06.png" alt="" /></p>
+
+<p>１つ完了。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2015/04/iam07.png" alt="" /></p>
+
+<h2>IAMアカウントの作成</h2>
+
+<h3>アカウントの作成</h3>
+
+<p>awsの申込に使用したアカウントは常用しないほうがよいよう。<br/>
+なので、普段使用するユーザーとして、IAMアカウントを作成する。</p>
+
+<p>先程のセキュリティ設定から、<code>個々のIAMユーザーの作成</code>を開き、<code>ユーザーの管理</code>をクリック。</p>
+
+<p>一つ前の記事とかぶるが、ユーザーを作成。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2015/04/iam08.png" alt="" /><br/>
+<img src="http://kayakuguri.github.io/images/2015/04/iam09.png" alt="" /></p>
+
+<p>キーが生成されるので、ダウンロードして保管しておくこと。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2015/04/iam10.png" alt="" /></p>
+
+<h3>ポリシーのアタッチ</h3>
+
+<p>作成したアカウントをクリックし、ポリシーのアタッチをクリック。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2015/04/iam12.png" alt="" /></p>
+
+<p>今回はログインユーザー代わり、ってことで、<code>AdministratorAccess</code>を選択する。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2015/04/iam13.png" alt="" /></p>
+
+<h3>パスワードの設定</h3>
+
+<p>アカウントをクリックした後の画面から、パスワードを設定する。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2015/04/iam18.png" alt="" /></p>
+
+<p>パスワードは自動で発行にしておいた。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2015/04/iam15.png" alt="" /></p>
+
+<p>パスワードが発行される。ダウンロードするなどして管理する。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2015/04/iam16.png" alt="" /></p>
+
+<h3>MFAの追加</h3>
+
+<p>同じようにauthyでMFAを追加しておく。<br/>
+同じように、QRコードを読み取り、キーを2つ打って追加完了。</p>
+
+<p>２つ完了。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2015/04/iam11.png" alt="" /></p>
+
+<h2>IAMアカウントにパスワードを設定</h2>
+
+<p>セキュリティ設定から、<br/>
+<code>IAMパスワードポリシーの適用</code>を開き、<code>パスワードポリシーの管理</code>をクリック。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2015/04/iam14.png" alt="" /></p>
+
+<p>表示されるポリシーを適切に設定してパスワードポリシーの適用をクリック。<br/>
+今回はデフォルトのままにしておいた。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2015/04/iam19.png" alt="" /></p>
+
+<p>３つ完了。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2015/04/iam20.png" alt="" /></p>
+
+<h2>グループの作成と割り当て</h2>
+
+<p>セキュリティの設定から<code>グループを使用してアクセス許可を割り当て</code>を開き、<code>グループの管理</code>をクリック。<br/>
+IAMユーザーを作成した時と同じように。<br/>
+<code>新しいグループの作成</code>をクリック。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2015/04/iam21.png" alt="" /></p>
+
+<p>適当に名前をつけて、、
+<img src="http://kayakuguri.github.io/images/2015/04/iam22.png" alt="" /></p>
+
+<p>ポリシーを同じく、<code>AdministratorAccess</code>にセットして、作成。<br/>
+<img src="http://kayakuguri.github.io/images/2015/04/iam23.png" alt="" /></p>
+
+<p>とりあえず作成だけでOKとしておく。<br/>
+アカウントは1つだけなので。</p>
+
+<p>4つ完了。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2015/04/iam25.png" alt="" /></p>
+
+<h2>ルートアクセスキーの削除</h2>
+
+<p>順番が逆ですが、最後にルートアクセスキーを削除する。</p>
+
+<p>右上のユーザー名をクリックし、<code>認証情報</code>をクリック。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2015/04/iam26.png" alt="" /></p>
+
+<p>アクセスキー、を開く。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2015/04/iam27.png" alt="" /></p>
+
+<p>2つある。<br/>
+調べてみると、先日別のブログ用に導入したWordPressのアドオン、Amason JSがこのルートアクセスキーを使用しているよう。<br/>
+そういえば追加したような…。<br/>
+<a href="http://easyramble.com/wordpress-amazon-js-plugin.html">WordPressでアマゾン・アソシエイトを簡単設定！Amazon JSプラグイン | EasyRamble</a></p>
+
+<p>このプラグインはいまのところIAMのキーには対応していない、とのこと。<br/>
+なのでこのアクセスキーは削除できない。<br/>
+同じくもう一つのものもウィジェットに使っている可能性大。<br/>
+2008年作成、とかなり古いのだけど…。</p>
+
+<h2>結果</h2>
+
+<p>結局全部クリアには出来なかった。<br/>
+ルートアクセスキーを無効化に出来なかったのでその他の設定の効力がかなり落ちている感じだけど、<br/>
+(IAMユーザーの設定とかしててもルートで入れるので意味ない)<br/>
+とりあえず2段階認証だけは入れておけばいいと思います。</p>
+
+<h2>参考</h2>
+
+<p><a href="http://qiita.com/yoshidashingo/items/cd206daca0596659b440">AWSアカウント作ったらこれだけはやっとけ！IAMユーザーとAuthyを使ったMFAで2段階認証 &ndash; Qiita</a><br/>
+<a href="http://docs.aws.amazon.com/ja_jp/general/latest/gr/managing-aws-access-keys.html">AWS アカウントのアクセスキー管理</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[Herokuアドオン]TransloaditでAWS S3にアップロード]]></title>
@@ -2676,53 +2868,6 @@ $this-&gt;params['named']['param2'];
 <h2>参考</h2>
 
 <p><a href="http://creazy.net/2009/05/cakephp_routing.html">http://creazy.net/2009/05/cakephp_routing.html</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[CakePHP]Transitionコンポーネントでバリデーションを効かせるモデルを指定]]></title>
-    <link href="http://kayakuguri.github.io/blog/2015/04/01/cakephp-transition-validate/"/>
-    <updated>2015-04-01T19:22:30+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2015/04/01/cakephp-transition-validate</id>
-    <content type="html"><![CDATA[<p>またバリデーションネタ。<br/>
-cakephpでフォーム作成の際に、Transitionコンポーネントを使用するとすこぶる便利。<br/>
-以下が使い方としてはわかりやすかった。<br/>
-<a href="http://endoyuta.com/2013/05/18/cakephp-transition%E3%82%B3%E3%83%B3%E3%83%9D%E3%83%BC%E3%83%8D%E3%83%B3%E3%83%881-0/">cakePHP Transitionコンポーネント &ndash; Logicky Blog</a></p>
-
-<!-- more -->
-
-
-<p>で、その中で、入力画面から確認画面に遷移する際に指定したバリデーションルールを適用させたかった。<br/>
-たいていのサイトでは、<code>$this-&gt;Transition-&gt;checkData('xxx')</code>を使えばよい、と書いてあったのだが、それだと効かなかった。<br/>
-原因を探していると、どうやら使用しているコントローラーで複数のモデルを使用していると効かないよう。<br/>
-そんなときは<code>checkData</code>の第２引数でモデルを明示的に指定してやると効くようになった。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>class FormController extends AppController
-</span><span class='line'>{
-</span><span class='line'>  public $uses = array('User', 'Hoge', 'Fuga');
-</span><span class='line'>  
-</span><span class='line'>  public function input(){
-</span><span class='line'>      $this-&gt;Transition-&gt;checkData('confirm','Hoge');
-</span><span class='line'>      ...
-</span><span class='line'>  }
-</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
-
-
-<p>上記のように書くと、<code>Hoge</code>モデルで記述したバリデーションが適用される。<br/>
-ここを配列にして複数のモデルを指定してやることも可能だそう。</p>
-
-<p><a href="http://d.hatena.ne.jp/kunit/20101005#1286265311">[PHP][CakePHP] Transitionコンポーネント &ndash; checkData() について</a></p>
-
-<p>それにしてもこのコンポーネントはびっくりするくらい便利。ほんとに。</p>
 ]]></content>
   </entry>
   
