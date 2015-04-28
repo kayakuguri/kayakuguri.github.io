@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-04-24T16:23:19+09:00</updated>
+  <updated>2015-04-28T12:58:39+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,166 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[Salesforce]承認プロセスの作り方]]></title>
+    <link href="http://kayakuguri.github.io/blog/2015/04/28/approval-process/"/>
+    <updated>2015-04-28T12:43:41+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2015/04/28/approval-process</id>
+    <content type="html"><![CDATA[<p>承認プロセスを作成してみたので、そのログ。</p>
+
+<!-- more -->
+
+
+<h2>承認プロセスの作成</h2>
+
+<p><code>商談</code>オブジェクトで作成してみる。<br/>
+<img src="http://kayakuguri.github.io/images/2015/04/shonin01.jpg" alt="" /></p>
+
+<h4>ステップ 1. 名前と説明の入力</h4>
+
+<p>プロセス名と一意の名前を適当に入力。<br/>
+<img src="http://kayakuguri.github.io/images/2015/04/shonin02.jpg" alt="" /></p>
+
+<h4>ステップ 2. 入力条件の指定</h4>
+
+<p>特定の入力条件で承認プロセスを発動する場合は設定。<br/>
+全てレコードで承認を必要とする場合はなしで。<br/>
+<img src="http://kayakuguri.github.io/images/2015/04/shonin03.jpg" alt="" /></p>
+
+<h4>ステップ 3. 承認者項目と編集権限のプロパティの指定</h4>
+
+<p>この承認申請を誰に割り当てるのか＝誰に承認してもらうのかを決定<br/>
+標準項目としてマネージャーという項目がある。<br/>
+<img src="http://kayakuguri.github.io/images/2015/04/shonin04.jpg" alt="" /></p>
+
+<p>これは、ユーザーの項目内で設定しているマネージャーに指定されたユーザーを承認者とするもの。<br/>
+<img src="http://kayakuguri.github.io/images/2015/04/shonin05.jpg" alt="" /></p>
+
+<p>今回はなしにしておいて後で設定する。<br/>
+<img src="http://kayakuguri.github.io/images/2015/04/shonin06.jpg" alt="" /></p>
+
+<h4>ステップ 4. 通知テンプレートの選択</h4>
+
+<p>承認開始時に送信するメールを設定。<br/>
+<img src="http://kayakuguri.github.io/images/2015/04/shonin07.jpg" alt="" /></p>
+
+<p>メールテンプレートは以下から作成可能。<br/>
+管理->コミュニケーションテンプレート->メールテンプレート</p>
+
+<p>なしでもよい。</p>
+
+<h4>ステップ 5. 承認ページレイアウトに表示する項目の選択</h4>
+
+<p>承認者が承認時に確認する画面の項目を選択する。<br/>
+今回はそのままで。<br/>
+<img src="http://kayakuguri.github.io/images/2015/04/shonin08.jpg" alt="" /></p>
+
+<h4>ステップ 6. 申請者の指定</h4>
+
+<p>この承認プロセスを申請できるユーザーを限定できる。<br/>
+通常は所有者、となる。<br/>
+<img src="http://kayakuguri.github.io/images/2015/04/shonin09.jpg" alt="" /></p>
+
+<p><code>保存</code>する。</p>
+
+<h2>承認ステップの作成</h2>
+
+<p><img src="http://kayakuguri.github.io/images/2015/04/shonin10.jpg" alt="" /></p>
+
+<p>最大15個までのステップを追加可能。</p>
+
+<h4>ステップ 1. 名前と説明の入力</h4>
+
+<p>名前と一意の名前を適当に入力。<br/>
+<img src="http://kayakuguri.github.io/images/2015/04/shonin11.jpg" alt="" /></p>
+
+<h4>ステップ 2. ステップ条件の指定</h4>
+
+<p>このステップに入る条件を指定できる。<br/>
+今回は全てのレコードとする。<br/>
+<img src="http://kayakuguri.github.io/images/2015/04/shonin25.jpg" alt="" /></p>
+
+<h4>ステップ 3. 割り当て先の選択</h4>
+
+<p>承認者の設定。<br/>
+都度変えたい場合は、手動、も選べる。<br/>
+今回は固定で、特定のユーザーに自動で割り当てる。<br/>
+<img src="http://kayakuguri.github.io/images/2015/04/shonin12.jpg" alt="" /></p>
+
+<p><code>保存</code>する。</p>
+
+<h2>アクション</h2>
+
+<p><img src="http://kayakuguri.github.io/images/2015/04/shonin13.jpg" alt="" /></p>
+
+<p>以下の4つを選択可能。<br/>
+上記で設定した承認ステップのアクションを作成。<br/>
+申請時や承認時、却下時にアクションが起動する。</p>
+
+<ul>
+<li>ToDo</li>
+<li>電子メールアラート</li>
+<li>項目自動更新</li>
+<li>アウトバウンドメッセージ</li>
+</ul>
+
+
+<h3>項目自動更新</h3>
+
+<p>名前、一意の名前を適当に作成。<br/>
+更新する項目を選択し、どの値にするかを決定する。<br/>
+今回はフェーズを更新するとする。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2015/04/shonin14.jpg" alt="" /></p>
+
+<h2>作成完了</h2>
+
+<p>全ての設定が終わったら、<code>有効化</code>しておく。<br/>
+<img src="http://kayakuguri.github.io/images/2015/04/shonin15.jpg" alt="" /></p>
+
+<p>警告が出るが、OKをクリック。<br/>
+<img src="http://kayakuguri.github.io/images/2015/04/shonin16.jpg" alt="" /></p>
+
+<p>完了。</p>
+
+<h2>承認の流れ</h2>
+
+<p>商談レコードを作成し、承認申請を行う、のだが、承認申請のボタンがデフォルトでは出てなかった。 <br/>
+(環境によって変わるかも)<br/>
+なので、ページレイアウトから<code>承認申請</code>のボタンを追加した。<br/>
+<img src="http://kayakuguri.github.io/images/2015/04/shonin17.jpg" alt="" /></p>
+
+<p>また、同じく関連項目の<code>承認履歴</code>を追加しておく。<br/>
+<img src="http://kayakuguri.github.io/images/2015/04/shonin21.jpg" alt="" /></p>
+
+<p>表示されるようになったので、<code>承認申請</code>をクリック。<br/>
+<img src="http://kayakuguri.github.io/images/2015/04/shonin18.jpg" alt="" /></p>
+
+<p>警告が表示されるが、OK。<br/>
+<img src="http://kayakuguri.github.io/images/2015/04/shonin19.jpg" alt="" /></p>
+
+<p>するとレコードがロックされ、<br/>
+<img src="http://kayakuguri.github.io/images/2015/04/shonin20.jpg" alt="" /></p>
+
+<p>設定したメールが飛ぶ。</p>
+
+<p>そして、承認履歴の部分に承認、却下などの項目が現れる。<br/>
+<img src="http://kayakuguri.github.io/images/2015/04/shonin22.jpg" alt="" /></p>
+
+<p><code>承認/却下</code>をクリックすると、入力エリアが現れるので、適当にコメントを書いて承認してみる。<br/>
+<img src="http://kayakuguri.github.io/images/2015/04/shonin23.jpg" alt="" /></p>
+
+<p>レコードに戻ると、承認されている。設定した項目自動更新も反映されている。<br/>
+<img src="http://kayakuguri.github.io/images/2015/04/shonin24.jpg" alt="" /></p>
+
+<p>実際は承認するユーザーは別になると思うが、今回は自分で申請して承認している。</p>
+
+<h2>参考</h2>
+
+<p><a href="https://www.youtube.com/watch?v=b6_9NNTn_Hk">Salesforceをもっと使い倒そう-承認プロセス &ndash; YouTube</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[AWSアカウントのセキュリティ設定を実施]]></title>
@@ -2784,90 +2944,6 @@ cakeの場合、オプションに<code>'required' =&gt; false</code>を指定�
 
 <p><a href="http://stackoverflow.com/questions/7168645/invalid-form-control-only-in-google-chrome">html &ndash; &quot;Invalid form control&quot; only in Google Chrome &ndash; Stack Overflow</a><br/>
 <a href="http://d.hatena.ne.jp/cakephper/20130211/1360589926">CakePHP2.3からinputタグにhtml5のrequired属性がつくようになった &ndash; cakephperの日記(CakePHP, Laravel, PHP)</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[CakePHP]URLからパラメータを受け取る]]></title>
-    <link href="http://kayakuguri.github.io/blog/2015/04/03/cakephp-routing-params/"/>
-    <updated>2015-04-03T14:37:52+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2015/04/03/cakephp-routing-params</id>
-    <content type="html"><![CDATA[<p>cake記法？で書かれたURLからパラメータを取得するメモ。</p>
-
-<!-- more -->
-
-
-<h2>コントローラーのみで制御</h2>
-
-<p>cakephpでのURLの基本は以下。</p>
-
-<blockquote><p>コントローラー名/アクション名</p></blockquote>
-
-<p>これにパラメータをつけたければ、その後ろに並べるのみ。</p>
-
-<blockquote><p>コントローラー名/アクション名/パラメータ1/パラメータ2</p></blockquote>
-
-<p>このパラメータを取得する方法は以下。</p>
-
-<pre><code>//URL - ctrl/act/param1/param2
-
-$this-&gt;params['pass'][0]; //param1
-$this-&gt;params['pass'][1]; //param2
-</code></pre>
-
-<p>で、指定の名前を付けたい場合は、以下のように。</p>
-
-<blockquote><p>コントローラー名/アクション/パラメータ名1:パラメータ/パラメータ名2:パラメータ</p></blockquote>
-
-<pre><code>//URL - ctrl/act/param1:hoge/param2:fuga
-
-$this-&gt;params['named']['param1'];
-$this-&gt;params['named']['param2'];
-</code></pre>
-
-<p>で、View側でこのリンクを作る方法は以下。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;?php echo $this-&gt;Html-&gt;link('リンクテキスト', array(
-</span><span class='line'>  'controller' =&gt; 'ctrl',
-</span><span class='line'>  'action' =&gt; 'act',
-</span><span class='line'>  'param1' =&gt; 'hoge'
-</span><span class='line'>)) ?&gt;</span></code></pre></td></tr></table></div></figure>
-
-
-<p></p>
-
-<p>これで上記の、<code>/ctrl/act/param1:hoge</code>が生成される</p>
-
-<h2>ルーティング</h2>
-
-<p>このままだとURLが冗長になるので、ルーティングを設定して、スッキリさせる。<br/>
-さらに予めパラメータ名を指定してやる。</p>
-
-<h4>ルーティング</h4>
-
-<pre><code>Router::connect('/ctrl/act/:param1', array('controller' =&gt; 'ctrl', 'action' =&gt; 'act'));
-</code></pre>
-
-<p>こうすると、上記で記述したリンクを貼ると、以下のURLが生成される。</p>
-
-<pre><code>/ctrl/act/hoge
-</code></pre>
-
-<p>これを取得するには以下。</p>
-
-<pre><code>$this-&gt;params['param1']
-</code></pre>
-
-<p>これの方が見た目も取得方法もすっきりしててよさげ。</p>
-
-<h2>参考</h2>
-
-<p><a href="http://creazy.net/2009/05/cakephp_routing.html">http://creazy.net/2009/05/cakephp_routing.html</a></p>
 ]]></content>
   </entry>
   
