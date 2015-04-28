@@ -4,7 +4,7 @@
   <title><![CDATA[Category: php | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/php/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-04-28T20:24:48+09:00</updated>
+  <updated>2015-04-28T20:26:51+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -40,7 +40,7 @@
 なので、XML。<br/>
 以下のようにアクセスが記録されていた。</p>
 
-<pre><code>at=info method=POST path="/liam_dnes.php?id=1" host=shrouded-island-2254.herokuapp.com request_id=01b99464-c9dc-4e15-aa19-8c941a48b40a fwd="182.50.78.8" dyno=web.1 connect=1ms service=4ms status=200 bytes=189
+<pre><code>at=info method=POST path="/liam_dnes.php?id=1" host=shrouded-island-xxxx.herokuapp.com request_id=01b99464-c9dc-4e15-aa19-xxxxxxx fwd="xxx.xxx.78.8" dyno=web.1 connect=1ms service=4ms status=200 bytes=189
 </code></pre>
 
 <p>どうやらPOSTでアクセスされているよう。<br/>
