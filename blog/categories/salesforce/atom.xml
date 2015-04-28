@@ -4,7 +4,7 @@
   <title><![CDATA[Category: salesforce | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/salesforce/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-04-28T12:58:39+09:00</updated>
+  <updated>2015-04-28T20:22:51+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,103 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[Salesforce]承認申請のアウトバウンドメッセージをPHPで受け取る]]></title>
+    <link href="http://kayakuguri.github.io/blog/2015/04/28/approval-process-outbound-massage/"/>
+    <updated>2015-04-28T20:20:01+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2015/04/28/approval-process-outbound-massage</id>
+    <content type="html"><![CDATA[<p>salesforceからのアウトバウンドメッセージの内容をPHPで受け取ってみた。</p>
+
+<!-- more -->
+
+
+<h2>アウトバウンドメッセージの設定</h2>
+
+<p>前回作成したものの申請時のアクション部分に<code>アウトバウンドメッセージ</code>を追加。<br/>
+<img src="/images/2015/04/outbound01.jpg" alt="" /></p>
+
+<p>以下のように設定した。<br/>
+<img src="/images/2015/04/outbound02.jpg" alt="" /></p>
+
+<p>設定完了<br/>
+<img src="/images/2015/04/outbound03.jpg" alt="" /></p>
+
+<h2>PHPで受け取る</h2>
+
+<p>アウトバウンドメッセージは<code>SOAP</code>で通信が行われる。<br/>
+なので、XML。<br/>
+以下のようにアクセスが記録されていた。</p>
+
+<pre><code>at=info method=POST path="/liam_dnes.php?id=1" host=shrouded-island-2254.herokuapp.com request_id=01b99464-c9dc-4e15-aa19-8c941a48b40a fwd="182.50.78.8" dyno=web.1 connect=1ms service=4ms status=200 bytes=189
+</code></pre>
+
+<p>どうやらPOSTでアクセスされているよう。<br/>
+<code>$_POST</code>のままでは取得できなかった。<br/>
+どうやら生のPOSTデータを取得する必要があるらしい。</p>
+
+<p>以下で取得した。</p>
+
+<pre><code>$data = file_get_contents( 'php://input' );
+</code></pre>
+
+<p>取得すると、以下のようなXMLが取得できた。</p>
+
+<p>```
+&lt;?xml version=&ldquo;1.0&rdquo; encoding=&ldquo;UTF-8&rdquo;?>
+&lt;soapenv:Envelope xmlns:soapenv=&ldquo;<a href="http://schemas.xmlsoap.org/soap/envelope/">http://schemas.xmlsoap.org/soap/envelope/</a>&rdquo; xmlns:xsd=&ldquo;<a href="http://www.w3.org/2001/XMLSchema">http://www.w3.org/2001/XMLSchema</a>&rdquo; xmlns:xsi=&ldquo;<a href="http://www.w3.org/2001/XMLSchema-instance">http://www.w3.org/2001/XMLSchema-instance</a>&rdquo;></p>
+
+<pre><code>&lt;soapenv:Body&gt;
+    &lt;notifications xmlns="http://soap.sforce.com/2005/09/outbound"&gt;
+        &lt;OrganizationId&gt;00D10000000Zyxxxxx&lt;/OrganizationId&gt;
+        &lt;SessionId xsi:nil="true"/&gt;
+        &lt;PartnerUrl&gt;https://ap.salesforce.com/services/Soap/u/33.0/00D100000xxxxx&lt;/PartnerUrl&gt;
+        &lt;ActionId&gt;04k100000008STGAA2&lt;/ActionId&gt;
+        &lt;EnterpriseUrl&gt;https://ap.salesforce.com/services/Soap/c/33.0/00D100000xxxxx&lt;/EnterpriseUrl&gt;
+        &lt;Notification&gt;
+            &lt;Id&gt;04l1000000xxxxxx&lt;/Id&gt;
+            &lt;sObject xsi:type="sf:Opportunity" xmlns:sf="urn:sobject.enterprise.soap.sforce.com"&gt;
+                &lt;sf:Id&gt;0061000000cxxxxx&lt;/sf:Id&gt;
+                &lt;sf:Name&gt;アウトバウンドのテスト商談&lt;/sf:Name&gt;
+                &lt;sf:StageName&gt;Prospecting&lt;/sf:StageName&gt;
+                &lt;sf:IsClosed&gt;false&lt;/sf:IsClosed&gt;
+            &lt;/sObject&gt;
+        &lt;/Notification&gt;
+    &lt;/notifications&gt;
+&lt;/soapenv:Body&gt;
+</code></pre>
+
+<p>&lt;/soapenv:Envelope>
+```</p>
+
+<p>アウトバウンドの設定は以下のような形。</p>
+
+<p>ここからXMLをパースして、名前など設定した値を取得するには以下。</p>
+
+<p>```
+&lt;?php</p>
+
+<p>$data = file_get_contents(&lsquo;php://input&rsquo;);
+$xml = simplexml_load_string($data);</p>
+
+<p>//ID
+$notification = $xml->children(&lsquo;<a href="http://schemas.xmlsoap.org/soap/envelope/">http://schemas.xmlsoap.org/soap/envelope/</a>&rsquo;)&ndash;>Body->children(&lsquo;<a href="http://soap.sforce.com/2005/09/outbound">http://soap.sforce.com/2005/09/outbound</a>&rsquo;)&ndash;>notifications->Notification;
+echo $notification->Id;</p>
+
+<p>//パラメータ
+$params = $notification->sObject->children(&lsquo;urn:sobject.enterprise.soap.sforce.com&rsquo;);
+echo $params->Id;
+echo $params->Name;
+echo $params->IsClosed;
+```</p>
+
+<h2>参考</h2>
+
+<p><a href="http://php.net/manual/ja/wrappers.php.php#wrappers.php.input">php://input</a><br/>
+<a href="http://ivystar.jp/programming/php/what-is-phpinput/">「php://input」とは何？－POSTの生データ？ | アイビースター</a><br/>
+<a href="https://amigotechnotes.wordpress.com/2013/11/16/parse-xml-with-namespace-by-simplexml-in-php/">Parse XML with namespace by SimpleXML in PHP | Amigo&#039;s Technical Notes</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[Salesforce]承認プロセスの作り方]]></title>
@@ -385,60 +482,6 @@ result.request_time = &lsquo;2015-3-27 12:33&rsquo;;</p>
 
 <p>このフィード追跡機能はフォローしたレコードにどういう変更があった時に通知するか、を設定できるので、<br/>
 上手く使えば便利になるのかもしれません。</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[salesforce]メモ&添付ファイルに添付されたファイルのURLを取得する]]></title>
-    <link href="http://kayakuguri.github.io/blog/2014/12/25/get-attachment-url/"/>
-    <updated>2014-12-25T11:21:42+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2014/12/25/get-attachment-url</id>
-    <content type="html"><![CDATA[<p>オブジェクトの、「メモ＆添付ファイル」で添付されたファイルを公開URLを使用してダウンロードリンクを作成したい。</p>
-
-<!-- more -->
-
-
-<p>添付ファイルの名前などはSOQLで取得できるが、そのファイルへのリンクURLそのものは取得出来ない。<br/>
-けれど、以下のURLを組み立てる事で、ダウンロードは出来るよう。</p>
-
-<pre><code>https://cs6.salesforce.com/servlet/servlet.FileDownload?file=FILE_ID
-</code></pre>
-
-<p>これさえわかれば後は公開URLに適用させてやればよい。<br/>
-その際に参照権限を与えておかないといけない。<br/>
-その方法は以前書いた画像の表示とほぼ同じ。<br/>
-<a href="http://kayakuguri.github.io/blog/2014/10/16/forcecom-sites-profile/">[Salesforce]リッチテキストエリアに保存された画像を一般公開する</a></p>
-
-<p>まずは、サイトの設定から、</p>
-
-<p><img src="/images/2014/12/attach01.jpg" alt="" /></p>
-
-<p>表示ラベルをクリックして詳細を表示し、</p>
-
-<p><img src="/images/2014/12/attach02.jpg" alt="" /></p>
-
-<p>公開アクセス設定から、</p>
-
-<p><img src="/images/2014/12/attach03.jpg" alt="" /></p>
-
-<p>プロファイルの編集を選んで、</p>
-
-<p><img src="/images/2014/12/attach04.jpg" alt="" /></p>
-
-<p>添付ファイルをダウンロードさせたいオブジェクトの権限に参照を与えてやる。</p>
-
-<p><img src="/images/2014/12/attach05.jpg" alt="" /></p>
-
-<p>後は、項目レベルセキュリティの設定で個別な参照権限の設定が必要かと思ったが、これだけでいけた。</p>
-
-<p>設定後は以下のようなアドレスになる。</p>
-
-<pre><code>http://yourdomain.cs6.force.com/yoursite/servlet/servlet.FileDownload?file=FILE-ID
-</code></pre>
-
-<h3>参考</h3>
-
-<p><a href="https://developer.salesforce.com/forums/ForumsMain?id=906F0000000AURkIAO">Trigger to get download link/url from attachments in salesforce?</a></p>
 ]]></content>
   </entry>
   

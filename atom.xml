@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-04-28T12:58:39+09:00</updated>
+  <updated>2015-04-28T20:22:51+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,133 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[Salesforce]承認申請のアウトバウンドメッセージをPHPで受け取る]]></title>
+    <link href="http://kayakuguri.github.io/blog/2015/04/28/approval-process-outbound-massage/"/>
+    <updated>2015-04-28T20:20:01+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2015/04/28/approval-process-outbound-massage</id>
+    <content type="html"><![CDATA[<p>salesforceからのアウトバウンドメッセージの内容をPHPで受け取ってみた。</p>
+
+<!-- more -->
+
+
+<h2>アウトバウンドメッセージの設定</h2>
+
+<p>前回作成したものの申請時のアクション部分に<code>アウトバウンドメッセージ</code>を追加。<br/>
+<img src="http://kayakuguri.github.io/images/2015/04/outbound01.jpg" alt="" /></p>
+
+<p>以下のように設定した。<br/>
+<img src="http://kayakuguri.github.io/images/2015/04/outbound02.jpg" alt="" /></p>
+
+<p>設定完了<br/>
+<img src="http://kayakuguri.github.io/images/2015/04/outbound03.jpg" alt="" /></p>
+
+<h2>PHPで受け取る</h2>
+
+<p>アウトバウンドメッセージは<code>SOAP</code>で通信が行われる。<br/>
+なので、XML。<br/>
+以下のようにアクセスが記録されていた。</p>
+
+<pre><code>at=info method=POST path="/liam_dnes.php?id=1" host=shrouded-island-2254.herokuapp.com request_id=01b99464-c9dc-4e15-aa19-8c941a48b40a fwd="182.50.78.8" dyno=web.1 connect=1ms service=4ms status=200 bytes=189
+</code></pre>
+
+<p>どうやらPOSTでアクセスされているよう。<br/>
+<code>$_POST</code>のままでは取得できなかった。<br/>
+どうやら生のPOSTデータを取得する必要があるらしい。</p>
+
+<p>以下で取得した。</p>
+
+<pre><code>$data = file_get_contents( 'php://input' );
+</code></pre>
+
+<p>取得すると、以下のようなXMLが取得できた。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+</span><span class='line'>&lt;soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"&gt;
+</span><span class='line'>    &lt;soapenv:Body&gt;
+</span><span class='line'>        &lt;notifications xmlns="http://soap.sforce.com/2005/09/outbound"&gt;
+</span><span class='line'>            &lt;OrganizationId&gt;00D10000000Zyxxxxx&lt;/OrganizationId&gt;
+</span><span class='line'>            &lt;SessionId xsi:nil="true"/&gt;
+</span><span class='line'>            &lt;PartnerUrl&gt;https://ap.salesforce.com/services/Soap/u/33.0/00D100000xxxxx&lt;/PartnerUrl&gt;
+</span><span class='line'>            &lt;ActionId&gt;04k100000008STGAA2&lt;/ActionId&gt;
+</span><span class='line'>            &lt;EnterpriseUrl&gt;https://ap.salesforce.com/services/Soap/c/33.0/00D100000xxxxx&lt;/EnterpriseUrl&gt;
+</span><span class='line'>            &lt;Notification&gt;
+</span><span class='line'>                &lt;Id&gt;04l1000000xxxxxx&lt;/Id&gt;
+</span><span class='line'>                &lt;sObject xsi:type="sf:Opportunity" xmlns:sf="urn:sobject.enterprise.soap.sforce.com"&gt;
+</span><span class='line'>                    &lt;sf:Id&gt;0061000000cxxxxx&lt;/sf:Id&gt;
+</span><span class='line'>                    &lt;sf:Name&gt;アウトバウンドのテスト商談&lt;/sf:Name&gt;
+</span><span class='line'>                    &lt;sf:StageName&gt;Prospecting&lt;/sf:StageName&gt;
+</span><span class='line'>                    &lt;sf:IsClosed&gt;false&lt;/sf:IsClosed&gt;
+</span><span class='line'>                &lt;/sObject&gt;
+</span><span class='line'>            &lt;/Notification&gt;
+</span><span class='line'>        &lt;/notifications&gt;
+</span><span class='line'>    &lt;/soapenv:Body&gt;
+</span><span class='line'>&lt;/soapenv:Envelope&gt;</span></code></pre></td></tr></table></div></figure>
+
+
+<p>アウトバウンドの設定は以下のような形。</p>
+
+<p>ここからXMLをパースして、名前など設定した値を取得するには以下。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;?php
+</span><span class='line'>
+</span><span class='line'>$data = file_get_contents('php://input');
+</span><span class='line'>$xml = simplexml_load_string($data);
+</span><span class='line'>
+</span><span class='line'>//ID
+</span><span class='line'>$notification = $xml-&gt;children('http://schemas.xmlsoap.org/soap/envelope/')-&gt;Body-&gt;children('http://soap.sforce.com/2005/09/outbound')-&gt;notifications-&gt;Notification;
+</span><span class='line'>echo $notification-&gt;Id;
+</span><span class='line'>
+</span><span class='line'>//パラメータ
+</span><span class='line'>$params = $notification-&gt;sObject-&gt;children('urn:sobject.enterprise.soap.sforce.com');
+</span><span class='line'>echo $params-&gt;Id;
+</span><span class='line'>echo $params-&gt;Name;
+</span><span class='line'>echo $params-&gt;IsClosed;</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>参考</h2>
+
+<p><a href="http://php.net/manual/ja/wrappers.php.php#wrappers.php.input">php://input</a><br/>
+<a href="http://ivystar.jp/programming/php/what-is-phpinput/">「php://input」とは何？－POSTの生データ？ | アイビースター</a><br/>
+<a href="https://amigotechnotes.wordpress.com/2013/11/16/parse-xml-with-namespace-by-simplexml-in-php/">Parse XML with namespace by SimpleXML in PHP | Amigo&#039;s Technical Notes</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[Salesforce]承認プロセスの作り方]]></title>
@@ -2843,107 +2970,6 @@ notAfter=Apr  8 14:59:59 2016 GMT
 
 <p><a href="http://dackdive.hateblo.jp/entry/2014/07/05/100926">[Salesforce]活動履歴(ActivityHistory)がテストで取得できない？ &ndash; dackdive&#39;s blog</a><br/>
 <a href="http://blog.flect.co.jp/salesforce/2012/05/post-9aec.html">セールスフォースの豆知識: テストメソッドがアクセスできるデータが変わりました</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[CakaPHP]ラジオボタンの必須チェック]]></title>
-    <link href="http://kayakuguri.github.io/blog/2015/04/06/cakephp-radio-validation/"/>
-    <updated>2015-04-06T12:58:39+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2015/04/06/cakephp-radio-validation</id>
-    <content type="html"><![CDATA[<p>またもやバリデーションネタ。<br/>
-ラジオボタンにたいして未選択のチェックを入れる方法。</p>
-
-<!-- more -->
-
-
-<p>モデルのバリデーションルールに、<code>'required' =&gt; true</code>とかを入れればよいだけかとおもいきや、なかなか一筋縄ではいかなった。</p>
-
-<h3>&lsquo;required&rsquo; => true</h3>
-
-<p><code>'required' =&gt; true</code>を設定しただけではバリデーションルールが適用されないよう。<br/>
-ルールを同時に設定する必要があるとか。<br/>
-このオプションの意味は、指定のキーデータがない場合にチェックされるよう。(たぶん)</p>
-
-<p>ルールには空だとエラー、ということで、<code>notEmpty</code>を追加。<br/>
-これで必須のチェックのみは完了。</p>
-
-<h3>required属性</h3>
-
-<p>モデルでバリデーションを指定すると、自動的にinputタグの属性に、<code>required</code>が追加されてしまう。<br/>
-このまま送信しようとすると、Chrome限定だと思うが、エラーが出た送信出来ない。</p>
-
-<blockquote><p>An invalid form control with name=&lsquo;xxx&rsquo; is not focusable.</p></blockquote>
-
-<p>Chromeでは<code>required</code>属性が入ったinputでデータがなかった場合は、吹き出しのようなものを出すような仕様になっているが、<br/>
-radioボタンの場合はその吹き出しを出す場所がなくてエラーになってしまうみたい。</p>
-
-<h4>回避方法</h4>
-
-<p>回避方法はいくつかあるよう。</p>
-
-<p>１）<br/>
-なのでradioボタンの場合はこの属性を入れてはいけない。<br/>
-cakeの場合、オプションに<code>'required' =&gt; false</code>を指定してやることで出さないように出来た。</p>
-
-<p>２）<br/>
-<code>form</code>タグの生成時に<code>novalidate</code>をtrueでセットしてやればその中のinputタグには、<code>required</code>属性がつかなくなるよう。<br/>
-全部にセット出来るという意味ではこれが一番お手軽かも。</p>
-
-<h3>ソース</h3>
-
-<p>最終的なソースの抜粋は以下。</p>
-
-<h4>モデル</h4>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>'radio_data' =&gt; array(
-</span><span class='line'>    array(
-</span><span class='line'>        'rule' =&gt; 'notEmpty',
-</span><span class='line'>        'message' =&gt; '選択して下さい'
-</span><span class='line'>    ),
-</span><span class='line'>)</span></code></pre></td></tr></table></div></figure>
-
-
-<h4>ビュー</h4>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;?php echo $this-&gt;Form-&gt;input('radio_data', array(
-</span><span class='line'>  'type' =&gt; 'radio',
-</span><span class='line'>  'options' =&gt; array('OK', 'NG'),
-</span><span class='line'>  'required' =&gt; false
-</span><span class='line'>));?&gt;</span></code></pre></td></tr></table></div></figure>
-
-
-<p>もしくは、</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;?php echo $this-&gt;Form-&gt;create('Model', array('novalidate' =&gt; true));  ?&gt;
-</span><span class='line'>~~~中略~~~
-</span><span class='line'>&lt;?php echo $this-&gt;Form-&gt;input('radio_data', array(
-</span><span class='line'>  'type' =&gt; 'radio',
-</span><span class='line'>  'options' =&gt; array('OK', 'NG'),
-</span><span class='line'>));?&gt;</span></code></pre></td></tr></table></div></figure>
-
-
-<h3>参考</h3>
-
-<p><a href="http://stackoverflow.com/questions/7168645/invalid-form-control-only-in-google-chrome">html &ndash; &quot;Invalid form control&quot; only in Google Chrome &ndash; Stack Overflow</a><br/>
-<a href="http://d.hatena.ne.jp/cakephper/20130211/1360589926">CakePHP2.3からinputタグにhtml5のrequired属性がつくようになった &ndash; cakephperの日記(CakePHP, Laravel, PHP)</a></p>
 ]]></content>
   </entry>
   
