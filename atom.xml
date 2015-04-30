@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-04-30T10:50:52+09:00</updated>
+  <updated>2015-04-30T10:55:23+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -18,8 +18,7 @@
     <link href="http://kayakuguri.github.io/blog/2015/04/30/heroku-sticky-session/"/>
     <updated>2015-04-30T10:03:06+09:00</updated>
     <id>http://kayakuguri.github.io/blog/2015/04/30/heroku-sticky-session</id>
-    <content type="html"><![CDATA[<p>herokuにおいて、セッションの取り扱いが若干クセがあったのだけど、<br/>
-この、<code>スティッキーセッション(セッションアフィニティ)</code>なるもので楽になるのかも。</p>
+    <content type="html"><![CDATA[<p>herokuで、<code>スティッキーセッション(セッションアフィニティ)</code>を有効化するオプションが公開されたってことで、調べてみた。</p>
 
 <!-- more -->
 
