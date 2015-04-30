@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-04-28T20:26:51+09:00</updated>
+  <updated>2015-04-30T10:50:52+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,114 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[Heroku]スティッキーセッションの有効化]]></title>
+    <link href="http://kayakuguri.github.io/blog/2015/04/30/heroku-sticky-session/"/>
+    <updated>2015-04-30T10:03:06+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2015/04/30/heroku-sticky-session</id>
+    <content type="html"><![CDATA[<p>herokuにおいて、セッションの取り扱いが若干クセがあったのだけど、<br/>
+この、<code>スティッキーセッション(セッションアフィニティ)</code>なるもので楽になるのかも。</p>
+
+<!-- more -->
+
+
+<h2>dyno</h2>
+
+<p>herokuでは、dynoを増やしていく=ロードバランサとなって、アクセスの度にランダムにサーバを割り振られる。<br/>
+なので、サーバ側に保持しているセッションは同一ユーザーのアクセスであってもページを遷移しただけでセッションが保持されていないサーバに割り振られてしまい、セッション切れを起こしてしまう、という問題がある。<br/>
+これを解決していたのが主に、<a href="https://addons.heroku.com/memcachier">MemCachier</a>というアドオンで、このMemCachier側にセッションを保持してやることでサーバが変わってもセッションを維持する、という流れで作成するのがセオリーだった。<br/>
+(1Dynoだとサーバは一つなので必要ない)</p>
+
+<h2>スティッキーセッション</h2>
+
+<p>それを解決するのが、スティッキーセッション、セッション・アフィニティ、と呼ばれるもののよう。<br/>
+これは、ロードバランサなどでサーバが数台ある場合に、特定のユーザーからのアクセスは特定のサーバのみに接続するように調整するもの、らしい。<br/>
+なので、ページ遷移をしてもサーバが変わらず、セッションが切れる事がない、というわけ。<br/>
+ただし、この設定で重要なのは、この同じサーバに割り当てる時間、の設定、とのこと。<br/>
+長くするとロードバランサの意味がなくなっていくし、短くするとセッションが切れてしまう。<br/>
+heroku上でこの時間を設定できるのかは今のところ不明。</p>
+
+<p><a href="http://docs.aws.amazon.com/ja_jp/ElasticLoadBalancing/latest/DeveloperGuide/elb-sticky-sessions.html">スティッキーセッションの有効化と無効化</a></p>
+
+<h2>herokuでの設定</h2>
+
+<p>この機能はまだベータ版、ってことで、デフォルトではもちろん無効となっている。<br/>
+有効にするには以下のコマンドを実行する必要がある。</p>
+
+<pre><code>$ heroku labs:enable http-session-affinity
+</code></pre>
+
+<h2>検証</h2>
+
+<p>実際に検証してみる。<br/>
+検証は、以下のサイトにあった、訪問回数をカウントする単純なものを使用してみた。<br/>
+この回数がリロードの度に増えていけばセッションが引き継がれている、ということだが、<br/>
+別サーバに接続されてセッションがなくなるとカウントがやり直しになったりする、はず。</p>
+
+<p><a href="http://www.phppro.jp/school/phpschool/vol8/1">第8回　セッションの仕組みを知ろう &ndash; PHP基礎講座</a></p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;?php
+</span><span class='line'>session_start();
+</span><span class='line'>
+</span><span class='line'>if (isset($_SESSION["counter"])) {
+</span><span class='line'>  $_SESSION["counter"]++;
+</span><span class='line'>  print($_SESSION["counter"]."回目の読み込みです。");
+</span><span class='line'>} else {
+</span><span class='line'>   $_SESSION["counter"] = 0;
+</span><span class='line'>  print("はじめての読み込みです。");
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>1 Dyno</h3>
+
+<p>まず、Dynoを１で。<br/>
+これは順調に増えた。当然の結果。</p>
+
+<h3>2 Dyno</h3>
+
+<p>dynoを増やしてみる。<br/>
+何度かリロードしていると、10回目くらいで「はじめての読み込みです。」という表示が登場。<br/>
+それ以降、何回かごとに別々のカウント数が表示される状態に。</p>
+
+<h3>セッションアフィニティ</h3>
+
+<p>で、この2Dynoの状態でセッションアフィニティをオンに。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$ heroku labs:enable http-session-affinity                                                    [ruby-2.1.2]
+</span><span class='line'>Enabling http-session-affinity for session-afinity-test... done
+</span><span class='line'>WARNING: This feature is experimental and may change or be removed without notice.
+</span><span class='line'>For more information see: https://devcenter.heroku.com/articles/session-affinity</span></code></pre></td></tr></table></div></figure>
+
+
+<p>アクセスしてみる。<br/>
+100になるくらいまでリロードしてみたが、正常にカウント出来たいたので、きちんと同一セッションを見にいっていると思う。</p>
+
+<h3>注意</h3>
+
+<p>ただし、herokuをdeployするとセッションが切れてしまうのは変わらないようなので注意が必要。<br/>
+また、ベータ版の機能となるので、これに頼った実装はまだ早いと思われる。</p>
+
+<h2>参考</h2>
+
+<p><a href="https://blog.heroku.com/archives/2015/4/28/introducing_session_affinity">Heroku | Introducing Session Affinity</a><br/>
+<a href="https://devcenter.heroku.com/articles/session-affinity">Heroku Labs: Session Affinity | Heroku Dev Center</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[Salesforce]承認申請のアウトバウンドメッセージをPHPで受け取る]]></title>
@@ -2919,57 +3027,6 @@ notAfter=Apr  8 14:59:59 2016 GMT
 </code></pre>
 
 <p>期間内だと問題なくアップ出来ました。</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[salesforce]テスト実行時に組織化の全てのデータにアクセスする]]></title>
-    <link href="http://kayakuguri.github.io/blog/2015/04/07/sf-seealldata-test/"/>
-    <updated>2015-04-07T14:40:33+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2015/04/07/sf-seealldata-test</id>
-    <content type="html"><![CDATA[<p>salesforceでテストコードを実行させる場合、通常であればデータはテスト用にコード内で作成する必要があります。<br/>
-しかし、組織内のデータを直接使用してテストしたい場合もあります。あります。<br/>
-そんな時のメモ。</p>
-
-<!-- more -->
-
-
-<p>テストアノテーションメソッドを以下のようにすればよいだけ。</p>
-
-<pre><code>@isTest(SeeAllData=true)
-</code></pre>
-
-<p>これで組織化にある全データを使用してテストの実行が行えます。<br/>
-ですが、もちろんsandboxと本番環境に差異がある場合はsandboxで通ったテストが本番では通らない、カバー率が低い、ということがありえますので注意です。</p>
-
-<p>これを使用するシュチエーションとしては、活動履歴(<code>ActivityHistory</code>)を使用する場合があります。<br/>
-活動履歴は直接SOQLでは作成できず、テストコード内で作成したデータには紐付いて作成されません。<br/>
-要するに、テスト実行する手段がない、よう。<br/>
-その際に上記メソッドを使う事で組織内に作成されたデータを使用してのテストが必要になってきます。</p>
-
-<p>もともとsalesforceは<code>Spring '12</code>リリースまでは(<code>API 24.0</code>より古いもの)では全データにアクセスが出来たよう。<br/>
-それだと組織内のデータに依存してしまって上手くテスト実行が出来ない、という状態だったため、デフォルトでは組織内のデータにはアクセス出来ないように変更されたようです。<br/>
-で、アクセスしたい場合は上記のコードを書けばよい、と。<br/>
-上手く使えばテストが非常に落になりそうです(違う)。</p>
-
-<p>上記メソッドを使用しなくても以下のデータは組織内のデータを使用してテスト実行が可能なようです。</p>
-
-<ul>
-<li>User</li>
-<li>Profile</li>
-<li>Organization</li>
-<li>RecordType</li>
-<li>ApexClass</li>
-<li>ApexTrigger</li>
-<li>ApexComponent</li>
-<li>ApexPage</li>
-</ul>
-
-
-<h3>参考</h3>
-
-<p><a href="http://dackdive.hateblo.jp/entry/2014/07/05/100926">[Salesforce]活動履歴(ActivityHistory)がテストで取得できない？ &ndash; dackdive&#39;s blog</a><br/>
-<a href="http://blog.flect.co.jp/salesforce/2012/05/post-9aec.html">セールスフォースの豆知識: テストメソッドがアクセスできるデータが変わりました</a></p>
 ]]></content>
   </entry>
   
