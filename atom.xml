@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-04-30T10:55:23+09:00</updated>
+  <updated>2015-05-01T14:29:14+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,73 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[salesforce]アウトバウンドメッセージ送信時のエラー]]></title>
+    <link href="http://kayakuguri.github.io/blog/2015/05/01/salesforce-outbound-xml/"/>
+    <updated>2015-05-01T14:26:22+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2015/05/01/salesforce-outbound-xml</id>
+    <content type="html"><![CDATA[<p>先日、アウトバウンドメッセージをPHPで受けとる方法を紹介したけれど、試しているとアウトバウンドメッセージの送信がSalesforce側から何度も試行されていることがわかった。</p>
+
+<!-- more -->
+
+
+<p>salesforce側のログを見ていると、以下のようなエラーが出ている。<br/>
+<code>設定 &gt; 監視 &gt; アウトバウンドメッセージ</code></p>
+
+<p><img src="http://kayakuguri.github.io/images/2015/05/outbound_error.jpg" alt="エラー" /></p>
+
+<blockquote><p>org.xml.sax.SAXParseException; lineNumber: 1; columnNumber: 1; Content is not allowed in prolog.</p></blockquote>
+
+<p>どうやら、PHP側の応答が、SOAPの形式に則ってないとsalesforce側でXMLの解析ができずにエラーが出てしまうっぽい。<br/>
+なので、エラーが解消されるまで数回試行が続く、っぽい。</p>
+
+<p>応答はXMLの形式でなければならないので、headerでXMLとしてやる必要がある。</p>
+
+<pre><code>header("Content-Type: application/xml; charset=UTF-8");
+</code></pre>
+
+<p>また、返却するXMLは以下のような形でないといけないよう。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"&gt;
+</span><span class='line'>  &lt;soapenv:Body&gt;
+</span><span class='line'>      &lt;notificationsResponse xmlns="http://soap.sforce.com/2005/09/outbound"&gt;
+</span><span class='line'>      &lt;Ack&gt;true&lt;/Ack&gt;
+</span><span class='line'>  &lt;/notificationsResponse&gt;
+</span><span class='line'>  &lt;/soapenv:Body&gt;
+</span><span class='line'>&lt;/soapenv:Envelope&gt;</span></code></pre></td></tr></table></div></figure>
+
+
+<p>というわけで、以下のようにPHPを書いてやればエラーは出ない。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;?php
+</span><span class='line'>header("Content-Type: application/xml; charset=UTF-8");
+</span><span class='line'>
+</span><span class='line'>//--何らかの処理--
+</span><span class='line'>
+</span><span class='line'>$response = '&lt;soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"&gt;&lt;soapenv:Body&gt;&lt;notificationsResponse xmlns="http://soap.sforce.com/2005/09/outbound"&gt;&lt;Ack&gt;true&lt;/Ack&gt;&lt;/notificationsResponse&gt;&lt;/soapenv:Body&gt;&lt;/soapenv:Envelope&gt;';
+</span><span class='line'>echo $response;</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>参考</h2>
+
+<p><a href="http://www.tgerm.com/2014/08/testing-soap-outbound-messages-without-failures-saxexception.html">{!blog.concret.io}: Testing SOAP Outbound Messages without failures</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[Heroku]スティッキーセッションの有効化]]></title>
@@ -2984,48 +3051,6 @@ catchの部分は今回で言えば、<code>DmlException</code>なので、そ�
 <p><a href="https://www.salesforce.com/us/developer/docs/apexcode/Content/apex_methods_system_date.htm#apex_System_Date_format">Date Class &ndash; format()</a><br/>
 <a href="https://www.salesforce.com/us/developer/docs/apexcode/Content/apex_methods_system_datetime.htm#apex_System_Datetime_format_2">Datetime Class &ndash; format(string)</a><br/>
 <a href="http://stackoverflow.com/questions/11834873/salesforce-apex-validating-date-for-format-and-value">validation &ndash; Salesforce Apex: Validating date for format and value &ndash; Stack Overflow</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[heroku]ssl設定時のエラーについてのメモ]]></title>
-    <link href="http://kayakuguri.github.io/blog/2015/04/09/ssl-error/"/>
-    <updated>2015-04-09T13:03:29+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2015/04/09/ssl-error</id>
-    <content type="html"><![CDATA[<p>簡単な事だったのですが、情報が見つけられなかったのでメモ。</p>
-
-<!-- more -->
-
-
-<p>herokuにsslを適用させる場合、証明書と秘密鍵をアドオンにアップロードします。<br/>
-具体的には以下のコマンド。</p>
-
-<pre><code>$ heroku certs:add 証明書 秘密鍵
-</code></pre>
-
-<p>その際に、以下のエラーが返って来た。</p>
-
-<blockquote><p>Unable to parse certificate. Please ensure the certificate is in PEM format.</p></blockquote>
-
-<p>内容は特に間違っているとは思えず、何度見返しても正しい。</p>
-
-<p>結局原因は、有効期間前、というなんとも単純な事だった。<br/>
-取得した時点ではまだ開始前の状態で、期限前。<br/>
-あまり期限を先にして取得することってないのか、ググっても特に出てこず。<br/>
-期限外だったらそう怒ってくれればいいのに、上記のエラー内容ではその事が特にわからなかったのもハマりポイントでした。</p>
-
-<p>ちなみに有効期間の確認は以下。</p>
-
-<pre><code>$ openssl x509 -in 証明書 -noout -dates
-</code></pre>
-
-<p>以下のような形で返ってくる。</p>
-
-<pre><code>notBefore=Apr  8 15:00:00 2015 GMT
-notAfter=Apr  8 14:59:59 2016 GMT
-</code></pre>
-
-<p>期間内だと問題なくアップ出来ました。</p>
 ]]></content>
   </entry>
   

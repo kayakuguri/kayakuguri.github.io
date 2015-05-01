@@ -4,7 +4,7 @@
   <title><![CDATA[Category: php | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/php/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-04-30T10:55:23+09:00</updated>
+  <updated>2015-05-01T14:29:14+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,64 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[salesforce]アウトバウンドメッセージ送信時のエラー]]></title>
+    <link href="http://kayakuguri.github.io/blog/2015/05/01/salesforce-outbound-xml/"/>
+    <updated>2015-05-01T14:26:22+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2015/05/01/salesforce-outbound-xml</id>
+    <content type="html"><![CDATA[<p>先日、アウトバウンドメッセージをPHPで受けとる方法を紹介したけれど、試しているとアウトバウンドメッセージの送信がSalesforce側から何度も試行されていることがわかった。</p>
+
+<!-- more -->
+
+
+<p>salesforce側のログを見ていると、以下のようなエラーが出ている。<br/>
+<code>設定 &gt; 監視 &gt; アウトバウンドメッセージ</code></p>
+
+<p><img src="/images/2015/05/outbound_error.jpg" alt="エラー" /></p>
+
+<blockquote><p>org.xml.sax.SAXParseException; lineNumber: 1; columnNumber: 1; Content is not allowed in prolog.</p></blockquote>
+
+<p>どうやら、PHP側の応答が、SOAPの形式に則ってないとsalesforce側でXMLの解析ができずにエラーが出てしまうっぽい。<br/>
+なので、エラーが解消されるまで数回試行が続く、っぽい。</p>
+
+<p>応答はXMLの形式でなければならないので、headerでXMLとしてやる必要がある。</p>
+
+<pre><code>header("Content-Type: application/xml; charset=UTF-8");
+</code></pre>
+
+<p>また、返却するXMLは以下のような形でないといけないよう。</p>
+
+<p>```
+&lt;soapenv:Envelope xmlns:soapenv=&ldquo;<a href="http://schemas.xmlsoap.org/soap/envelope/">http://schemas.xmlsoap.org/soap/envelope/</a>&rdquo;></p>
+
+<pre><code>&lt;soapenv:Body&gt;
+    &lt;notificationsResponse xmlns="http://soap.sforce.com/2005/09/outbound"&gt;
+    &lt;Ack&gt;true&lt;/Ack&gt;
+&lt;/notificationsResponse&gt;
+&lt;/soapenv:Body&gt;
+</code></pre>
+
+<p>&lt;/soapenv:Envelope>
+```</p>
+
+<p>というわけで、以下のようにPHPを書いてやればエラーは出ない。</p>
+
+<p>```
+&lt;?php
+header(&ldquo;Content-Type: application/xml; charset=UTF-8&rdquo;);</p>
+
+<p>//&mdash;何らかの処理&mdash;</p>
+
+<p>$response = &lsquo;&lt;soapenv:Envelope xmlns:soapenv=&ldquo;<a href="http://schemas.xmlsoap.org/soap/envelope/">http://schemas.xmlsoap.org/soap/envelope/</a>&rdquo;>&lt;soapenv:Body><notificationsResponse xmlns="http://soap.sforce.com/2005/09/outbound"><Ack>true</Ack></notificationsResponse>&lt;/soapenv:Body>&lt;/soapenv:Envelope>&rsquo;;
+echo $response;
+```</p>
+
+<h2>参考</h2>
+
+<p><a href="http://www.tgerm.com/2014/08/testing-soap-outbound-messages-without-failures-saxexception.html">{!blog.concret.io}: Testing SOAP Outbound Messages without failures</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[Salesforce]承認申請のアウトバウンドメッセージをPHPで受け取る]]></title>
@@ -444,133 +502,6 @@ PHP 5.5.14 (cli) (built: Jun 28 2014 10:29:43)
 
 <pre><code>  - Installing facebook/php-sdk-v4 (4.0.9)
 </code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Mailgun APIを使ってメールを送る Composer版]]></title>
-    <link href="http://kayakuguri.github.io/blog/2014/07/15/mailgunapi/"/>
-    <updated>2014-07-15T14:13:12+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2014/07/15/mailgunapi</id>
-    <content type="html"><![CDATA[<p>いくつか書いているmailgunを使用したメール送信の件ですが、<br/>
-たぶん正しいと思われる方法がわかったのでメモしておきます。</p>
-
-<!-- more -->
-
-
-<h3>composerでインストール</h3>
-
-<p><a href="https://github.com/mailgun/mailgun-php">mailgun/mailgun-php · GitHub</a></p>
-
-<p>composerを使用して、ライブラリをインストールします。<br/>
-Composerのインストールは以下などを参照に。<br/>
-<a href="http://tech.basicinc.jp/php/2013/08/18/php_composer/">PHPのパッケージ管理Composerを使う</a></p>
-
-<p>Windowsの場合は以下に書きました。<br/>
-<a href="http://kayakuguri.github.io/blog/2014/07/15/win7-composer/">Windows7でComposerのインストール</a></p>
-
-<p><code>composer.json</code>に以下のように記述。</p>
-
-<pre><code>{
-    "require": {
-        "mailgun/mailgun-php": "~1.7.1"
-    }
-}
-</code></pre>
-
-<p>で、インストール。</p>
-
-<pre><code>$ composer install
-</code></pre>
-
-<p>これでライブラリなどがダウンロードされ、mailgunの依存関係が出来上がります。</p>
-
-<h3>Mailgun</h3>
-
-<h4>インストール</h4>
-
-<p>アドオンのインストール。</p>
-
-<pre><code>$ heroku addons:add mailgun
-</code></pre>
-
-<h4>セットアップ</h4>
-
-<p>PHPの冒頭で初期化して送信。<br/>
-初期化するためにはAPIキーとドメインが必要。<br/>
-これは環境変数に入っている。</p>
-
-<pre><code>MAILGUN_API_KEY:       key-xxx
-MAILGUN_SMTP_LOGIN:    postmaster@xxx.mailgun.org
-MAILGUN_SMTP_PASSWORD: xxx
-MAILGUN_SMTP_PORT:     587
-MAILGUN_SMTP_SERVER:   smtp.mailgun.org
-</code></pre>
-
-<p>ドメインは、<code>MAILGUN_SMTP_LOGIN</code>の<code>@</code>より後ろ、になるので、それを使用する。</p>
-
-<pre><code>require 'vendor/autoload.php';
-use Mailgun\Mailgun;
-
-$mgClient = new Mailgun(getenv('MAILGUN_API_KEY'));
-$domain = getenv('MAILGUN_SMTP_LOGIN');
-$domain = substr($domain, strpos($domain, '@') + 1);
-</code></pre>
-
-<h4>送信</h4>
-
-<p>通常の送信は以下。</p>
-
-<pre><code>$result = $mgClient-&gt;sendMessage($domain, array(
-    'from'    =&gt; 'Excited User &lt;me@samples.mailgun.org&gt;',
-    'to'      =&gt; 'Baz &lt;baz@example.com&gt;',
-    'subject' =&gt; 'Hello',
-    'text'    =&gt; 'Testing some Mailgun awesomness!'
-));
-</code></pre>
-
-<h4>パラメータを個別に設定</h4>
-
-<p>上記では送信時に一括で指定しているけれど、これを個別に設定するには、<br/>
-<code>Message Builder</code>というものを使用します。<br/>
-<a href="https://github.com/mailgun/mailgun-php/blob/master/src/Mailgun/Messages/README.md#usage---message-builder">Usage &ndash; Message Builder</a></p>
-
-<p>上記のセットをバラすと以下のようになります。</p>
-
-<pre><code>$msgBldr = $mgClient-&gt;MessageBuilder();
-$msgBldr-&gt;setFromAddress('Excited User &lt;me@samples.mailgun.org&gt;');
-$msgBldr-&gt;addToRecipient('Baz &lt;baz@example.com&gt;');
-$msgBldr-&gt;setSubject('Hello');
-$msgBldr-&gt;setTextBody('Testing some Mailgun awesomness!'); 
-$result = $mgClient-&gt;post("{$domain}/messages", $msgBldr-&gt;getMessage(), $msgBldr-&gt;getFiles());
-</code></pre>
-
-<h4>キューにまとめて登録</h4>
-
-<p>また、キューにまとめて登録する場合は、<code>Batch Message</code>を使用します。<br/>
-<a href="https://github.com/mailgun/mailgun-php/blob/master/src/Mailgun/Messages/README.md#usage---batch-message">Usage &ndash; Batch Message</a></p>
-
-<p>これを使用して、toを複数登録すると、それぞれのtoにバラバラに同じメールが送られます。</p>
-
-<pre><code>$msgBldr = $mgClient-&gt;BatchMessage($domain);
-$msgBldr-&gt;addToRecipient('test1 &lt;test1@example.com&gt;');
-$msgBldr-&gt;addToRecipient('test2 &lt;test2@example.com&gt;');
-// 他のパラメータ設定は同じ
-$result = $msgBldr-&gt;finalize();
-</code></pre>
-
-<p><code>finalize</code>で、キューに登録されるようでした。</p>
-
-<hr />
-
-<p>今までのmailgun関連の記事はこちら</p>
-
-<ul>
-<li><a href="http://kayakuguri.github.io/blog/2014/02/17/send-mail-from-heroku-with-mailgun/">PHPでMailgunを使ってherokuでメール送信する</a></li>
-<li><a href="http://kayakuguri.github.io/blog/2014/02/18/php-heroku-sendattachmail/">[PHP]herokuで添付ファイル付きメールを送る</a></li>
-<li><a href="http://kayakuguri.github.io/blog/2014/02/19/attachment-use-mailgunapi/">[PHP][heroku]Mailgun APIを使って添付ファイルを送る</a></li>
-</ul>
-
 ]]></content>
   </entry>
   
