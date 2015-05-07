@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-05-07T11:44:00+09:00</updated>
+  <updated>2015-05-07T15:34:18+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,347 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[herokuアドオン]cloudinaryで動画を試してみた[PHP]]]></title>
+    <link href="http://kayakuguri.github.io/blog/2015/05/07/cloudinary-movie/"/>
+    <updated>2015-05-07T15:31:47+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2015/05/07/cloudinary-movie</id>
+    <content type="html"><![CDATA[<p>2015年5月5日に新しく発表された動画サポートを試してみた。</p>
+
+<!-- more -->
+
+
+<h2>アップロード</h2>
+
+<p>インストールなどは<a href="http://kayamemo.mrlittlebig.com/blog/2015/05/07/cloudinary-img/">前回の記事</a>参照。</p>
+
+<p>同一ディレクトリにある、movファイルをアップロードした。<br/>
+動画は、iPhoneで撮影したもの。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;?php
+</span><span class='line'>require '../vendor/autoload.php';
+</span><span class='line'>
+</span><span class='line'>use Cloudinary;
+</span><span class='line'>use Cloudinary\Uploader;
+</span><span class='line'>
+</span><span class='line'>$account = parse_url(getenv('CLOUDINARY_URL'));
+</span><span class='line'>
+</span><span class='line'>\Cloudinary::config(array(
+</span><span class='line'>    "cloud_name" =&gt; $account['host'],
+</span><span class='line'>    "api_key" =&gt; $account['user'],
+</span><span class='line'>    "api_secret" =&gt; $account['pass']
+</span><span class='line'>));
+</span><span class='line'>
+</span><span class='line'>$ret = \Cloudinary\Uploader::upload("iphone_movie.mov",array(
+</span><span class='line'>    "resource_type" =&gt; "video"
+</span><span class='line'>));
+</span><span class='line'>
+</span><span class='line'>print_r($ret);</span></code></pre></td></tr></table></div></figure>
+
+
+<p>結果は以下。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>Array ( 
+</span><span class='line'>  [public_id] =&gt; wfdpqg39qjoc6lnkr3cs 
+</span><span class='line'>  [version] =&gt; 1430967110 
+</span><span class='line'>  [signature] =&gt; 7f52af2c53ccc3b38f8b33300a40d6085c85c032 
+</span><span class='line'>  [width] =&gt; 1280 
+</span><span class='line'>  [height] =&gt; 720 
+</span><span class='line'>  [format] =&gt; mov 
+</span><span class='line'>  [resource_type] =&gt; video 
+</span><span class='line'>  [created_at] =&gt; 2015-05-07T02:51:50Z 
+</span><span class='line'>  [tags] =&gt; Array ( ) 
+</span><span class='line'>  [bytes] =&gt; 5572519 
+</span><span class='line'>  [type] =&gt; upload 
+</span><span class='line'>  [etag] =&gt; 3114c6de99a74817eef082b330754d1e 
+</span><span class='line'>  [url] =&gt; http://res.cloudinary.com/harslxcej/video/upload/v1430967110/wfdpqg39qjoc6lnkr3cs.mov 
+</span><span class='line'>  [secure_url] =&gt; https://res.cloudinary.com/harslxcej/video/upload/v1430967110/wfdpqg39qjoc6lnkr3cs.mov 
+</span><span class='line'>  [audio] =&gt; Array ( 
+</span><span class='line'>      [codec] =&gt; aac 
+</span><span class='line'>      [bit_rate] =&gt; 63431 
+</span><span class='line'>      [frequency] =&gt; 44100 
+</span><span class='line'>      [channels] =&gt; 1 
+</span><span class='line'>      [channel_layout] =&gt; mono 
+</span><span class='line'>  ) 
+</span><span class='line'>  [video] =&gt; Array ( 
+</span><span class='line'>      [pix_format] =&gt; yuv420p 
+</span><span class='line'>      [codec] =&gt; h264 
+</span><span class='line'>      [level] =&gt; 31 
+</span><span class='line'>      [bit_rate] =&gt; 4604806 
+</span><span class='line'>  ) 
+</span><span class='line'>  [frame_rate] =&gt; 29.97002997003 
+</span><span class='line'>  [bit_rate] =&gt; 4686070 
+</span><span class='line'>  [duration] =&gt; 9.538333 
+</span><span class='line'>  [rotation] =&gt; 0 
+</span><span class='line'>)</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>表示</h2>
+
+<p>PHPでは、<code>cl_video_tag</code>を利用することで<code>video</code>タグを出力してくれる。</p>
+
+<pre><code>cl_video_tag($public_id, array( "alt" =&gt; "Sample Video" ));
+</code></pre>
+
+<p>出力</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;video alt='Sample Video' poster='https://res.cloudinary.com/harslxcej/video/upload/wfdpqg39qjoc6lnkr3cs.jpg'&gt;
+</span><span class='line'>  &lt;source src='https://res.cloudinary.com/harslxcej/video/upload/wfdpqg39qjoc6lnkr3cs.webm' type='video/webm'&gt;
+</span><span class='line'>  &lt;source src='https://res.cloudinary.com/harslxcej/video/upload/wfdpqg39qjoc6lnkr3cs.mp4' type='video/mp4'&gt;
+</span><span class='line'>  &lt;source src='https://res.cloudinary.com/harslxcej/video/upload/wfdpqg39qjoc6lnkr3cs.ogv' type='video/ogg'&gt;
+</span><span class='line'>&lt;/video&gt;</span></code></pre></td></tr></table></div></figure>
+
+
+<p>このままだとコントローラーが表示されていないので、その辺のオプションも追加する。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>cl_video_tag($public_id, array(
+</span><span class='line'>    "width" =&gt; 600,
+</span><span class='line'>    "height" =&gt; 400,
+</span><span class='line'>    "crop" =&gt; "fill",
+</span><span class='line'>    "preload" =&gt; "none",
+</span><span class='line'>    "controls" =&gt; true,
+</span><span class='line'>));</span></code></pre></td></tr></table></div></figure>
+
+
+<p>出力</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;video controls='1' height='400' poster='https://res.cloudinary.com/harslxcej/video/upload/c_fill,h_400,w_600/wfdpqg39qjoc6lnkr3cs.jpg' preload='none' width='600'&gt;
+</span><span class='line'>  &lt;source src='https://res.cloudinary.com/harslxcej/video/upload/c_fill,h_400,w_600/wfdpqg39qjoc6lnkr3cs.webm' type='video/webm'&gt;
+</span><span class='line'>  &lt;source src='https://res.cloudinary.com/harslxcej/video/upload/c_fill,h_400,w_600/wfdpqg39qjoc6lnkr3cs.mp4' type='video/mp4'&gt;
+</span><span class='line'>  &lt;source src='https://res.cloudinary.com/harslxcej/video/upload/c_fill,h_400,w_600/wfdpqg39qjoc6lnkr3cs.ogv' type='video/ogg'&gt;
+</span><span class='line'>&lt;/video&gt;</span></code></pre></td></tr></table></div></figure>
+
+
+<p>サムネイルの出力は以下。<br/>
+public idに拡張子をつけてやらないと表示が出来なかった。<br/>
+(jpg, png, webp, wdpに対応しているよう)</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>cl_image_tag($public_id.".jpg", array(
+</span><span class='line'>    "width"=&gt;300,
+</span><span class='line'>    "height"=&gt;300,
+</span><span class='line'>    "crop"=&gt;"fill",
+</span><span class='line'>    "resource_type"=&gt;"video"
+</span><span class='line'>));</span></code></pre></td></tr></table></div></figure>
+
+
+<p>結果</p>
+
+<pre><code>&lt;img src='https://res.cloudinary.com/harslxcej/video/upload/c_fill,h_300,w_300/wfdpqg39qjoc6lnkr3cs.jpg' height='300' width='300'/&gt;
+</code></pre>
+
+<h2>フォームからアップロード</h2>
+
+<p><a href="http://kayamemo.mrlittlebig.com/blog/2015/04/16/heroku-transloadit-2/">前回、Transloaditでアップロード</a>した時と同じように、フォームから選択した動画をアップロードしてみる。</p>
+
+<h3>情報が取得できない</h3>
+
+<p>動画をフォームからアップロードしてみると情報が取得できない、と思ったが、<br/>
+どうやらサーバーの設定での最大アップロードサイズを超過していたよう。</p>
+
+<p>アップロードサイズはデフォルトでは、<code>2MB</code>。<br/>
+これの変更方法は以前に書いていた。<br/>
+<a href="http://kayamemo.mrlittlebig.com/blog/2014/02/18/change-max-filesize/">[PHP][heroku]upload_max_filesizeを変更する &ndash; KayaMemo</a></p>
+
+<h3>コード</h3>
+
+<p>以下、全コード。<br/>
+動画をアップロードされたら表示するところまで。<br/>
+(エラーチェックなどは全くしていないので注意)</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;?php
+</span><span class='line'>require '../vendor/autoload.php';
+</span><span class='line'>use Cloudinary;
+</span><span class='line'>use Cloudinary\Uploader;
+</span><span class='line'>
+</span><span class='line'>$showFlg = false;
+</span><span class='line'>
+</span><span class='line'>if(isset($_FILES['userfile'])){
+</span><span class='line'>    if (move_uploaded_file($_FILES['userfile']['tmp_name'], $_FILES['userfile']['name'])) {
+</span><span class='line'>        $uploadFile = $_FILES['userfile']['name'];
+</span><span class='line'>
+</span><span class='line'>    $account = parse_url(getenv('CLOUDINARY_URL'));
+</span><span class='line'>    \Cloudinary::config(array(
+</span><span class='line'>        "cloud_name" =&gt; $account['host'],
+</span><span class='line'>        "api_key" =&gt; $account['user'],
+</span><span class='line'>        "api_secret" =&gt; $account['pass']
+</span><span class='line'>    ));
+</span><span class='line'>
+</span><span class='line'>    $ret = \Cloudinary\Uploader::upload($uploadFile,array(
+</span><span class='line'>        "resource_type" =&gt; "video"
+</span><span class='line'>    ));
+</span><span class='line'>    $public_id = $ret['public_id'];
+</span><span class='line'>    $showFlg = true;
+</span><span class='line'>    }
+</span><span class='line'>}
+</span><span class='line'>?&gt;
+</span><span class='line'>
+</span><span class='line'>&lt;!DOCTYPE html&gt;
+</span><span class='line'>&lt;html lang="ja"&gt;
+</span><span class='line'>&lt;head&gt;
+</span><span class='line'>    &lt;title&gt;ファイルアップロードテスト&lt;/title&gt;
+</span><span class='line'>    &lt;meta charset="utf-8"&gt;
+</span><span class='line'>&lt;/head&gt;
+</span><span class='line'>&lt;body&gt;
+</span><span class='line'>
+</span><span class='line'>&lt;?php if(!$showFlg){ ?&gt;
+</span><span class='line'>&lt;form enctype="multipart/form-data" method="post" action="upload-form-movie.php"&gt;
+</span><span class='line'>    &lt;input type="hidden" name="MAX_FILE_SIZE" value="20000000" /&gt;
+</span><span class='line'>    &lt;input name="userfile" type="file"&gt;
+</span><span class='line'>    &lt;input type="submit" value="Upload"&gt;
+</span><span class='line'>&lt;/form&gt;
+</span><span class='line'>&lt;?php }else{
+</span><span class='line'>    echo $resize = cl_video_tag($public_id, array(
+</span><span class='line'>        "width" =&gt; 600,
+</span><span class='line'>        "height" =&gt; 400,
+</span><span class='line'>        "crop" =&gt; "fill",
+</span><span class='line'>        "preload" =&gt; "none",
+</span><span class='line'>        "controls" =&gt; true,
+</span><span class='line'>    ));
+</span><span class='line'>} ?&gt;
+</span><span class='line'>
+</span><span class='line'>&lt;/body&gt;
+</span><span class='line'>&lt;/html&gt;</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>参考</h2>
+
+<p><a href="http://cloudinary.com/blog/introducing_cloud_based_service_for_video_upload_real_time_manipulation_and_optimized_viewing#api_example_1">Introducing cloud based service for video management | Cloudinary Blog</a><br/>
+<a href="http://cloudinary.com/documentation/video_manipulation_and_delivery">Video manipulation and delivery | Cloudinary</a></p>
+
+<p><a href="http://php.net/manual/ja/features.file-upload.post-method.php">PHP: POST メソッドによるアップロード &ndash; Manual </a><br/>
+<a href="http://www.php-factory.net/trivia/05.php">サーバーのアップロードファイルの最大容量の確認と容量制限の変更｜PHP工房</a><br/>
+<a href="https://devcenter.heroku.com/articles/custom-php-settings#user-ini-files-recommended">Customizing Web Server and Runtime Settings for PHP | Heroku Dev Center</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[herokuアドオン]cloudinaryで画像のアップロードと表示[PHP]]]></title>
@@ -3164,69 +3505,6 @@ catchの部分は今回で言えば、<code>DmlException</code>なので、そ�
 <h3>参考</h3>
 
 <p><a href="https://developer.salesforce.com/forums/ForumsMain?id=906F00000008xGuIAI">How do I test for an exception(&lsquo;addError&rsquo;) in a Trigger ? &ndash; Salesforce Developer Community</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[CakePHP]400系エラーが発生した場合にトップページにリダイレクトさせる]]></title>
-    <link href="http://kayakuguri.github.io/blog/2015/04/13/cake-php-404-redirect/"/>
-    <updated>2015-04-13T15:35:00+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2015/04/13/cake-php-404-redirect</id>
-    <content type="html"><![CDATA[<p>ググると色々と方法が出てくるので今更ですが、<br/>
-記事によって微妙に違ったので、最終的に上手くいったものをメモ。</p>
-
-<!-- more -->
-
-
-<p>cakephpがエラーをハンドリングしているControllerは以下。<br/>
-<code>/lib/Cake/Error/ExceptionRenderer.php</code></p>
-
-<p>この中の、219行目あたりにある、<code>error400</code>の処理が400系エラー時の処理にあたる。<br/>
-なので、これをオーバーライドしてやる形でリダイレクト処理を書く。<br/>
-(直接編集してもいいが、コアシステムになるのでなるべく触らないほうがよさげ)</p>
-
-<p>まずエラーの際の処理をオーバーライドするためのクラスファイルを作成。<br/>
-<code>/lib/Cake/Error/AppExceptionRenderer.php</code></p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;?php
-</span><span class='line'>App::uses('ExceptionRenderer', 'Error');
-</span><span class='line'>
-</span><span class='line'>class AppExceptionRenderer extends ExceptionRenderer {
-</span><span class='line'>    public function error400($error) { // 400番台のエラー時に呼ばれるメソッドを上書き
-</span><span class='line'>        $this-&gt;controller-&gt;redirect(array('controller' =&gt; 'users', 'action' =&gt; 'index'), 301);
-</span><span class='line'>    }
-</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
-
-
-<p>この時に注意点は、<code>redirect</code>関数を呼び出すときに、<code>$this-&gt;controller</code>経由で呼び出さないとエラーになってしまった。<br/>
-<code>$this-&gt;redirect()</code>ではダメだった。</p>
-
-<p>で、coreクラスでエラー時に呼び出すクラスを作成したクラスに変更。</p>
-
-<p><code>/app/Config/core.php</code> 79行目付近</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>'renderer' =&gt; 'ExceptionRenderer',
-</span><span class='line'>↓↓
-</span><span class='line'>'renderer' =&gt; 'AppExceptionRenderer',</span></code></pre></td></tr></table></div></figure>
-
-
-<p>後はコントローラーなどがないページへアクセスすれば、指定のページにリダイレクトが発生する。</p>
-
-<h3>参考</h3>
-
-<p><a href="https://www.markernet.co.jp/blog/2014/06/12/post-1622/">CakePHP2.Xで404 Not Foundエラーをリダイレクトする方法 | WEB制作ブログ</a><br/>
-<a href="http://studio-faust.com/programming/258/">CakePHP2 404エラーの場合にトップページにリダイレクト | Web Studio Faust</a></p>
 ]]></content>
   </entry>
   

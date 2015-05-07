@@ -4,7 +4,7 @@
   <title><![CDATA[Category: heroku-add-on | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/heroku-add-on/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-05-07T11:44:00+09:00</updated>
+  <updated>2015-05-07T15:34:18+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,259 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[herokuアドオン]cloudinaryで動画を試してみた[PHP]]]></title>
+    <link href="http://kayakuguri.github.io/blog/2015/05/07/cloudinary-movie/"/>
+    <updated>2015-05-07T15:31:47+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2015/05/07/cloudinary-movie</id>
+    <content type="html"><![CDATA[<p>2015年5月5日に新しく発表された動画サポートを試してみた。</p>
+
+<!-- more -->
+
+
+<h2>アップロード</h2>
+
+<p>インストールなどは<a href="http://kayamemo.mrlittlebig.com/blog/2015/05/07/cloudinary-img/">前回の記事</a>参照。</p>
+
+<p>同一ディレクトリにある、movファイルをアップロードした。<br/>
+動画は、iPhoneで撮影したもの。</p>
+
+<p>```
+&lt;?php
+require &lsquo;../vendor/autoload.php&rsquo;;</p>
+
+<p>use Cloudinary;
+use Cloudinary\Uploader;</p>
+
+<p>$account = parse_url(getenv(&lsquo;CLOUDINARY_URL&rsquo;));</p>
+
+<p>\Cloudinary::config(array(</p>
+
+<pre><code>"cloud_name" =&gt; $account['host'],
+"api_key" =&gt; $account['user'],
+"api_secret" =&gt; $account['pass']
+</code></pre>
+
+<p>));</p>
+
+<p>$ret = \Cloudinary\Uploader::upload(&ldquo;iphone_movie.mov&rdquo;,array(</p>
+
+<pre><code>"resource_type" =&gt; "video"
+</code></pre>
+
+<p>));</p>
+
+<p>print_r($ret);
+```</p>
+
+<p>結果は以下。</p>
+
+<p>```
+Array (</p>
+
+<pre><code>[public_id] =&gt; wfdpqg39qjoc6lnkr3cs 
+[version] =&gt; 1430967110 
+[signature] =&gt; 7f52af2c53ccc3b38f8b33300a40d6085c85c032 
+[width] =&gt; 1280 
+[height] =&gt; 720 
+[format] =&gt; mov 
+[resource_type] =&gt; video 
+[created_at] =&gt; 2015-05-07T02:51:50Z 
+[tags] =&gt; Array ( ) 
+[bytes] =&gt; 5572519 
+[type] =&gt; upload 
+[etag] =&gt; 3114c6de99a74817eef082b330754d1e 
+[url] =&gt; http://res.cloudinary.com/harslxcej/video/upload/v1430967110/wfdpqg39qjoc6lnkr3cs.mov 
+[secure_url] =&gt; https://res.cloudinary.com/harslxcej/video/upload/v1430967110/wfdpqg39qjoc6lnkr3cs.mov 
+[audio] =&gt; Array ( 
+    [codec] =&gt; aac 
+    [bit_rate] =&gt; 63431 
+    [frequency] =&gt; 44100 
+    [channels] =&gt; 1 
+    [channel_layout] =&gt; mono 
+) 
+[video] =&gt; Array ( 
+    [pix_format] =&gt; yuv420p 
+    [codec] =&gt; h264 
+    [level] =&gt; 31 
+    [bit_rate] =&gt; 4604806 
+) 
+[frame_rate] =&gt; 29.97002997003 
+[bit_rate] =&gt; 4686070 
+[duration] =&gt; 9.538333 
+[rotation] =&gt; 0 
+</code></pre>
+
+<p>)
+```</p>
+
+<h2>表示</h2>
+
+<p>PHPでは、<code>cl_video_tag</code>を利用することで<code>video</code>タグを出力してくれる。</p>
+
+<pre><code>cl_video_tag($public_id, array( "alt" =&gt; "Sample Video" ));
+</code></pre>
+
+<p>出力</p>
+
+<p>```
+<video alt='Sample Video' poster='https://res.cloudinary.com/harslxcej/video/upload/wfdpqg39qjoc6lnkr3cs.jpg'></p>
+
+<pre><code>&lt;source src='https://res.cloudinary.com/harslxcej/video/upload/wfdpqg39qjoc6lnkr3cs.webm' type='video/webm'&gt;
+&lt;source src='https://res.cloudinary.com/harslxcej/video/upload/wfdpqg39qjoc6lnkr3cs.mp4' type='video/mp4'&gt;
+&lt;source src='https://res.cloudinary.com/harslxcej/video/upload/wfdpqg39qjoc6lnkr3cs.ogv' type='video/ogg'&gt;
+</code></pre>
+
+<p></video>
+```</p>
+
+<p>このままだとコントローラーが表示されていないので、その辺のオプションも追加する。</p>
+
+<p>```
+cl_video_tag($public_id, array(</p>
+
+<pre><code>"width" =&gt; 600,
+"height" =&gt; 400,
+"crop" =&gt; "fill",
+"preload" =&gt; "none",
+"controls" =&gt; true,
+</code></pre>
+
+<p>));
+```</p>
+
+<p>出力</p>
+
+<p>```
+<video controls='1' height='400' poster='https://res.cloudinary.com/harslxcej/video/upload/c_fill,h_400,w_600/wfdpqg39qjoc6lnkr3cs.jpg' preload='none' width='600'></p>
+
+<pre><code>&lt;source src='https://res.cloudinary.com/harslxcej/video/upload/c_fill,h_400,w_600/wfdpqg39qjoc6lnkr3cs.webm' type='video/webm'&gt;
+&lt;source src='https://res.cloudinary.com/harslxcej/video/upload/c_fill,h_400,w_600/wfdpqg39qjoc6lnkr3cs.mp4' type='video/mp4'&gt;
+&lt;source src='https://res.cloudinary.com/harslxcej/video/upload/c_fill,h_400,w_600/wfdpqg39qjoc6lnkr3cs.ogv' type='video/ogg'&gt;
+</code></pre>
+
+<p></video>
+```</p>
+
+<p>サムネイルの出力は以下。<br/>
+public idに拡張子をつけてやらないと表示が出来なかった。<br/>
+(jpg, png, webp, wdpに対応しているよう)</p>
+
+<p>```
+cl_image_tag($public_id.&ldquo;.jpg&rdquo;, array(</p>
+
+<pre><code>"width"=&gt;300,
+"height"=&gt;300,
+"crop"=&gt;"fill",
+"resource_type"=&gt;"video"
+</code></pre>
+
+<p>));
+```</p>
+
+<p>結果</p>
+
+<pre><code>&lt;img src='https://res.cloudinary.com/harslxcej/video/upload/c_fill,h_300,w_300/wfdpqg39qjoc6lnkr3cs.jpg' height='300' width='300'/&gt;
+</code></pre>
+
+<h2>フォームからアップロード</h2>
+
+<p><a href="http://kayamemo.mrlittlebig.com/blog/2015/04/16/heroku-transloadit-2/">前回、Transloaditでアップロード</a>した時と同じように、フォームから選択した動画をアップロードしてみる。</p>
+
+<h3>情報が取得できない</h3>
+
+<p>動画をフォームからアップロードしてみると情報が取得できない、と思ったが、<br/>
+どうやらサーバーの設定での最大アップロードサイズを超過していたよう。</p>
+
+<p>アップロードサイズはデフォルトでは、<code>2MB</code>。<br/>
+これの変更方法は以前に書いていた。<br/>
+<a href="http://kayamemo.mrlittlebig.com/blog/2014/02/18/change-max-filesize/">[PHP][heroku]upload_max_filesizeを変更する &ndash; KayaMemo</a></p>
+
+<h3>コード</h3>
+
+<p>以下、全コード。<br/>
+動画をアップロードされたら表示するところまで。<br/>
+(エラーチェックなどは全くしていないので注意)</p>
+
+<p>```
+&lt;?php
+require &lsquo;../vendor/autoload.php&rsquo;;
+use Cloudinary;
+use Cloudinary\Uploader;</p>
+
+<p>$showFlg = false;</p>
+
+<p>if(isset($_FILES[&lsquo;userfile&rsquo;])){</p>
+
+<pre><code>if (move_uploaded_file($_FILES['userfile']['tmp_name'], $_FILES['userfile']['name'])) {
+    $uploadFile = $_FILES['userfile']['name'];
+
+$account = parse_url(getenv('CLOUDINARY_URL'));
+\Cloudinary::config(array(
+    "cloud_name" =&gt; $account['host'],
+    "api_key" =&gt; $account['user'],
+    "api_secret" =&gt; $account['pass']
+));
+
+$ret = \Cloudinary\Uploader::upload($uploadFile,array(
+    "resource_type" =&gt; "video"
+));
+$public_id = $ret['public_id'];
+$showFlg = true;
+}
+</code></pre>
+
+<p>}
+?></p>
+
+<p>&lt;!DOCTYPE html>
+<html lang="ja">
+<head></p>
+
+<pre><code>&lt;title&gt;ファイルアップロードテスト&lt;/title&gt;
+&lt;meta charset="utf-8"&gt;
+</code></pre>
+
+<p></head>
+<body></p>
+
+<p>&lt;?php if(!$showFlg){ ?>
+<form enctype="multipart/form-data" method="post" action="upload-form-movie.php"></p>
+
+<pre><code>&lt;input type="hidden" name="MAX_FILE_SIZE" value="20000000" /&gt;
+&lt;input name="userfile" type="file"&gt;
+&lt;input type="submit" value="Upload"&gt;
+</code></pre>
+
+<p></form>
+&lt;?php }else{</p>
+
+<pre><code>echo $resize = cl_video_tag($public_id, array(
+    "width" =&gt; 600,
+    "height" =&gt; 400,
+    "crop" =&gt; "fill",
+    "preload" =&gt; "none",
+    "controls" =&gt; true,
+));
+</code></pre>
+
+<p>} ?></p>
+
+<p></body>
+</html>
+```</p>
+
+<h2>参考</h2>
+
+<p><a href="http://cloudinary.com/blog/introducing_cloud_based_service_for_video_upload_real_time_manipulation_and_optimized_viewing#api_example_1">Introducing cloud based service for video management | Cloudinary Blog</a><br/>
+<a href="http://cloudinary.com/documentation/video_manipulation_and_delivery">Video manipulation and delivery | Cloudinary</a></p>
+
+<p><a href="http://php.net/manual/ja/features.file-upload.post-method.php">PHP: POST メソッドによるアップロード &ndash; Manual </a><br/>
+<a href="http://www.php-factory.net/trivia/05.php">サーバーのアップロードファイルの最大容量の確認と容量制限の変更｜PHP工房</a><br/>
+<a href="https://devcenter.heroku.com/articles/custom-php-settings#user-ini-files-recommended">Customizing Web Server and Runtime Settings for PHP | Heroku Dev Center</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[herokuアドオン]cloudinaryで画像のアップロードと表示[PHP]]]></title>
@@ -934,81 +1187,6 @@ transloadit\TransloaditResponse Object
 <a href="https://devcenter.heroku.com/articles/transloadit">Transloadit | Heroku Dev Center</a><br/>
 <a href="https://transloadit.com/">File upload processing web service | Transloadit</a><br/>
 <a href="https://github.com/transloadit/php-sdk">transloadit/php-sdk</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[Herokuアドオン]PostgreSQL Studio]]></title>
-    <link href="http://kayakuguri.github.io/blog/2015/01/29/postgresql-studio/"/>
-    <updated>2015-01-29T11:30:01+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2015/01/29/postgresql-studio</id>
-    <content type="html"><![CDATA[<p>herokuのアドオン、「PostgreSQL Studio」を入れてみた。</p>
-
-<!-- more -->
-
-
-<p><img src="/images/2015/01/postgresqlStdio00.jpg" alt="postgresql studio" /></p>
-
-<h2>概要</h2>
-
-<p>自身のアカウントで管理しているアプリ内に導入されているPostgreSQLの情報を閲覧、管理出来るアドオン。</p>
-
-<h2>インストール</h2>
-
-<p>導入は無料で行えます。<br/>
-というか、無料バージョンしか存在していません。</p>
-
-<pre><code>$ heroku addons:add pgstudio
-</code></pre>
-
-<h2>承認</h2>
-
-<p>herokuのアプリページでアドオンをクリックするとアドオンのトップページへ遷移出来る。<br/>
-PostgreSQL Studioのトップへインストール後に遷移すると、以下のような承認画面が出る。</p>
-
-<p><img src="/images/2015/01/postgresqlStdio01.jpg" alt="authorize" /></p>
-
-<p>内容は、</p>
-
-<blockquote><p>Read-only access to all of your apps and resources, excluding account information. Includes configuration variables, which may include runtime secrets.</p></blockquote>
-
-<p>あなたのアカウント情報を除く全てのアプリに読み取り専用の権限を許可します。<br/>
-そこには、設定情報やランタイム情報も含まれます。</p>
-
-<p>と、アドオンを入れるのは一つのアプリなのに、<strong>全ての</strong>アプリへの接続許可を求められます。<br/>
-この権現の編集は、自身のアカウントページから行えます。<br/>
-<a href="https://dashboard.heroku.com/account">https://dashboard.heroku.com/account</a></p>
-
-<p><img src="/images/2015/01/postgresqlStdio04.jpg" alt="承認設定" /></p>
-
-<p>というのも、自身が管理しているアプリにインストールしている全てのPostgreSQLのデータをこれで管理出来るため、この権現が必要なようです。</p>
-
-<h2>データ閲覧</h2>
-
-<p>承認してアクセスすると、閲覧したいDBの選択画面になるので、任意のものを選択し、Loginします。</p>
-
-<p><img src="/images/2015/01/postgresqlStdio02.jpg" alt="login" /></p>
-
-<p>ログインすると、そのDBの情報を見たり、クエリを実行したり、などが出来ます。</p>
-
-<p><img src="/images/2015/01/postgresqlStdio03.jpg" alt="db情報" /></p>
-
-<p>テーブルの構造はそのままで見ることができるが、データの中身は、SQLを発行しないと見られないよう。</p>
-
-<p><img src="/images/2015/01/postgresqlStdio05.jpg" alt="レコード内容" /></p>
-
-<h2>まとめ</h2>
-
-<p>ローカルにアプリをインストールしたり、自前でphpPGAdminを入れたりせずともアドオンさえ入れていればよいので、すごく楽。<br/>
-ただし、全アプリへのアクセス権限が必要になる＝全てのアプリのデータが閲覧可能、というのは少し怖い。<br/>
-アプリごとの承認ならいいのだけれど。<br/>
-なので、実質は自分のアカウント内のどれかのアプリに一つだけ入れておけばよいことになる。<br/>
-あと、ベータ版なので、動作の不具合や終了などがありえる。</p>
-
-<h2>参考</h2>
-
-<p><a href="https://devcenter.heroku.com/articles/pgstudio">公式ドキュメント</a><br/>
-<a href="https://addons.heroku.com/pgstudio">アドオンページ</a></p>
 ]]></content>
   </entry>
   
