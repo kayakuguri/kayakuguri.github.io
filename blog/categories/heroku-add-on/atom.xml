@@ -4,7 +4,7 @@
   <title><![CDATA[Category: heroku-add-on | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/heroku-add-on/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-05-01T14:29:14+09:00</updated>
+  <updated>2015-05-07T11:39:20+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,200 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[herokuアドオン]cloudinaryで画像のアップロードと表示[PHP]]]></title>
+    <link href="http://kayakuguri.github.io/blog/2015/05/07/cloudinary-img/"/>
+    <updated>2015-05-07T11:34:35+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2015/05/07/cloudinary-img</id>
+    <content type="html"><![CDATA[<p>PHPを利用して、cloudinaryにアップロードして、画像を表示させてみた。</p>
+
+<!-- more -->
+
+
+<h2>インストール</h2>
+
+<p>composerを利用。</p>
+
+<p>```
+{
+  &ldquo;require&rdquo;: {</p>
+
+<pre><code>"cloudinary/cloudinary_php": "dev-master"
+</code></pre>
+
+<p>  }
+}
+```</p>
+
+<p>インストール。</p>
+
+<p>```
+$ composer install
+Loading composer repositories with package information
+Installing dependencies (including require-dev)
+  &ndash; Installing cloudinary/cloudinary_php (dev-master cfa2fd7)</p>
+
+<pre><code>Cloning cfa2fd7d4043844b46411c213795eafb648703df
+</code></pre>
+
+<p>Writing lock file
+Generating autoload files
+```</p>
+
+<h2>herokuにインストール</h2>
+
+<p>アドオンを追加。</p>
+
+<p><img src="/images/2015/05/Cloudinary01.jpg" alt="add-on" /></p>
+
+<p><code>
+$ heroku addons:create cloudinary:starter
+Creating unwinding-truly-5886... done
+Adding unwinding-truly-5886 to your-app-name... done
+Setting CLOUDINARY_URL and restarting your-app-name... done, v3
+Use `heroku addons:docs cloudinary` to view documentation.
+</code></p>
+
+<p>環境変数の<code>CLOUDINARY_URL</code>でアカウント情報を取得できる。</p>
+
+<h2>アップロード</h2>
+
+<p>以下のコードを記述し、アクセス。<br/>
+flickr上にある画像をアップロードしている。</p>
+
+<p>```
+&lt;?php
+require &lsquo;../vendor/autoload.php&rsquo;;</p>
+
+<p>use Cloudinary;
+use Cloudinary\Uploader;</p>
+
+<p>$account = parse_url(getenv(&lsquo;CLOUDINARY_URL&rsquo;));</p>
+
+<p>\Cloudinary::config(array(</p>
+
+<pre><code>"cloud_name" =&gt; $account['host'],
+"api_key" =&gt; $account['user'],
+"api_secret" =&gt; $account['pass']
+</code></pre>
+
+<p>));</p>
+
+<p>$ret = \Cloudinary\Uploader::upload(&ldquo;<a href="https://farm9.staticflickr.com/8748/16531734384_afdd2327e5_z.jpg">https://farm9.staticflickr.com/8748/16531734384_afdd2327e5_z.jpg</a>&rdquo;);</p>
+
+<p>print_r($ret);
+```</p>
+
+<p>で、結果は以下のように返ってくる。</p>
+
+<p>```
+Array (</p>
+
+<pre><code>[public_id] =&gt; xa9kfgp9jvxouekmrrqu 
+[version] =&gt; 1430964069 
+[signature] =&gt; 088135f7c32ad04436a18eb35d05b28bfd9e7870 
+[width] =&gt; 640 
+[height] =&gt; 480 
+[format] =&gt; jpg 
+[resource_type] =&gt; image 
+[created_at] =&gt; 2015-05-07T02:01:09Z 
+[tags] =&gt; Array ( ) 
+[bytes] =&gt; 174550 
+[type] =&gt; upload 
+[etag] =&gt; 6fdff26d1bd4d9cc55c3c613743a8dc1 
+[url] =&gt; http://res.cloudinary.com/harslxcej/image/upload/v1430964069/xa9kfgp9jvxouekmrrqu.jpg 
+[secure_url] =&gt; https://res.cloudinary.com/harslxcej/image/upload/v1430964069/xa9kfgp9jvxouekmrrqu.jpg 
+</code></pre>
+
+<p>)```</p>
+
+<h2>URLでの表示</h2>
+
+<p>アップロードが完了したものはアクセスするURLを変更することでサイズなどを変更できる。</p>
+
+<h3>オリジナル</h3>
+
+<pre><code>http://res.cloudinary.com/harslxcej/image/upload/xa9kfgp9jvxouekmrrqu.jpg
+</code></pre>
+
+<p><img src="http://res.cloudinary.com/harslxcej/image/upload/xa9kfgp9jvxouekmrrqu.jpg" alt="オリジナル" /></p>
+
+<h3>リサイズ</h3>
+
+<pre><code>http://res.cloudinary.com/harslxcej/image/upload/w_100,h_100/xa9kfgp9jvxouekmrrqu.jpg
+</code></pre>
+
+<p><img src="http://res.cloudinary.com/harslxcej/image/upload/w_100,h_100/xa9kfgp9jvxouekmrrqu.jpg" alt="リサイズ" /></p>
+
+<h3>角丸</h3>
+
+<pre><code>http://res.cloudinary.com/harslxcej/image/upload/w_320,h_240,c_fill,r_20/xa9kfgp9jvxouekmrrqu.jpg
+</code></pre>
+
+<p><img src="http://res.cloudinary.com/harslxcej/image/upload/w_320,h_240,c_fill,r_20/xa9kfgp9jvxouekmrrqu.jpg" alt="角丸" /></p>
+
+<p>利用できるタグなどは以下を参照。<br/>
+<a href="http://cloudinary.com/documentation/image_transformations">Image transformations | Cloudinary</a></p>
+
+<h2>PHPでURLの生成</h2>
+
+<p>上記のURLをPHPのコードで生成する。</p>
+
+<h3>cl_image_tag</h3>
+
+<p><code>cl_image_tag</code>を利用すると、<code>&lt;img&gt;</code>のタグごと出力される。</p>
+
+<pre><code>$public_id = 'xa9kfgp9jvxouekmrrqu';
+echo cl_image_tag($public_id, array( "alt" =&gt; "Sample Image" ));
+</code></pre>
+
+<p>結果</p>
+
+<pre><code>&lt;img src='https://res.cloudinary.com/harslxcej/image/upload/xa9kfgp9jvxouekmrrqu' alt='Sample Image'/&gt;
+</code></pre>
+
+<p>加工</p>
+
+<pre><code>cl_image_tag($public_id, array(
+    "width" =&gt; 100,
+    "height" =&gt; 100,
+    "crop" =&gt; "fill",
+    "effect" =&gt; "grayscale"
+));
+</code></pre>
+
+<p>結果</p>
+
+<pre><code>&lt;img src='https://res.cloudinary.com/harslxcej/image/upload/c_fill,e_grayscale,h_100,w_100/xa9kfgp9jvxouekmrrqu' height='100' width='100'/&gt;
+</code></pre>
+
+<p><img src='https://res.cloudinary.com/harslxcej/image/upload/c_fill,e_grayscale,h_100,w_100/xa9kfgp9jvxouekmrrqu' height='100' width='100'/></p>
+
+<h3>cloudinary_url</h3>
+
+<p>URLを直接取得するには、<code>cloudinary_url</code>を使用する。</p>
+
+<pre><code>echo cloudinary_url($public_id);
+echo cloudinary_url($public_id, array(
+    "width" =&gt; 100,
+    "height" =&gt; 100,
+    "crop" =&gt; "fill",
+    "effect" =&gt; "grayscale"
+));
+</code></pre>
+
+<p>その他、詳しくは以下を参照。</p>
+
+<p><a href="http://cloudinary.com/documentation/php_image_manipulation">PHP image manipulation | Cloudinary</a></p>
+
+<h2>参考</h2>
+
+<p><a href="http://cloudinary.com/documentation/php_integration">PHP integration | Cloudinary</a><br/>
+<a href="http://programmer-jobs.blogspot.jp/2013/12/phpphalconcloudinary.html">PHPフレームワークのPhalconで&#12289;写真ストレージクラウドのCloudinaryと連携 一言多いプログラマーの独り言</a><br/>
+<a href="https://github.com/cloudinary/cloudinary_php">cloudinary/cloudinary_php</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[Herokuアドオン]TransloaditでAWS S3にアップロード]]></title>

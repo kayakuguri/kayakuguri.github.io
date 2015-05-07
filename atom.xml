@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-05-01T14:29:14+09:00</updated>
+  <updated>2015-05-07T11:39:20+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,223 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[herokuアドオン]cloudinaryで画像のアップロードと表示[PHP]]]></title>
+    <link href="http://kayakuguri.github.io/blog/2015/05/07/cloudinary-img/"/>
+    <updated>2015-05-07T11:34:35+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2015/05/07/cloudinary-img</id>
+    <content type="html"><![CDATA[<p>PHPを利用して、cloudinaryにアップロードして、画像を表示させてみた。</p>
+
+<!-- more -->
+
+
+<h2>インストール</h2>
+
+<p>composerを利用。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>{
+</span><span class='line'>  "require": {
+</span><span class='line'>    "cloudinary/cloudinary_php": "dev-master"
+</span><span class='line'>  }
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<p>インストール。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$ composer install
+</span><span class='line'>Loading composer repositories with package information
+</span><span class='line'>Installing dependencies (including require-dev)
+</span><span class='line'>  - Installing cloudinary/cloudinary_php (dev-master cfa2fd7)
+</span><span class='line'>    Cloning cfa2fd7d4043844b46411c213795eafb648703df
+</span><span class='line'>
+</span><span class='line'>Writing lock file
+</span><span class='line'>Generating autoload files</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>herokuにインストール</h2>
+
+<p>アドオンを追加。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2015/05/Cloudinary01.jpg" alt="add-on" /></p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$ heroku addons:create cloudinary:starter
+</span><span class='line'>Creating unwinding-truly-5886... done
+</span><span class='line'>Adding unwinding-truly-5886 to your-app-name... done
+</span><span class='line'>Setting CLOUDINARY_URL and restarting your-app-name... done, v3
+</span><span class='line'>Use `heroku addons:docs cloudinary` to view documentation.</span></code></pre></td></tr></table></div></figure>
+
+
+<p>環境変数の<code>CLOUDINARY_URL</code>でアカウント情報を取得できる。</p>
+
+<h2>アップロード</h2>
+
+<p>以下のコードを記述し、アクセス。<br/>
+flickr上にある画像をアップロードしている。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;?php
+</span><span class='line'>require '../vendor/autoload.php';
+</span><span class='line'>
+</span><span class='line'>use Cloudinary;
+</span><span class='line'>use Cloudinary\Uploader;
+</span><span class='line'>
+</span><span class='line'>$account = parse_url(getenv('CLOUDINARY_URL'));
+</span><span class='line'>
+</span><span class='line'>\Cloudinary::config(array(
+</span><span class='line'>    "cloud_name" =&gt; $account['host'],
+</span><span class='line'>    "api_key" =&gt; $account['user'],
+</span><span class='line'>    "api_secret" =&gt; $account['pass']
+</span><span class='line'>));
+</span><span class='line'>
+</span><span class='line'>$ret = \Cloudinary\Uploader::upload("https://farm9.staticflickr.com/8748/16531734384_afdd2327e5_z.jpg");
+</span><span class='line'>
+</span><span class='line'>print_r($ret);</span></code></pre></td></tr></table></div></figure>
+
+
+<p>で、結果は以下のように返ってくる。</p>
+
+<p>&#8220;`
+Array (</p>
+
+<pre><code>[public_id] =&gt; xa9kfgp9jvxouekmrrqu 
+[version] =&gt; 1430964069 
+[signature] =&gt; 088135f7c32ad04436a18eb35d05b28bfd9e7870 
+[width] =&gt; 640 
+[height] =&gt; 480 
+[format] =&gt; jpg 
+[resource_type] =&gt; image 
+[created_at] =&gt; 2015-05-07T02:01:09Z 
+[tags] =&gt; Array ( ) 
+[bytes] =&gt; 174550 
+[type] =&gt; upload 
+[etag] =&gt; 6fdff26d1bd4d9cc55c3c613743a8dc1 
+[url] =&gt; http://res.cloudinary.com/harslxcej/image/upload/v1430964069/xa9kfgp9jvxouekmrrqu.jpg 
+[secure_url] =&gt; https://res.cloudinary.com/harslxcej/image/upload/v1430964069/xa9kfgp9jvxouekmrrqu.jpg 
+</code></pre>
+
+<p>)&#8220;`</p>
+
+<h2>URLでの表示</h2>
+
+<p>アップロードが完了したものはアクセスするURLを変更することでサイズなどを変更できる。</p>
+
+<h3>オリジナル</h3>
+
+<pre><code>http://res.cloudinary.com/harslxcej/image/upload/xa9kfgp9jvxouekmrrqu.jpg
+</code></pre>
+
+<p><img src="http://res.cloudinary.com/harslxcej/image/upload/xa9kfgp9jvxouekmrrqu.jpg" alt="オリジナル" /></p>
+
+<h3>リサイズ</h3>
+
+<pre><code>http://res.cloudinary.com/harslxcej/image/upload/w_100,h_100/xa9kfgp9jvxouekmrrqu.jpg
+</code></pre>
+
+<p><img src="http://res.cloudinary.com/harslxcej/image/upload/w_100,h_100/xa9kfgp9jvxouekmrrqu.jpg" alt="リサイズ" /></p>
+
+<h3>角丸</h3>
+
+<pre><code>http://res.cloudinary.com/harslxcej/image/upload/w_320,h_240,c_fill,r_20/xa9kfgp9jvxouekmrrqu.jpg
+</code></pre>
+
+<p><img src="http://res.cloudinary.com/harslxcej/image/upload/w_320,h_240,c_fill,r_20/xa9kfgp9jvxouekmrrqu.jpg" alt="角丸" /></p>
+
+<p>利用できるタグなどは以下を参照。<br/>
+<a href="http://cloudinary.com/documentation/image_transformations">Image transformations | Cloudinary</a></p>
+
+<h2>PHPでURLの生成</h2>
+
+<p>上記のURLをPHPのコードで生成する。</p>
+
+<h3>cl_image_tag</h3>
+
+<p><code>cl_image_tag</code>を利用すると、<code>&lt;img&gt;</code>のタグごと出力される。</p>
+
+<pre><code>$public_id = 'xa9kfgp9jvxouekmrrqu';
+echo cl_image_tag($public_id, array( "alt" =&gt; "Sample Image" ));
+</code></pre>
+
+<p>結果</p>
+
+<pre><code>&lt;img src='https://res.cloudinary.com/harslxcej/image/upload/xa9kfgp9jvxouekmrrqu' alt='Sample Image'/&gt;
+</code></pre>
+
+<p>加工</p>
+
+<pre><code>cl_image_tag($public_id, array(
+    "width" =&gt; 100,
+    "height" =&gt; 100,
+    "crop" =&gt; "fill",
+    "effect" =&gt; "grayscale"
+));
+</code></pre>
+
+<p>結果</p>
+
+<pre><code>&lt;img src='https://res.cloudinary.com/harslxcej/image/upload/c_fill,e_grayscale,h_100,w_100/xa9kfgp9jvxouekmrrqu' height='100' width='100'/&gt;
+</code></pre>
+
+<p><img src='https://res.cloudinary.com/harslxcej/image/upload/c_fill,e_grayscale,h_100,w_100/xa9kfgp9jvxouekmrrqu' height='100' width='100'/></p>
+
+<h3>cloudinary_url</h3>
+
+<p>URLを直接取得するには、<code>cloudinary_url</code>を使用する。</p>
+
+<pre><code>echo cloudinary_url($public_id);
+echo cloudinary_url($public_id, array(
+    "width" =&gt; 100,
+    "height" =&gt; 100,
+    "crop" =&gt; "fill",
+    "effect" =&gt; "grayscale"
+));
+</code></pre>
+
+<p>その他、詳しくは以下を参照。</p>
+
+<p><a href="http://cloudinary.com/documentation/php_image_manipulation">PHP image manipulation | Cloudinary</a></p>
+
+<h2>参考</h2>
+
+<p><a href="http://cloudinary.com/documentation/php_integration">PHP integration | Cloudinary</a><br/>
+<a href="http://programmer-jobs.blogspot.jp/2013/12/phpphalconcloudinary.html">PHPフレームワークのPhalconで&#12289;写真ストレージクラウドのCloudinaryと連携 一言多いプログラマーの独り言</a><br/>
+<a href="https://github.com/cloudinary/cloudinary_php">cloudinary/cloudinary_php</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[salesforce]アウトバウンドメッセージ送信時のエラー]]></title>
@@ -2997,60 +3214,6 @@ catchの部分は今回で言えば、<code>DmlException</code>なので、そ�
 
 <p><a href="https://www.markernet.co.jp/blog/2014/06/12/post-1622/">CakePHP2.Xで404 Not Foundエラーをリダイレクトする方法 | WEB制作ブログ</a><br/>
 <a href="http://studio-faust.com/programming/258/">CakePHP2 404エラーの場合にトップページにリダイレクト | Web Studio Faust</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[apex]Date型のフォーマット]]></title>
-    <link href="http://kayakuguri.github.io/blog/2015/04/10/format-date/"/>
-    <updated>2015-04-10T10:55:07+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2015/04/10/format-date</id>
-    <content type="html"><![CDATA[<p>何回かググっているので、備忘録。</p>
-
-<!-- more -->
-
-
-<p>Date型のフォーマットは一応用意されているが、フォーマット内容を指定が出来ないよう。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>Date d = Date.newInstance(2015, 4, 10);
-</span><span class='line'>System.debug(d); //2015-04-10 00:00:00
-</span><span class='line'>String d_str = d.format();
-</span><span class='line'>System.debug(d_str); //2015/04/10</span></code></pre></td></tr></table></div></figure>
-
-
-<p><code>format('yyyy-MM-dd')</code>とか書くと怒られる。<br/>
-<a href="https://www.salesforce.com/us/developer/docs/apexcode/Content/apex_methods_system_date.htm#apex_System_Date_format">Date Class &ndash; format()</a></p>
-
-<p>代わりにDatetime型の場合はフォーマットを指定して出力が可能。<br/>
-なので、Date型のものをフォーマット指定して出力したい場合は、一度Datetime型に変換してやる必要がある。</p>
-
-<p>apexのDatetime型の扱いには注意が必要で、そのまま変換してDatetime型のまま使用しているとタイムゾーンが標準時になって９時間戻ってしまう。<br/>
-ただしそれをフォーマットして文字列にするとまた元に戻る。
-指定するならする、しないならしない、で統一しているとややこしくならなくてすみそう。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>Date d = Date.newInstance(2015, 4, 10);
-</span><span class='line'>System.debug(d);  //2015-04-10 00:00:00
-</span><span class='line'>Datetime dt = Datetime.newInstance(d.year(), d.month(), d.day());
-</span><span class='line'>System.debug(dt);  //2015-04-09 15:00:00
-</span><span class='line'>String dt_str = dt.format('yyyy-MM-dd');
-</span><span class='line'>System.debug(dt_str);  //2015-04-10</span></code></pre></td></tr></table></div></figure>
-
-
-<h3>参考</h3>
-
-<p><a href="https://www.salesforce.com/us/developer/docs/apexcode/Content/apex_methods_system_date.htm#apex_System_Date_format">Date Class &ndash; format()</a><br/>
-<a href="https://www.salesforce.com/us/developer/docs/apexcode/Content/apex_methods_system_datetime.htm#apex_System_Datetime_format_2">Datetime Class &ndash; format(string)</a><br/>
-<a href="http://stackoverflow.com/questions/11834873/salesforce-apex-validating-date-for-format-and-value">validation &ndash; Salesforce Apex: Validating date for format and value &ndash; Stack Overflow</a></p>
 ]]></content>
   </entry>
   
