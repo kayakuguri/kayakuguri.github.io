@@ -4,7 +4,7 @@
   <title><![CDATA[Category: heroku | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/heroku/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-05-09T21:09:15+09:00</updated>
+  <updated>2015-05-11T12:10:44+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,96 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[herokuアドオン]cloudinaryでの画像制限設定について]]></title>
+    <link href="http://kayakuguri.github.io/blog/2015/05/11/cloudinary-security/"/>
+    <updated>2015-05-11T12:07:56+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2015/05/11/cloudinary-security</id>
+    <content type="html"><![CDATA[<p>cloudinaryを利用した時に他者に乱用されたりしないのかどうかを調べてみた。</p>
+
+<!-- more -->
+
+
+<h2>画像のURL</h2>
+
+<p>アップロードする際に、画像名となる<code>public_url</code>を指定しなければランダムで文字列がふられる。</p>
+
+<p><strong>デフォルトでのアップロードの例</strong></p>
+
+<blockquote><p><a href="https://res.cloudinary.com/harslxcej/image/upload/xa9kfgp9jvxouekmrrqu">https://res.cloudinary.com/harslxcej/image/upload/xa9kfgp9jvxouekmrrqu</a></p></blockquote>
+
+<p><code>harslxcej</code>はcloudinaryアカウトごとの名前。<code>cloud_name</code>と呼ばれるもの。<br/>
+<a href="http://cloudinary.com/documentation/api_and_access_identifiers#cloud_name">Cloud Name | API, URLs and access identifiers | Cloudinary</a></p>
+
+<p>これだけでも推測は不可能だが、さらにprivateモードを利用することでさらに複雑にすることが可能。</p>
+
+<p>PHPでのアップロード時のオプション</p>
+
+<p>```
+\Cloudinary\Uploader::upload(&ldquo;your-img&rdquo;,array(</p>
+
+<pre><code>"type" =&gt; "private"
+</code></pre>
+
+<p>));
+```</p>
+
+<p>表示時のオプション</p>
+
+<p>```
+$private = cl_image_tag($public_id . &ldquo;.jpg&rdquo;, array(</p>
+
+<pre><code>"type"=&gt;"private",
+"sign_url"=&gt;true
+</code></pre>
+
+<p>));
+```</p>
+
+<p>※<code>"sign_url"=&gt;true</code>がないと表示が出来なかった。</p>
+
+<p>表示URL</p>
+
+<blockquote><p><a href="https://res.cloudinary.com/harslxcej/image/private/s--q7MlJXLg--/leyxq6ys2wielv6b8yki.jpg">https://res.cloudinary.com/harslxcej/image/private/s--q7MlJXLg--/leyxq6ys2wielv6b8yki.jpg</a></p></blockquote>
+
+<h3>直リンクは可能</h3>
+
+<p>ただし、URLさえわかってしまえば、表示することは可能。<br/>
+また、いわゆる別サーバーからの直リンク、も制限は出来ない。</p>
+
+<h2>編集の制限</h2>
+
+<p>cloudinaryはURLから直接画像や動画を編集する事が出来る。<br/>
+例えば以下のような指定。</p>
+
+<pre><code>https://res.cloudinary.com/harslxcej/image/upload/h_100,w_100,c_fill/xa9kfgp9jvxouekmrrqu
+</code></pre>
+
+<p>これをプログラムからの指定のみに制限する事が可能。</p>
+
+<p>Cloudinaryの管理画面から、<code>Setting -&gt; Security</code>にアクセス。<br/>
+<code>Strict transformations:</code>を<code>Enabled</code>にしてsaveする。<br/>
+これで、URLからの直接編集が禁止となる。</p>
+
+<p><img src="/images/2015/05/cloudinary_security01.jpg" alt="Strict transformations" /></p>
+
+<p>２つ下の項目に、<code>Strict video transformations:</code>と動画でも同じく禁止する設定があるので合わせて設定しておくとよいかも。</p>
+
+<p>これで、PHPなどプログラム上からの生成以外は制限することができたが、<br/>
+特定のURLからのみはURLでの編集を許可してやることも可能。</p>
+
+<p>上記、<code>Security</code>画面から、<code>Allowed strict referral domains:</code>に許可したいドメインを指定することで設定できる。</p>
+
+<p><img src="/images/2015/05/cloudinary_security02.jpg" alt="Allowed strict referral domains" /></p>
+
+<h2>参考</h2>
+
+<p><a href="http://support.cloudinary.com/hc/en-us/articles/202520342-Does-Cloudinary-support-uploading-private-images-">Does Cloudinary support uploading private images? &ndash; Cloudinary Support</a><br/>
+<a href="http://support.cloudinary.com/hc/en-us/articles/202520632--Can-our-users-upload-private-images-which-are-not-accessible-through-a-public-URL-">Can our users upload private images which are not accessible through a public URL? &ndash; Cloudinary Support</a><br/>
+<a href="http://cloudinary.com/blog/how_to_quickly_build_a_stock_photo_site_using_cloudinary">How to quickly build a stock photo site using Cloudinary | Cloudinary Blog</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[herokuアドオン]cloudinaryで動画を試してみた[PHP]]]></title>
@@ -780,41 +870,6 @@ Stream #0:1(und): Audio: aac (LC) (mp4a / 0x6134706D), 48000 Hz, mono, fltp, 82 
 <a href="http://joppot.info/2014/06/14/1621">awsのs3を操作する為のaccess keyとsecret keyを取得する(IAM)</a><br/>
 <a href="https://transloadit.com/docs/conversion-robots/#export-to-amazon-s3-with-the-s3store-bot">Export to Amazon S3 with the /s3/store bot | Transloadit</a><br/>
 <a href="https://transloadit.com/docs/#assembly-variables">#Assembly variables | Integration | Transloadit</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[herokuをデプロイするためにgitに空でコミットする]]></title>
-    <link href="http://kayakuguri.github.io/blog/2015/04/21/git-allow-empty/"/>
-    <updated>2015-04-21T11:14:17+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2015/04/21/git-allow-empty</id>
-    <content type="html"><![CDATA[<p>小ネタ。<br/>
-タイトル通り。</p>
-
-<!-- more -->
-
-
-<p>herokuはgitにてpushした時にのみ、deployが走る。<br/>
-しかし、アドオンを追加した時など、ファイルの変更はないけれどデプロイだけしたい場合がたまにある。<br/>
-そんな時にはファイルを無駄に少しだけ触ったりしていたのだけれど、空でコミット出来る事が出来ると知ったので、メモ。</p>
-
-<pre><code>$ git commit -m "for deploy heroku" --allow-empty
-</code></pre>
-
-<p>これでコミットしておいてpushすると無事、デプロイ出来る。</p>
-
-<p>以下、検証。</p>
-
-<pre><code>$ git push heroku master
-Everything up-to-date
-$ git commit -m "for deploy heroku" --allow-empty
-[master 069260f] for deploy heroku
-$ git push heroku master
-Counting objects: 1, done.
-Writing objects: 100% (1/1), 190 bytes | 0 bytes/s, done.
-.....
-  0022947..069260f  master -&gt; master
-</code></pre>
 ]]></content>
   </entry>
   

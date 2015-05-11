@@ -4,7 +4,7 @@
   <title><![CDATA[Category: heroku-add-on | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/heroku-add-on/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-05-09T21:09:15+09:00</updated>
+  <updated>2015-05-11T12:10:44+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,96 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[herokuアドオン]cloudinaryでの画像制限設定について]]></title>
+    <link href="http://kayakuguri.github.io/blog/2015/05/11/cloudinary-security/"/>
+    <updated>2015-05-11T12:07:56+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2015/05/11/cloudinary-security</id>
+    <content type="html"><![CDATA[<p>cloudinaryを利用した時に他者に乱用されたりしないのかどうかを調べてみた。</p>
+
+<!-- more -->
+
+
+<h2>画像のURL</h2>
+
+<p>アップロードする際に、画像名となる<code>public_url</code>を指定しなければランダムで文字列がふられる。</p>
+
+<p><strong>デフォルトでのアップロードの例</strong></p>
+
+<blockquote><p><a href="https://res.cloudinary.com/harslxcej/image/upload/xa9kfgp9jvxouekmrrqu">https://res.cloudinary.com/harslxcej/image/upload/xa9kfgp9jvxouekmrrqu</a></p></blockquote>
+
+<p><code>harslxcej</code>はcloudinaryアカウトごとの名前。<code>cloud_name</code>と呼ばれるもの。<br/>
+<a href="http://cloudinary.com/documentation/api_and_access_identifiers#cloud_name">Cloud Name | API, URLs and access identifiers | Cloudinary</a></p>
+
+<p>これだけでも推測は不可能だが、さらにprivateモードを利用することでさらに複雑にすることが可能。</p>
+
+<p>PHPでのアップロード時のオプション</p>
+
+<p>```
+\Cloudinary\Uploader::upload(&ldquo;your-img&rdquo;,array(</p>
+
+<pre><code>"type" =&gt; "private"
+</code></pre>
+
+<p>));
+```</p>
+
+<p>表示時のオプション</p>
+
+<p>```
+$private = cl_image_tag($public_id . &ldquo;.jpg&rdquo;, array(</p>
+
+<pre><code>"type"=&gt;"private",
+"sign_url"=&gt;true
+</code></pre>
+
+<p>));
+```</p>
+
+<p>※<code>"sign_url"=&gt;true</code>がないと表示が出来なかった。</p>
+
+<p>表示URL</p>
+
+<blockquote><p><a href="https://res.cloudinary.com/harslxcej/image/private/s--q7MlJXLg--/leyxq6ys2wielv6b8yki.jpg">https://res.cloudinary.com/harslxcej/image/private/s--q7MlJXLg--/leyxq6ys2wielv6b8yki.jpg</a></p></blockquote>
+
+<h3>直リンクは可能</h3>
+
+<p>ただし、URLさえわかってしまえば、表示することは可能。<br/>
+また、いわゆる別サーバーからの直リンク、も制限は出来ない。</p>
+
+<h2>編集の制限</h2>
+
+<p>cloudinaryはURLから直接画像や動画を編集する事が出来る。<br/>
+例えば以下のような指定。</p>
+
+<pre><code>https://res.cloudinary.com/harslxcej/image/upload/h_100,w_100,c_fill/xa9kfgp9jvxouekmrrqu
+</code></pre>
+
+<p>これをプログラムからの指定のみに制限する事が可能。</p>
+
+<p>Cloudinaryの管理画面から、<code>Setting -&gt; Security</code>にアクセス。<br/>
+<code>Strict transformations:</code>を<code>Enabled</code>にしてsaveする。<br/>
+これで、URLからの直接編集が禁止となる。</p>
+
+<p><img src="/images/2015/05/cloudinary_security01.jpg" alt="Strict transformations" /></p>
+
+<p>２つ下の項目に、<code>Strict video transformations:</code>と動画でも同じく禁止する設定があるので合わせて設定しておくとよいかも。</p>
+
+<p>これで、PHPなどプログラム上からの生成以外は制限することができたが、<br/>
+特定のURLからのみはURLでの編集を許可してやることも可能。</p>
+
+<p>上記、<code>Security</code>画面から、<code>Allowed strict referral domains:</code>に許可したいドメインを指定することで設定できる。</p>
+
+<p><img src="/images/2015/05/cloudinary_security02.jpg" alt="Allowed strict referral domains" /></p>
+
+<h2>参考</h2>
+
+<p><a href="http://support.cloudinary.com/hc/en-us/articles/202520342-Does-Cloudinary-support-uploading-private-images-">Does Cloudinary support uploading private images? &ndash; Cloudinary Support</a><br/>
+<a href="http://support.cloudinary.com/hc/en-us/articles/202520632--Can-our-users-upload-private-images-which-are-not-accessible-through-a-public-URL-">Can our users upload private images which are not accessible through a public URL? &ndash; Cloudinary Support</a><br/>
+<a href="http://cloudinary.com/blog/how_to_quickly_build_a_stock_photo_site_using_cloudinary">How to quickly build a stock photo site using Cloudinary | Cloudinary Blog</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[herokuアドオン]cloudinaryで動画を試してみた[PHP]]]></title>
@@ -883,310 +973,6 @@ $_SERVER['REQUEST_URI']
 <p><a href="https://transloadit.com/demos/ftp-store/store-uploaded-files">Store the originally uploaded files on your FTP server | Transloadit</a><br/>
 <a href="https://transloadit.com/docs/#how-to-use-a-template">How to use a template</a><br/>
 <a href="https://transloadit.com/docs/conversion-robots/#available-job-variables">Available job variables</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[Herokuアドオン]Transloaditアドオンを使ってPHPでファイルアップロード]]></title>
-    <link href="http://kayakuguri.github.io/blog/2015/04/16/heroku-transloadit-1/"/>
-    <updated>2015-04-16T10:32:46+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2015/04/16/heroku-transloadit-1</id>
-    <content type="html"><![CDATA[<p>動画をアップロード + エンコードしてくれるというTransloaditのherokuアドオンを使ってみた。</p>
-
-<!-- more -->
-
-
-<h2>herokuへのインストール</h2>
-
-<p>無料プランがあるので、とりあえずそれで。</p>
-
-<pre><code>$ heroku addons:add transloadit:sandbox
-</code></pre>
-
-<p>無料プランの場合は、Encoding Volumeが1GB、の制限がある。</p>
-
-<p>transloaditの料金体系は少しややこしくなっているようで、<br/>
-無料のsandboxプランだと、トータルで1GBになっているよう。</p>
-
-<p><a href="https://addons.heroku.com/transloadit">Transloadit | Add-ons | Heroku</a><br/>
-<img src="/images/2015/04/transloadit02.jpg" alt="heroku料金" /></p>
-
-<p>公式ページのプランでも値段は一緒。</p>
-
-<p><a href="https://transloadit.com/pricing/">Pricing &amp; Signup | Transloadit</a><br/>
-<img src="/images/2015/04/transloadit01.jpg" alt="公式料金" /></p>
-
-<p>この1GBとうのは何が含まれるかというと、公式で説明があった。<br/>
-エンコードした場合、する前とした後と両方のサイズが合算されてカウントされるよう。</p>
-
-<p>例えば、0.8MBの画像ファイルをエンコードして0.2MBしたとすれば、それで1MBを使用した事になる。<br/>
-で、これを1024回繰り返すと、1GBになるので無料枠は終了。</p>
-
-<p>ファイルの閲覧自体には加算されないよう。</p>
-
-<h2>PHP SDKのインストール</h2>
-
-<p>公式どおり、Composerでインストールする。</p>
-
-<p>```
-{
-  &ldquo;require&rdquo;: {</p>
-
-<pre><code>"transloadit/php-sdk": "dev-master"
-</code></pre>
-
-<p>  }
-}
-```</p>
-
-<p>ローカルで<code>composer install</code>しておく。<br/>
-この際、php5.6以上でないとインストール出来ないので注意。<br/>
-(自分の環境ではphp5.4だったので、<a href="http://kayamemo.mrlittlebig.com/blog/2015/04/15/mac-update-php/">アップデートした</a>)</p>
-
-<h2>ファイルのアップロード</h2>
-
-<p>公式に載っていたママだけど、<br/>
-アクセスするとheroku上の同じディレクトリに置いたファイルをアップロードするだけ、のサンプルを実行してみる。</p>
-
-<p><strong>PHP全コード</strong></p>
-
-<p>```
-&lt;?php
-require &lsquo;../vendor/autoload.php&rsquo;;</p>
-
-<p>use transloadit\Transloadit;
-$transloadit = new Transloadit(array(</p>
-
-<pre><code>'key' =&gt; getenv('TRANSLOADIT_AUTH_KEY'),
-'secret' =&gt; getenv('TRANSLOADIT_SECRET_KEY')
-</code></pre>
-
-<p>));</p>
-
-<p>$response = $transloadit->createAssembly(array(</p>
-
-<pre><code>'files' =&gt; array(dirname(__FILE__).'/160x160.png'),
-'params' =&gt; array(
-    'steps' =&gt; array(
-        'resize' =&gt; array(
-            'robot' =&gt; '/image/resize',
-            'width' =&gt; 100,
-            'height' =&gt; 100,
-        )
-    )
-),
-</code></pre>
-
-<p>));</p>
-
-<p>// Show the results of the assembly we spawned
-echo &lsquo;<pre>&rsquo;;
-print_r($response);
-echo &lsquo;</pre>&rsquo;;
-```</p>
-
-<p><strong>レスポンス</strong></p>
-
-<p>```
-transloadit\TransloaditResponse Object
-(</p>
-
-<pre><code>[data] =&gt; Array
-    (
-        [ok] =&gt; ASSEMBLY_EXECUTING
-        [message] =&gt; The assembly is currently being executed.
-        [assembly_id] =&gt; id
-        [parent_id] =&gt; 
-        [account_id] =&gt; id
-        [template_id] =&gt; 
-        [instance] =&gt; xxx.transloadit.com
-        [assembly_url] =&gt; http://api2.karima.transloadit.com/assemblies/xxx
-        [assembly_ssl_url] =&gt; https://karima.transloadit.com/assemblies/xxx
-        [bytes_received] =&gt; 1107
-        [bytes_expected] =&gt; 1107
-        [upload_duration] =&gt; 1.477
-        [client_agent] =&gt; Transloadit PHP SDK v2.0.0
-        [client_ip] =&gt; 10.166.13.48
-        [client_referer] =&gt; 
-        [start_date] =&gt; 2015/04/16 01:29:02 GMT
-        [is_infinite] =&gt; 
-        [has_dupe_jobs] =&gt; 
-        [execution_start] =&gt; 2015/04/16 01:29:03 GMT
-        [execution_duration] =&gt; 0.002
-        [notify_start] =&gt; 
-        [notify_url] =&gt; 
-        [notify_status] =&gt; 
-        [notify_response_code] =&gt; 
-        [notify_duration] =&gt; 
-        [last_job_completed] =&gt; 
-        [fields] =&gt; Array
-            (
-            )
-
-        [running_jobs] =&gt; Array
-            (
-            )
-
-        [bytes_usage] =&gt; 0
-        [executing_jobs] =&gt; Array
-            (
-                [0] =&gt; resize
-            )
-
-        [started_jobs] =&gt; Array
-            (
-                [0] =&gt; resize:::original
-            )
-
-        [parent_assembly_status] =&gt; 
-        [params] =&gt; {"steps":{"resize":{"robot":"/image/resize","width":100,"height":100}},"auth":{"key":"****","expires":"2015/04/16 03:29:01+00:00"}}
-        [template] =&gt; 
-        [uploads] =&gt; Array
-            (
-                [0] =&gt; Array
-                    (
-                        [id] =&gt; xxx
-                        [name] =&gt; 160x160.png
-                        [basename] =&gt; 160x160
-                        [ext] =&gt; png
-                        [size] =&gt; 494
-                        [mime] =&gt; image/png
-                        [type] =&gt; image
-                        [field] =&gt; file_1
-                        [md5hash] =&gt; xxx
-                        [original_id] =&gt; xxx
-                        [original_basename] =&gt; 160x160
-                        [original_md5hash] =&gt; xxx
-                        [url] =&gt; http://tmp.transloadit.com.s3.amazonaws.com/xxx.png
-                        [ssl_url] =&gt; https://s3.amazonaws.com/tmp.transloadit.com/xxx.png
-                        [meta] =&gt; Array
-                            (
-                                [width] =&gt; 160
-                                [height] =&gt; 160
-                                [date_recorded] =&gt; 
-                                [date_file_created] =&gt; 
-                                [date_file_modified] =&gt; 2015/04/16 01:29:02 GMT
-                                [title] =&gt; 
-                                [description] =&gt; 
-                                [location] =&gt; 
-                                [aspect_ratio] =&gt; 1
-                                [city] =&gt; 
-                                [state] =&gt; 
-                                [country] =&gt; 
-                                [country_code] =&gt; 
-                                [keywords] =&gt; 
-                                [aperture] =&gt; 
-                                [exposure_compensation] =&gt; 
-                                [exposure_mode] =&gt; 
-                                [exposure_time] =&gt; 
-                                [flash] =&gt; 
-                                [focal_length] =&gt; 
-                                [f_number] =&gt; 
-                                [iso] =&gt; 
-                                [light_value] =&gt; 
-                                [metering_mode] =&gt; 
-                                [shutter_speed] =&gt; 
-                                [white_balance] =&gt; 
-                                [device_name] =&gt; 
-                                [device_vendor] =&gt; 
-                                [device_software] =&gt; 
-                                [latitude] =&gt; 
-                                [longitude] =&gt; 
-                                [orientation] =&gt; 
-                                [has_clipping_path] =&gt; 
-                                [creator] =&gt; 
-                                [author] =&gt; 
-                                [copyright] =&gt; 
-                                [copyright_notice] =&gt; 
-                                [frame_count] =&gt; 1
-                                [colorspace] =&gt; Gray
-                                [average_color] =&gt; #686868
-                            )
-
-                    )
-
-            )
-
-        [results] =&gt; Array
-            (
-            )
-
-    )
-
-[curlInfo] =&gt; Array
-    (
-        [url] =&gt; https://karima.transloadit.com/assemblies
-        [content_type] =&gt; application/json; charset=utf-8
-        [http_code] =&gt; 200
-        [header_size] =&gt; 371
-        [request_size] =&gt; 220
-        [filetime] =&gt; -1
-        [ssl_verify_result] =&gt; 0
-        [redirect_count] =&gt; 0
-        [total_time] =&gt; 1.91859
-        [namelookup_time] =&gt; 0.012709
-        [connect_time] =&gt; 0.421413
-        [pretransfer_time] =&gt; 0.435759
-        [size_upload] =&gt; 1107
-        [size_download] =&gt; 2527
-        [speed_download] =&gt; 1317
-        [speed_upload] =&gt; 576
-        [download_content_length] =&gt; -1
-        [upload_content_length] =&gt; 1107
-        [starttransfer_time] =&gt; 0.43577
-        [redirect_time] =&gt; 0
-        [redirect_url] =&gt; 
-        [primary_ip] =&gt; 10.234.41.26
-        [certinfo] =&gt; Array
-            (
-            )
-
-        [primary_port] =&gt; 443
-        [local_ip] =&gt; 172.18.203.90
-        [local_port] =&gt; 41591
-    )
-
-[curlErrorNumber] =&gt; 0
-[curlErrorMessage] =&gt; 
-</code></pre>
-
-<p>)
-```</p>
-
-<p>画像のURLはレスポンスの、<code>data &gt; uploads &gt; url(ssl_url)</code>に入っている。</p>
-
-<h2>結果</h2>
-
-<p>herokuのアドオンからTransloadit上で確認すると以下のようにファイルがアップロードされていた。<br/>
-<img src="/images/2015/04/transloadit03.jpg" alt="結果" /></p>
-
-<p>ファイル名をクリックする事で詳細を確認出来る。<br/>
-ファイルの確認やダウンロードもここから可能。<br/>
-<img src="/images/2015/04/transloadit04.jpg" alt="詳細" /></p>
-
-<p>アップロードされたファイルは上記からダウンロード可能だが、この保存ファイルは一時的なもののよう。<br/>
-24時間後には消える。らしい。</p>
-
-<blockquote><p>Please keep in mind that we store files only for 24 hours after they were created. To persist your files, please use one of our <a href="https://transloadit.com/docs/conversion-robots/#file-export-robots">file export robots</a>.</p></blockquote>
-
-<p>なので、<code>file export robots</code>を使用してどこかしらにエクスポートしてやる必要がある。<br/>
-エクスポート先として用意されているものは以下のよう。</p>
-
-<ul>
-<li>Amazon S3</li>
-<li>SFTP</li>
-<li>FTP</li>
-<li>Rackspace</li>
-<li>YouTube</li>
-</ul>
-
-
-<h2>参考</h2>
-
-<p><a href="https://addons.heroku.com/transloadit">Transloadit | Add-ons | Heroku</a><br/>
-<a href="https://devcenter.heroku.com/articles/transloadit">Transloadit | Heroku Dev Center</a><br/>
-<a href="https://transloadit.com/">File upload processing web service | Transloadit</a><br/>
-<a href="https://github.com/transloadit/php-sdk">transloadit/php-sdk</a></p>
 ]]></content>
   </entry>
   
