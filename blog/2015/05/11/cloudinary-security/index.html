@@ -131,14 +131,50 @@
 <figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$private = cl_image_tag($public_id . ".jpg", array(
+</span><span class='line'>    "type"=&gt;"private"
+</span><span class='line'>));</span></code></pre></td></tr></table></div></figure>
+
+
+<p>表示URL</p>
+
+<blockquote><p><a href="http://res.cloudinary.com/harslxcej/image/private/leyxq6ys2wielv6b8yki">http://res.cloudinary.com/harslxcej/image/private/leyxq6ys2wielv6b8yki</a></p></blockquote>
+
+<p>しかしこのままではアクセスが出来ない。<br/>
+このURLでのアクセスを許可してやる必要がある。</p>
+
+<h3>編集セットの個別許可</h3>
+
+<p>Cloudinaryの管理画面から、<code>Transformations</code>を選択。<br/>
+ここに、いままでアクセスしたことがある編集設定などがずらずらと並んでいるので、その中から探し出すか、新たに設定を作成してやる。</p>
+
+<p><img src="/images/2015/05/cloudinary_security04.jpg" alt="Create new" /></p>
+
+<p>編集設定を作る</p>
+
+<p><img src="/images/2015/05/cloudinary_security05.jpg" alt="Create new" /></p>
+
+<p>で、許可したい編集セットの<code>Disallowed</code>となっているマーク部分をクリックすると、<code>Allowed</code>の緑アイコンに代わり、アクセスが許可される。<br/>
+(編集なしの生データにアクセスを許可してやるには、<code>Create a new transformaton..</code>で何もせずにそのまま保存してやればよい。)</p>
+
+<p><img src="/images/2015/05/cloudinary_security03.jpg" alt="allowed" /></p>
+
+<h3>sign_url</h3>
+
+<p>最初は<code>sign_url</code>をつけないとプライベートのものはアクセス出来ないと思っていたが、上記の方法で解消できた。<br/>
+以下でもアクセスは出来るが、プライベートタイプのものを表示する方法、という用途ではないと思われる。</p>
+
+<p><code>"sign_url"=&gt;true</code>をつけると固定のURLとなるので、編集が不可能になるが、表示が許可されるようになる。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
 <span class='line-number'>4</span>
 </pre></td><td class='code'><pre><code class=''><span class='line'>$private = cl_image_tag($public_id . ".jpg", array(
 </span><span class='line'>    "type"=&gt;"private",
 </span><span class='line'>    "sign_url"=&gt;true
 </span><span class='line'>));</span></code></pre></td></tr></table></div></figure>
 
-
-<p>※<code>"sign_url"=&gt;true</code>がないと表示が出来なかった。</p>
 
 <p>表示URL</p>
 
