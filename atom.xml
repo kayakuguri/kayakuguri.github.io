@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-05-11T12:57:24+09:00</updated>
+  <updated>2015-05-13T11:56:14+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,202 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[SFストリーミングAPIを試してみた]]></title>
+    <link href="http://kayakuguri.github.io/blog/2015/05/13/sf-streaming-api/"/>
+    <updated>2015-05-13T11:54:34+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2015/05/13/sf-streaming-api</id>
+    <content type="html"><![CDATA[<p>salesforceのストリーミングAPIを利用すればプッシュ通知のようなものを作成できる、ということで試してみた。</p>
+
+<!-- more -->
+
+
+<h2>仕組み</h2>
+
+<p>Long pollingと呼ばれる技術が使用されているよう。<br/>
+仕組みとしては以下がわかりやすかった。</p>
+
+<blockquote><p>1.クライアントからは従来のポーリング同様に、サーバに対して要求を発行<br/>
+2.サーバ側はその要求に対して即時に応答を返さず、ずっと掴んだままにしておく<br/>
+3.サーバ側でイベントの発生を検知したら、それまで掴みっぱなしになっていた複数の要求に対して一斉に応答を返す<br/>
+4.応答を受信したブラウザはすぐに次の要求を再発行して、ふたたび応答待ちの状態へと戻る<br/>
+⇒  結果的にサーバからのプッシュ通知が行われたような動作になります。<br/>
+<a href="http://www.terrasky.co.jp/blog/?p=802#sthash.HrI4ITMg.dpuf">http://www.terrasky.co.jp/blog/?p=802#sthash.HrI4ITMg.dpuf</a></p></blockquote>
+
+<h2>流れ</h2>
+
+<p>作成の手順は以下。</p>
+
+<ol>
+<li>オブジェクトの作成(設定)</li>
+<li>PushTopicの作成</li>
+<li>PushTopicをチャンネルに登録、テスト</li>
+</ol>
+
+
+<h2>1.オブジェクトの作成(設定)</h2>
+
+<p>プッシュするためのオブジェクトとして今回は以下のカスタムオブジェクトを使用した。</p>
+
+<p>オブジェクト名：CustomMessage<br/>
+プッシュ内容：未読(Unread__c)のチェックボックスがtrueになればプッシュ通知</p>
+
+<h2>2.PushTopicの作成</h2>
+
+<p><code>PushTopic</code>は管理画面上からは作成出来ないよう。<br/>
+開発者コンソールから直接レコードを作成する。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2015/05/stereaming_api1.jpg" alt="" /></p>
+
+<p>実行させたコードは以下。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>PushTopic pushTopic = new PushTopic();
+</span><span class='line'>pushTopic.Name = 'UnreadNotification';
+</span><span class='line'>pushTopic.Query = 'SELECT Id, Unread__c FROM CustomMessage__c';
+</span><span class='line'>pushTopic.NotifyForOperationCreate = true;
+</span><span class='line'>pushTopic.NotifyForOperationUpdate = true;
+</span><span class='line'>pushTopic.NotifyForOperationUndelete = false;
+</span><span class='line'>pushTopic.NotifyForOperationDelete = false;
+</span><span class='line'>pushTopic.ApiVersion = 32.0;
+</span><span class='line'>insert pushTopic;</span></code></pre></td></tr></table></div></figure>
+
+
+<p>※<code>NotifyForOperations</code>と<code>NotifyForFields</code>は変更出来ない、と怒られた。</p>
+
+<h3>通知タイミング</h3>
+
+<p>レコードがどうなった時に通知するかを、<code>NotifyForOperationCreate</code>等で設定している。<br/>
+(これらはデフォルトでは<code>true</code>)</p>
+
+<table>
+<thead>
+<tr>
+<th>項目 </th>
+<th> 内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>NotifyForOperationCreate </td>
+<td> 作成</td>
+</tr>
+<tr>
+<td>NotifyForOperationUpdate </td>
+<td> 更新</td>
+</tr>
+<tr>
+<td>NotifyForOperationUndelete </td>
+<td> 復元</td>
+</tr>
+<tr>
+<td>NotifyForOperationDelete </td>
+<td> 削除</td>
+</tr>
+</tbody>
+</table>
+
+
+<p><img src="http://kayakuguri.github.io/images/2015/05/stereaming_api2.jpg" alt="" /></p>
+
+<p>実行後、SOQLで参照してみた。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2015/05/stereaming_api3.jpg" alt="" /></p>
+
+<h3>通知対象</h3>
+
+<p><code>NotifyForFields</code>は設定出来ない、と怒られたが、ここはデフォルトでは<code>Referenced</code>になっている。<br/>
+これは、指定したクエリのSELECT句とWHERE句、両方を通知対象とする、という意味のよう。<br/>
+これをSELECT句だけを対象に、とも出来るのだとか。</p>
+
+<p>今回はSELECTに指定した、Unread__cが作成、更新されると通知される。<br/>
+(WHERE句がないので、全てのレコード対象)</p>
+
+<p>またこのSELECT句には必ず<code>ID</code>を含める必要があるとのこと。</p>
+
+<h2>3.PushTopicをチャンネルに登録、テスト</h2>
+
+<h3>登録</h3>
+
+<p>以下にアクセス。<br/>
+<a href="https://workbench.developerforce.com/login.php">https://workbench.developerforce.com/login.php</a></p>
+
+<p>これは、デモ目的でのみ利用可能な、Salesforceから提供されている、ワークベンチのホスト型インスタンス、だそう。<br/>
+本番利用の際は自前で、ワークベンチの設定が必要なのだとか。<br/>
+(この辺は未調査)</p>
+
+<p><code>Environment</code>は<code>Production</code>を選択した。<br/>
+<code>API Version</code>は<code>32</code>を選択。(33はなかった)</p>
+
+<p><img src="http://kayakuguri.github.io/images/2015/05/stereaming_api4.jpg" alt="" /></p>
+
+<p>規約に同意して、<code>Login with Salesforce</code>をクリック。<br/>
+承認を求められるので、<code>許可</code>をクリック。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2015/05/stereaming_api5.jpg" alt="" /></p>
+
+<p><code>Jump to:</code>で、<code>Streaming Push Topics</code>を選択。<br/>
+<code>select</code>をクリック。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2015/05/stereaming_api6.jpg" alt="" /></p>
+
+<p>次の画面で接続が行われる。<br/>
+Push Topicで先程作成した、PushTopicを選択。<br/>
+デフォルトでは登録されていない状態っぽいので、<code>Subscribe</code>ボタンをクリックして登録しておく。<br/>
+その状態でブラウザを開いたままにしておく。<br/>
+<img src="http://kayakuguri.github.io/images/2015/05/stereaming_api7.jpg" alt="" /></p>
+
+<h3>テスト</h3>
+
+<p>新しいウインドウで、再度以下にアクセスし、同じく<code>Production</code>のバージョン<code>32</code>でログイン。<br/>
+<a href="https://workbench.developerforce.com/login.php">https://workbench.developerforce.com/login.php</a></p>
+
+<p>上部メニューの<code>data</code>から、<code>Insert</code>をクリック。<br/>
+<img src="http://kayakuguri.github.io/images/2015/05/stereaming_api8.jpg" alt="" /></p>
+
+<p>Object Typeで対象のカスタムオブジェクト(CustomMessage__c)を選択し、<code>Next</code>をクリック。<br/>
+<img src="http://kayakuguri.github.io/images/2015/05/stereaming_api9.jpg" alt="" /></p>
+
+<p>オブジェクトをインサートするための情報を入力。<br/>
+OwinIDは入力しなくても大丈夫だった。<br/>
+<img src="http://kayakuguri.github.io/images/2015/05/stereaming_api10.jpg" alt="" /></p>
+
+<p><code>Commit Insert</code>をクリックするとインサートが完了する。<br/>
+<img src="http://kayakuguri.github.io/images/2015/05/stereaming_api11.jpg" alt="" /></p>
+
+<p>すると、先程開いていた画面に内容が(ほぼ)リアルタイムに通知される。<br/>
+<img src="http://kayakuguri.github.io/images/2015/05/stereaming_api12.jpg" alt="" /></p>
+
+<p><code>sobject</code>には、PushTopicのSELECT句で設定した項目が入っている。</p>
+
+<p>このレコードの作成はこの<code>workbench</code>上からわざわざ作業しなくても、Salesfroceから直接レコードを新規で作成しても受信は問題なくできた。<br/>
+あとは、Visualforceのコードに組み込めば受信ページを作れるよう。</p>
+
+<h2>制限</h2>
+
+<p>色々と制限があるよう。詳しくは以下の記事の最後のほうの表を参照。<br/>
+<a href="http://www.terrasky.co.jp/blog/?p=802">http://www.terrasky.co.jp/blog/?p=802</a></p>
+
+<p>トピック数が20、とか、登録者数が20、とか、結構厳しい。<br/>
+そもそも、Visualforceでの利用で、SFのアカウントを持っている人が通知を受け取るページを開発するのに使用する事を前提としているっぽい。<br/>
+通常のwebサービスでSFからの通知を受け取るのに利用出来るかと思って調べていたのだが、どうも違うようだった。</p>
+
+<h2>参考</h2>
+
+<p><a href="https://developer.salesforce.com/docs/atlas.ja-jp.api_streaming.meta/api_streaming/quick_start_workbench.htm">ワークベンチを使用したクイックスタート | Force.com ストリーミング API 開発者ガイド | Salesforce Developers</a><br/>
+<a href="http://tyoshikawa1106.hatenablog.com/entry/2013/08/01/225204">SFDC：Streaming API 試してみました &ndash; tyoshikawa1106のブログ</a><br/>
+<a href="http://www.terrasky.co.jp/blog/?p=802">10分で分かる！使える！ストリーミング API &laquo;  TerraSky Tech Blog</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[herokuアドオン]cloudinaryでの画像制限設定について]]></title>
@@ -3416,83 +3612,6 @@ RewriteRule ^$ https://ssl.cp.4143.com [R=301,L]
 <a href="https://devcenter.heroku.com/articles/transloadit">Transloadit | Heroku Dev Center</a><br/>
 <a href="https://transloadit.com/">File upload processing web service | Transloadit</a><br/>
 <a href="https://github.com/transloadit/php-sdk">transloadit/php-sdk</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[mac]macのPHPのバージョンをアップデートする]]></title>
-    <link href="http://kayakuguri.github.io/blog/2015/04/15/mac-update-php/"/>
-    <updated>2015-04-15T20:15:38+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2015/04/15/mac-update-php</id>
-    <content type="html"><![CDATA[<p>とあるSDKをcomposer経由でインストールしようとすると、PHPのバージョンが古い、と怒られてしまった。<br/>
-なので、macで5.6にしたメモ。</p>
-
-<!-- more -->
-
-
-<p>アップデート前。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>$ php -v
-</span><span class='line'>PHP 5.4.38 (cli) (built: Mar 19 2015 14:49:15)
-</span><span class='line'>Copyright (c) 1997-2014 The PHP Group
-</span><span class='line'>Zend Engine v2.4.0, Copyright (c) 1998-2014 Zend Technologies</span></code></pre></td></tr></table></div></figure>
-
-
-<hr />
-
-<p>基本的に以下のママ。<br/>
-<code>homebrew</code>でインストールした。</p>
-
-<p><a href="http://takemaru123.hatenablog.jp/entry/2014/11/27/224037">macにhomebrewでPHP5.6環境をインストールしてみる &ndash; たけまるの日記</a></p>
-
-<p>まず、xcode-selectをインストールしておく。<br/>
-(Xcode自体がインストールされていない場合はインストールが必要)<br/>
-(理由はわかてない)</p>
-
-<pre><code>$ xcode-select --install
-</code></pre>
-
-<p>すると、以下のメッセージが表示されて、ダイアログが表示された。</p>
-
-<blockquote><p>xcode-select: note: install requested for command line developer tools</p></blockquote>
-
-<p><img src="http://kayakuguri.github.io/images/2015/04/mac_php_update_1.png" alt="ダイアログ" /></p>
-
-<p>インストール、を押すと規約同意画面に進み、インストールが始まる。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2015/04/mac_php_update_2.png" alt="規約同意" /><br/>
-<img src="http://kayakuguri.github.io/images/2015/04/mac_php_update_3.png" alt="インストール中" /></p>
-
-<p>インストール後に以下でhomebrewのリポジトリを作成。<br/>
-(ここもよくわかってない)</p>
-
-<pre><code>$ brew tap homebrew/php
-$ brew tap homebrew/dupes
-</code></pre>
-
-<p>で、いよいよPHP5.6のインストール。</p>
-
-<pre><code>$ brew install php56 --with-apxs2=/usr/sbin/apxs
-~~~~~
-==&gt; Summary
-🍺  /usr/local/Cellar/php56/5.6.7: 500 files, 51M
-</code></pre>
-
-<p>で、ターミナルを再起動すると、無事、アップデートされました。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>$ php -v
-</span><span class='line'>PHP 5.6.7 (cli) (built: Mar 22 2015 19:03:55)
-</span><span class='line'>Copyright (c) 1997-2015 The PHP Group
-</span><span class='line'>Zend Engine v2.6.0, Copyright (c) 1998-2015 Zend Technologies</span></code></pre></td></tr></table></div></figure>
-
 ]]></content>
   </entry>
   
