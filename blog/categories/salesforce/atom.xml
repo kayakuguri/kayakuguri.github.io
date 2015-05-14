@@ -4,7 +4,7 @@
   <title><![CDATA[Category: salesforce | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/salesforce/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-05-13T11:56:14+09:00</updated>
+  <updated>2015-05-14T15:06:03+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,49 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[salesfroce]開発者コンソールでのFIELD_INTEGRITY_EXCEPTIONエラー]]></title>
+    <link href="http://kayakuguri.github.io/blog/2015/05/14/developper-console-error/"/>
+    <updated>2015-05-14T14:50:12+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2015/05/14/developper-console-error</id>
+    <content type="html"><![CDATA[<p>たまに起こっていつも調べている気がするのでメモ。</p>
+
+<!-- more -->
+
+
+<p>最近は開発者コンソールで開発をしている事が多いのだけれど、ファイルをいざ保存しようとしたらたまに以下のようなエラーが出て保存できない時がある。</p>
+
+<p><img src="/images/2015/05/Force_com_Developer_Console_01.jpg" alt="" /></p>
+
+<blockquote><p>FIELD_INTEGRITY_EXCEPTION<br/>
+Failde to create createContainerMember for containerId=undefined:null は無効な containerIdです。</p></blockquote>
+
+<p>保存しているファイルの種類や内容には関係ない。<br/>
+これが起こるとsavingのまま止まってしまう。</p>
+
+<p>で、解決方法は公式にある。</p>
+
+<p><a href="https://help.salesforce.com/apex/HTViewSolution?id=000204953&amp;language=en_US">Developer console cannot save classes/triggers/pages</a></p>
+
+<p>まず、開発者コンソールを閉じて、再度開く。(念のため)<br/>
+で、開発者コンソールのメニューから、<code>Workspace</code> &ndash;> <code>New Workspace</code>を選択。</p>
+
+<p><img src="/images/2015/05/Force_com_Developer_Console_02.jpg" alt="" /></p>
+
+<p>適当な名前で保存する。</p>
+
+<p><img src="/images/2015/05/Force_com_Developer_Console_03.jpg" alt="" /></p>
+
+<p>ワークスペースが新しく切り替わる(見た目は変わらない)。<br/>
+すると、無事保存出来るようになる。</p>
+
+<p>一度保存出来るようになったらもとのdefaultのワークスペースに戻しても問題なくなっているので、<br/>
+先程作った適当なワークスペース削除しても問題なし。</p>
+
+<p>開発者コンソールは便利なんだけど、いかんせん不安定な印象がある…。</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[SFストリーミングAPIを試してみた]]></title>
@@ -517,119 +560,6 @@ RestRequest req = new RestRequest();
 RestContext.request = req;
 userInfo_API.doPost();
 </code></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[salesforce]Apex REST作成時のtips]]></title>
-    <link href="http://kayakuguri.github.io/blog/2015/03/27/apex-rest-tips/"/>
-    <updated>2015-03-27T19:45:44+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2015/03/27/apex-rest-tips</id>
-    <content type="html"><![CDATA[<p>最近よくApexRESTを作成していて、<br/>
-その中でちょっとしたtipsというかメモをメモっておきます。</p>
-
-<!-- more -->
-
-
-<h2>エンドポイント</h2>
-
-<p>エンドポイントの指定には以下のように書きます。</p>
-
-<pre><code>@RestResource(urlMapping='/User/Login')
-</code></pre>
-
-<p>この時に、<code>*</code>を使う事も出来ます。</p>
-
-<pre><code>@RestResource(urlMapping='/User/*')
-</code></pre>
-
-<p>なので、ここにユーザーIDを入れたりして、そのIDを取得することで、<br/>
-よりREST APIらしい(?)挙動でAPIを作成する事が出来ます。<br/>
-apex側で送信されたIDを取得するには、以下のように<code>/</code>で区切って取得します。</p>
-
-<pre><code>String accountId = req.requestURI.substring(req.requestURI.lastIndexOf('/')+1);
-</code></pre>
-
-<p>公式のドキュメントに正にこのままの内容が載っていました。</p>
-
-<p><a href="https://www.salesforce.com/us/developer/docs/apexcode/Content/apex_rest_code_sample_basic.htm">Apex REST Basic Code Sample</a></p>
-
-<h2>JSON</h2>
-
-<p>返却するJSONの形式ですが、クラスの入れ子や、<code>List</code>を活用することで<br/>
-かなり自由度高く作成出来ます。</p>
-
-<p>例えば、以下のようなJSONを返すとします。</p>
-
-<p>```
-&ldquo;success&rdquo;:1,
-&ldquo;User&rdquo; : {</p>
-
-<pre><code>"user_id": xxx,
-"hobby":[
-    {"name":"映画", "level":"3"},
-    {"name":"サッカー", "level":"1"}
-]
-</code></pre>
-
-<p>},
-&ldquo;request_time&rdquo;: &ldquo;2015-3-27 12:33&rdquo;
-```</p>
-
-<p>この場合、以下のようにクラスを複数作り、入れ子構造を作る事で作成出来ます。</p>
-
-<p>```
-global class UserData{</p>
-
-<pre><code>global String user_id;
-global HobbyData hobby
-</code></pre>
-
-<p>}
-global class HobbyData{</p>
-
-<pre><code>global String name;
-global String level;
-</code></pre>
-
-<p>}
-global class resultData{</p>
-
-<pre><code>global Integer success;
-global UserData User;
-global String request_time;
-</code></pre>
-
-<p>}
-```</p>
-
-<p>作成するときは以下のような感じで。</p>
-
-<p>```
-List<HobbyData> hobbies = new List<HobbyData>();
-HobbyData hobby1 = new HobbyData();
-hobby1.name = &lsquo;映画&rsquo;;
-hobby1.level = &lsquo;3&rsquo;;
-hobbies.add(hobby1);
-HobbyData hobby2 = new HobbyData();
-hobby2.name = &lsquo;サッカー&rsquo;;
-hobby2.level = &lsquo;1&rsquo;;
-hobbies.add(hobby2);</p>
-
-<p>UserData user = new UserData();
-user.user_id = &lsquo;xxx&rsquo;;
-user.hobby = hobbies;</p>
-
-<p>resultData result = new resultData();
-result.success = 1;
-result.User = user;
-result.request_time = &lsquo;2015-3-27 12:33&rsquo;;</p>
-
-<p>return result;
-```</p>
-
-<p>地道な作業にはなりますが、これでわりかし綺麗なJSONが返せました。<br/>
-もっと簡単な方法があったらまた書きます。</p>
 ]]></content>
   </entry>
   
