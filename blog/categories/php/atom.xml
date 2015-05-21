@@ -4,7 +4,7 @@
   <title><![CDATA[Category: php | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/php/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-05-14T15:06:03+09:00</updated>
+  <updated>2015-05-21T19:28:55+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,55 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Session Fixation]]></title>
+    <link href="http://kayakuguri.github.io/blog/2015/05/21/session-fixation/"/>
+    <updated>2015-05-21T19:09:52+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2015/05/21/session-fixation</id>
+    <content type="html"><![CDATA[<p>今更ながら、Session Fixationなるものを知ったのでメモ。</p>
+
+<!-- more -->
+
+
+<p>内容は以下、徳丸先生が詳しい。<br/>
+<a href="http://blog.tokumaru.org/2009/01/introduction-to-session-fixation-attack.html">とくまるひろしのSession Fixation攻撃入門 | 徳丸浩の日記</a></p>
+
+<p>日本語では、<code>セッション固定攻撃</code>と呼ばれているようで、<br/>
+ログイン認証をセッションで行っているサイトに対して、何らかの方法でユーザーに意図した固定セッションIDを与えた状態でログインしてもらい、<br/>
+攻撃者はそのIDでログインしたことにする、というもののよう。</p>
+
+<p>対策としては以下いずれかになるよう。</p>
+
+<blockquote><p>(1) セッション変数内に特定の値を常に与えるようにし、もしその値が無かった場合には正しくふられたセッションIDではないと判断する。<br/>
+(セッションIDの正当性をセッション変数内に埋め込む)<br/>
+(2) ログイン処理など、そのサイトでの本来のセッションの使用を行う時点で(重要な情報を持たせるときに)、セッションIDを変更する。
+<a href="http://pentan.info/php/session_fixation.html">http://pentan.info/php/session_fixation.html</a></p></blockquote>
+
+<p>2のセッションの付け替えは以下のようにする。</p>
+
+<pre><code>session_start();
+session_destroy();
+session_start();
+session_regenerate_id();
+</code></pre>
+
+<p>ログインが成功し、ログイン認証をセッションに格納する直前に付け替えを入れてやれば、<br/>
+ログイン後には別のIDとなるので、攻撃側が用意した固定IDを回避することが出来る。</p>
+
+<p>ただしこの、<code>session_regenerate_id</code>は結構な負荷がかかるようで、<br/>
+連続して使用しているとセッションが切れてしまうらしい。<br/>
+なので、連続的に実行されないようにする事が重要っぽい。<br/>
+ログイン時に一回のみ実行されるようにしておけば特に問題なさそう。</p>
+
+<h2>参考</h2>
+
+<p><a href="http://canalize.jp/archives/009281.php">セッションハイジャック と session_regenerate_id( )関数 &ndash; Shoulder.jp</a> <br/>
+<a href="http://pentan.info/php/session_gc.html">セッションの有効期間とか設定とか挙動とかを調べました &ndash; [PHP + PHP] ぺんたん info</a><br/>
+<a href="http://pentan.info/php/session_fixation.html">セッション固定攻撃(session fixation) &ndash; [PHP + PHP] ぺんたん info</a><br/>
+<a href="http://blog.ohgaki.net/session_regenerate_id_wo">ログイン後にsession_regenerate_id()を実行するだけで十分か? | yohgaki&#039;s blog</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[salesforce]アウトバウンドメッセージ送信時のエラー]]></title>
@@ -425,83 +474,6 @@ PHP 5.6.7 (cli) (built: Mar 22 2015 19:03:55)
 Copyright (c) 1997-2015 The PHP Group
 Zend Engine v2.6.0, Copyright (c) 1998-2015 Zend Technologies
 </code></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Facebookのphp-sdk-v4をcomposerを使ってインストールした時のメモ]]></title>
-    <link href="http://kayakuguri.github.io/blog/2014/08/04/facebook-sdk-v4-composer/"/>
-    <updated>2014-08-04T19:26:37+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2014/08/04/facebook-sdk-v4-composer</id>
-    <content type="html"><![CDATA[<p>今更ながらFacebookのAPIがv2.0にアップデートされた事による<br/>
-影響範囲の大きさにショックを受けています。</p>
-
-<p><a href="http://kuneko.hatenadiary.com/entry/facebook_search_public_post">Facebookの全体公開投稿は2015年に完全に検索できなくなるかも &ndash; ku:neko ism</a><br/>
-<a href="http://snowadays.jp/2014/05/2762">Facebookログイン Version2.0（アプリのパーミッション仕様変更）</a><br/>
-<a href="http://qiita.com/hilotter/items/b88402505faeebbbce89">Facebook Graph API 2.0について &ndash; Qiita</a></p>
-
-<!-- more -->
-
-
-<p>で、新しいものに対応したアプリを作成するべく、<br/>
-PHPのSDKをダウンロードしてきて、、と思ったのですが、composerに対応しているということで、<br/>
-composerでインストールしてみることに。</p>
-
-<p><a href="https://developers.facebook.com/docs/php/gettingstarted/4.0.0">Getting Started php-sdk-v4</a><br/>
-この公式によると、以下のようにしてインストールする、だけ。</p>
-
-<pre><code>{
-  "require" : {
-    "facebook/php-sdk-v4" : "4.0.*"
-  }
-}
-</code></pre>
-
-<p>しかしエラーが。</p>
-
-<pre><code>Your requirements could not be resolved to an installable set of packages.
-  Problem 1
-- facebook/php-sdk-v4 4.0.9 requires php &gt;=5.4.0 -&gt; no matching package found.
-</code></pre>
-
-<p>バージョンの指定を、<code>4.0.9</code>としたり、<code>*</code>としてみても同じ。<br/>
-ググってみると以下の情報に当たる。</p>
-
-<p><a href="http://stackoverflow.com/questions/24269649/composer-not-installing-latest-facebook-php-sdk-due-to-multiple-php-versions">composer not installing latest facebook php sdk due to multiple php versions &ndash; Stack Overflow</a></p>
-
-<p>どうやら、php-sdk-v4は、PHPのバージョンが5.4からの対応、なのだけれど、<br/>
-PCにインストールしているPHPのバージョンが低いとエラーが出るらしい。</p>
-
-<p>ターミナルからPHPのバージョンを調べてみると、きっちり、<code>5.3.28</code>。</p>
-
-<pre><code>$ php -v
-PHP 5.3.28 (cli) (built: Jan 23 2014 18:02:48)
-</code></pre>
-
-<p>調べてみると、下記が一番簡単そうだったので、この方法でインストールした。</p>
-
-<p><a href="http://kimikimi714.hatenablog.com/entry/2013/07/06/233518">macのphpをアップデート &ndash; わすれっぽいきみえ</a></p>
-
-<pre><code>$ curl -s http://php-osx.liip.ch/install.sh | bash -s 5.5
-</code></pre>
-
-<p>で、このままではデフォルトにはならないので、パスを通す、と。<br/>
-<code>~/.bashrc</code>の冒頭に下記を追加しておいた。</p>
-
-<pre><code>export PATH=/usr/local/php5/bin:$PATH
-</code></pre>
-
-<p>で、バージョンを再度確認してみると、無事、アップデートされていた。</p>
-
-<pre><code>$ php -v
-PHP 5.5.14 (cli) (built: Jun 28 2014 10:29:43)
-</code></pre>
-
-<p>で、再度、composerをインストールしてみると、無事、完了した。<br/>
-これでようやく環境が整ったことになる。</p>
-
-<pre><code>  - Installing facebook/php-sdk-v4 (4.0.9)
-</code></pre>
 ]]></content>
   </entry>
   

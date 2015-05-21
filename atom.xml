@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-05-14T15:06:03+09:00</updated>
+  <updated>2015-05-21T19:28:55+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,55 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Session Fixation]]></title>
+    <link href="http://kayakuguri.github.io/blog/2015/05/21/session-fixation/"/>
+    <updated>2015-05-21T19:09:52+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2015/05/21/session-fixation</id>
+    <content type="html"><![CDATA[<p>今更ながら、Session Fixationなるものを知ったのでメモ。</p>
+
+<!-- more -->
+
+
+<p>内容は以下、徳丸先生が詳しい。<br/>
+<a href="http://blog.tokumaru.org/2009/01/introduction-to-session-fixation-attack.html">とくまるひろしのSession Fixation攻撃入門 | 徳丸浩の日記</a></p>
+
+<p>日本語では、<code>セッション固定攻撃</code>と呼ばれているようで、<br/>
+ログイン認証をセッションで行っているサイトに対して、何らかの方法でユーザーに意図した固定セッションIDを与えた状態でログインしてもらい、<br/>
+攻撃者はそのIDでログインしたことにする、というもののよう。</p>
+
+<p>対策としては以下いずれかになるよう。</p>
+
+<blockquote><p>(1) セッション変数内に特定の値を常に与えるようにし、もしその値が無かった場合には正しくふられたセッションIDではないと判断する。<br/>
+(セッションIDの正当性をセッション変数内に埋め込む)<br/>
+(2) ログイン処理など、そのサイトでの本来のセッションの使用を行う時点で(重要な情報を持たせるときに)、セッションIDを変更する。
+<a href="http://pentan.info/php/session_fixation.html">http://pentan.info/php/session_fixation.html</a></p></blockquote>
+
+<p>2のセッションの付け替えは以下のようにする。</p>
+
+<pre><code>session_start();
+session_destroy();
+session_start();
+session_regenerate_id();
+</code></pre>
+
+<p>ログインが成功し、ログイン認証をセッションに格納する直前に付け替えを入れてやれば、<br/>
+ログイン後には別のIDとなるので、攻撃側が用意した固定IDを回避することが出来る。</p>
+
+<p>ただしこの、<code>session_regenerate_id</code>は結構な負荷がかかるようで、<br/>
+連続して使用しているとセッションが切れてしまうらしい。<br/>
+なので、連続的に実行されないようにする事が重要っぽい。<br/>
+ログイン時に一回のみ実行されるようにしておけば特に問題なさそう。</p>
+
+<h2>参考</h2>
+
+<p><a href="http://canalize.jp/archives/009281.php">セッションハイジャック と session_regenerate_id( )関数 &ndash; Shoulder.jp</a> <br/>
+<a href="http://pentan.info/php/session_gc.html">セッションの有効期間とか設定とか挙動とかを調べました &ndash; [PHP + PHP] ぺんたん info</a><br/>
+<a href="http://pentan.info/php/session_fixation.html">セッション固定攻撃(session fixation) &ndash; [PHP + PHP] ぺんたん info</a><br/>
+<a href="http://blog.ohgaki.net/session_regenerate_id_wo">ログイン後にsession_regenerate_id()を実行するだけで十分か? | yohgaki&#039;s blog</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[salesfroce]開発者コンソールでのFIELD_INTEGRITY_EXCEPTIONエラー]]></title>
@@ -2924,253 +2973,6 @@ RewriteRule ^$ https://ssl.cp.4143.com [R=301,L]
 <p><a href="https://help.salesforce.com/HTViewHelpDoc?id=code_inbound_email.htm&amp;language=ja">InboundEmail &#12458;&#12502;&#12472;&#12455;&#12463;&#12488;&#12398;&#20351;&#29992;</a><br/>
 <a href="https://developer.salesforce.com/page/An_Introduction_To_Email_Services_on_Force.com">An Introduction To Email Services on Force.com &ndash; developer.force.com</a><br/>
 <a href="http://tyoshikawa1106.hatenablog.com/entry/2013/07/31/213518">SFDC：Messaging.InboundEmailHandlerについて &ndash; tyoshikawa1106のブログ</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[Herokuアドオン]TransloaditでFTPアップロード]]></title>
-    <link href="http://kayakuguri.github.io/blog/2015/04/16/heroku-transloadit-2/"/>
-    <updated>2015-04-16T17:08:38+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2015/04/16/heroku-transloadit-2</id>
-    <content type="html"><![CDATA[<p>アップロード先をFTPに指定する方法と、<br/>
-その内容をテンプレート化するまでのメモ。</p>
-
-<!-- more -->
-
-
-<p><code>steps</code>内の<code>robot</code>で、<code>/ftp/store</code>を指定する。<br/>
-詳しいパラメータは以下。</p>
-
-<p><a href="https://transloadit.com/docs/conversion-robots/#export-to-your-ftp-server-with-the-ftpexport-robot">6.3 Export to your FTP Server with the /ftp/export robot</a></p>
-
-<p>設定ファイル部分は以下のようにした。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>$transloadit-&gt;createAssemblyForm([
-</span><span class='line'>    'params' =&gt; [
-</span><span class='line'>        'steps' =&gt; [
-</span><span class='line'>            'export' =&gt; [
-</span><span class='line'>                'use' =&gt; ':original',
-</span><span class='line'>                'robot' =&gt; '/ftp/store',
-</span><span class='line'>                'user' =&gt; 'ユーザー名',
-</span><span class='line'>                'password' =&gt; 'パスワード',
-</span><span class='line'>                'host' =&gt; 'ホスト名',
-</span><span class='line'>                'path' =&gt; '/ディレクトリ/test.jpg'
-</span><span class='line'>            ]
-</span><span class='line'>        ],
-</span><span class='line'>        'redirect_url' =&gt; $redirectUrl
-</span><span class='line'>    ]
-</span><span class='line'>]);</span></code></pre></td></tr></table></div></figure>
-
-
-<p>フォームから入力されたファイルがアップロードされる。</p>
-
-<ul>
-<li> <code>export</code>：ここは名前をつけているだけなので、なんでもよい。</li>
-<li><code>use</code>：どの時点のファイルを使用するか。<code>:original</code>だとオリジナルのファイル。複数のパターンを指定する場合は配列で指定する。<br>ただし、その場合、パスは１つしか指定出来ないので、後に書いたほうが上書きされる。<br>(２つ書かないといけないと思われる)</li>
-<li><code>user</code>：ユーザー名</li>
-<li><code>password</code>：パスワード</li>
-<li><code>host</code>：ホスト</li>
-<li><code>path</code>：保存先のパス。ファイル名まで指定しないといけない</li>
-</ul>
-
-
-<p>ファイル名は、<code>${file.url_name}</code>と指定することで、ユーザーが選択したファイル名でアップロード出来る。<br/>
-この書き方の種類は以下にあった。<br/>
-<a href="https://transloadit.com/docs/conversion-robots/#available-job-variables">https://transloadit.com/docs/conversion-robots/#available-job-variables</a></p>
-
-<p>実行後は即時にアップロードされるわけではなく、多少の処理が必要になるよう。<br/>
-なので実際にはキューを出している状態。<br/>
-数秒後にサーバー上にアップロードが行われる。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2015/04/transloadit05.jpg" alt="Executing" /></p>
-
-<p>なので、クライアント側で完了を検知するには、transloaditから通知させるか(まだよくわかってない)、<br/>
-定期的に確認しにいくか、などの処理が必要と思われる。</p>
-
-<h2>テンプレート化</h2>
-
-<p>上記の設定内容をテンプレート化して保存してみる。<br/>
-テンプレート化することによってアカウント情報などをソース上から分離出来、セキュリティを高める効果があるよう。</p>
-
-<p>herokuのアドオンからtranloaditの管理画面に遷移後、<code>TEMPLATES</code>を選択。<br/>
-<code>+NES</code>をクリック。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2015/04/transloadit06.jpg" alt="Executing" /></p>
-
-<p>で、以下のようにテンプレートを作成する。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>{
-</span><span class='line'>  "steps": {
-</span><span class='line'>    "export": {
-</span><span class='line'>      "use": ":original",
-</span><span class='line'>      "robot": "/ftp/store",
-</span><span class='line'>      "user": "ユーザー名",
-</span><span class='line'>      "password": "パスワード",
-</span><span class='line'>      "host": "ホスト名",
-</span><span class='line'>      "path": "/ディレクトリ/${file.url_name}"
-</span><span class='line'>    }
-</span><span class='line'>  }
-</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
-
-
-<p>適当に名前をつけて保存。<br/>
-保存後、テンプレートの一覧画面から、IDを確認できるようになるので、これを覚えておく。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2015/04/transloadit07.jpg" alt="Template list" /></p>
-
-<p>で、このIDを使用して以下のように書き換える。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>$transloadit-&gt;createAssemblyForm([
-</span><span class='line'>    'params' =&gt; [
-</span><span class='line'>        'template_id' =&gt; 'テンプレートのID',
-</span><span class='line'>        'redirect_url' =&gt; $redirectUrl
-</span><span class='line'>    ]
-</span><span class='line'>]);</span></code></pre></td></tr></table></div></figure>
-
-
-<p>これで実行すると上記のテンプレートが使用されて、FTPアップロードが行われる。<br/>
-テンプレートを使用してアップロードした場合は、結果のリストにもその旨が表示される。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2015/04/transloadit08.jpg" alt="Assemblies" /></p>
-
-<h2>コード</h2>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-<span class='line-number'>39</span>
-<span class='line-number'>40</span>
-<span class='line-number'>41</span>
-<span class='line-number'>42</span>
-<span class='line-number'>43</span>
-<span class='line-number'>44</span>
-<span class='line-number'>45</span>
-<span class='line-number'>46</span>
-<span class='line-number'>47</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;?php
-</span><span class='line'>require '../vendor/autoload.php';
-</span><span class='line'>
-</span><span class='line'>use transloadit\Transloadit;
-</span><span class='line'>$transloadit = new Transloadit([
-</span><span class='line'>    'key' =&gt; getenv('TRANSLOADIT_AUTH_KEY'),
-</span><span class='line'>    'secret' =&gt; getenv('TRANSLOADIT_SECRET_KEY')
-</span><span class='line'>]);
-</span><span class='line'>
-</span><span class='line'>$response = Transloadit::response();
-</span><span class='line'>if ($response) {
-</span><span class='line'>    echo '&lt;h1&gt;Assembly status:&lt;/h1&gt;';
-</span><span class='line'>    echo '&lt;pre&gt;';
-</span><span class='line'>    print_r($response);
-</span><span class='line'>    echo '&lt;/pre&gt;';
-</span><span class='line'>    exit;
-</span><span class='line'>}
-</span><span class='line'>
-</span><span class='line'>$redirectUrl = sprintf(
-</span><span class='line'>    'http://%s%s',
-</span><span class='line'>    $_SERVER['HTTP_HOST'],
-</span><span class='line'>    $_SERVER['REQUEST_URI']
-</span><span class='line'>);
-</span><span class='line'>
-</span><span class='line'>echo $transloadit-&gt;createAssemblyForm([
-</span><span class='line'>    'params' =&gt; [
-</span><span class='line'>        'template_id' =&gt; 'テンプレートのID',
-</span><span class='line'>        'redirect_url' =&gt; $redirectUrl
-</span><span class='line'>    ]
-</span><span class='line'>]);
-</span><span class='line'>
-</span><span class='line'>?&gt;
-</span><span class='line'>
-</span><span class='line'>&lt;!DOCTYPE html&gt;
-</span><span class='line'>&lt;html lang="ja"&gt;
-</span><span class='line'>&lt;head&gt;
-</span><span class='line'>    &lt;meta charset="utf-8"&gt;
-</span><span class='line'>&lt;/head&gt;
-</span><span class='line'>&lt;body&gt;
-</span><span class='line'>
-</span><span class='line'>&lt;form method="post" action="upload_select_sample.php"&gt;
-</span><span class='line'>    &lt;input name="example_upload" type="file" accept="image/*,video/*"&gt;
-</span><span class='line'>    &lt;input type="submit" value="Upload"&gt;
-</span><span class='line'>&lt;/form&gt;
-</span><span class='line'>
-</span><span class='line'>&lt;/body&gt;
-</span><span class='line'>&lt;/html&gt;</span></code></pre></td></tr></table></div></figure>
-
-
-<hr />
-
-<h2>参考</h2>
-
-<p><a href="https://transloadit.com/demos/ftp-store/store-uploaded-files">Store the originally uploaded files on your FTP server | Transloadit</a><br/>
-<a href="https://transloadit.com/docs/#how-to-use-a-template">How to use a template</a><br/>
-<a href="https://transloadit.com/docs/conversion-robots/#available-job-variables">Available job variables</a></p>
 ]]></content>
   </entry>
   
