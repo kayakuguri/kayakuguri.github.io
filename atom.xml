@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-05-21T19:28:55+09:00</updated>
+  <updated>2015-05-22T16:35:56+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,88 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[wordpressをherokuにインストールする場合はルーティングのhtaccessを自分で設置すること]]></title>
+    <link href="http://kayakuguri.github.io/blog/2015/05/22/heroku-wp-htaccess/"/>
+    <updated>2015-05-22T16:11:35+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2015/05/22/heroku-wp-htaccess</id>
+    <content type="html"><![CDATA[<p>タイトルママ。<br/>
+ちょっとハマったのでメモ。</p>
+
+<!-- more -->
+
+
+<h2>WordPressのインストール</h2>
+
+<p>以下の手順で通常通りwordpressをインストールした。</p>
+
+<ol>
+<li>herokuにインストール用のアプリを作成</li>
+<li>gitでローカルにclone</li>
+<li>2のディレクトリ内に<a href="https://ja.wordpress.org/">Wordpress日本語版</a>をダウンロードして展開</li>
+<li>herokuのアプリにmySQLのアドオン、<a href="https://addons.heroku.com/cleardb">ClearDB</a>を入れる</li>
+<li>環境変数から、DBの接続情報を確認。<br/>
+<code>mysql://ユーザ名:パスワード@サーバ名/データベース?reconnect=true</code></li>
+<li>wp-config.phpにDB情報を反映</li>
+<li>PushしてDploy</li>
+<li>wp-admin/install.phpにアクセスして、サイト名やユーザー名などを設定してインストール。</li>
+<li>完了</li>
+</ol>
+
+
+<h2>固定ページにアクセス</h2>
+
+<p>通常の投稿でもたぶん同じ事が起こると思うが、<br/>
+最初から入っているサンプルの固定ページにアクセス。</p>
+
+<blockquote><p><a href="http://YOUR-APP-NAME.herokuapp.com/sample-page/">http://YOUR-APP-NAME.herokuapp.com/sample-page/</a></p></blockquote>
+
+<p>アクセスを確認してから、特にソースは触らずに<a href="http://kayakuguri.github.io/blog/2015/04/21/git-allow-empty/">空でdeploy</a>。</p>
+
+<p>再度上記の固定ページにアクセスすると、<strong>404 Notfound</strong>。</p>
+
+<h2>ルーティング</h2>
+
+<p>ローカルに入れていたWordPressのディレクトとファイルを見比べていると、<br/>
+ローカルのものはドキュメントルートに<code>.htaccess</code>がある。</p>
+
+<p>中身を見ていると、リダイレクトしているよう。</p>
+
+<p>どうやら、wordpressのインストール時に、wordpressのルートにルーティング用の<code>.htaccess</code>を自動で作成するよう。<br/>
+それがdeployのタイミングで消えてしまい、リダイレクトがかからず、404となっていた。</p>
+
+<p><code>.htaccess</code>の中身は以下。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'># BEGIN WordPress
+</span><span class='line'>&lt;IfModule mod_rewrite.c&gt;
+</span><span class='line'>RewriteEngine On
+</span><span class='line'>RewriteBase /
+</span><span class='line'>RewriteRule ^index\.php$ - [L]
+</span><span class='line'>RewriteCond %{REQUEST_FILENAME} !-f
+</span><span class='line'>RewriteCond %{REQUEST_FILENAME} !-d
+</span><span class='line'>RewriteRule . /index.php [L]
+</span><span class='line'>&lt;/IfModule&gt;
+</span><span class='line'>
+</span><span class='line'># END WordPress</span></code></pre></td></tr></table></div></figure>
+
+
+<p>これを<code>.htaccess</code>の名前でwordpressのルートに保存してやり、git管理下においてやればよい。</p>
+
+<p>これを置いた状態であれば、deployかけても問題なくアクセスが出来た。</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Session Fixation]]></title>
@@ -2792,187 +2874,6 @@ RewriteRule ^$ https://ssl.cp.4143.com [R=301,L]
 <a href="http://www.ksknet.net/apache/rewritecond_rew.html">RewriteCond &ndash; RewriteRuleの条件を設定</a><br/>
 <a href="http://noshirossi.blog.fc2.com/blog-entry-203.html">.htaccess　mod_rewriteで画像直リンク禁止 &ndash; 趣味を綴る日記</a><br/>
 <a href="http://blog.livedoor.jp/tak_bon/archives/6508443.html">ステム覚書帳 : [Apache]RewriteCondとRewriteRuleは抱き合わせで</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[apex][SF]InboundEmailHandlerを使ったリードの作成]]></title>
-    <link href="http://kayakuguri.github.io/blog/2015/04/17/inboundemailhandler-apex/"/>
-    <updated>2015-04-17T14:47:20+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2015/04/17/inboundemailhandler-apex</id>
-    <content type="html"><![CDATA[<p>salesforceでメールを受け取って、そのメールアドレスでリードを作る方法と、<br/>
-エラーで返信するときの方法。</p>
-
-<!-- more -->
-
-
-<h2>apex</h2>
-
-<p>メールサービスを作成する際にapexクラスを指定するので、先に作成しておきます。</p>
-
-<p>例えば今回は、送信元のメールアドレスを使用してリードを作成するとします。<br/>
-また、すでに登録されているメールアドレスの場合、エラーメールを返信するとします。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>global class MailCreateLead implements Messaging.InboundEmailHandler {
-</span><span class='line'>  global Messaging.InboundEmailResult handleInboundEmail(Messaging.InboundEmail email, Messaging.InboundEnvelope envelope) {
-</span><span class='line'>      Messaging.InboundEmailResult result = new Messaging.InboundEmailresult();
-</span><span class='line'>      
-</span><span class='line'>      //メールが重複しているかどうかをチェック
-</span><span class='line'>      String mail_str = email.fromAddress;
-</span><span class='line'>      List&lt;Lead&gt; check = [SELECT id FROM Lead WHERE Email=:mail_str LIMIT 1];
-</span><span class='line'>      if(check.size() != 0){
-</span><span class='line'>          result.message = '送信されたメールアドレスはすでに登録済です。';
-</span><span class='line'>          result.success = false;
-</span><span class='line'>      }else{
-</span><span class='line'>          Lead l = new Lead();
-</span><span class='line'>          l.Company = '-'; //(必須)
-</span><span class='line'>          l.LastName = (email.fromName == null) ? 'メール会員' : email.fromName;
-</span><span class='line'>          l.Email = email.fromAddress;
-</span><span class='line'>          insert l;
-</span><span class='line'>          result.success = true;
-</span><span class='line'>      }
-</span><span class='line'>      
-</span><span class='line'>      return result;
-</span><span class='line'>  }
-</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
-
-
-<p><code>Messaging.InboundEmailResult</code>を返却するが、<code>success</code>がfalseの場合は、<br/>
-受信を拒否し、設定されたエラーメッセージ(<code>message</code>)を送信元のメールアドレスに返す。<br/>
-この時返信されるメールは、<code>noreply@salesforce.com</code>となっており、これは変更できないっぽい。</p>
-
-<p>重複していない場合は、送信元のメールアドレスと名前(あれば)を使用してリードを作っている。</p>
-
-<h3>テストコード</h3>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-<span class='line-number'>39</span>
-<span class='line-number'>40</span>
-<span class='line-number'>41</span>
-<span class='line-number'>42</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>@isTest
-</span><span class='line'>public class MailCreateLead_Test {
-</span><span class='line'>  //正常時
-</span><span class='line'>  private static testMethod void execute_success() {
-</span><span class='line'>      Test.startTest();
-</span><span class='line'>      
-</span><span class='line'>      Messaging.InboundEmail email = new Messaging.InboundEmail() ;
-</span><span class='line'>        Messaging.InboundEnvelope env = new Messaging.InboundEnvelope();
-</span><span class='line'>        email.subject = 'Test Success';
-</span><span class='line'>        email.fromname = 'FirstName LastName';
-</span><span class='line'>        email.fromAddress = 'someaddress@email.com';
-</span><span class='line'>        email.plainTextBody = '';
-</span><span class='line'>        
-</span><span class='line'>        MailServiceToCreateLead emailService = new MailServiceToCreateLead();
-</span><span class='line'>        Messaging.InboundEmailResult res = emailService.handleInboundEmail(email, env);
-</span><span class='line'>        
-</span><span class='line'>        Test.stopTest();
-</span><span class='line'>  }
-</span><span class='line'>  
-</span><span class='line'>  //エラー時
-</span><span class='line'>  private static testMethod void execute_fail(){
-</span><span class='line'>      //重複チェック
-</span><span class='line'>      Lead le = new Lead();
-</span><span class='line'>        le.Company = '-';
-</span><span class='line'>        le.LastName = 'failed test';
-</span><span class='line'>        le.Email = 'test@test.com';
-</span><span class='line'>        Insert le;
-</span><span class='line'>        
-</span><span class='line'>        Test.startTest();
-</span><span class='line'>        
-</span><span class='line'>        Messaging.InboundEmail email = new Messaging.InboundEmail() ;
-</span><span class='line'>        Messaging.InboundEnvelope env = new Messaging.InboundEnvelope();
-</span><span class='line'>        email.subject = 'Test Failed';
-</span><span class='line'>        email.fromname = 'FirstName LastName';
-</span><span class='line'>        email.fromAddress = 'test@test.com'; //上記メールアドレスと被せる
-</span><span class='line'>        email.plainTextBody = '';
-</span><span class='line'>        MailServiceToCreateLead emailService = new MailServiceToCreateLead();
-</span><span class='line'>        Messaging.InboundEmailResult res = emailService.handleInboundEmail(email, env);
-</span><span class='line'>        
-</span><span class='line'>        Test.stopTest();
-</span><span class='line'>  }
-</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>メールサービス</h2>
-
-<p><code>設定 &gt; 開発 &gt; メールサービス</code>から作成します。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2015/04/inboundemailhandler01.jpg" alt="メールサービス" /></p>
-
-<p>設定内容は、サービス名と、先程作成したapexクラスを指定してやるくらいです。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2015/04/inboundemailhandler02.jpg" alt="新規作成" /></p>
-
-<p>作成後、ユニークなメールアドレスが割り当てられるので、<br/>
-そのアドレス宛てに送信するとメールサービスが起動します。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2015/04/inboundemailhandler03.jpg" alt="設定内容" /></p>
-
-<h2>参考</h2>
-
-<p><a href="https://help.salesforce.com/HTViewHelpDoc?id=code_inbound_email.htm&amp;language=ja">InboundEmail &#12458;&#12502;&#12472;&#12455;&#12463;&#12488;&#12398;&#20351;&#29992;</a><br/>
-<a href="https://developer.salesforce.com/page/An_Introduction_To_Email_Services_on_Force.com">An Introduction To Email Services on Force.com &ndash; developer.force.com</a><br/>
-<a href="http://tyoshikawa1106.hatenablog.com/entry/2013/07/31/213518">SFDC：Messaging.InboundEmailHandlerについて &ndash; tyoshikawa1106のブログ</a></p>
 ]]></content>
   </entry>
   

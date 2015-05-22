@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: wordpress | KayaMemo]]></title>
+  <link href="http://kayakuguri.github.io/blog/categories/wordpress/atom.xml" rel="self"/>
+  <link href="http://kayakuguri.github.io/"/>
+  <updated>2015-05-22T16:35:56+09:00</updated>
+  <id>http://kayakuguri.github.io/</id>
+  <author>
+    <name><![CDATA[萱潜]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[wordpressをherokuにインストールする場合はルーティングのhtaccessを自分で設置すること]]></title>
+    <link href="http://kayakuguri.github.io/blog/2015/05/22/heroku-wp-htaccess/"/>
+    <updated>2015-05-22T16:11:35+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2015/05/22/heroku-wp-htaccess</id>
+    <content type="html"><![CDATA[<p>タイトルママ。<br/>
+ちょっとハマったのでメモ。</p>
+
+<!-- more -->
+
+
+<h2>WordPressのインストール</h2>
+
+<p>以下の手順で通常通りwordpressをインストールした。</p>
+
+<ol>
+<li>herokuにインストール用のアプリを作成</li>
+<li>gitでローカルにclone</li>
+<li>2のディレクトリ内に<a href="https://ja.wordpress.org/">Wordpress日本語版</a>をダウンロードして展開</li>
+<li>herokuのアプリにmySQLのアドオン、<a href="https://addons.heroku.com/cleardb">ClearDB</a>を入れる</li>
+<li>環境変数から、DBの接続情報を確認。<br/>
+<code>mysql://ユーザ名:パスワード@サーバ名/データベース?reconnect=true</code></li>
+<li>wp-config.phpにDB情報を反映</li>
+<li>PushしてDploy</li>
+<li>wp-admin/install.phpにアクセスして、サイト名やユーザー名などを設定してインストール。</li>
+<li>完了</li>
+</ol>
+
+
+<h2>固定ページにアクセス</h2>
+
+<p>通常の投稿でもたぶん同じ事が起こると思うが、<br/>
+最初から入っているサンプルの固定ページにアクセス。</p>
+
+<blockquote><p><a href="http://YOUR-APP-NAME.herokuapp.com/sample-page/">http://YOUR-APP-NAME.herokuapp.com/sample-page/</a></p></blockquote>
+
+<p>アクセスを確認してから、特にソースは触らずに<a href="http://kayakuguri.github.io/blog/2015/04/21/git-allow-empty/">空でdeploy</a>。</p>
+
+<p>再度上記の固定ページにアクセスすると、<strong>404 Notfound</strong>。</p>
+
+<h2>ルーティング</h2>
+
+<p>ローカルに入れていたWordPressのディレクトとファイルを見比べていると、<br/>
+ローカルのものはドキュメントルートに<code>.htaccess</code>がある。</p>
+
+<p>中身を見ていると、リダイレクトしているよう。</p>
+
+<p>どうやら、wordpressのインストール時に、wordpressのルートにルーティング用の<code>.htaccess</code>を自動で作成するよう。<br/>
+それがdeployのタイミングで消えてしまい、リダイレクトがかからず、404となっていた。</p>
+
+<p><code>.htaccess</code>の中身は以下。</p>
+
+<p>```</p>
+
+<h1>BEGIN WordPress</h1>
+
+<p><IfModule mod_rewrite.c>
+RewriteEngine On
+RewriteBase /
+RewriteRule ^index.php$ &ndash; [L]
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule . /index.php [L]
+</IfModule></p>
+
+<h1>END WordPress</h1>
+
+<p>```</p>
+
+<p>これを<code>.htaccess</code>の名前でwordpressのルートに保存してやり、git管理下においてやればよい。</p>
+
+<p>これを置いた状態であれば、deployかけても問題なくアクセスが出来た。</p>
+]]></content>
+  </entry>
+  
+</feed>
