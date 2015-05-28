@@ -4,7 +4,7 @@
   <title><![CDATA[Category: heroku-add-on | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/heroku-add-on/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-05-26T17:55:33+09:00</updated>
+  <updated>2015-05-28T16:46:52+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -507,24 +507,24 @@ Array (</p>
 
 <h3>オリジナル</h3>
 
-<pre><code>http://res.cloudinary.com/harslxcej/image/upload/xa9kfgp9jvxouekmrrqu.jpg
+<pre><code>http://res.cloudinary.com/dalir2yty/image/upload/xa9kfgp9jvxouekmrrqu_nml8db.jpg
 </code></pre>
 
-<p><img src="http://res.cloudinary.com/harslxcej/image/upload/xa9kfgp9jvxouekmrrqu.jpg" alt="オリジナル" /></p>
+<p><img src="http://res.cloudinary.com/dalir2yty/image/upload/xa9kfgp9jvxouekmrrqu_nml8db.jpg" alt="オリジナル" /></p>
 
 <h3>リサイズ</h3>
 
-<pre><code>http://res.cloudinary.com/harslxcej/image/upload/w_100,h_100/xa9kfgp9jvxouekmrrqu.jpg
+<pre><code>http://res.cloudinary.com/dalir2yty/image/upload/w_100,h_100/xa9kfgp9jvxouekmrrqu_nml8db.jpg
 </code></pre>
 
-<p><img src="http://res.cloudinary.com/harslxcej/image/upload/w_100,h_100/xa9kfgp9jvxouekmrrqu.jpg" alt="リサイズ" /></p>
+<p><img src="http://res.cloudinary.com/dalir2yty/image/upload/w_100,h_100/xa9kfgp9jvxouekmrrqu_nml8db.jpg" alt="リサイズ" /></p>
 
 <h3>角丸</h3>
 
-<pre><code>http://res.cloudinary.com/harslxcej/image/upload/w_320,h_240,c_fill,r_20/xa9kfgp9jvxouekmrrqu.png
+<pre><code>http://res.cloudinary.com/dalir2yty/image/upload/w_320,h_240,c_fill,r_20/xa9kfgp9jvxouekmrrqu_nml8db.jpg
 </code></pre>
 
-<p><img src="http://res.cloudinary.com/harslxcej/image/upload/w_320,h_240,c_fill,r_20/xa9kfgp9jvxouekmrrqu.png" alt="角丸" /></p>
+<p><img src="http://res.cloudinary.com/dalir2yty/image/upload/w_320,h_240,c_fill,r_20/xa9kfgp9jvxouekmrrqu_nml8db.jpg" alt="角丸" /></p>
 
 <p>利用できるタグなどは以下を参照。<br/>
 <a href="http://cloudinary.com/documentation/image_transformations">Image transformations | Cloudinary</a></p>
@@ -558,10 +558,10 @@ echo cl_image_tag($public_id, array( "alt" =&gt; "Sample Image" ));
 
 <p>結果</p>
 
-<pre><code>&lt;img src='https://res.cloudinary.com/harslxcej/image/upload/c_fill,e_grayscale,h_100,w_100/xa9kfgp9jvxouekmrrqu' height='100' width='100'/&gt;
+<pre><code>&lt;img src='http://res.cloudinary.com/dalir2yty/image/upload/c_fill,e_grayscale,h_100,w_100/xa9kfgp9jvxouekmrrqu_nml8db.jpg' height='100' width='100'/&gt;
 </code></pre>
 
-<p><img src='https://res.cloudinary.com/harslxcej/image/upload/c_fill,e_grayscale,h_100,w_100/xa9kfgp9jvxouekmrrqu' height='100' width='100'/></p>
+<p><img src='http://res.cloudinary.com/dalir2yty/image/upload/c_fill,e_grayscale,h_100,w_100/xa9kfgp9jvxouekmrrqu_nml8db.jpg' height='100' width='100'/></p>
 
 <h3>cloudinary_url</h3>
 
