@@ -4,7 +4,7 @@
   <title><![CDATA[Category: heroku | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/heroku/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-05-28T16:46:52+09:00</updated>
+  <updated>2015-05-29T12:32:55+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,43 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[heroku]exif情報を扱う]]></title>
+    <link href="http://kayakuguri.github.io/blog/2015/05/29/heroku-exif/"/>
+    <updated>2015-05-29T12:26:34+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2015/05/29/heroku-exif</id>
+    <content type="html"><![CDATA[<p>heorkuで画像アップロード機能をつけた際、画像かを判定するのに、exif情報を利用したところ、エラーが出た。</p>
+
+<!-- more -->
+
+
+<p><code>exif_imagetype</code>を利用して画像かを判定していたのだけど、<br/>
+以下のように、そんな関数ないよ、と怒られた。</p>
+
+<blockquote><p>Fatal error: Call to undefined function exif_imagetype() i</p></blockquote>
+
+<p>調べてみると、herokuは標準ではexif情報を扱うためのPHPモジュールが入っていないよう。<br/>
+composerを使えばインストール出来る、とのことなので以下のように記述し再度deploy。<br/>
+これで解決出来た。</p>
+
+<p>```
+{</p>
+
+<pre><code>"require": {
+    "ext-exif":"*"
+}
+</code></pre>
+
+<p>}
+```</p>
+
+<h2>参考</h2>
+
+<p><a href="http://stackoverflow.com/questions/16224488/how-to-get-the-exif-php-extension-working-on-heroku">How to get the EXIF PHP extension working on Heroku? &ndash; Stack Overflow</a><br/>
+<a href="https://devcenter.heroku.com/articles/php-support#extensions">Extensions | Heroku PHP Support | Heroku Dev Center</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[wordpressをherokuにインストールする場合はルーティングのhtaccessを自分で設置すること]]></title>
@@ -660,101 +697,6 @@ echo cloudinary_url($public_id, array(
 <p><a href="http://cloudinary.com/documentation/php_integration">PHP integration | Cloudinary</a><br/>
 <a href="http://programmer-jobs.blogspot.jp/2013/12/phpphalconcloudinary.html">PHPフレームワークのPhalconで&#12289;写真ストレージクラウドのCloudinaryと連携 一言多いプログラマーの独り言</a><br/>
 <a href="https://github.com/cloudinary/cloudinary_php">cloudinary/cloudinary_php</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[Heroku]スティッキーセッションの有効化]]></title>
-    <link href="http://kayakuguri.github.io/blog/2015/04/30/heroku-sticky-session/"/>
-    <updated>2015-04-30T10:03:06+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2015/04/30/heroku-sticky-session</id>
-    <content type="html"><![CDATA[<p>herokuで、<code>スティッキーセッション(セッションアフィニティ)</code>を有効化するオプションが公開されたってことで、調べてみた。</p>
-
-<!-- more -->
-
-
-<h2>dyno</h2>
-
-<p>herokuでは、dynoを増やしていく=ロードバランサとなって、アクセスの度にランダムにサーバを割り振られる。<br/>
-なので、サーバ側に保持しているセッションは同一ユーザーのアクセスであってもページを遷移しただけでセッションが保持されていないサーバに割り振られてしまい、セッション切れを起こしてしまう、という問題がある。<br/>
-これを解決していたのが主に、<a href="https://addons.heroku.com/memcachier">MemCachier</a>というアドオンで、このMemCachier側にセッションを保持してやることでサーバが変わってもセッションを維持する、という流れで作成するのがセオリーだった。<br/>
-(1Dynoだとサーバは一つなので必要ない)</p>
-
-<h2>スティッキーセッション</h2>
-
-<p>それを解決するのが、スティッキーセッション、セッション・アフィニティ、と呼ばれるもののよう。<br/>
-これは、ロードバランサなどでサーバが数台ある場合に、特定のユーザーからのアクセスは特定のサーバのみに接続するように調整するもの、らしい。<br/>
-なので、ページ遷移をしてもサーバが変わらず、セッションが切れる事がない、というわけ。<br/>
-ただし、この設定で重要なのは、この同じサーバに割り当てる時間、の設定、とのこと。<br/>
-長くするとロードバランサの意味がなくなっていくし、短くするとセッションが切れてしまう。<br/>
-heroku上でこの時間を設定できるのかは今のところ不明。</p>
-
-<p><a href="http://docs.aws.amazon.com/ja_jp/ElasticLoadBalancing/latest/DeveloperGuide/elb-sticky-sessions.html">スティッキーセッションの有効化と無効化</a></p>
-
-<h2>herokuでの設定</h2>
-
-<p>この機能はまだベータ版、ってことで、デフォルトではもちろん無効となっている。<br/>
-有効にするには以下のコマンドを実行する必要がある。</p>
-
-<pre><code>$ heroku labs:enable http-session-affinity
-</code></pre>
-
-<h2>検証</h2>
-
-<p>実際に検証してみる。<br/>
-検証は、以下のサイトにあった、訪問回数をカウントする単純なものを使用してみた。<br/>
-この回数がリロードの度に増えていけばセッションが引き継がれている、ということだが、<br/>
-別サーバに接続されてセッションがなくなるとカウントがやり直しになったりする、はず。</p>
-
-<p><a href="http://www.phppro.jp/school/phpschool/vol8/1">第8回　セッションの仕組みを知ろう &ndash; PHP基礎講座</a></p>
-
-<p>```
-&lt;?php
-session_start();</p>
-
-<p>if (isset($<em>SESSION[&ldquo;counter&rdquo;])) {
-  $</em>SESSION[&ldquo;counter&rdquo;]++;
-  print($<em>SESSION[&ldquo;counter&rdquo;].&ldquo;回目の読み込みです。&rdquo;);
-} else {
-   $</em>SESSION[&ldquo;counter&rdquo;] = 0;
-  print(&ldquo;はじめての読み込みです。&rdquo;);
-}
-```</p>
-
-<h3>1 Dyno</h3>
-
-<p>まず、Dynoを１で。<br/>
-これは順調に増えた。当然の結果。</p>
-
-<h3>2 Dyno</h3>
-
-<p>dynoを増やしてみる。<br/>
-何度かリロードしていると、10回目くらいで「はじめての読み込みです。」という表示が登場。<br/>
-それ以降、何回かごとに別々のカウント数が表示される状態に。</p>
-
-<h3>セッションアフィニティ</h3>
-
-<p>で、この2Dynoの状態でセッションアフィニティをオンに。</p>
-
-<p><code>
-$ heroku labs:enable http-session-affinity                                                    [ruby-2.1.2]
-Enabling http-session-affinity for session-afinity-test... done
-WARNING: This feature is experimental and may change or be removed without notice.
-For more information see: https://devcenter.heroku.com/articles/session-affinity
-</code></p>
-
-<p>アクセスしてみる。<br/>
-100になるくらいまでリロードしてみたが、正常にカウント出来たいたので、きちんと同一セッションを見にいっていると思う。</p>
-
-<h3>注意</h3>
-
-<p>ただし、herokuをdeployするとセッションが切れてしまうのは変わらないようなので注意が必要。<br/>
-また、ベータ版の機能となるので、これに頼った実装はまだ早いと思われる。</p>
-
-<h2>参考</h2>
-
-<p><a href="https://blog.heroku.com/archives/2015/4/28/introducing_session_affinity">Heroku | Introducing Session Affinity</a><br/>
-<a href="https://devcenter.heroku.com/articles/session-affinity">Heroku Labs: Session Affinity | Heroku Dev Center</a></p>
 ]]></content>
   </entry>
   

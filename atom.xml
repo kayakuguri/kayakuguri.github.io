@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-05-28T16:46:52+09:00</updated>
+  <updated>2015-05-29T12:32:55+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,44 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[heroku]exif情報を扱う]]></title>
+    <link href="http://kayakuguri.github.io/blog/2015/05/29/heroku-exif/"/>
+    <updated>2015-05-29T12:26:34+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2015/05/29/heroku-exif</id>
+    <content type="html"><![CDATA[<p>heorkuで画像アップロード機能をつけた際、画像かを判定するのに、exif情報を利用したところ、エラーが出た。</p>
+
+<!-- more -->
+
+
+<p><code>exif_imagetype</code>を利用して画像かを判定していたのだけど、<br/>
+以下のように、そんな関数ないよ、と怒られた。</p>
+
+<blockquote><p>Fatal error: Call to undefined function exif_imagetype() i</p></blockquote>
+
+<p>調べてみると、herokuは標準ではexif情報を扱うためのPHPモジュールが入っていないよう。<br/>
+composerを使えばインストール出来る、とのことなので以下のように記述し再度deploy。<br/>
+これで解決出来た。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>{
+</span><span class='line'>    "require": {
+</span><span class='line'>        "ext-exif":"*"
+</span><span class='line'>    }
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>参考</h2>
+
+<p><a href="http://stackoverflow.com/questions/16224488/how-to-get-the-exif-php-extension-working-on-heroku">How to get the EXIF PHP extension working on Heroku? &ndash; Stack Overflow</a><br/>
+<a href="https://devcenter.heroku.com/articles/php-support#extensions">Extensions | Heroku PHP Support | Heroku Dev Center</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Vagrant環境での環境変数の設定方法]]></title>
@@ -2805,47 +2843,6 @@ APIのクラスのみを実行させようとしてもエラーが出る。</p>
 <h2>結果</h2>
 
 <p>結局何も問題はなかったけれど、メモとして残しておく。</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[CakePHP]ページタイトルを設定する]]></title>
-    <link href="http://kayakuguri.github.io/blog/2015/04/20/cakephp-pagetitle/"/>
-    <updated>2015-04-20T11:16:52+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2015/04/20/cakephp-pagetitle</id>
-    <content type="html"><![CDATA[<p>変な所でハマってしまったのでメモ。</p>
-
-<!-- more -->
-
-
-<p>cakephpでタイトルの設定をするべくググっていると、どうやら以下で変更が出来る、とのこと。</p>
-
-<pre><code>$this-&gt;set('title_for_layout', 'ページタイトル');
-</code></pre>
-
-<p>しかし一向に反映されない。<br/>
-それもそのはずで、デフォルトのテンプレート内の<code>title</code>タグ部分を変更してしまっていて、<br/>
-固定にしていたので変更が効かなかった。<br/>
-そもそも、<code>$this-&gt;set</code>はviewに変数セットするためだけの関数なので、View側と記述を合わせれば<code>title_for_layout</code>である必要がない、ということになる。</p>
-
-<p>ちなみデフォルトテンプレートの初期設定は以下になっているよう。<br/>
-<a href="http://ameblo.jp/itboy/entry-11510932141.html">http://ameblo.jp/itboy/entry-11510932141.html</a></p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;title&gt;
-</span><span class='line'>    &lt;?php echo $cakeDescription ?&gt;:
-</span><span class='line'>    &lt;?php echo $title_for_layout; ?&gt;
-</span><span class='line'>&lt;/title&gt;</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>参考</h2>
-
-<p><a href="http://book.cakephp.org/2.0/ja/views.html#view-layouts">ビュー &mdash; CakePHP Cookbook 2.x ドキュメント &ndash; レイアウト</a><br/>
-<a href="http://www.t-net.ne.jp/~cyfis/cakephp/controller/pageTitle.html">ページタイトルを設定する &ndash; CakePHPの部屋</a><br/>
-<a href="http://satoshi14.hatenablog.com/entry/2013/05/13/125421">CakePHP ページタイトルを一括管理する方法 &ndash; Autumn Like Blog</a></p>
 ]]></content>
   </entry>
   
