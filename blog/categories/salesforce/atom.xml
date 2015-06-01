@@ -4,7 +4,7 @@
   <title><![CDATA[Category: salesforce | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/salesforce/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-05-29T21:07:09+09:00</updated>
+  <updated>2015-06-01T17:35:20+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,74 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[salesforce]レコードの詳細からカスタムボタンでapexを呼び出す]]></title>
+    <link href="http://kayakuguri.github.io/blog/2015/06/01/custom-btn-apex/"/>
+    <updated>2015-06-01T17:33:40+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2015/06/01/custom-btn-apex</id>
+    <content type="html"><![CDATA[<p>カスタムボタンを使用してJSからApexを呼び出して処理させてみる。</p>
+
+<!-- more -->
+
+
+<h2>Apex</h2>
+
+<p><code>webService</code>を使用して、apexクラスを作成しておく。<br/>
+戻り値は文字列としておく。</p>
+
+<p>```
+global class SampleClass{</p>
+
+<pre><code>webService static String hogeMethod(String id){
+    return 'このレコードのIDは、' + msg_id + 'です。';
+}
+</code></pre>
+
+<p>}
+```</p>
+
+<h2>カスタムボタン</h2>
+
+<p>リードの場合は以下にある。</p>
+
+<p><img src="/images/2015/06/custom_btn02.jpg" alt="" /></p>
+
+<p><code>新規ボタンまたはリンク</code>をクリック。</p>
+
+<p><code>動作</code>を<code>JavaScriptを実行</code>に、<br/>
+<code>内容のソース</code>を<code>onClick JavaScript</code>にする。</p>
+
+<p><img src="/images/2015/06/custom_btn01.jpg" alt="" /></p>
+
+<p>内容は以下の用に記述。</p>
+
+<p><code>
+{!REQUIRESCRIPT('/soap/ajax/31.0/connection.js')}
+{!REQUIRESCRIPT('/soap/ajax/31.0/apex.js')}
+var ret = sforce.apex.execute('SampleClass','hogeMethod',{id:"{!CustomObject__c.Id}"});
+alert(ret);
+</code></p>
+
+<p>このカスタムボタンがクリックされると、このJSが実行される。<br/>
+<code>sforce.apex.execute</code>で実行するapexとメソッドを指定している。<br/>
+第一引数がクラス名。第二引数がメソッド。第三引数が引数、となる。<br/>
+引数で実行しているレコードのIDを渡すように項目を差し込んでいる。</p>
+
+<h2>表示</h2>
+
+<p>表示は、レイアウトの編集で、ボタンから追加。<br/>
+<img src="/images/2015/06/custom_btn04.jpg" alt="" /></p>
+
+<p>レコードの詳細からボタンをクリックするとIDが渡されて実行される。<br/>
+<img src="/images/2015/06/custom_btn03.jpg" alt="" /></p>
+
+<h2>参考</h2>
+
+<p><a href="https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_and_ajax.htm">Apex in AJAX | Force.com Apex Code Developer&#x27;s Guide | Salesforce Developers</a><br/>
+<a href="https://developer.salesforce.com/forums/ForumsMain?id=906F00000009BNkIAM">カスタムボタン押下時にSFDC上のWebServiceをコールする方法 &ndash; Salesforce Developer Community</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Force.com CLIをインストールして試してみた]]></title>
@@ -591,166 +659,6 @@ echo $params->IsClosed;
 <p><a href="http://php.net/manual/ja/wrappers.php.php#wrappers.php.input">php://input</a><br/>
 <a href="http://ivystar.jp/programming/php/what-is-phpinput/">「php://input」とは何？－POSTの生データ？ | アイビースター</a><br/>
 <a href="https://amigotechnotes.wordpress.com/2013/11/16/parse-xml-with-namespace-by-simplexml-in-php/">Parse XML with namespace by SimpleXML in PHP | Amigo&#039;s Technical Notes</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[Salesforce]承認プロセスの作り方]]></title>
-    <link href="http://kayakuguri.github.io/blog/2015/04/28/approval-process/"/>
-    <updated>2015-04-28T12:43:41+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2015/04/28/approval-process</id>
-    <content type="html"><![CDATA[<p>承認プロセスを作成してみたので、そのログ。</p>
-
-<!-- more -->
-
-
-<h2>承認プロセスの作成</h2>
-
-<p><code>商談</code>オブジェクトで作成してみる。<br/>
-<img src="/images/2015/04/shonin01.jpg" alt="" /></p>
-
-<h4>ステップ 1. 名前と説明の入力</h4>
-
-<p>プロセス名と一意の名前を適当に入力。<br/>
-<img src="/images/2015/04/shonin02.jpg" alt="" /></p>
-
-<h4>ステップ 2. 入力条件の指定</h4>
-
-<p>特定の入力条件で承認プロセスを発動する場合は設定。<br/>
-全てレコードで承認を必要とする場合はなしで。<br/>
-<img src="/images/2015/04/shonin03.jpg" alt="" /></p>
-
-<h4>ステップ 3. 承認者項目と編集権限のプロパティの指定</h4>
-
-<p>この承認申請を誰に割り当てるのか＝誰に承認してもらうのかを決定<br/>
-標準項目としてマネージャーという項目がある。<br/>
-<img src="/images/2015/04/shonin04.jpg" alt="" /></p>
-
-<p>これは、ユーザーの項目内で設定しているマネージャーに指定されたユーザーを承認者とするもの。<br/>
-<img src="/images/2015/04/shonin05.jpg" alt="" /></p>
-
-<p>今回はなしにしておいて後で設定する。<br/>
-<img src="/images/2015/04/shonin06.jpg" alt="" /></p>
-
-<h4>ステップ 4. 通知テンプレートの選択</h4>
-
-<p>承認開始時に送信するメールを設定。<br/>
-<img src="/images/2015/04/shonin07.jpg" alt="" /></p>
-
-<p>メールテンプレートは以下から作成可能。<br/>
-管理->コミュニケーションテンプレート->メールテンプレート</p>
-
-<p>なしでもよい。</p>
-
-<h4>ステップ 5. 承認ページレイアウトに表示する項目の選択</h4>
-
-<p>承認者が承認時に確認する画面の項目を選択する。<br/>
-今回はそのままで。<br/>
-<img src="/images/2015/04/shonin08.jpg" alt="" /></p>
-
-<h4>ステップ 6. 申請者の指定</h4>
-
-<p>この承認プロセスを申請できるユーザーを限定できる。<br/>
-通常は所有者、となる。<br/>
-<img src="/images/2015/04/shonin09.jpg" alt="" /></p>
-
-<p><code>保存</code>する。</p>
-
-<h2>承認ステップの作成</h2>
-
-<p><img src="/images/2015/04/shonin10.jpg" alt="" /></p>
-
-<p>最大15個までのステップを追加可能。</p>
-
-<h4>ステップ 1. 名前と説明の入力</h4>
-
-<p>名前と一意の名前を適当に入力。<br/>
-<img src="/images/2015/04/shonin11.jpg" alt="" /></p>
-
-<h4>ステップ 2. ステップ条件の指定</h4>
-
-<p>このステップに入る条件を指定できる。<br/>
-今回は全てのレコードとする。<br/>
-<img src="/images/2015/04/shonin25.jpg" alt="" /></p>
-
-<h4>ステップ 3. 割り当て先の選択</h4>
-
-<p>承認者の設定。<br/>
-都度変えたい場合は、手動、も選べる。<br/>
-今回は固定で、特定のユーザーに自動で割り当てる。<br/>
-<img src="/images/2015/04/shonin12.jpg" alt="" /></p>
-
-<p><code>保存</code>する。</p>
-
-<h2>アクション</h2>
-
-<p><img src="/images/2015/04/shonin13.jpg" alt="" /></p>
-
-<p>以下の4つを選択可能。<br/>
-上記で設定した承認ステップのアクションを作成。<br/>
-申請時や承認時、却下時にアクションが起動する。</p>
-
-<ul>
-<li>ToDo</li>
-<li>電子メールアラート</li>
-<li>項目自動更新</li>
-<li>アウトバウンドメッセージ</li>
-</ul>
-
-
-<h3>項目自動更新</h3>
-
-<p>名前、一意の名前を適当に作成。<br/>
-更新する項目を選択し、どの値にするかを決定する。<br/>
-今回はフェーズを更新するとする。</p>
-
-<p><img src="/images/2015/04/shonin14.jpg" alt="" /></p>
-
-<h2>作成完了</h2>
-
-<p>全ての設定が終わったら、<code>有効化</code>しておく。<br/>
-<img src="/images/2015/04/shonin15.jpg" alt="" /></p>
-
-<p>警告が出るが、OKをクリック。<br/>
-<img src="/images/2015/04/shonin16.jpg" alt="" /></p>
-
-<p>完了。</p>
-
-<h2>承認の流れ</h2>
-
-<p>商談レコードを作成し、承認申請を行う、のだが、承認申請のボタンがデフォルトでは出てなかった。 <br/>
-(環境によって変わるかも)<br/>
-なので、ページレイアウトから<code>承認申請</code>のボタンを追加した。<br/>
-<img src="/images/2015/04/shonin17.jpg" alt="" /></p>
-
-<p>また、同じく関連項目の<code>承認履歴</code>を追加しておく。<br/>
-<img src="/images/2015/04/shonin21.jpg" alt="" /></p>
-
-<p>表示されるようになったので、<code>承認申請</code>をクリック。<br/>
-<img src="/images/2015/04/shonin18.jpg" alt="" /></p>
-
-<p>警告が表示されるが、OK。<br/>
-<img src="/images/2015/04/shonin19.jpg" alt="" /></p>
-
-<p>するとレコードがロックされ、<br/>
-<img src="/images/2015/04/shonin20.jpg" alt="" /></p>
-
-<p>設定したメールが飛ぶ。</p>
-
-<p>そして、承認履歴の部分に承認、却下などの項目が現れる。<br/>
-<img src="/images/2015/04/shonin22.jpg" alt="" /></p>
-
-<p><code>承認/却下</code>をクリックすると、入力エリアが現れるので、適当にコメントを書いて承認してみる。<br/>
-<img src="/images/2015/04/shonin23.jpg" alt="" /></p>
-
-<p>レコードに戻ると、承認されている。設定した項目自動更新も反映されている。<br/>
-<img src="/images/2015/04/shonin24.jpg" alt="" /></p>
-
-<p>実際は承認するユーザーは別になると思うが、今回は自分で申請して承認している。</p>
-
-<h2>参考</h2>
-
-<p><a href="https://www.youtube.com/watch?v=b6_9NNTn_Hk">Salesforceをもっと使い倒そう-承認プロセス &ndash; YouTube</a></p>
 ]]></content>
   </entry>
   

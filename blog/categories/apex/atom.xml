@@ -4,7 +4,7 @@
   <title><![CDATA[Category: apex | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/apex/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-05-29T21:07:09+09:00</updated>
+  <updated>2015-06-01T17:35:20+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,74 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[salesforce]レコードの詳細からカスタムボタンでapexを呼び出す]]></title>
+    <link href="http://kayakuguri.github.io/blog/2015/06/01/custom-btn-apex/"/>
+    <updated>2015-06-01T17:33:40+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2015/06/01/custom-btn-apex</id>
+    <content type="html"><![CDATA[<p>カスタムボタンを使用してJSからApexを呼び出して処理させてみる。</p>
+
+<!-- more -->
+
+
+<h2>Apex</h2>
+
+<p><code>webService</code>を使用して、apexクラスを作成しておく。<br/>
+戻り値は文字列としておく。</p>
+
+<p>```
+global class SampleClass{</p>
+
+<pre><code>webService static String hogeMethod(String id){
+    return 'このレコードのIDは、' + msg_id + 'です。';
+}
+</code></pre>
+
+<p>}
+```</p>
+
+<h2>カスタムボタン</h2>
+
+<p>リードの場合は以下にある。</p>
+
+<p><img src="/images/2015/06/custom_btn02.jpg" alt="" /></p>
+
+<p><code>新規ボタンまたはリンク</code>をクリック。</p>
+
+<p><code>動作</code>を<code>JavaScriptを実行</code>に、<br/>
+<code>内容のソース</code>を<code>onClick JavaScript</code>にする。</p>
+
+<p><img src="/images/2015/06/custom_btn01.jpg" alt="" /></p>
+
+<p>内容は以下の用に記述。</p>
+
+<p><code>
+{!REQUIRESCRIPT('/soap/ajax/31.0/connection.js')}
+{!REQUIRESCRIPT('/soap/ajax/31.0/apex.js')}
+var ret = sforce.apex.execute('SampleClass','hogeMethod',{id:"{!CustomObject__c.Id}"});
+alert(ret);
+</code></p>
+
+<p>このカスタムボタンがクリックされると、このJSが実行される。<br/>
+<code>sforce.apex.execute</code>で実行するapexとメソッドを指定している。<br/>
+第一引数がクラス名。第二引数がメソッド。第三引数が引数、となる。<br/>
+引数で実行しているレコードのIDを渡すように項目を差し込んでいる。</p>
+
+<h2>表示</h2>
+
+<p>表示は、レイアウトの編集で、ボタンから追加。<br/>
+<img src="/images/2015/06/custom_btn04.jpg" alt="" /></p>
+
+<p>レコードの詳細からボタンをクリックするとIDが渡されて実行される。<br/>
+<img src="/images/2015/06/custom_btn03.jpg" alt="" /></p>
+
+<h2>参考</h2>
+
+<p><a href="https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_and_ajax.htm">Apex in AJAX | Force.com Apex Code Developer&#x27;s Guide | Salesforce Developers</a><br/>
+<a href="https://developer.salesforce.com/forums/ForumsMain?id=906F00000009BNkIAM">カスタムボタン押下時にSFDC上のWebServiceをコールする方法 &ndash; Salesforce Developer Community</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[apex][SF]ApexRESTのテストコードでのパラメータの渡し方]]></title>
@@ -362,119 +430,6 @@ System.debug(dt_str);  //2015-04-10
 <p><a href="https://www.salesforce.com/us/developer/docs/apexcode/Content/apex_methods_system_date.htm#apex_System_Date_format">Date Class &ndash; format()</a><br/>
 <a href="https://www.salesforce.com/us/developer/docs/apexcode/Content/apex_methods_system_datetime.htm#apex_System_Datetime_format_2">Datetime Class &ndash; format(string)</a><br/>
 <a href="http://stackoverflow.com/questions/11834873/salesforce-apex-validating-date-for-format-and-value">validation &ndash; Salesforce Apex: Validating date for format and value &ndash; Stack Overflow</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[salesforce]Apex REST作成時のtips]]></title>
-    <link href="http://kayakuguri.github.io/blog/2015/03/27/apex-rest-tips/"/>
-    <updated>2015-03-27T19:45:44+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2015/03/27/apex-rest-tips</id>
-    <content type="html"><![CDATA[<p>最近よくApexRESTを作成していて、<br/>
-その中でちょっとしたtipsというかメモをメモっておきます。</p>
-
-<!-- more -->
-
-
-<h2>エンドポイント</h2>
-
-<p>エンドポイントの指定には以下のように書きます。</p>
-
-<pre><code>@RestResource(urlMapping='/User/Login')
-</code></pre>
-
-<p>この時に、<code>*</code>を使う事も出来ます。</p>
-
-<pre><code>@RestResource(urlMapping='/User/*')
-</code></pre>
-
-<p>なので、ここにユーザーIDを入れたりして、そのIDを取得することで、<br/>
-よりREST APIらしい(?)挙動でAPIを作成する事が出来ます。<br/>
-apex側で送信されたIDを取得するには、以下のように<code>/</code>で区切って取得します。</p>
-
-<pre><code>String accountId = req.requestURI.substring(req.requestURI.lastIndexOf('/')+1);
-</code></pre>
-
-<p>公式のドキュメントに正にこのままの内容が載っていました。</p>
-
-<p><a href="https://www.salesforce.com/us/developer/docs/apexcode/Content/apex_rest_code_sample_basic.htm">Apex REST Basic Code Sample</a></p>
-
-<h2>JSON</h2>
-
-<p>返却するJSONの形式ですが、クラスの入れ子や、<code>List</code>を活用することで<br/>
-かなり自由度高く作成出来ます。</p>
-
-<p>例えば、以下のようなJSONを返すとします。</p>
-
-<p>```
-&ldquo;success&rdquo;:1,
-&ldquo;User&rdquo; : {</p>
-
-<pre><code>"user_id": xxx,
-"hobby":[
-    {"name":"映画", "level":"3"},
-    {"name":"サッカー", "level":"1"}
-]
-</code></pre>
-
-<p>},
-&ldquo;request_time&rdquo;: &ldquo;2015-3-27 12:33&rdquo;
-```</p>
-
-<p>この場合、以下のようにクラスを複数作り、入れ子構造を作る事で作成出来ます。</p>
-
-<p>```
-global class UserData{</p>
-
-<pre><code>global String user_id;
-global HobbyData hobby
-</code></pre>
-
-<p>}
-global class HobbyData{</p>
-
-<pre><code>global String name;
-global String level;
-</code></pre>
-
-<p>}
-global class resultData{</p>
-
-<pre><code>global Integer success;
-global UserData User;
-global String request_time;
-</code></pre>
-
-<p>}
-```</p>
-
-<p>作成するときは以下のような感じで。</p>
-
-<p>```
-List<HobbyData> hobbies = new List<HobbyData>();
-HobbyData hobby1 = new HobbyData();
-hobby1.name = &lsquo;映画&rsquo;;
-hobby1.level = &lsquo;3&rsquo;;
-hobbies.add(hobby1);
-HobbyData hobby2 = new HobbyData();
-hobby2.name = &lsquo;サッカー&rsquo;;
-hobby2.level = &lsquo;1&rsquo;;
-hobbies.add(hobby2);</p>
-
-<p>UserData user = new UserData();
-user.user_id = &lsquo;xxx&rsquo;;
-user.hobby = hobbies;</p>
-
-<p>resultData result = new resultData();
-result.success = 1;
-result.User = user;
-result.request_time = &lsquo;2015-3-27 12:33&rsquo;;</p>
-
-<p>return result;
-```</p>
-
-<p>地道な作業にはなりますが、これでわりかし綺麗なJSONが返せました。<br/>
-もっと簡単な方法があったらまた書きます。</p>
 ]]></content>
   </entry>
   

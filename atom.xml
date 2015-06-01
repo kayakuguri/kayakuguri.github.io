@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-05-29T21:07:09+09:00</updated>
+  <updated>2015-06-01T17:35:20+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,78 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[salesforce]レコードの詳細からカスタムボタンでapexを呼び出す]]></title>
+    <link href="http://kayakuguri.github.io/blog/2015/06/01/custom-btn-apex/"/>
+    <updated>2015-06-01T17:33:40+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2015/06/01/custom-btn-apex</id>
+    <content type="html"><![CDATA[<p>カスタムボタンを使用してJSからApexを呼び出して処理させてみる。</p>
+
+<!-- more -->
+
+
+<h2>Apex</h2>
+
+<p><code>webService</code>を使用して、apexクラスを作成しておく。<br/>
+戻り値は文字列としておく。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>global class SampleClass{
+</span><span class='line'>  webService static String hogeMethod(String id){
+</span><span class='line'>      return 'このレコードのIDは、' + msg_id + 'です。';
+</span><span class='line'>  }
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>カスタムボタン</h2>
+
+<p>リードの場合は以下にある。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2015/06/custom_btn02.jpg" alt="" /></p>
+
+<p><code>新規ボタンまたはリンク</code>をクリック。</p>
+
+<p><code>動作</code>を<code>JavaScriptを実行</code>に、<br/>
+<code>内容のソース</code>を<code>onClick JavaScript</code>にする。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2015/06/custom_btn01.jpg" alt="" /></p>
+
+<p>内容は以下の用に記述。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>{!REQUIRESCRIPT('/soap/ajax/31.0/connection.js')} 
+</span><span class='line'>{!REQUIRESCRIPT('/soap/ajax/31.0/apex.js')} 
+</span><span class='line'>var ret = sforce.apex.execute('SampleClass','hogeMethod',{id:"{!CustomObject__c.Id}"}); 
+</span><span class='line'>alert(ret);</span></code></pre></td></tr></table></div></figure>
+
+
+<p>このカスタムボタンがクリックされると、このJSが実行される。<br/>
+<code>sforce.apex.execute</code>で実行するapexとメソッドを指定している。<br/>
+第一引数がクラス名。第二引数がメソッド。第三引数が引数、となる。<br/>
+引数で実行しているレコードのIDを渡すように項目を差し込んでいる。</p>
+
+<h2>表示</h2>
+
+<p>表示は、レイアウトの編集で、ボタンから追加。<br/>
+<img src="http://kayakuguri.github.io/images/2015/06/custom_btn04.jpg" alt="" /></p>
+
+<p>レコードの詳細からボタンをクリックするとIDが渡されて実行される。<br/>
+<img src="http://kayakuguri.github.io/images/2015/06/custom_btn03.jpg" alt="" /></p>
+
+<h2>参考</h2>
+
+<p><a href="https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_and_ajax.htm">Apex in AJAX | Force.com Apex Code Developer&#x27;s Guide | Salesforce Developers</a><br/>
+<a href="https://developer.salesforce.com/forums/ForumsMain?id=906F00000009BNkIAM">カスタムボタン押下時にSFDC上のWebServiceをコールする方法 &ndash; Salesforce Developer Community</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Force.com CLIをインストールして試してみた]]></title>
@@ -3000,82 +3072,6 @@ $ git push heroku master
 <p><a href="http://qiita.com/MasatoYoshioka@github/items/1b4de4249dc40ff1d902">macosxのphpにmcryptをインストール &ndash; Qiita</a><br/>
 <a href="http://www.slideshare.net/esolves/deploy-laravel-on-heroku">Deploy Laravel on Heroku</a><br/>
 <a href="https://mattstauffer.co/blog/laravel-on-heroku-using-a-postgresql-database">Laravel on Heroku &ndash; Using a PostgreSQL database &ndash; MattStauffer.co</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[apex][SF]ApexRESTのテストコードでのパラメータの渡し方]]></title>
-    <link href="http://kayakuguri.github.io/blog/2015/04/20/rest-apex-test/"/>
-    <updated>2015-04-20T15:43:39+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2015/04/20/rest-apex-test</id>
-    <content type="html"><![CDATA[<p>いくつくか方法があるような。<br/>
-そのうち一番楽だったものを。</p>
-
-<!-- more -->
-
-
-<p>例えば以下のようなクラスを作ったとする。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>@RestResource(urlMapping='/user/*')
-</span><span class='line'>global with sharing class userInfo_API {
-</span><span class='line'>  @HttpPost
-</span><span class='line'>  global static ResultData doPost(){
-</span><span class='line'>      RestRequest req = RestContext.request;
-</span><span class='line'>      String user_id = req.params.get('user_id');
-</span><span class='line'>      
-</span><span class='line'>      //何らかの処理
-</span><span class='line'>  }
-</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
-
-
-<p>この場合、<code>user_id</code>を渡すためには以下のように記述します。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>@isTest
-</span><span class='line'>private class Test_userInfo_API {
-</span><span class='line'>  static testMethod void postTest(){
-</span><span class='line'>      RestRequest req = new RestRequest();
-</span><span class='line'>      RestContext.request = req;
-</span><span class='line'>      req.addParameter('user_id', 'ユーザーID');
-</span><span class='line'>      userInfo_API.doPost();
-</span><span class='line'>  }
-</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
-
-
-<p><code>RestRequest</code>のパラメータにセットしておくだけでOKなよう。</p>
-
-<p>余談。<br/>
-APIのクラスのみを実行させようとしてもエラーが出る。</p>
-
-<blockquote><p>System.NullPointerException: Attempt to de-reference a null object</p></blockquote>
-
-<p>なのでテストメソッド内では最低限以下は必要。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>RestRequest req = new RestRequest();
-</span><span class='line'>RestContext.request = req;
-</span><span class='line'>userInfo_API.doPost();</span></code></pre></td></tr></table></div></figure>
-
 ]]></content>
   </entry>
   
