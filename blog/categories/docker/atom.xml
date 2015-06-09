@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
 
-  <title><![CDATA[Category: vagrant | KayaMemo]]></title>
-  <link href="http://kayakuguri.github.io/blog/categories/vagrant/atom.xml" rel="self"/>
+  <title><![CDATA[Category: docker | KayaMemo]]></title>
+  <link href="http://kayakuguri.github.io/blog/categories/docker/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
   <updated>2015-06-09T20:25:28+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
@@ -271,147 +271,6 @@ CONTAINER ID        IMAGE               COMMAND                CREATED          
 <p><a href="http://dotinstall.com/lessons/basic_docker">Docker入門 (全11回) &ndash; プログラミングならドットインストール</a><br/>
 <a href="http://tech.lexues.co.jp/archives/1569">【社内勉強会】Docker入門してみました | LexTech</a><br/>
 [Dockerのcentosでapacheインストール失敗する。rpmがうんちゃらとか言われる &ndash; ふじたの知見</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Vagrant環境での環境変数の設定方法]]></title>
-    <link href="http://kayakuguri.github.io/blog/2015/05/26/vagrant-env/"/>
-    <updated>2015-05-26T17:54:23+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2015/05/26/vagrant-env</id>
-    <content type="html"><![CDATA[<p>vagrant環境で環境変数を使いたかったので調べてみたところ、<br/>
-httpdファイルへの追記が必要とのことで試してみた。</p>
-
-<!-- more -->
-
-
-<h2>httpd</h2>
-
-<p><code>/etc/sysconfig/httpd</code>このファイルへ必要な環境変数を記述し、<code>vagrant up</code>すればよい。</p>
-
-<pre><code>export SET_VALUE=hoge
-</code></pre>
-
-<p>httpdの中身はデフォルトでは全てコメントアウトされているので、上記だけを記述したファイルに差し替えてもOK。</p>
-
-<h2>再起動</h2>
-
-<p>apacheの再起動ではだめで、vagrant自体の再起動が必要。</p>
-
-<pre><code>$ vagrant reload
-</code></pre>
-
-<p>phpinfoで出力させてみると、無事、反映されていた。</p>
-
-<p><img src="/images/2015/05/enviroment.jpg" alt="" /></p>
-
-<h2>$_ENV</h2>
-
-<p>これで反映はされたが、環境変数を取得するための、<code>$_ENV</code>が動作しなかった。<br/>
-<code>getenv()</code>だと正しく取得出来る。</p>
-
-<p>調べて見ると、<code>php.ini</code>の設定で<code>ENV</code>を使用するかを設定出来るよう。<br/>
-デフォルトでは使用するようになっているようだが、なぜか使用しないようになっていた。</p>
-
-<p>設定する場合は以下のように記述。<br/>
-場所は、<code>/etc/php.ini</code>にあった。</p>
-
-<pre><code>variables_order = "EGPCS"
-</code></pre>
-
-<p>EGPCSというのは以下のように頭文字となっている。</p>
-
-<blockquote><p>EGPCS (Environment (環境変数)、 Get、Post、 Cookie (クッキー)、そして Server)<br/>
-<a href="http://php.net/manual/ja/ini.core.php">http://php.net/manual/ja/ini.core.php</a></p></blockquote>
-
-<p>これを反映して再起動。</p>
-
-<h2>Vagrantでの反映</h2>
-
-<p>ファイルは予め用意しておき、<code>vagrant up</code>だけで反映されるようにしてみる。<br/>
-とはいえ、シェルでコピーしているだけだけど。</p>
-
-<p>セットアップ用のシェルスクリプト内に以下を追記。<br/>
-設定用の<code>httpd</code>ファイルはVagrantfileと同階層の<code>vagrant.config</code>ディレクトリ以下に設置しているものとする。</p>
-
-<pre><code>cp /vagrant/vagrant.config/httpd /etc/sysconfig/httpd
-</code></pre>
-
-<p>この状態で、<code>vagrant up</code>すれば、<code>vagrant.config</code>内で設定したファイルがvagrant環境に反映される。</p>
-
-<h2>参考</h2>
-
-<p><a href="http://yukke.blog3.fc2.com/blog-entry-68.html">ブログ Apache＋PHPで環境変数を追加したい</a></p>
-
-<p>この参考記事でわかったけれど、同じく<code>Apache Environment</code>と<code>environment</code>でハマってた。<br/>
-以下のような関係になっているらしい。</p>
-
-<table>
-<thead>
-<tr>
-<th>方法 </th>
-<th> 反映先 </th>
-<th> 取得方法</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>httpd.conf </td>
-<td> Apache Environment </td>
-<td> $_SERVER</td>
-</tr>
-<tr>
-<td>httpd </td>
-<td> environment </td>
-<td> $_ENV</td>
-</tr>
-</tbody>
-</table>
-
-
-<p><a href="http://detail.chiebukuro.yahoo.co.jp/qa/question_detail/q11102244256">phpで環境変数$_ENVを使用しようとしていますが使用できない状態です。&hellip; &ndash; Yahoo!知恵袋</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Vagrantの起動時のシェルスクリプトのメモ。composerとpostgresql9.3]]></title>
-    <link href="http://kayakuguri.github.io/blog/2015/01/28/vagrant-shell-composer-postgresql/"/>
-    <updated>2015-01-28T14:33:11+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2015/01/28/vagrant-shell-composer-postgresql</id>
-    <content type="html"><![CDATA[<p>調べて組み込んだので具体的なコードをメモ。</p>
-
-<!-- more -->
-
-
-<h3>Composer</h3>
-
-<pre><code># Composer
-curl -sS https://getcomposer.org/installer | php
-mv composer.phar /usr/local/bin/composer
-</code></pre>
-
-<h3>PostgreSQL 9.3</h3>
-
-<p>centOS6に標準で入っているPostgreSQLは8.3。<br/>
-なので、9.3を指定して入れる。</p>
-
-<pre><code># postgresql
-# 9.3
-rpm -ivh http://yum.postgresql.org/9.3/redhat/rhel-6-x86_64/pgdg-centos93-9.3-1.noarch.rpm
-yum -y install postgresql93-server
-if [ ! -f /var/lib/pgsql/9.3/data/postgresql.conf ]; then
-    su postgres -c '/usr/pgsql-9.3/bin/initdb --no-locale -D /var/lib/pgsql/9.3/data'
-    if [ -f /vagrant/postgresql.conf ]; then
-        cp -a /vagrant/postgresql.conf /var/lib/pgsql/9.3/data/
-    fi
-fi
-/sbin/service postgresql-9.3 restart
-/sbin/chkconfig postgresql-9.3 on
-</code></pre>
-
-<h3>参考</h3>
-
-<p><a href="http://www.slideshare.net/shin1x1/vagrant-php">Vagrant で作る PHP 開発環境 [実践編]</a></p>
 ]]></content>
   </entry>
   

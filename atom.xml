@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-06-01T17:35:20+09:00</updated>
+  <updated>2015-06-09T20:25:28+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,289 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Dockerをvagrantに入れてwebサーバーを立ち上げるまで]]></title>
+    <link href="http://kayakuguri.github.io/blog/2015/06/09/my-first-docker/"/>
+    <updated>2015-06-09T20:21:19+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2015/06/09/my-first-docker</id>
+    <content type="html"><![CDATA[<p>dockerは話にはよく聞くけど全くわからなかったので、とりあえずインストールして動かすところまでやってみた。</p>
+
+<!-- more -->
+
+
+<h2>Ubuntu</h2>
+
+<p>Dockerはlinux環境でのみ動作可能、ということで、Vagrantにlinux環境を作って、そこにdockerをインストールする。<br/>
+さらに、dockerはUbuntuで開発されているとのことなので、同じくUbuntuにインストールしてやるのが一番無難っぽい。</p>
+
+<h3>VagrantBoxの作成</h3>
+
+<p>Ubuntu14の64bit版を使ってvagrantboxを作成する。<br/>
+<a href="http://www.vagrantbox.es/">http://www.vagrantbox.es/</a><br/>
+このページ内で、<code>trusty</code>で検索。<br/>
+(Ubuntu14はtrustyと呼ばれているらしい)</p>
+
+<p>その64bit版のURLをコピー。ちなみに以下のURL。</p>
+
+<blockquote><p><a href="https://cloud-images.ubuntu.com/vagrant/trusty/current/trusty-server-cloudimg-amd64-vagrant-disk1.box">https://cloud-images.ubuntu.com/vagrant/trusty/current/trusty-server-cloudimg-amd64-vagrant-disk1.box</a></p></blockquote>
+
+<h3>VagratBoxの追加</h3>
+
+<p>vagrantに追加する。</p>
+
+<pre><code>$ vagrant box add trusty64 https://cloud-images.ubuntu.com/vagrant/trusty/current/trusty-server-cloudimg-amd64-vagrant-disk1.box
+</code></pre>
+
+<p><code>box add</code>で先程コピーしたURLから追加する。<br/>
+<code>trusty64</code>としたところはboxの名前なので任意でよい。</p>
+
+<p>10分くらい待つと完了した。</p>
+
+<h3>初期化</h3>
+
+<p>導入したいディレクトリに移動して、初期化する。</p>
+
+<pre><code>$ vagrant init trusty64
+</code></pre>
+
+<p>先程指定したboxの名前を使用する。<br/>
+ここでもしばらく待つと完了。<br/>
+<code>Vagrantfile</code>というファイルが作成される。<br/>
+特に編集する必要はないが、IPアドレスのみ変更した。</p>
+
+<h3>起動</h3>
+
+<p>で、起動。</p>
+
+<pre><code>$ vagrant up
+</code></pre>
+
+<p>sshで入ってみる。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$ vagrant ssh
+</span><span class='line'>Welcome to Ubuntu 14.04.2 LTS (GNU/Linux 3.13.0-53-generic x86_64)
+</span><span class='line'>...
+</span><span class='line'>vagrant@vagrant-ubuntu-trusty-64:~$</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>Doker</h2>
+
+<h3>インストール</h3>
+
+<p>で、Dockerをインストール。<br/>
+公式に沿って実行する。<br/>
+<a href="https://docs.docker.com/installation/ubuntulinux/">https://docs.docker.com/installation/ubuntulinux/</a></p>
+
+<p>まずは必要なパッケージをインストール。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$ sudo apt-get update
+</span><span class='line'>$ sudo apt-get install linux-image-generic-lts-trusty
+</span><span class='line'>$ sudo reboot</span></code></pre></td></tr></table></div></figure>
+
+
+<p>再起動後、dockerのインストール。<br/>
+<code>wget</code>がインストールされているかを確認。<br/>
+インストールされていたので、そのまま進む。</p>
+
+<pre><code>$ which wget
+/usr/bin/wget
+</code></pre>
+
+<p>で、dockerパッケージをダウンロードし、インストールする。</p>
+
+<pre><code>$ wget -qO- https://get.docker.com/ | sh
+</code></pre>
+
+<p>しばらく待つと完了。</p>
+
+<pre><code>$ docker --version
+Docker version 1.6.2, build 7c8fca2
+</code></pre>
+
+<h2>Docker image</h2>
+
+<h3>pull</h3>
+
+<p><a href="https://registry.hub.docker.com/">https://registry.hub.docker.com/</a><br/>
+上記サイトから任意のimageを引っ張ってくる。<br/>
+<code>centos</code>のイメージを入れてみる。<br/>
+<a href="https://registry.hub.docker.com/search?q=centos&amp;searchfield=">centosの検索結果</a></p>
+
+<pre><code>$ sudo docker pull centos
+</code></pre>
+
+<p>入っているimageのリストは以下で確認できる。</p>
+
+<pre><code>$ sudo docker images
+REPOSITORY          TAG                 IMAGE ID            CREATED             VIRTUAL SIZE
+centos              latest              fd44297e2ddb        6 weeks ago         215.7 MB
+</code></pre>
+
+<h3>Container</h3>
+
+<p>で、落としてきたimageからcontainerを作成して、その上で簡単なコマンドを走らせてみる。</p>
+
+<pre><code>$ sudo docker run centos echo "hello world!"
+hello world!
+</code></pre>
+
+<p><code>docker run</code>で指定したimageからcontainerを作成。<br/>
+その後に続くコマンドをそのcontainer上で実行している。</p>
+
+<p>実行されたcontainerを確認スルには以下。<br/>
+(<code>-a</code>のオプションを外すすと実行中のcontainerが表示される。)</p>
+
+<pre><code>$ sudo docker ps -a
+CONTAINER ID        IMAGE               COMMAND                CREATED              STATUS                          PORTS               NAMES
+0a84f937b7c        centos:latest       "echo 'hello world!'   About a minute ago   Exited (0) About a minute ago                       agitated_banach
+</code></pre>
+
+<h2>Webサーバーの立ち上げ</h2>
+
+<h3>dockerfile</h3>
+
+<p>dockerfileを作る。</p>
+
+<pre><code>$ vim Dockerfile
+</code></pre>
+
+<p>中身は簡単に以下のように。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>FROM centos
+</span><span class='line'>MAINTAINER xxx
+</span><span class='line'>
+</span><span class='line'>RUN yum install -y httpd
+</span><span class='line'>ADD ./index.html /var/www/html/
+</span><span class='line'>EXPOSE 80
+</span><span class='line'>CMD ["/usr/sbin/httpd", "-D", "FOREGROUND"]</span></code></pre></td></tr></table></div></figure>
+
+
+<p><code>MAINTAINER</code>は作成者の名前などを書いてやるのが習慣らしい。</p>
+
+<p>index.htmlを適当に作成。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;html&gt;
+</span><span class='line'>&lt;body&gt;
+</span><span class='line'>hello docker world!
+</span><span class='line'>&lt;/body&gt;
+</span><span class='line'>&lt;/html&gt;</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>build</h3>
+
+<p>で、ビルドする。<br/>
+ビルドで、imageからdockerfile内のコマンドを使用してcontainerを作成し、さらにその結果を新しくimageに出力する、ところまでをやってくれるコマンドのよう。</p>
+
+<pre><code>$ sudo docker build -t test/httpd .
+</code></pre>
+
+<p><code>test/httpd</code>はcontainerの名前。任意でよい。<br/>
+最後の<code>.</code>は現在のディレクトリでビルド、ということ。</p>
+
+<p>しばらく待って完了…と行きたいところだけど、どうやらエラーが出て止まってしまってるよう。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>Complete!
+</span><span class='line'>INFO[0012] The command [/bin/sh -c yum install -y httpd] returned a non-zero code: 1</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Complete!って出てるけど、その先のStepに進まない…。</p>
+
+<h3>エラー回避</h3>
+
+<p>ググってみると以下がヒット。<br/>
+<a href="http://fujita222.hateblo.jp/entry/2015/03/10/163657">Dockerのcentosでapacheインストール失敗する。rpmがうんちゃらとか言われる</a></p>
+
+<p>どうやらpullしてきたcentOSがあたらしすぎてダメだったよう。<br/>
+なので、この記事どおりcentos6をpullして使う。</p>
+
+<pre><code>$ sudo docker pull centos:centos6
+$ sudo docker images
+REPOSITORY          TAG                 IMAGE ID            CREATED             VIRTUAL SIZE
+centos              centos6             b9aeeaeb5e17        6 weeks ago         202.6 MB
+</code></pre>
+
+<p>で、<code>Dockerfile</code>の中身をcentos6を使うように修正。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>FROM centos:centos6
+</span><span class='line'>MAINTAINER xxx
+</span><span class='line'>
+</span><span class='line'>RUN yum install -y httpd
+</span><span class='line'>ADD ./index.html /var/www/html/
+</span><span class='line'>EXPOSE 80
+</span><span class='line'>CMD ["/usr/sbin/httpd", "-D", "FOREGROUND"]</span></code></pre></td></tr></table></div></figure>
+
+
+<p>これで再度実行。</p>
+
+<pre><code>$ sudo docker build -t test/httpd .
+</code></pre>
+
+<p>ようやく無事、完了。</p>
+
+<pre><code>$ sudo docker images
+REPOSITORY          TAG                 IMAGE ID            CREATED             VIRTUAL SIZE
+test/httpd          latest              74ea9508c04c        52 seconds ago      271.2 MB
+centos              centos6             b9aeeaeb5e17        6 weeks ago         202.6 MB
+</code></pre>
+
+<h3>run</h3>
+
+<p>ポートを指定してバックグラウンドで実行。</p>
+
+<pre><code>$ sudo docker run -p 8080:80 -d test/httpd
+</code></pre>
+
+<p>起動している。</p>
+
+<pre><code>$ sudo docker ps
+CONTAINER ID        IMAGE               COMMAND                CREATED             STATUS              PORTS                  NAMES
+4aca4268ffa3        test/httpd:latest   "/usr/sbin/httpd -D    15 seconds ago      Up 15 seconds       0.0.0.0:8080-&gt;80/tcp   compassionate_poincare
+</code></pre>
+
+<p>Vagrantfileで指定したIPアドレスに8080のポートをつけてやればアクセスが出来る。</p>
+
+<blockquote><p><a href="http://192.168.33.30:8080/">http://192.168.33.30:8080/</a></p></blockquote>
+
+<p>アクセスすると、先程作成した<code>index.html</code>が表示された。</p>
+
+<p>なんだかんだで大変だったけどとりあえず起動できた。</p>
+
+<h2>参考</h2>
+
+<p><a href="http://dotinstall.com/lessons/basic_docker">Docker入門 (全11回) &ndash; プログラミングならドットインストール</a><br/>
+<a href="http://tech.lexues.co.jp/archives/1569">【社内勉強会】Docker入門してみました | LexTech</a><br/>
+[Dockerのcentosでapacheインストール失敗する。rpmがうんちゃらとか言われる &ndash; ふじたの知見</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[salesforce]レコードの詳細からカスタムボタンでapexを呼び出す]]></title>
@@ -2858,220 +3141,6 @@ Writing objects: 100% (1/1), 190 bytes | 0 bytes/s, done.
 .....
   0022947..069260f  master -&gt; master
 </code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Laravel5をpostgresqlでHerokuにデプロイ]]></title>
-    <link href="http://kayakuguri.github.io/blog/2015/04/21/laravel5-on-heroku/"/>
-    <updated>2015-04-21T10:59:17+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2015/04/21/laravel5-on-heroku</id>
-    <content type="html"><![CDATA[<p>Laravel5をherokuに入れてみました。<br/>
-ブラウザやディレクトリでの操作は一切なしで、黒い画面のみで作成してみました。</p>
-
-<!-- more -->
-
-
-<h2>mcrypt</h2>
-
-<p>ローカルにてインストールしようとするとないと怒られたので導入。<br/>
-また、PHPのバージョンが古い場合は、<a href="http://kayamemo.mrlittlebig.com/blog/2015/04/15/mac-update-php/">アップデートが必要</a>。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>$ php -v                                                                                                           [ruby-2.1.2]
-</span><span class='line'>PHP 5.6.7 (cli) (built: Mar 22 2015 19:03:55)
-</span><span class='line'>Copyright (c) 1997-2015 The PHP Group
-</span><span class='line'>Zend Engine v2.6.0, Copyright (c) 1998-2015 Zend Technologies
-</span><span class='line'>
-</span><span class='line'>$ brew search mcrypt                                                                                               [ruby-2.1.2]
-</span><span class='line'>libtomcrypt    mcrypt       php53-mcrypt   php54-mcrypt   php55-mcrypt   php56-mcrypt
-</span><span class='line'>
-</span><span class='line'>$ brew install php56-mcrypt
-</span><span class='line'>...略...
-</span><span class='line'>==&gt; Summary
-</span><span class='line'>  /usr/local/Cellar/php56-mcrypt/5.6.7: 3 files, 56K, built in 116 seconds</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>laravelの導入</h2>
-
-<p>インストール</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>$ composer create-project laravel/laravel --prefer-dist laravel-sample-on-heroku
-</span><span class='line'>...略...
-</span><span class='line'>$ cd laravel-sample-on-heroku</span></code></pre></td></tr></table></div></figure>
-
-
-<p>ドキュメントルートの設定</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>$ touch Procfile
-</span><span class='line'>$ echo 'web: vendor/bin/heroku-php-apache2 public' &gt;&gt; Procfile</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Gitを作成</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>$ git init
-</span><span class='line'>$ git add .
-</span><span class='line'>$ git commit -m 'init laravel'</span></code></pre></td></tr></table></div></figure>
-
-
-<p>herokuアプリの作成</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>$ heroku create laravel-sample-on-heroku
-</span><span class='line'>Creating laravel-sample-on-heroku... done, stack is cedar-14
-</span><span class='line'>https://laravel-sample-on-heroku.herokuapp.com/ | https://git.heroku.com/laravel-sample-on-heroku.git
-</span><span class='line'>Git remote heroku added</span></code></pre></td></tr></table></div></figure>
-
-
-<p>このままデプロイすると、<code>package.json</code>がルートディレクトリにあるため、<code>nodejs</code>のアプリになってしまう。<br/>
-なので、phpのビルドパックを追加。<br/>
-<a href="https://github.com/heroku/heroku-buildpack-php">https://github.com/heroku/heroku-buildpack-php</a></p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>$ heroku config:set BUILDPACK_URL=https://github.com/heroku/heroku-buildpack-php
-</span><span class='line'>Setting config vars and restarting laravel-sample-on-heroku... done, v4
-</span><span class='line'>BUILDPACK_URL: https://github.com/heroku/heroku-buildpack-php</span></code></pre></td></tr></table></div></figure>
-
-
-<blockquote><p>アプリの作成と同時にするには、<code>create</code>の後に、<code>--buildpack URL</code>を追加してやると一回で設定できる。<br/>
-$ heroku create laravel-sample-on-heroku &mdash;buildpack URL xxx</p></blockquote>
-
-<p>すでにリモートリポジトリに追加されているので、pushしてデプロイ。</p>
-
-<pre><code>$ git push heroku master
-</code></pre>
-
-<p>ページを開くとすでに動作する状態。</p>
-
-<pre><code>$ heroku open
-</code></pre>
-
-<p>完了！</p>
-
-<h2>DBの設定</h2>
-
-<p>アドオンを追加(無料)</p>
-
-<pre><code>$ heroku addons:add heroku-postgresql:dev
-</code></pre>
-
-<p>DBの情報を取得</p>
-
-<pre><code>$ heroku config | grep HEROKU_POSTGRESQL
-HEROKU_POSTGRESQL_CRIMSON_URL: postgres://UserName:Password@Host.compute-1.amazonaws.com:Port/DatabaseName  
-</code></pre>
-
-<p>生成したDBをプライマリーに設定</p>
-
-<pre><code>$ heroku pg:promote HEROKU_POSTGRESQL_CRIMSON_URL
-Promoting HEROKU_POSTGRESQL_CRIMSON_URL (DATABASE_URL) to DATABASE_URL... done
-</code></pre>
-
-<p>ここからはファイル編集</p>
-
-<pre><code>$ vi config/database.php
----
-//29行目
-'default' =&gt; 'mysql',
-↓
-'default' =&gt; 'pgsql',
----
-//冒頭に追加
-$url = parse_url(getenv("DATABASE_URL"));
-
-$host = $url["host"];
-$username = $url["user"];
-$password = $url["pass"];
-$database = substr($url["path"], 1);
----
-//67行目から
-'pgsql' =&gt; [
-    'driver'   =&gt; 'pgsql',
-    'host'     =&gt; $host,
-    'database' =&gt; $database,
-    'username' =&gt; $username,
-    'password' =&gt; $password,
-    'charset'  =&gt; 'utf8',
-    'prefix'   =&gt; '',
-    'schema'   =&gt; 'public',
-],
-</code></pre>
-
-<p>pushしてデプロイ</p>
-
-<pre><code>$ git add .
-$ git commit -m 'setup Heroku PostgreSQL'
-$ git push heroku master
-</code></pre>
-
-<p>最後に<a href="http://laravel3.kore1server.com/docs/database/migrations">マイグレーション</a>を実行</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>$ heroku run php artisan migrate
-</span><span class='line'>Running `php artisan migrate` attached to terminal... up, run.4728
-</span><span class='line'>**************************************
-</span><span class='line'>*     Application In Production!     *
-</span><span class='line'>**************************************
-</span><span class='line'>
-</span><span class='line'>Do you really wish to run this command? [y/N]y
-</span><span class='line'>Migration table created successfully.
-</span><span class='line'>Migrated: 2014_10_12_000000_create_users_table
-</span><span class='line'>Migrated: 2014_10_12_100000_create_password_resets_table</span></code></pre></td></tr></table></div></figure>
-
-
-<p><code>/auth/register</code>で、ユーザー登録画面。<br/>
-<code>/auth/login</code>でログイン。<br/>
-<code>/password/email</code>でパスワードリセットになる。<br/>
-(メール送信は設定していないので出来ない)</p>
-
-<p>一通りの設定はこれで完了！<br/>
-あとはセッション保持に<a href="https://addons.heroku.com/memcachier">MemCachier</a>か<a href="https://addons.heroku.com/?q=redi">Redis To Go</a>の設定や、<br/>
-メール送信用に<a href="https://addons.heroku.com/sendgrid">SendGrid</a>などが必要になると思う。</p>
-
-<h2>サンプル</h2>
-
-<p>作成したアプリは以下。</p>
-
-<p><a href="http://laravel-sample-on-heroku.herokuapp.com">http://laravel-sample-on-heroku.herokuapp.com</a></p>
-
-<h2>参考</h2>
-
-<p><a href="http://qiita.com/MasatoYoshioka@github/items/1b4de4249dc40ff1d902">macosxのphpにmcryptをインストール &ndash; Qiita</a><br/>
-<a href="http://www.slideshare.net/esolves/deploy-laravel-on-heroku">Deploy Laravel on Heroku</a><br/>
-<a href="https://mattstauffer.co/blog/laravel-on-heroku-using-a-postgresql-database">Laravel on Heroku &ndash; Using a PostgreSQL database &ndash; MattStauffer.co</a></p>
 ]]></content>
   </entry>
   
