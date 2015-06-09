@@ -4,7 +4,7 @@
   <title><![CDATA[Category: vagrant | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/vagrant/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-06-09T20:25:28+09:00</updated>
+  <updated>2015-06-09T20:27:48+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -269,8 +269,7 @@ CONTAINER ID        IMAGE               COMMAND                CREATED          
 <h2>参考</h2>
 
 <p><a href="http://dotinstall.com/lessons/basic_docker">Docker入門 (全11回) &ndash; プログラミングならドットインストール</a><br/>
-<a href="http://tech.lexues.co.jp/archives/1569">【社内勉強会】Docker入門してみました | LexTech</a><br/>
-[Dockerのcentosでapacheインストール失敗する。rpmがうんちゃらとか言われる &ndash; ふじたの知見</p>
+<a href="http://tech.lexues.co.jp/archives/1569">【社内勉強会】Docker入門してみました | LexTech</a></p>
 ]]></content>
   </entry>
   
