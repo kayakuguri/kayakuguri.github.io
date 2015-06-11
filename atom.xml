@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-06-11T11:00:35+09:00</updated>
+  <updated>2015-06-11T14:54:09+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,71 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[salesforce]指定のユーザーでテスト実行]]></title>
+    <link href="http://kayakuguri.github.io/blog/2015/06/11/system-run-as/"/>
+    <updated>2015-06-11T14:53:28+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2015/06/11/system-run-as</id>
+    <content type="html"><![CDATA[<p>salesforceのユーザーである、<code>User</code>オブジェクトにカスタム項目を作って、<br/>
+それを使ったコードなんかを書いた時にそのユーザーでの実行が必要になる。<br/>
+そんな時のメモ。</p>
+
+<!-- more -->
+
+
+<h2>テスト実行</h2>
+
+<p><code>system.runas(){}</code>を使う。<br/>
+引数に使用するユーザーを指定し、<code>{}</code>内で実行する処理を書く。</p>
+
+<h2>ユーザーの作成</h2>
+
+<p>指定するユーザーをテスト内で作成するには以下のようにする。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>Map&lt;String,ID&gt; profiles = new Map&lt;String,ID&gt;();
+</span><span class='line'>Profile ps = [select id, name from Profile where name = '標準ユーザ' LIMIT 1];
+</span><span class='line'>User standard = new User(alias = 'standt', 
+</span><span class='line'>  email='standarduser@testorg.com', 
+</span><span class='line'>  emailencodingkey='UTF-8', 
+</span><span class='line'>  lastname='Testing', languagelocalekey='en_US', 
+</span><span class='line'>  localesidkey='en_US', 
+</span><span class='line'>  ProfileId = ps.id,
+</span><span class='line'>  timezonesidkey='America/Los_Angeles', 
+</span><span class='line'>  username='standarduser-test@testorg.com'
+</span><span class='line'>);</span></code></pre></td></tr></table></div></figure>
+
+
+<p>標準ユーザーのプロフィール権限で作成している。<br/>
+この時に、<code>email</code>の項目と<code>username</code>を同じにしていると、すでにそのユーザーネームは使われています、とエラーが出た。</p>
+
+<p>で、実行。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>system.runas(standard){
+</span><span class='line'>  //実行する内容
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>参考</h2>
+
+<p><a href="http://blogjp.sforce.com/2013/07/systemrunas-29e3.html">System.runAs()を使う時の注意点 | Salesforce Developers Japan Blog</a><br/>
+<a href="view-source:http://developer.force.com/cookbook/recipe/using-system-runas-in-test-methods">Using System.runAs in Test Methods &ndash; null</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[salesforce]バッチスケジュールの一通りの書き方]]></title>
@@ -3029,379 +3094,6 @@ Stream #0:1(und): Audio: aac (LC) (mp4a / 0x6134706D), 48000 Hz, mono, fltp, 82 
 <a href="http://joppot.info/2014/06/14/1621">awsのs3を操作する為のaccess keyとsecret keyを取得する(IAM)</a><br/>
 <a href="https://transloadit.com/docs/conversion-robots/#export-to-amazon-s3-with-the-s3store-bot">Export to Amazon S3 with the /s3/store bot | Transloadit</a><br/>
 <a href="https://transloadit.com/docs/#assembly-variables">#Assembly variables | Integration | Transloadit</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[CakePhp]ログイン処理を外部APIを使用して実装する]]></title>
-    <link href="http://kayakuguri.github.io/blog/2015/04/23/cakephp-custom-authenticate/"/>
-    <updated>2015-04-23T17:30:59+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2015/04/23/cakephp-custom-authenticate</id>
-    <content type="html"><![CDATA[<p>DBからの情報取得ではなく、外部のAPIにアクセスして認証したかったので<br/>
-Authコンポーネントをカスタマイズしてみた。</p>
-
-<!-- more -->
-
-
-<p>画面遷移としては、ユーザー名(メールアドレス)とパスワードを入力し、<br/>
-APIに接続してOKならログインする、というもの。</p>
-
-<h2>Authenticate</h2>
-
-<p>おーせんてぃけーと。<br/>
-上記で書いた通り、フォームから送信されたユーザー名とパスワードを使用してログインするので、<br/>
-<code>FormAuthenticate</code>を継承する。<br/>
-オーバーライドする関数は、<code>authenticate</code>と<code>_findUser</code>。</p>
-
-<p><code>/app/Controller/Component/Auth/UseAPIAuthenticate.php</code></p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-<span class='line-number'>39</span>
-<span class='line-number'>40</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;?php
-</span><span class='line'>App::uses('FormAuthenticate', 'Controller/Component/Auth');
-</span><span class='line'>
-</span><span class='line'>class UseAPIAuthenticate extends FormAuthenticate {
-</span><span class='line'>
-</span><span class='line'>    public function authenticate(CakeRequest $request, CakeResponse $response)
-</span><span class='line'>    {
-</span><span class='line'>      //コンポーネントの設定を読み込む
-</span><span class='line'>        $userModel = $this-&gt;settings['userModel'];
-</span><span class='line'>        list(, $model) = pluginSplit($userModel);
-</span><span class='line'>        $fields = $this-&gt;settings['fields'];
-</span><span class='line'>        if (!$this-&gt;_checkFields($request, $model, $fields)) {
-</span><span class='line'>            return false;
-</span><span class='line'>        }
-</span><span class='line'>
-</span><span class='line'>        return $this-&gt;_findUser(
-</span><span class='line'>            $request-&gt;data[$model][$fields['username']],
-</span><span class='line'>            $request-&gt;data[$model][$fields['password']]
-</span><span class='line'>        );
-</span><span class='line'>    }
-</span><span class='line'>
-</span><span class='line'>    public function _findUser($username, $password = null)
-</span><span class='line'>    {
-</span><span class='line'>        // ログイン実施
-</span><span class='line'>        $this-&gt;user = null;
-</span><span class='line'>        $ret = ClassRegistry::init('Api')-&gt;login($username, $password);
-</span><span class='line'>        if (! $ret) {
-</span><span class='line'>            //なんらかのログインエラー
-</span><span class='line'>            return false;
-</span><span class='line'>        }
-</span><span class='line'>
-</span><span class='line'>      //ユーザーデータ。中身はニーズに合わせて
-</span><span class='line'>        $result = Array(
-</span><span class='line'>            "username" =&gt; $username,
-</span><span class='line'>            "result" =&gt; $ret
-</span><span class='line'>        );
-</span><span class='line'>        return $result;
-</span><span class='line'>    }
-</span><span class='line'>
-</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
-
-
-<p>APIに接続する処理は、Apiというモデルに記述しているとする。<br/>
-コンポーネントからモデルを使用するのはあまりよくないともどこかで見たが、標準のAuthコンポーネントも使用していたのでよしとする。<br/>
-その際の使用方法は以下のようになる。</p>
-
-<pre><code>ClassRegistry::init('Api')
-</code></pre>
-
-<p>ログイン成功後、返却するデータの中身は、配列である必要があるよう。<br/>
-<code>true</code>とだけ返してても認証されなかった。</p>
-
-<h2>AppController</h2>
-
-<p>AppControllerにて、上記のAuthコンポーネントの設定を書く。</p>
-
-<p><code>/app/Controller/AppController.php</code></p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;?php
-</span><span class='line'>App::uses('Controller', 'Controller');
-</span><span class='line'>
-</span><span class='line'>class AppController extends Controller {
-</span><span class='line'>
-</span><span class='line'>    public $uses = array('User', 'Api');
-</span><span class='line'>
-</span><span class='line'>    public $components = array(
-</span><span class='line'>        'Session',
-</span><span class='line'>        'Auth' =&gt; array(
-</span><span class='line'>            'authenticate' =&gt; array(
-</span><span class='line'>                'UseAPI' =&gt; array(
-</span><span class='line'>                    'userModel' =&gt; 'User',
-</span><span class='line'>                    'fields' =&gt; array(
-</span><span class='line'>                        'username' =&gt; 'email'
-</span><span class='line'>                    )
-</span><span class='line'>                )
-</span><span class='line'>            )
-</span><span class='line'>        )
-</span><span class='line'>    );
-</span><span class='line'>        
-</span><span class='line'>    ....略....
-</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
-
-
-<p>作成したクラスファイル名が、<code>UseAPIAuthenticate</code>の場合は、<code>UseAPI</code>と、Authenticateを引いて指定する。<br/>
-これは実際にCakeのAuthコンポーネント内で、以下のように指定されているため。</p>
-
-<p><code>/lib/Cake/Controller/Component/AuthComponent.php</code> 795行目</p>
-
-<pre><code>$className = $class . 'Authenticate';
-</code></pre>
-
-<p>で、使用するモデルは、<code>User</code>とし、今回はメールアドレスでのログインということで、<code>username</code>に<code>email</code>を使用する指定をしている。</p>
-
-<h2>UsersController</h2>
-
-<p>で、ログインページで実行される処理を<code>UsersController</code>に書く。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-<span class='line-number'>39</span>
-<span class='line-number'>40</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;?php
-</span><span class='line'>App::uses('AppController', 'Controller');
-</span><span class='line'>class UsersController extends AppController
-</span><span class='line'>{
-</span><span class='line'>  public $uses = array('User', 'Api');
-</span><span class='line'>  
-</span><span class='line'>  public function beforeFilter()
-</span><span class='line'>    {
-</span><span class='line'>        $this-&gt;Auth-&gt;allow('login', ...認証除外ページ);
-</span><span class='line'>        parent::beforeFilter();
-</span><span class='line'>    }
-</span><span class='line'>    
-</span><span class='line'>    /**
-</span><span class='line'>     * ログイン
-</span><span class='line'>     */
-</span><span class='line'>    public function login()
-</span><span class='line'>    {
-</span><span class='line'>        //POST値がある？
-</span><span class='line'>        if (! $this-&gt;request-&gt;is('post')) {
-</span><span class='line'>            // ログインフォームを表示
-</span><span class='line'>            $this-&gt;logout(); //ログアウトしてログインページを表示させる処理
-</span><span class='line'>            return;
-</span><span class='line'>        }
-</span><span class='line'>
-</span><span class='line'>        /// authコンポーネント使用
-</span><span class='line'>        //ログイン
-</span><span class='line'>        $result = $this-&gt;Auth-&gt;login(); //trueかfalseが返ってくる
-</span><span class='line'>        $data = $this-&gt;Auth-&gt;user(); //UseAPIAuthenticateで設定したユーザーデータを取得出来る
-</span><span class='line'>        
-</span><span class='line'>        if (!$result) {
-</span><span class='line'>            $this-&gt;Session-&gt;setFlash(__('ユーザ名もしくはパスワードが正しくありません'));
-</span><span class='line'>            return;
-</span><span class='line'>        }
-</span><span class='line'>
-</span><span class='line'>        //トップページへ
-</span><span class='line'>        $this-&gt;redirect(array('action' =&gt; 'index'));
-</span><span class='line'>    }
-</span><span class='line'>    
-</span><span class='line'>    ....略....
-</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
-
-
-<p><code>$this-&gt;Auth-&gt;login()</code>とするだけでフォームで入力された内容が引き継がれてログイン処理が行われる。<br/>
-実際の処理は、<code>/lib/Cake/Controller/Component/AuthComponent.php</code>で行われている。<br/>
-ログインの結果は、trueかfalesで返ってくるのでfalseの場合はエラーを表示している。<br/>
-ログイン成功時にセットしたユーザーデータは、<code>$this-&gt;Auth-&gt;user()</code>で取得できる。</p>
-
-<h2>Model</h2>
-
-<p>実際にAPIを使用してログインしている箇所は側だけ。中身は割愛。</p>
-
-<p><code>/app/Model/Api.php</code></p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;?php
-</span><span class='line'>App::uses('AppModel', 'Model');
-</span><span class='line'>class Sf extends AppModel
-</span><span class='line'>{
-</span><span class='line'>  public function login($email, $pw)
-</span><span class='line'>    {
-</span><span class='line'>        //何かしらAPIへの接続処理
-</span><span class='line'>
-</span><span class='line'>        return $result;
-</span><span class='line'>    }
-</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>View</h2>
-
-<p>最後はビュー。フォーム部分だけ。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;?php echo $this-&gt;Form-&gt;create('User', array('novalidate' =&gt; true)); ?&gt;
-</span><span class='line'>  &lt;label&gt;
-</span><span class='line'>        ログインID&lt;br&gt;
-</span><span class='line'>        &lt;?php echo $this-&gt;Form-&gt;input('User.email', array(
-</span><span class='line'>            'label' =&gt; false,
-</span><span class='line'>            'placeholder' =&gt; ''
-</span><span class='line'>        )); ?&gt;
-</span><span class='line'>    &lt;/label&gt;
-</span><span class='line'>    
-</span><span class='line'>    &lt;label&gt;
-</span><span class='line'>        パスワード&lt;br&gt;
-</span><span class='line'>        &lt;?php echo $this-&gt;Form-&gt;input('User.password', array(
-</span><span class='line'>            'type' =&gt; 'password',
-</span><span class='line'>            'value' =&gt; '',
-</span><span class='line'>            'label' =&gt; false,
-</span><span class='line'>            'placeholder' =&gt; ''
-</span><span class='line'>        )); ?&gt;
-</span><span class='line'>    &lt;/label&gt;
-</span><span class='line'>    &lt;?php echo $this-&gt;Session-&gt;flash(); // エラーメッセージ ?&gt;
-</span><span class='line'>    
-</span><span class='line'>    &lt;?php echo $this-&gt;Form-&gt;submit('ログイン', array(
-</span><span class='line'>        'class' =&gt; 'input-submit',
-</span><span class='line'>        'div' =&gt; false
-</span><span class='line'>    )); ?&gt;
-</span><span class='line'>&lt;?php echo $this-&gt;Form-&gt;end() ?&gt;</span></code></pre></td></tr></table></div></figure>
-
-
-<p>nameにあたる、<code>User.email</code>の部分はCompnentの設定に合わせる。<br/>
-ちなみに、formタグにある、<code>'novalidate' =&gt; true</code>は、<br/>
-何も指定しない場合は勝手に、<code>required="required"</code>がついてしまうので、それを付けない設定を一括で指定している。<br/>
-バリデーションは他でまとめてしているのでついてないほうがなにかとやりやすい。</p>
-
-<h2>まとめ</h2>
-
-<p>最初は自前でクッキーなどをチェックしていたのだが、<br/>
-ページ遷移時の認証機構をcakephpが一括して受け持ってくれるのはかなり楽だった。</p>
-
-<h2>参考</h2>
-
-<p><a href="http://book.cakephp.org/2.0/ja/core-libraries/components/authentication.html#id6">カスタム認証オブジェクトの作成 &ndash; 認証 &mdash; CakePHP Cookbook 2.x ドキュメント</a><br/>
-<a href="http://qiita.com/gold1/items/94938956ed02d939b7f2">CakePHP 2.4 md5 で Auth認証 &ndash; Qiita</a></p>
 ]]></content>
   </entry>
   
