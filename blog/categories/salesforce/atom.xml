@@ -4,7 +4,7 @@
   <title><![CDATA[Category: salesforce | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/salesforce/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-06-09T20:27:48+09:00</updated>
+  <updated>2015-06-11T11:00:35+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,238 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[salesforce]バッチスケジュールの一通りの書き方]]></title>
+    <link href="http://kayakuguri.github.io/blog/2015/06/11/apex-batch-schedule/"/>
+    <updated>2015-06-11T10:59:41+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2015/06/11/apex-batch-schedule</id>
+    <content type="html"><![CDATA[<p>複数クラスにわたってたりしてややこしかったのでメモ。</p>
+
+<!-- more -->
+
+
+<h2>バッチ</h2>
+
+<p>まずはバッチファイル。<br/>
+ここで実際に動作させたい内容を書く。<br/>
+枠はこんな感じ。</p>
+
+<p><code>Batch_sample.apex</code></p>
+
+<p>```
+global with sharing class Batch_sample implements Database.Batchable<sObject>
+{</p>
+
+<pre><code>private String query;
+
+//コンストラクタ
+global Batch_UpdatePushlist(String q){
+    query = q;
+}
+
+//データ取得
+global Database.QueryLocator start(Database.BatchableContext BC){
+    return Database.getQueryLocator(query);
+}
+
+//開始
+global void execute(Database.BatchableContext BC, List&lt;sObject&gt; scope){
+
+    //バッチの処理を記述
+
+}
+
+//完了
+global void finish(Database.BatchableContext BC)
+{
+    //完了後の処理があれば
+}
+</code></pre>
+
+<p>}
+```</p>
+
+<p>バッチを起動させるには以下のようにSOQL文と件数を渡して実行する。</p>
+
+<p><code>
+String soql = 'SELECT ID FROM sObject';
+Batch_sample b = new Batch_sample(soql);
+Database.executeBatch(b, 200);
+</code></p>
+
+<p>実行時に指定したSOQLで取得するレコード分、バッチが動作する。<br/>
+この際に取得出来る件数が、バッチの場合は500万件。<br/>
+とはいえ、実際には一度の処理では指定した件数分のみ処理し、ガバナ制限がリセットされて再度実行、を繰り返す。<br/>
+<code>executeBatch</code>の第二引数が一回の処理で実行する件数。<br/>
+(デフォルトは200件)</p>
+
+<p>バッチ全体の動作は10分以内、というガバナ制限もあり。<br/>
+(100万件単位になってくると結構厳しい数字っぽい)</p>
+
+<h2>スケジューラー</h2>
+
+<p>設定したバッチをスケジューラーとして実行させる。<br/>
+以下のように、<code>Schedulable</code>クラスをimplementsする。</p>
+
+<p><code>Schedule_sample.apxc</code></p>
+
+<p>```
+global class Schedule_sample implements Schedulable {</p>
+
+<pre><code>private final Integer BATCH_SIZE = 200;
+
+global void execute(SchedulableContext ctx) {
+    String soql = 'SELECT ID FROM sObject';
+    Batch_sample b = new Batch_sample(soql);
+    Database.executeBatch(b, BATCH_SIZE);
+}
+</code></pre>
+
+<p>}
+```</p>
+
+<p>このクラスをジョブに追加することでバッチをスケジューリング出来る。</p>
+
+<h2>スケジュールに追加</h2>
+
+<p>追加方法は２つある</p>
+
+<h3>設定画面から追加</h3>
+
+<p><code>設定-&gt;開発-&gt;Apexクラス</code>を選択。<br/>
+画面内の<code>Apexをスケジュール</code>をクリック。</p>
+
+<p><img src="/images/2015/06/apex_schedule01.jpg" alt="" /></p>
+
+<p>この中で毎月や毎日、などを選択できる。<br/>
+終了日も設定出来るので、ずっと動作するさせるものに関しては長めに設定しておく。</p>
+
+<p><img src="/images/2015/06/apex_schedule02.jpg" alt="" /></p>
+
+<h3>コードで実行</h3>
+
+<p>設定画面から追加での最大のデメリットは実行時間が毎時0分のみ、と、分の指定ができないところ。<br/>
+これをさせようと思うとコードからジョブに追加してやる必要がある。</p>
+
+<p>以下が追加させるコード</p>
+
+<pre><code>System.schedule('ジョブ名','0 0 * * * ?', new Schedule_sample());
+</code></pre>
+
+<p>第二引数に指定しているものは、クーロン式、というもので、ここで時間指定をしている。<br/>
+これは、左から、秒、分、時、日、月、曜日、年となっている。<br/>
+(年は省略化)</p>
+
+<p>例）</p>
+
+<ul>
+<li>&lsquo;0 0 13 * * ?'：毎日13時に実行</li>
+<li>&lsquo;0 0 10 ? * MON-FRI'：月～金の10時に実行</li>
+<li>&lsquo;0 0 * * * ?'：毎時0分に実行</li>
+<li>&lsquo;0 30 * * * ?'：毎時30分に実行</li>
+</ul>
+
+
+<p>秒のみの指定は怖くて試してません。</p>
+
+<p>この実行式を開発者コンソールの匿名実行から実行することでジョブに追加させられる。</p>
+
+<p><img src="/images/2015/06/apex_schedule03.jpg" alt="" /></p>
+
+<p>コードを書いて、実行ボタンをクリック。</p>
+
+<p><img src="/images/2015/06/apex_schedule04.jpg" alt="" /></p>
+
+<p>追加されたジョブは設定画面の、<code>ジョブ-&gt;スケジュール済みジョブ</code>から確認できる。</p>
+
+<p><img src="/images/2015/06/apex_schedule05.jpg" alt="" /></p>
+
+<h2>動作テスト</h2>
+
+<p>実際に開発中にいちいちスケジュールさせてジョブが実行されるのを待つのはあまりにもめんどくさい。<br/>
+バッチを起動させるコードを匿名実行から起動させてもよいがそれでも待ち時間が長いので、結局バッチ処理特有の部分をコメントアウトして、単なるクラスにしてそれを直接実行させる方法で確認した。</p>
+
+<p>以下のようにコメントアウトした。</p>
+
+<p>```
+//global with sharing class Batch_sample implements Database.Batchable<sObject>
+public class Batch_sample
+{</p>
+
+<pre><code>/*
+private String query;   
+//コンストラクタ
+global Batch_UpdatePushlist(String q){
+    query = q;
+}
+
+//データ取得
+global Database.QueryLocator start(Database.BatchableContext BC){
+    return Database.getQueryLocator(query);
+}
+*/
+
+//開始
+public void execute(List&lt;sObject&gt; scope){
+//global void execute(Database.BatchableContext BC, List&lt;sObject&gt; scope){
+
+    //バッチの処理を記述
+
+}
+
+//global void finish(Database.BatchableContext BC){}
+</code></pre>
+
+<p>}
+```</p>
+
+<p>これを匿名実行からSOQLでデータを取得してからそれを渡してやりつつ実行する。</p>
+
+<p><code>
+String soql = 'SELECT ID FROM sObject';
+List&lt;sObject&gt; data = Database.query(soql);
+Batch_sample batch = new Batch_sample();
+batch.execute(data);
+</code></p>
+
+<p>もっとスマートなやり方があったらぜひ。</p>
+
+<h2>テスト</h2>
+
+<p>テストコードはスケジューラに対して実行する。</p>
+
+<p><code>Schedule_sample_Test.apxc</code></p>
+
+<p>```
+@isTest
+public class Schedule_sample_Test {</p>
+
+<pre><code>public static String CRON_EXP = '0 0 0 15 3 ? 2022';
+
+static testmethod void test() {
+    //データ準備
+
+    Test.startTest();
+    String jobId = System.schedule('ScheduleApexClassTest', CRON_EXP, new Batch_sample());
+    Test.stopTest();
+
+    //バッチ後のデータ確認
+}
+</code></pre>
+
+<p>}
+```</p>
+
+<p>指定するクーロン式はなんでもよくて、<code>Test.stopTest();</code>の後にすぐにスケジュールが実行される。</p>
+
+<h2>参考</h2>
+
+<p><a href="https://developer.salesforce.com/docs/atlas.ja-jp.apex_workbook.meta/apex_workbook/apex_scheduling_2.htm">スケジュール可能なクラスのテストの追加 | Apex ワークブック | Salesforce Developers</a><br/>
+<a href="http://blog.flect.co.jp/salesforce/2010/08/apex-2136.html">セールスフォースの豆知識: スケジュール実行するApexのテストメソッドと実行時刻の詳細設定</a><br/>
+<a href="http://blog.livedoor.jp/androidbeginner/archives/39179776.html">【Salesforce】Apexジョブの書き方 : 怠けろ！プログラマ！</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[salesforce]レコードの詳細からカスタムボタンでapexを呼び出す]]></title>
@@ -562,103 +794,6 @@ OwinIDは入力しなくても大丈夫だった。<br/>
 <p><a href="https://developer.salesforce.com/docs/atlas.ja-jp.api_streaming.meta/api_streaming/quick_start_workbench.htm">ワークベンチを使用したクイックスタート | Force.com ストリーミング API 開発者ガイド | Salesforce Developers</a><br/>
 <a href="http://tyoshikawa1106.hatenablog.com/entry/2013/08/01/225204">SFDC：Streaming API 試してみました &ndash; tyoshikawa1106のブログ</a><br/>
 <a href="http://www.terrasky.co.jp/blog/?p=802">10分で分かる！使える！ストリーミング API &laquo;  TerraSky Tech Blog</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[Salesforce]承認申請のアウトバウンドメッセージをPHPで受け取る]]></title>
-    <link href="http://kayakuguri.github.io/blog/2015/04/28/approval-process-outbound-massage/"/>
-    <updated>2015-04-28T20:20:01+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2015/04/28/approval-process-outbound-massage</id>
-    <content type="html"><![CDATA[<p>salesforceからのアウトバウンドメッセージの内容をPHPで受け取ってみた。</p>
-
-<!-- more -->
-
-
-<h2>アウトバウンドメッセージの設定</h2>
-
-<p>前回作成したものの申請時のアクション部分に<code>アウトバウンドメッセージ</code>を追加。<br/>
-<img src="/images/2015/04/outbound01.jpg" alt="" /></p>
-
-<p>以下のように設定した。<br/>
-<img src="/images/2015/04/outbound02.jpg" alt="" /></p>
-
-<p>設定完了<br/>
-<img src="/images/2015/04/outbound03.jpg" alt="" /></p>
-
-<h2>PHPで受け取る</h2>
-
-<p>アウトバウンドメッセージは<code>SOAP</code>で通信が行われる。<br/>
-なので、XML。<br/>
-以下のようにアクセスが記録されていた。</p>
-
-<pre><code>at=info method=POST path="/liam_dnes.php?id=1" host=shrouded-island-xxxx.herokuapp.com request_id=01b99464-c9dc-4e15-aa19-xxxxxxx fwd="xxx.xxx.78.8" dyno=web.1 connect=1ms service=4ms status=200 bytes=189
-</code></pre>
-
-<p>どうやらPOSTでアクセスされているよう。<br/>
-<code>$_POST</code>のままでは取得できなかった。<br/>
-どうやら生のPOSTデータを取得する必要があるらしい。</p>
-
-<p>以下で取得した。</p>
-
-<pre><code>$data = file_get_contents( 'php://input' );
-</code></pre>
-
-<p>取得すると、以下のようなXMLが取得できた。</p>
-
-<p>```
-&lt;?xml version=&ldquo;1.0&rdquo; encoding=&ldquo;UTF-8&rdquo;?>
-&lt;soapenv:Envelope xmlns:soapenv=&ldquo;<a href="http://schemas.xmlsoap.org/soap/envelope/">http://schemas.xmlsoap.org/soap/envelope/</a>&rdquo; xmlns:xsd=&ldquo;<a href="http://www.w3.org/2001/XMLSchema">http://www.w3.org/2001/XMLSchema</a>&rdquo; xmlns:xsi=&ldquo;<a href="http://www.w3.org/2001/XMLSchema-instance">http://www.w3.org/2001/XMLSchema-instance</a>&rdquo;></p>
-
-<pre><code>&lt;soapenv:Body&gt;
-    &lt;notifications xmlns="http://soap.sforce.com/2005/09/outbound"&gt;
-        &lt;OrganizationId&gt;00D10000000Zyxxxxx&lt;/OrganizationId&gt;
-        &lt;SessionId xsi:nil="true"/&gt;
-        &lt;PartnerUrl&gt;https://ap.salesforce.com/services/Soap/u/33.0/00D100000xxxxx&lt;/PartnerUrl&gt;
-        &lt;ActionId&gt;04k100000008STGAA2&lt;/ActionId&gt;
-        &lt;EnterpriseUrl&gt;https://ap.salesforce.com/services/Soap/c/33.0/00D100000xxxxx&lt;/EnterpriseUrl&gt;
-        &lt;Notification&gt;
-            &lt;Id&gt;04l1000000xxxxxx&lt;/Id&gt;
-            &lt;sObject xsi:type="sf:Opportunity" xmlns:sf="urn:sobject.enterprise.soap.sforce.com"&gt;
-                &lt;sf:Id&gt;0061000000cxxxxx&lt;/sf:Id&gt;
-                &lt;sf:Name&gt;アウトバウンドのテスト商談&lt;/sf:Name&gt;
-                &lt;sf:StageName&gt;Prospecting&lt;/sf:StageName&gt;
-                &lt;sf:IsClosed&gt;false&lt;/sf:IsClosed&gt;
-            &lt;/sObject&gt;
-        &lt;/Notification&gt;
-    &lt;/notifications&gt;
-&lt;/soapenv:Body&gt;
-</code></pre>
-
-<p>&lt;/soapenv:Envelope>
-```</p>
-
-<p>アウトバウンドの設定は以下のような形。</p>
-
-<p>ここからXMLをパースして、名前など設定した値を取得するには以下。</p>
-
-<p>```
-&lt;?php</p>
-
-<p>$data = file_get_contents(&lsquo;php://input&rsquo;);
-$xml = simplexml_load_string($data);</p>
-
-<p>//ID
-$notification = $xml->children(&lsquo;<a href="http://schemas.xmlsoap.org/soap/envelope/">http://schemas.xmlsoap.org/soap/envelope/</a>&rsquo;)&ndash;>Body->children(&lsquo;<a href="http://soap.sforce.com/2005/09/outbound">http://soap.sforce.com/2005/09/outbound</a>&rsquo;)&ndash;>notifications->Notification;
-echo $notification->Id;</p>
-
-<p>//パラメータ
-$params = $notification->sObject->children(&lsquo;urn:sobject.enterprise.soap.sforce.com&rsquo;);
-echo $params->Id;
-echo $params->Name;
-echo $params->IsClosed;
-```</p>
-
-<h2>参考</h2>
-
-<p><a href="http://php.net/manual/ja/wrappers.php.php#wrappers.php.input">php://input</a><br/>
-<a href="http://ivystar.jp/programming/php/what-is-phpinput/">「php://input」とは何？－POSTの生データ？ | アイビースター</a><br/>
-<a href="https://amigotechnotes.wordpress.com/2013/11/16/parse-xml-with-namespace-by-simplexml-in-php/">Parse XML with namespace by SimpleXML in PHP | Amigo&#039;s Technical Notes</a></p>
 ]]></content>
   </entry>
   
