@@ -4,7 +4,7 @@
   <title><![CDATA[Category: apex | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/apex/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-06-11T14:54:09+09:00</updated>
+  <updated>2015-06-23T20:40:04+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,102 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[ApexRESTにてPOSTで送信された配列のデータを受け取る]]></title>
+    <link href="http://kayakuguri.github.io/blog/2015/06/23/apexrest-post-array/"/>
+    <updated>2015-06-23T20:38:27+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2015/06/23/apexrest-post-array</id>
+    <content type="html"><![CDATA[<p>RestApexを作成していて、配列でPOSTした値はどうやって取得するのかを調べてみた。</p>
+
+<!-- more -->
+
+
+<p>例えば、POSTでidというパラメータで送信した内容は以下のようにして取得可能。</p>
+
+<pre><code>RestRequest req = RestContext.request;
+String id = req.params.get('id');
+</code></pre>
+
+<p>しかし配列だとこれでは取得できなかった。</p>
+
+<p>送信データ</p>
+
+<pre><code>$value = [
+  'hoge'=&gt;['1', '2', '3']
+];
+</code></pre>
+
+<p>受信</p>
+
+<pre><code>RestRequest req = RestContext.request;
+String id = req.params.get('hoge');  //null
+</code></pre>
+
+<p>なので、どのようにしてデータがわたっているのかを出力させてみた。</p>
+
+<p>送信したデータ</p>
+
+<pre><code>$value = [
+  'id'=&gt;'hoge',
+  'arr'=&gt;['1', '2', '3']
+];
+</code></pre>
+
+<p>出力させたコード</p>
+
+<pre><code>RestRequest req = RestContext.request;
+System.debug(req.params);
+</code></pre>
+
+<p>出力結果</p>
+
+<pre><code>{arr[0]=1, arr[1]=2, arr[2]=3, id=hoge}
+</code></pre>
+
+<p>どうやらちゃんとデータは受け取れているよう。<br/>
+この<code>req.params</code>で受け取るデータの型は<code>Map</code>になっているよう。<br/>
+以下のように出来る。</p>
+
+<pre><code>RestRequest req = RestContext.request;
+Map&lt;String, String&gt; p = req.params;
+</code></pre>
+
+<p>ということはキーを取得できるし、キーから中身を全て取り出す事もできる。</p>
+
+<hr />
+
+<p>そんなわけで、かなり無理矢理だけど、指定したキーの中身を取り出す関数を作ってみた。<br/>
+配列で受け取る場合はフォームではチェックボックス、SF上では複数選択リスト、になるので、<br/>
+SFの形式に合わせて、<code>;</code>セミコロン区切りの文字列として返すようにした。</p>
+
+<p>```
+public String convertArrayPostData(Map&lt;String, String> val, String target){</p>
+
+<pre><code>String res = '';
+for(String sKey : val.keySet()){
+    Integer c = sKey.indexOf('[');
+    if(c == -1) continue;
+    String key = sKey.left(c);
+    if(key == target){
+        res += val.get(sKey) + ';';
+    }
+}
+if(res != '') res = res.removeEnd(';');
+return res;
+</code></pre>
+
+<p>}
+```</p>
+
+<p>上記の<code>arr</code>というキーのデータを取り出す場合は以下のように。</p>
+
+<pre><code>RestRequest req = RestContext.request;
+Map&lt;String, String&gt; p = req.params;
+String arrs = convertArrayPostData(p, 'arr');  //1;2;3
+</code></pre>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[salesforce]バッチスケジュールの一通りの書き方]]></title>
@@ -498,124 +594,6 @@ private static testMethod void execute_fail(){
 <p><a href="https://help.salesforce.com/HTViewHelpDoc?id=code_inbound_email.htm&amp;language=ja">InboundEmail &#12458;&#12502;&#12472;&#12455;&#12463;&#12488;&#12398;&#20351;&#29992;</a><br/>
 <a href="https://developer.salesforce.com/page/An_Introduction_To_Email_Services_on_Force.com">An Introduction To Email Services on Force.com &ndash; developer.force.com</a><br/>
 <a href="http://tyoshikawa1106.hatenablog.com/entry/2013/07/31/213518">SFDC：Messaging.InboundEmailHandlerについて &ndash; tyoshikawa1106のブログ</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[apex]トリガーのインサートエラーのテストコードを書く]]></title>
-    <link href="http://kayakuguri.github.io/blog/2015/04/14/apex-test-trigger/"/>
-    <updated>2015-04-14T17:31:36+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2015/04/14/apex-test-trigger</id>
-    <content type="html"><![CDATA[<p>言われてみれば当たり前なんですが、メモ。</p>
-
-<!-- more -->
-
-
-<p>レコードがインサートされた際にデータ内容をチェックして、間違っていればエラーを返す、というトリガーを作成した。<br/>
-要するに、自前のバリデーションチェックみたいなもの。<br/>
-このテストコードを書いた際に、そのエラー部分も通るように作ってしまうと、テストコード自体がエラーになってしまってチェック出来なかった。</p>
-
-<p>で、解決策としては単純で、<code>try〜catch</code>を使う。</p>
-
-<p>以下、例。</p>
-
-<h3>apex</h3>
-
-<p>```
-trigger SampleLeadTrigger on Lead (before insert) {</p>
-
-<pre><code>for(Lead obj : Trigger.New){
-    if(obj.LastName == 'test'){
-        obj.addError('testという名前は使えません');
-        continue;
-    }
-}
-</code></pre>
-
-<p>}
-```</p>
-
-<p>姓に、<code>test</code>という文字列の使用をエラーとするトリガーです。</p>
-
-<h3>テストコード</h3>
-
-<p>以下にようにそのままテストコードを書いてみます。</p>
-
-<p>```
-@isTest
-private class Test_SampleLeadTrigger {</p>
-
-<pre><code>static testMethod void excute(){
-    Lead test_obj = new Lead();
-    test_obj.Company = 'hoge co.';
-    test_obj.LastName = 'test';
-
-    insert test_obj;
-}
-</code></pre>
-
-<p>}
-```</p>
-
-<p>すると、以下のようなエラーが出てしまい、テストコードが実行できません。</p>
-
-<blockquote><p>18:14:44:833 FATAL_ERROR System.DmlException: Insert failed. First exception on row 0; first error: FIELD_CUSTOM_VALIDATION_EXCEPTION, testという名前は使えません: []</p></blockquote>
-
-<p>なので、<code>insert</code>する部分を<code>try-catch</code>で例外をキャッチするようにします。</p>
-
-<p>```
-@isTest
-private class Test_SampleLeadTrigger {</p>
-
-<pre><code>static testMethod void excute(){
-    Lead test_obj = new Lead();
-    test_obj.Company = 'hoge co.';
-    test_obj.LastName = 'test';
-
-    try{
-        insert test_obj;
-    }catch(Exception e){
-
-    }
-}
-</code></pre>
-
-<p>}
-```</p>
-
-<p>これでエラーで止まらなくなるので実行は出来るようになります。<br/>
-catchの部分は今回で言えば、<code>DmlException</code>なので、それでもよいですが、より広いエラーで、<code>Exception</code>にしています。<br/>
-この辺はあまり深く追求してません。。</p>
-
-<p>で、これだとテストは通りますが、テストの意味はあまりないと思うので、意図したエラーが返ってくるかを確認するために、以下のように変更します。</p>
-
-<p><code>try-catch</code>部分</p>
-
-<p>```
-try{</p>
-
-<pre><code>insert test_obj;
-</code></pre>
-
-<p>}catch(Exception e){</p>
-
-<pre><code>Boolean expectedExceptionThrown =  e.getMessage().contains('testという名前は使えません') ? true : false;
-System.AssertEquals(expectedExceptionThrown, true);
-</code></pre>
-
-<p>}
-```</p>
-
-<p>これで指定したエラーが返ってきたかどうかがチェックできます。<br/>
-もし指定したエラー以外のものが返ってきた場合は以下のようなエラーが出てテストコードが実行できなくなってしまうので間違いに気付くことが出来ます。</p>
-
-<blockquote><p>System.AssertException: Assertion Failed: Expected: false, Actual: true</p></blockquote>
-
-<p>（<code>e.getMessage()</code>は、 System.DmlException:〜の文言を含んだ内容となるので、<code>contains</code>関数で指定の文字列が<strong>含まれている</strong>かどうかをチェックしている。）</p>
-
-<h3>参考</h3>
-
-<p><a href="https://developer.salesforce.com/forums/ForumsMain?id=906F00000008xGuIAI">How do I test for an exception(&lsquo;addError&rsquo;) in a Trigger ? &ndash; Salesforce Developer Community</a></p>
 ]]></content>
   </entry>
   
