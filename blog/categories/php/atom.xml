@@ -4,7 +4,7 @@
   <title><![CDATA[Category: php | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/php/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-06-24T21:32:12+09:00</updated>
+  <updated>2015-06-24T21:33:37+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,37 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[CentOSにて、PHPのエラー出力をターミナルで監視]]></title>
+    <link href="http://kayakuguri.github.io/blog/2015/06/24/php-error-tail/"/>
+    <updated>2015-06-24T21:26:49+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2015/06/24/php-error-tail</id>
+    <content type="html"><![CDATA[<p>いつも忘れるのでメモ。</p>
+
+<!-- more -->
+
+
+<p>Vagrant環境にて、PHPのエラー出力をターミナルで監視する方法。<br/>
+まずは、エラーの出力ファイルの場所。</p>
+
+<pre><code>/var/log/httpd/error_log
+</code></pre>
+
+<p>これを、<code>tail</code>コマンドで表示させる。<br/>
+常に監視、の<code>-f</code>オプション付きで。</p>
+
+<pre><code>tail /var/log/httpd/error_log -f
+</code></pre>
+
+<p>かなり常識的な事だと思うけど、ググるのが面倒なのでメモ。</p>
+
+<h2>参考</h2>
+
+<p><a href="http://www.atmarkit.co.jp/fwin2k/win2ktips/423tail/tail.html">tailコマンドでログ・ファイルをリアルタイムに監視する － ＠IT</a><br/>
+<a href="http://detail.chiebukuro.yahoo.co.jp/qa/question_detail/q1213302327">『　リナックスサーバー　』　にＰＨＰのエラーログ・アクセスログにか&hellip; &ndash; Yahoo!知恵袋</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Session Fixation]]></title>
@@ -403,77 +434,6 @@ Migrated: 2014_10_12_100000_create_password_resets_table
 <p><a href="http://qiita.com/MasatoYoshioka@github/items/1b4de4249dc40ff1d902">macosxのphpにmcryptをインストール &ndash; Qiita</a><br/>
 <a href="http://www.slideshare.net/esolves/deploy-laravel-on-heroku">Deploy Laravel on Heroku</a><br/>
 <a href="https://mattstauffer.co/blog/laravel-on-heroku-using-a-postgresql-database">Laravel on Heroku &ndash; Using a PostgreSQL database &ndash; MattStauffer.co</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[mac]macのPHPのバージョンをアップデートする]]></title>
-    <link href="http://kayakuguri.github.io/blog/2015/04/15/mac-update-php/"/>
-    <updated>2015-04-15T20:15:38+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2015/04/15/mac-update-php</id>
-    <content type="html"><![CDATA[<p>とあるSDKをcomposer経由でインストールしようとすると、PHPのバージョンが古い、と怒られてしまった。<br/>
-なので、macで5.6にしたメモ。</p>
-
-<!-- more -->
-
-
-<p>アップデート前。</p>
-
-<p><code>
-$ php -v
-PHP 5.4.38 (cli) (built: Mar 19 2015 14:49:15)
-Copyright (c) 1997-2014 The PHP Group
-Zend Engine v2.4.0, Copyright (c) 1998-2014 Zend Technologies
-</code></p>
-
-<hr />
-
-<p>基本的に以下のママ。<br/>
-<code>homebrew</code>でインストールした。</p>
-
-<p><a href="http://takemaru123.hatenablog.jp/entry/2014/11/27/224037">macにhomebrewでPHP5.6環境をインストールしてみる &ndash; たけまるの日記</a></p>
-
-<p>まず、xcode-selectをインストールしておく。<br/>
-(Xcode自体がインストールされていない場合はインストールが必要)<br/>
-(理由はわかてない)</p>
-
-<pre><code>$ xcode-select --install
-</code></pre>
-
-<p>すると、以下のメッセージが表示されて、ダイアログが表示された。</p>
-
-<blockquote><p>xcode-select: note: install requested for command line developer tools</p></blockquote>
-
-<p><img src="/images/2015/04/mac_php_update_1.png" alt="ダイアログ" /></p>
-
-<p>インストール、を押すと規約同意画面に進み、インストールが始まる。</p>
-
-<p><img src="/images/2015/04/mac_php_update_2.png" alt="規約同意" /><br/>
-<img src="/images/2015/04/mac_php_update_3.png" alt="インストール中" /></p>
-
-<p>インストール後に以下でhomebrewのリポジトリを作成。<br/>
-(ここもよくわかってない)</p>
-
-<pre><code>$ brew tap homebrew/php
-$ brew tap homebrew/dupes
-</code></pre>
-
-<p>で、いよいよPHP5.6のインストール。</p>
-
-<pre><code>$ brew install php56 --with-apxs2=/usr/sbin/apxs
-~~~~~
-==&gt; Summary
-🍺  /usr/local/Cellar/php56/5.6.7: 500 files, 51M
-</code></pre>
-
-<p>で、ターミナルを再起動すると、無事、アップデートされました。</p>
-
-<p><code>
-$ php -v
-PHP 5.6.7 (cli) (built: Mar 22 2015 19:03:55)
-Copyright (c) 1997-2015 The PHP Group
-Zend Engine v2.6.0, Copyright (c) 1998-2015 Zend Technologies
-</code></p>
 ]]></content>
   </entry>
   
