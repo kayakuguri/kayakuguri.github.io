@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-06-24T21:33:37+09:00</updated>
+  <updated>2015-06-30T12:55:43+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,233 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[wordpress上のメディアをcloudinaryに自動アップロードして管理する]]></title>
+    <link href="http://kayakuguri.github.io/blog/2015/06/30/auto-upload-cloudinary-on-heroku/"/>
+    <updated>2015-06-30T12:54:33+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2015/06/30/auto-upload-cloudinary-on-heroku</id>
+    <content type="html"><![CDATA[<p>herokuでwordpressを使用した場合、通常ではアップロードした画像は<br/>
+heorkuの再起動のタイミングで全て消えてしまいます。</p>
+
+<!-- more -->
+
+
+<p>なので、そうならないようにクラウド上のストレージサービスである、cloudinaryに保存させたりします。<br/>
+cloudinaryには公式でwordpressのプラグインが用意されています。<br/>
+<a href="https://ja.wordpress.org/plugins/cloudinary-image-management-and-manipulation-in-the-cloud-cdn/">WordPress &#8250; Cloudinary &ndash; Image management and manipulation in the cloud + CDN &laquo; WordPress Plugins</a></p>
+
+<p>これを利用することでwordpress上の画像をcloudinaryで管理できるようになるのですが、<br/>
+アップロードした画像を手動でcloudinaryに反映させてやらねばなりません。<br/>
+それをなんとか自動でアップされるようにしてみました。</p>
+
+<h2>cloudinaryへのアップロード手順(通常)</h2>
+
+<p>通常と同じようにメディアライブラリ上から画像をアップロードします。<br/>
+一覧表示で、詳細まで表示される、テーブル表示に切り替えます。<br/>
+この時の右端に、<code>Upload to Cloudinary</code>というリンクがあるのでそれをクリックします。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2015/06/cloudinary_heroku01.jpg" alt="" /></p>
+
+<p>するとアップロードされ、表記がアップロード済に変わります。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2015/06/cloudinary_heroku02.jpg" alt="" /></p>
+
+<p>この時に内部では何をしているかと言うと、<br/>
+cloudinaryにアップロードし、アップ先のURLを使ってメタデータを書き換え、<br/>
+cloudinaryへアップした、というフラグを立てています。<br/>
+このフラグを立てているところがポイントになります。</p>
+
+<h2>メタデータ</h2>
+
+<p>wordpressでは画像は投稿データとして管理されています。<br/>
+データ構造は以下が詳しいのですが、画像部分だけを引用させてもらうとこんな感じです。<br/>
+<a href="http://hijiriworld.com/web/wp-data-register/">WordPress データ登録機構を知ってもっと自由で効率的なフローを  |  hijiriworld Web</a></p>
+
+<p><code>wp_posts</code>テーブル</p>
+
+<table>
+<thead>
+<tr>
+<th>post_title </th>
+<th> post_status </th>
+<th> post_name </th>
+<th> guid </th>
+<th> post_type </th>
+<th> post_mine_type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>{$file_name} </td>
+<td> inherit </td>
+<td> {$file_name} </td>
+<td> {$guid} </td>
+<td> attachment </td>
+<td> {$mine_type}</td>
+</tr>
+</tbody>
+</table>
+
+
+<p><code>wp_postmeta</code>テーブル</p>
+
+<table>
+<thead>
+<tr>
+<th>post_id </th>
+<th> meta_key </th>
+<th> meta_value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>{$attachment_id} </td>
+<td> _wp_attached_file </td>
+<td> {$file_name}</td>
+</tr>
+<tr>
+<td>{$attachment_id} </td>
+<td> _wp_attachment_metadata </td>
+<td> シリアライズされたメタデータ</td>
+</tr>
+</tbody>
+</table>
+
+
+<p>wp_postsの方は特に変更する必要はありません。<br/>
+重要なのはwp_postmetaのメタデータの方です。</p>
+
+<p>今回、変更する具体的な箇所は以下の２箇所です。<br/>
+<code>_wp_attached_file</code>をファイル名からcloudinaryのURLへ変更。<br/>
+<code>_wp_attachment_metadata</code>の中にcloudinaryフラグを立てる。</p>
+
+<h2>メディア管理とプラグインの仕組み</h2>
+
+<p>wordpressのメディアは都度URLを動的に生成しています。<br/>
+メイン画像の場合は以下。</p>
+
+<blockquote><p>ブログのパス + <code>_wp_attached_file</code>の$file_name</p></blockquote>
+
+<p>サムネイルの場合は以下。</p>
+
+<blockquote><p>ブログのパス + <code>_wp_attachment_metadata</code>の指定サイズのファイル名</p></blockquote>
+
+<p>なのでファイル名にcloudinaryの絶対パスを入れてしまうとURLが２重になってしまいます。</p>
+
+<p>で。<br/>
+これが、cloudinaryのフラグが立っているものに関しては、cloudinaryのプラグイン側でURLをうまい具合に置き換えて表示してくれます。<br/>
+なので、こちらとしてはフラグを立てるだけ、で大丈夫。</p>
+
+<h2>実作業</h2>
+
+<p>処理の流れは以下のように。</p>
+
+<ol>
+<li>画像をアップロード</li>
+<li>メタデータ作成のフック内で画像URLを取得</li>
+<li>取得したURLでcloudinaryにアップロード</li>
+<li>cloudinaryのURLでDBのファイル名を更新</li>
+<li>メタデータにフラグを立てる</li>
+</ol>
+
+
+<p><code>wp_generate_attachment_metadata</code>で、アップされたファイルのメタデータを作成する処理にフックをかけられるのでそれを使用します。</p>
+
+<p>functions.phpに以下を記述。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>function cldnry_wp_generate_attachment_metadata($metadata, $postid){
+</span><span class='line'>    $imgPath = get_attached_file( $postid );
+</span><span class='line'>
+</span><span class='line'>    //ファイル形式のチェック
+</span><span class='line'>    $info = pathinfo($imgPath);
+</span><span class='line'>    $public_id = $info["filename"];
+</span><span class='line'>    $mime_types = array("png"=&gt;"image/png", "jpg"=&gt;"image/jpeg", "pdf"=&gt;"application/pdf", "gif"=&gt;"image/gif", "bmp"=&gt;"image/bmp");
+</span><span class='line'>    $extension = $info["extension"];
+</span><span class='line'>    $type = @$mime_types[$extension];
+</span><span class='line'>    //画像以外はcloudinaryにアップしない
+</span><span class='line'>    if($type === null){
+</span><span class='line'>        $stderr = fopen( 'php://stderr', 'w' );
+</span><span class='line'>        fwrite( $stderr, 'アップロードされたファイルが画像ではありません。file-type:'.$extension );
+</span><span class='line'>        return $metadata;
+</span><span class='line'>    }
+</span><span class='line'>
+</span><span class='line'>    //Cloudinaryへアップ
+</span><span class='line'>    $cl_upload = new CloudinaryUploader();
+</span><span class='line'>    $uploaded = $cl_upload-&gt;upload($imgPath, array(
+</span><span class='line'>        "public_id" =&gt; $public_id,
+</span><span class='line'>    ));
+</span><span class='line'>    $public_id = $uploaded['public_id'];
+</span><span class='line'>
+</span><span class='line'>    //DBへ保存
+</span><span class='line'>    update_attached_file($postid, $uploaded['secure_url']);
+</span><span class='line'>    $metadata['cloudinary'] = true; //cloudinaryからアップしたことを記録
+</span><span class='line'>
+</span><span class='line'>    return $metadata;
+</span><span class='line'>}
+</span><span class='line'>add_filter( "wp_generate_attachment_metadata" , "cldnry_wp_generate_attachment_metadata",10 ,2 );</span></code></pre></td></tr></table></div></figure>
+
+
+<p>まず、<code>get_attached_file( $postid )</code>でアップされたファイルのURLを取得。<br/>
+そのファイルが画像かどうかを一応チェックしている。<br/>
+で、cloudinaryへアップロード。<br/>
+cloudinaryはプラグインのファイルから利用するので公式で解説されているコードとは少し異なります。<br/>
+で、アップされたらURLをファイル名として保存。<br/>
+最後にポイントとなる、フラグを立てて終了。</p>
+
+<p>これだけであとの表示周りの処理はcloudinaryがやってくれます。</p>
+
+<h2>結果</h2>
+
+<p>通常と同じように画像をアップすると、アップ完了時点でcloudinaryへ保存されます。<br/>
+以下のようにURLがcloudinaryになっている事が確認できるかと思います。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2015/06/cloudinary_heroku03.jpg" alt="" /></p>
+
+<p>一覧でテーブル表示にすると、cloudinaryにはすでにアップロード済の表記となっています。</p>
+
+<h2>まとめ</h2>
+
+<p>herokuでwordpressを扱う場合、この画像問題がネックの一つとなっているのですが、<br/>
+herokuにはcloudinaryのアドオンがあるので、これでとりあえずは解消したのではないでしょうか。<br/>
+この解消は自分の中ではかなり大きいです。</p>
+
+<p>使用の際の注意点としては、wordpress上でデータを削除してもcloudinary上からは削除されない、という点です。<br/>
+cloudinaryのアップロード容量が決まっているため、メンテナンスが必要かもしれません。</p>
+
+<p>あとはアップデートの問題が解決すればすっきり出来るのですが。。</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[CentOSにて、PHPのエラー出力をターミナルで監視]]></title>
@@ -2651,166 +2878,6 @@ heroku上でこの時間を設定できるのかは今のところ不明。</p>
 <p><a href="http://php.net/manual/ja/wrappers.php.php#wrappers.php.input">php://input</a><br/>
 <a href="http://ivystar.jp/programming/php/what-is-phpinput/">「php://input」とは何？－POSTの生データ？ | アイビースター</a><br/>
 <a href="https://amigotechnotes.wordpress.com/2013/11/16/parse-xml-with-namespace-by-simplexml-in-php/">Parse XML with namespace by SimpleXML in PHP | Amigo&#039;s Technical Notes</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[Salesforce]承認プロセスの作り方]]></title>
-    <link href="http://kayakuguri.github.io/blog/2015/04/28/approval-process/"/>
-    <updated>2015-04-28T12:43:41+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2015/04/28/approval-process</id>
-    <content type="html"><![CDATA[<p>承認プロセスを作成してみたので、そのログ。</p>
-
-<!-- more -->
-
-
-<h2>承認プロセスの作成</h2>
-
-<p><code>商談</code>オブジェクトで作成してみる。<br/>
-<img src="http://kayakuguri.github.io/images/2015/04/shonin01.jpg" alt="" /></p>
-
-<h4>ステップ 1. 名前と説明の入力</h4>
-
-<p>プロセス名と一意の名前を適当に入力。<br/>
-<img src="http://kayakuguri.github.io/images/2015/04/shonin02.jpg" alt="" /></p>
-
-<h4>ステップ 2. 入力条件の指定</h4>
-
-<p>特定の入力条件で承認プロセスを発動する場合は設定。<br/>
-全てレコードで承認を必要とする場合はなしで。<br/>
-<img src="http://kayakuguri.github.io/images/2015/04/shonin03.jpg" alt="" /></p>
-
-<h4>ステップ 3. 承認者項目と編集権限のプロパティの指定</h4>
-
-<p>この承認申請を誰に割り当てるのか＝誰に承認してもらうのかを決定<br/>
-標準項目としてマネージャーという項目がある。<br/>
-<img src="http://kayakuguri.github.io/images/2015/04/shonin04.jpg" alt="" /></p>
-
-<p>これは、ユーザーの項目内で設定しているマネージャーに指定されたユーザーを承認者とするもの。<br/>
-<img src="http://kayakuguri.github.io/images/2015/04/shonin05.jpg" alt="" /></p>
-
-<p>今回はなしにしておいて後で設定する。<br/>
-<img src="http://kayakuguri.github.io/images/2015/04/shonin06.jpg" alt="" /></p>
-
-<h4>ステップ 4. 通知テンプレートの選択</h4>
-
-<p>承認開始時に送信するメールを設定。<br/>
-<img src="http://kayakuguri.github.io/images/2015/04/shonin07.jpg" alt="" /></p>
-
-<p>メールテンプレートは以下から作成可能。<br/>
-管理->コミュニケーションテンプレート->メールテンプレート</p>
-
-<p>なしでもよい。</p>
-
-<h4>ステップ 5. 承認ページレイアウトに表示する項目の選択</h4>
-
-<p>承認者が承認時に確認する画面の項目を選択する。<br/>
-今回はそのままで。<br/>
-<img src="http://kayakuguri.github.io/images/2015/04/shonin08.jpg" alt="" /></p>
-
-<h4>ステップ 6. 申請者の指定</h4>
-
-<p>この承認プロセスを申請できるユーザーを限定できる。<br/>
-通常は所有者、となる。<br/>
-<img src="http://kayakuguri.github.io/images/2015/04/shonin09.jpg" alt="" /></p>
-
-<p><code>保存</code>する。</p>
-
-<h2>承認ステップの作成</h2>
-
-<p><img src="http://kayakuguri.github.io/images/2015/04/shonin10.jpg" alt="" /></p>
-
-<p>最大15個までのステップを追加可能。</p>
-
-<h4>ステップ 1. 名前と説明の入力</h4>
-
-<p>名前と一意の名前を適当に入力。<br/>
-<img src="http://kayakuguri.github.io/images/2015/04/shonin11.jpg" alt="" /></p>
-
-<h4>ステップ 2. ステップ条件の指定</h4>
-
-<p>このステップに入る条件を指定できる。<br/>
-今回は全てのレコードとする。<br/>
-<img src="http://kayakuguri.github.io/images/2015/04/shonin25.jpg" alt="" /></p>
-
-<h4>ステップ 3. 割り当て先の選択</h4>
-
-<p>承認者の設定。<br/>
-都度変えたい場合は、手動、も選べる。<br/>
-今回は固定で、特定のユーザーに自動で割り当てる。<br/>
-<img src="http://kayakuguri.github.io/images/2015/04/shonin12.jpg" alt="" /></p>
-
-<p><code>保存</code>する。</p>
-
-<h2>アクション</h2>
-
-<p><img src="http://kayakuguri.github.io/images/2015/04/shonin13.jpg" alt="" /></p>
-
-<p>以下の4つを選択可能。<br/>
-上記で設定した承認ステップのアクションを作成。<br/>
-申請時や承認時、却下時にアクションが起動する。</p>
-
-<ul>
-<li>ToDo</li>
-<li>電子メールアラート</li>
-<li>項目自動更新</li>
-<li>アウトバウンドメッセージ</li>
-</ul>
-
-
-<h3>項目自動更新</h3>
-
-<p>名前、一意の名前を適当に作成。<br/>
-更新する項目を選択し、どの値にするかを決定する。<br/>
-今回はフェーズを更新するとする。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2015/04/shonin14.jpg" alt="" /></p>
-
-<h2>作成完了</h2>
-
-<p>全ての設定が終わったら、<code>有効化</code>しておく。<br/>
-<img src="http://kayakuguri.github.io/images/2015/04/shonin15.jpg" alt="" /></p>
-
-<p>警告が出るが、OKをクリック。<br/>
-<img src="http://kayakuguri.github.io/images/2015/04/shonin16.jpg" alt="" /></p>
-
-<p>完了。</p>
-
-<h2>承認の流れ</h2>
-
-<p>商談レコードを作成し、承認申請を行う、のだが、承認申請のボタンがデフォルトでは出てなかった。 <br/>
-(環境によって変わるかも)<br/>
-なので、ページレイアウトから<code>承認申請</code>のボタンを追加した。<br/>
-<img src="http://kayakuguri.github.io/images/2015/04/shonin17.jpg" alt="" /></p>
-
-<p>また、同じく関連項目の<code>承認履歴</code>を追加しておく。<br/>
-<img src="http://kayakuguri.github.io/images/2015/04/shonin21.jpg" alt="" /></p>
-
-<p>表示されるようになったので、<code>承認申請</code>をクリック。<br/>
-<img src="http://kayakuguri.github.io/images/2015/04/shonin18.jpg" alt="" /></p>
-
-<p>警告が表示されるが、OK。<br/>
-<img src="http://kayakuguri.github.io/images/2015/04/shonin19.jpg" alt="" /></p>
-
-<p>するとレコードがロックされ、<br/>
-<img src="http://kayakuguri.github.io/images/2015/04/shonin20.jpg" alt="" /></p>
-
-<p>設定したメールが飛ぶ。</p>
-
-<p>そして、承認履歴の部分に承認、却下などの項目が現れる。<br/>
-<img src="http://kayakuguri.github.io/images/2015/04/shonin22.jpg" alt="" /></p>
-
-<p><code>承認/却下</code>をクリックすると、入力エリアが現れるので、適当にコメントを書いて承認してみる。<br/>
-<img src="http://kayakuguri.github.io/images/2015/04/shonin23.jpg" alt="" /></p>
-
-<p>レコードに戻ると、承認されている。設定した項目自動更新も反映されている。<br/>
-<img src="http://kayakuguri.github.io/images/2015/04/shonin24.jpg" alt="" /></p>
-
-<p>実際は承認するユーザーは別になると思うが、今回は自分で申請して承認している。</p>
-
-<h2>参考</h2>
-
-<p><a href="https://www.youtube.com/watch?v=b6_9NNTn_Hk">Salesforceをもっと使い倒そう-承認プロセス &ndash; YouTube</a></p>
 ]]></content>
   </entry>
   

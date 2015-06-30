@@ -4,7 +4,7 @@
   <title><![CDATA[Category: heroku | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/heroku/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-06-24T21:33:37+09:00</updated>
+  <updated>2015-06-30T12:55:43+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,207 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[wordpress上のメディアをcloudinaryに自動アップロードして管理する]]></title>
+    <link href="http://kayakuguri.github.io/blog/2015/06/30/auto-upload-cloudinary-on-heroku/"/>
+    <updated>2015-06-30T12:54:33+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2015/06/30/auto-upload-cloudinary-on-heroku</id>
+    <content type="html"><![CDATA[<p>herokuでwordpressを使用した場合、通常ではアップロードした画像は<br/>
+heorkuの再起動のタイミングで全て消えてしまいます。</p>
+
+<!-- more -->
+
+
+<p>なので、そうならないようにクラウド上のストレージサービスである、cloudinaryに保存させたりします。<br/>
+cloudinaryには公式でwordpressのプラグインが用意されています。<br/>
+<a href="https://ja.wordpress.org/plugins/cloudinary-image-management-and-manipulation-in-the-cloud-cdn/">WordPress &#8250; Cloudinary &ndash; Image management and manipulation in the cloud + CDN &laquo; WordPress Plugins</a></p>
+
+<p>これを利用することでwordpress上の画像をcloudinaryで管理できるようになるのですが、<br/>
+アップロードした画像を手動でcloudinaryに反映させてやらねばなりません。<br/>
+それをなんとか自動でアップされるようにしてみました。</p>
+
+<h2>cloudinaryへのアップロード手順(通常)</h2>
+
+<p>通常と同じようにメディアライブラリ上から画像をアップロードします。<br/>
+一覧表示で、詳細まで表示される、テーブル表示に切り替えます。<br/>
+この時の右端に、<code>Upload to Cloudinary</code>というリンクがあるのでそれをクリックします。</p>
+
+<p><img src="/images/2015/06/cloudinary_heroku01.jpg" alt="" /></p>
+
+<p>するとアップロードされ、表記がアップロード済に変わります。</p>
+
+<p><img src="/images/2015/06/cloudinary_heroku02.jpg" alt="" /></p>
+
+<p>この時に内部では何をしているかと言うと、<br/>
+cloudinaryにアップロードし、アップ先のURLを使ってメタデータを書き換え、<br/>
+cloudinaryへアップした、というフラグを立てています。<br/>
+このフラグを立てているところがポイントになります。</p>
+
+<h2>メタデータ</h2>
+
+<p>wordpressでは画像は投稿データとして管理されています。<br/>
+データ構造は以下が詳しいのですが、画像部分だけを引用させてもらうとこんな感じです。<br/>
+<a href="http://hijiriworld.com/web/wp-data-register/">WordPress データ登録機構を知ってもっと自由で効率的なフローを  |  hijiriworld Web</a></p>
+
+<p><code>wp_posts</code>テーブル</p>
+
+<table>
+<thead>
+<tr>
+<th>post_title </th>
+<th> post_status </th>
+<th> post_name </th>
+<th> guid </th>
+<th> post_type </th>
+<th> post_mine_type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>{$file_name} </td>
+<td> inherit </td>
+<td> {$file_name} </td>
+<td> {$guid} </td>
+<td> attachment </td>
+<td> {$mine_type}</td>
+</tr>
+</tbody>
+</table>
+
+
+<p><code>wp_postmeta</code>テーブル</p>
+
+<table>
+<thead>
+<tr>
+<th>post_id </th>
+<th> meta_key </th>
+<th> meta_value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>{$attachment_id} </td>
+<td> _wp_attached_file </td>
+<td> {$file_name}</td>
+</tr>
+<tr>
+<td>{$attachment_id} </td>
+<td> _wp_attachment_metadata </td>
+<td> シリアライズされたメタデータ</td>
+</tr>
+</tbody>
+</table>
+
+
+<p>wp_postsの方は特に変更する必要はありません。<br/>
+重要なのはwp_postmetaのメタデータの方です。</p>
+
+<p>今回、変更する具体的な箇所は以下の２箇所です。<br/>
+<code>_wp_attached_file</code>をファイル名からcloudinaryのURLへ変更。<br/>
+<code>_wp_attachment_metadata</code>の中にcloudinaryフラグを立てる。</p>
+
+<h2>メディア管理とプラグインの仕組み</h2>
+
+<p>wordpressのメディアは都度URLを動的に生成しています。<br/>
+メイン画像の場合は以下。</p>
+
+<blockquote><p>ブログのパス + <code>_wp_attached_file</code>の$file_name</p></blockquote>
+
+<p>サムネイルの場合は以下。</p>
+
+<blockquote><p>ブログのパス + <code>_wp_attachment_metadata</code>の指定サイズのファイル名</p></blockquote>
+
+<p>なのでファイル名にcloudinaryの絶対パスを入れてしまうとURLが２重になってしまいます。</p>
+
+<p>で。<br/>
+これが、cloudinaryのフラグが立っているものに関しては、cloudinaryのプラグイン側でURLをうまい具合に置き換えて表示してくれます。<br/>
+なので、こちらとしてはフラグを立てるだけ、で大丈夫。</p>
+
+<h2>実作業</h2>
+
+<p>処理の流れは以下のように。</p>
+
+<ol>
+<li>画像をアップロード</li>
+<li>メタデータ作成のフック内で画像URLを取得</li>
+<li>取得したURLでcloudinaryにアップロード</li>
+<li>cloudinaryのURLでDBのファイル名を更新</li>
+<li>メタデータにフラグを立てる</li>
+</ol>
+
+
+<p><code>wp_generate_attachment_metadata</code>で、アップされたファイルのメタデータを作成する処理にフックをかけられるのでそれを使用します。</p>
+
+<p>functions.phpに以下を記述。</p>
+
+<p>```
+function cldnry_wp_generate_attachment_metadata($metadata, $postid){</p>
+
+<pre><code>$imgPath = get_attached_file( $postid );
+
+//ファイル形式のチェック
+$info = pathinfo($imgPath);
+$public_id = $info["filename"];
+$mime_types = array("png"=&gt;"image/png", "jpg"=&gt;"image/jpeg", "pdf"=&gt;"application/pdf", "gif"=&gt;"image/gif", "bmp"=&gt;"image/bmp");
+$extension = $info["extension"];
+$type = @$mime_types[$extension];
+//画像以外はcloudinaryにアップしない
+if($type === null){
+    $stderr = fopen( 'php://stderr', 'w' );
+    fwrite( $stderr, 'アップロードされたファイルが画像ではありません。file-type:'.$extension );
+    return $metadata;
+}
+
+//Cloudinaryへアップ
+$cl_upload = new CloudinaryUploader();
+$uploaded = $cl_upload-&gt;upload($imgPath, array(
+    "public_id" =&gt; $public_id,
+));
+$public_id = $uploaded['public_id'];
+
+//DBへ保存
+update_attached_file($postid, $uploaded['secure_url']);
+$metadata['cloudinary'] = true; //cloudinaryからアップしたことを記録
+
+return $metadata;
+</code></pre>
+
+<p>}
+add_filter( &ldquo;wp_generate_attachment_metadata&rdquo; , &ldquo;cldnry_wp_generate_attachment_metadata&rdquo;,10 ,2 );
+```</p>
+
+<p>まず、<code>get_attached_file( $postid )</code>でアップされたファイルのURLを取得。<br/>
+そのファイルが画像かどうかを一応チェックしている。<br/>
+で、cloudinaryへアップロード。<br/>
+cloudinaryはプラグインのファイルから利用するので公式で解説されているコードとは少し異なります。<br/>
+で、アップされたらURLをファイル名として保存。<br/>
+最後にポイントとなる、フラグを立てて終了。</p>
+
+<p>これだけであとの表示周りの処理はcloudinaryがやってくれます。</p>
+
+<h2>結果</h2>
+
+<p>通常と同じように画像をアップすると、アップ完了時点でcloudinaryへ保存されます。<br/>
+以下のようにURLがcloudinaryになっている事が確認できるかと思います。</p>
+
+<p><img src="/images/2015/06/cloudinary_heroku03.jpg" alt="" /></p>
+
+<p>一覧でテーブル表示にすると、cloudinaryにはすでにアップロード済の表記となっています。</p>
+
+<h2>まとめ</h2>
+
+<p>herokuでwordpressを扱う場合、この画像問題がネックの一つとなっているのですが、<br/>
+herokuにはcloudinaryのアドオンがあるので、これでとりあえずは解消したのではないでしょうか。<br/>
+この解消は自分の中ではかなり大きいです。</p>
+
+<p>使用の際の注意点としては、wordpress上でデータを削除してもcloudinary上からは削除されない、という点です。<br/>
+cloudinaryのアップロード容量が決まっているため、メンテナンスが必要かもしれません。</p>
+
+<p>あとはアップデートの問題が解決すればすっきり出来るのですが。。</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[heroku]exif情報を扱う]]></title>
@@ -502,201 +703,6 @@ $showFlg = true;
 <p><a href="http://php.net/manual/ja/features.file-upload.post-method.php">PHP: POST メソッドによるアップロード &ndash; Manual </a><br/>
 <a href="http://www.php-factory.net/trivia/05.php">サーバーのアップロードファイルの最大容量の確認と容量制限の変更｜PHP工房</a><br/>
 <a href="https://devcenter.heroku.com/articles/custom-php-settings#user-ini-files-recommended">Customizing Web Server and Runtime Settings for PHP | Heroku Dev Center</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[herokuアドオン]cloudinaryで画像のアップロードと表示[PHP]]]></title>
-    <link href="http://kayakuguri.github.io/blog/2015/05/07/cloudinary-img/"/>
-    <updated>2015-05-07T11:34:35+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2015/05/07/cloudinary-img</id>
-    <content type="html"><![CDATA[<p>PHPを利用して、cloudinaryにアップロードして、画像を表示させてみた。</p>
-
-<!-- more -->
-
-
-<h2>インストール</h2>
-
-<p>composerを利用。</p>
-
-<p>```
-{
-  &ldquo;require&rdquo;: {</p>
-
-<pre><code>"cloudinary/cloudinary_php": "dev-master"
-</code></pre>
-
-<p>  }
-}
-```</p>
-
-<p>インストール。</p>
-
-<p>```
-$ composer install
-Loading composer repositories with package information
-Installing dependencies (including require-dev)
-  &ndash; Installing cloudinary/cloudinary_php (dev-master cfa2fd7)</p>
-
-<pre><code>Cloning cfa2fd7d4043844b46411c213795eafb648703df
-</code></pre>
-
-<p>Writing lock file
-Generating autoload files
-```</p>
-
-<h2>herokuにインストール</h2>
-
-<p>アドオンを追加。</p>
-
-<p><img src="/images/2015/05/Cloudinary01.jpg" alt="add-on" /></p>
-
-<p><code>
-$ heroku addons:create cloudinary:starter
-Creating unwinding-truly-5886... done
-Adding unwinding-truly-5886 to your-app-name... done
-Setting CLOUDINARY_URL and restarting your-app-name... done, v3
-Use `heroku addons:docs cloudinary` to view documentation.
-</code></p>
-
-<p>環境変数の<code>CLOUDINARY_URL</code>でアカウント情報を取得できる。</p>
-
-<h2>アップロード</h2>
-
-<p>以下のコードを記述し、アクセス。<br/>
-flickr上にある画像をアップロードしている。</p>
-
-<p>```
-&lt;?php
-require &lsquo;../vendor/autoload.php&rsquo;;</p>
-
-<p>use Cloudinary;
-use Cloudinary\Uploader;</p>
-
-<p>$account = parse_url(getenv(&lsquo;CLOUDINARY_URL&rsquo;));</p>
-
-<p>\Cloudinary::config(array(</p>
-
-<pre><code>"cloud_name" =&gt; $account['host'],
-"api_key" =&gt; $account['user'],
-"api_secret" =&gt; $account['pass']
-</code></pre>
-
-<p>));</p>
-
-<p>$ret = \Cloudinary\Uploader::upload(&ldquo;<a href="https://farm9.staticflickr.com/8748/16531734384_afdd2327e5_z.jpg">https://farm9.staticflickr.com/8748/16531734384_afdd2327e5_z.jpg</a>&rdquo;);</p>
-
-<p>print_r($ret);
-```</p>
-
-<p>で、結果は以下のように返ってくる。</p>
-
-<p>```
-Array (</p>
-
-<pre><code>[public_id] =&gt; xa9kfgp9jvxouekmrrqu 
-[version] =&gt; 1430964069 
-[signature] =&gt; 088135f7c32ad04436a18eb35d05b28bfd9e7870 
-[width] =&gt; 640 
-[height] =&gt; 480 
-[format] =&gt; jpg 
-[resource_type] =&gt; image 
-[created_at] =&gt; 2015-05-07T02:01:09Z 
-[tags] =&gt; Array ( ) 
-[bytes] =&gt; 174550 
-[type] =&gt; upload 
-[etag] =&gt; 6fdff26d1bd4d9cc55c3c613743a8dc1 
-[url] =&gt; http://res.cloudinary.com/harslxcej/image/upload/v1430964069/xa9kfgp9jvxouekmrrqu.jpg 
-[secure_url] =&gt; https://res.cloudinary.com/harslxcej/image/upload/v1430964069/xa9kfgp9jvxouekmrrqu.jpg 
-</code></pre>
-
-<p>)
-```</p>
-
-<h2>URLでの表示</h2>
-
-<p>アップロードが完了したものはアクセスするURLを変更することでサイズなどを変更できる。</p>
-
-<h3>オリジナル</h3>
-
-<pre><code>http://res.cloudinary.com/dalir2yty/image/upload/xa9kfgp9jvxouekmrrqu_nml8db.jpg
-</code></pre>
-
-<p><img src="http://res.cloudinary.com/dalir2yty/image/upload/xa9kfgp9jvxouekmrrqu_nml8db.jpg" alt="オリジナル" /></p>
-
-<h3>リサイズ</h3>
-
-<pre><code>http://res.cloudinary.com/dalir2yty/image/upload/w_100,h_100/xa9kfgp9jvxouekmrrqu_nml8db.jpg
-</code></pre>
-
-<p><img src="http://res.cloudinary.com/dalir2yty/image/upload/w_100,h_100/xa9kfgp9jvxouekmrrqu_nml8db.jpg" alt="リサイズ" /></p>
-
-<h3>角丸</h3>
-
-<pre><code>http://res.cloudinary.com/dalir2yty/image/upload/w_320,h_240,c_fill,r_20/xa9kfgp9jvxouekmrrqu_nml8db.jpg
-</code></pre>
-
-<p><img src="http://res.cloudinary.com/dalir2yty/image/upload/w_320,h_240,c_fill,r_20/xa9kfgp9jvxouekmrrqu_nml8db.jpg" alt="角丸" /></p>
-
-<p>利用できるタグなどは以下を参照。<br/>
-<a href="http://cloudinary.com/documentation/image_transformations">Image transformations | Cloudinary</a></p>
-
-<h2>PHPでURLの生成</h2>
-
-<p>上記のURLをPHPのコードで生成する。</p>
-
-<h3>cl_image_tag</h3>
-
-<p><code>cl_image_tag</code>を利用すると、<code>&lt;img&gt;</code>のタグごと出力される。</p>
-
-<pre><code>$public_id = 'xa9kfgp9jvxouekmrrqu';
-echo cl_image_tag($public_id, array( "alt" =&gt; "Sample Image" ));
-</code></pre>
-
-<p>結果</p>
-
-<pre><code>&lt;img src='https://res.cloudinary.com/harslxcej/image/upload/xa9kfgp9jvxouekmrrqu' alt='Sample Image'/&gt;
-</code></pre>
-
-<p>加工</p>
-
-<pre><code>cl_image_tag($public_id, array(
-    "width" =&gt; 100,
-    "height" =&gt; 100,
-    "crop" =&gt; "fill",
-    "effect" =&gt; "grayscale"
-));
-</code></pre>
-
-<p>結果</p>
-
-<pre><code>&lt;img src='http://res.cloudinary.com/dalir2yty/image/upload/c_fill,e_grayscale,h_100,w_100/xa9kfgp9jvxouekmrrqu_nml8db.jpg' height='100' width='100'/&gt;
-</code></pre>
-
-<p><img src='http://res.cloudinary.com/dalir2yty/image/upload/c_fill,e_grayscale,h_100,w_100/xa9kfgp9jvxouekmrrqu_nml8db.jpg' height='100' width='100'/></p>
-
-<h3>cloudinary_url</h3>
-
-<p>URLを直接取得するには、<code>cloudinary_url</code>を使用する。</p>
-
-<pre><code>echo cloudinary_url($public_id);
-echo cloudinary_url($public_id, array(
-    "width" =&gt; 100,
-    "height" =&gt; 100,
-    "crop" =&gt; "fill",
-    "effect" =&gt; "grayscale"
-));
-</code></pre>
-
-<p>その他、詳しくは以下を参照。</p>
-
-<p><a href="http://cloudinary.com/documentation/php_image_manipulation">PHP image manipulation | Cloudinary</a></p>
-
-<h2>参考</h2>
-
-<p><a href="http://cloudinary.com/documentation/php_integration">PHP integration | Cloudinary</a><br/>
-<a href="http://programmer-jobs.blogspot.jp/2013/12/phpphalconcloudinary.html">PHPフレームワークのPhalconで&#12289;写真ストレージクラウドのCloudinaryと連携 一言多いプログラマーの独り言</a><br/>
-<a href="https://github.com/cloudinary/cloudinary_php">cloudinary/cloudinary_php</a></p>
 ]]></content>
   </entry>
   
