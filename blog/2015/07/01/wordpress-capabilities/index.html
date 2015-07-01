@@ -1,0 +1,543 @@
+
+<!DOCTYPE HTML>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>[WordPress]新規ユーザー登録時に選べる権限を制限する - KayaMemo</title>
+
+	
+	<meta name="description" content="<!-- google_ad_client = "ca-pub-0887267957680144"; /* kayakuguri top */ google_ad_slot = "1210228675"; google_ad_width = 468; google_ad_height = 60 &hellip;">
+	
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+	<link href="/atom.xml" rel="alternate" title="KayaMemo" type="application/atom+xml">
+	<link rel="canonical" href="">
+	<link href="/favicon.png" rel="shortcut icon">
+	<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+	<script async="true" src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+	
+<meta property="og:title" content="[WordPress]新規ユーザー登録時に選べる権限を制限する - KayaMemo" />
+<meta property="og:type" content="article" />
+<meta property="og:description" content="<!-- google_ad_client = "ca-pub-0887267957680144"; /* kayakuguri top */ google_ad_slot = "1210228675"; google_ad_width = 468; google_ad_height = 60 &hellip;" />
+
+<meta property="og:url" content="" />
+<meta property="og:image" content="http://kayakuguri.github.io/images/about_me.jpg" />
+<meta property="og:author" content="kayakuguri" />
+<meta property="og:site_name" content="KayaMemo" />
+<meta property="og:locale" content="ja_JP" />
+<meta property="fb:app_id" content="509051419202319" />
+</head>
+
+
+<body>
+	<header id="header" class="inner"><h1><a href="/">KayaMemo</a></h1>
+<nav id="main-nav"><ul class="main">
+	<li><a href="/">Blog</a></li>
+	<li><a href="/blog/archives">Archives</a></li>
+</ul>
+</nav>
+<nav id="mobile-nav">
+	<div class="alignleft menu">
+		<a class="button">Menu</a>
+		<div class="container"><ul class="main">
+	<li><a href="/">Blog</a></li>
+	<li><a href="/blog/archives">Archives</a></li>
+</ul>
+</div>
+	</div>
+	<div class="alignright search">
+		<a class="button"></a>
+		<div class="container">
+			<form action="http://google.com/search" method="get">
+				<input type="text" name="q" results="0">
+				<input type="hidden" name="q" value="site:kayakuguri.github.io">
+			</form>
+		</div>
+	</div>
+</nav>
+<nav id="sub-nav" class="alignright">
+	<div class="social">
+		
+		
+		
+		
+    
+		
+		
+		
+		
+		
+		<a class="rss" href="/atom.xml" title="RSS">RSS</a>
+		
+    
+	</div>
+	<form class="search" action="http://google.com/search" method="get">
+		<input class="alignright" type="text" name="q" results="0">
+		<input type="hidden" name="q" value="site:kayakuguri.github.io">
+	</form>
+</nav>
+
+</header>
+	
+		
+	
+	<div id="content" class="inner"><article class="post">
+	<h2 class="title">[WordPress]新規ユーザー登録時に選べる権限を制限する</h2>
+	<div class="entry-content">
+        <div class="adArea">
+    <script type="text/javascript"><!--
+    google_ad_client = "ca-pub-0887267957680144";
+    /* kayakuguri top */
+    google_ad_slot = "1210228675";
+    google_ad_width = 468;
+    google_ad_height = 60;
+    //-->
+    </script>
+    <script type="text/javascript"
+            src="//pagead2.googlesyndication.com/pagead/show_ads.js">
+    </script>
+</div>
+        <p>Wordpressにて、自分に設定されている権限レベル以下の権限のみを取得して、<br/>
+新規登録画面で登録出来る権限を制御できるようにしてみた。</p>
+
+<!-- more  -->
+
+
+<h2>権限一覧の取得</h2>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>function xx(){
+</span><span class='line'>  global $wp_roles;
+</span><span class='line'>  $all_roles = $wp_roles-&gt;roles;
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<p>出力</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>[(権限名-スラッグ)] =&gt; Array
+</span><span class='line'>        (
+</span><span class='line'>            [name] =&gt; 権限名
+</span><span class='line'>            [capabilities] =&gt; Array
+</span><span class='line'>                (
+</span><span class='line'>                    [read] =&gt; 1
+</span><span class='line'>                    [level_0] =&gt; 1
+</span><span class='line'>                    権限内容                    
+</span><span class='line'>                )
+</span><span class='line'>
+</span><span class='line'>        )
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>シリアライズ</h2>
+
+<p>自分に設定されている権限を取得する。<br/>
+ただし、DBを直接除くとシリアライズされている。</p>
+
+<p>とはいえ、取得は普通にWPの関数で可能。</p>
+
+<pre><code>get_user_meta(ID, 'wp_capabilities', true);
+</code></pre>
+
+<p>セットは以下のように</p>
+
+<pre><code>update_user_meta($user_id, 'wp_capabilities', ['staff' =&gt; 1]);
+</code></pre>
+
+<h2>取得</h2>
+
+<h3>自分のレベルを取得</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>global $current_user;
+</span><span class='line'>$mylevel = $current_user-&gt;user_level;</span></code></pre></td></tr></table></div></figure>
+
+
+<p>これで一見取れているようにみえたが、なぜかレベルの低いユーザーもレベルが10と取得されてしまった。<br/>
+なので、実際に入っているデータの、<code>level_xx</code>を見て一致させていく泥臭い手法をとった。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$uid = wp_get_current_user()-&gt;get('ID');
+</span><span class='line'>//自分のロール
+</span><span class='line'>$my_role = get_user_meta($uid, 'wp_capabilities', true);
+</span><span class='line'>$my_role = key($my_role);
+</span><span class='line'>$myobj = $wp_roles-&gt;role_objects[$my_role]-&gt;capabilities;
+</span><span class='line'>$mylevel = 0;
+</span><span class='line'>for($i = 10; $i&gt;=0; $i--){
+</span><span class='line'>    if(isset($myobj['level_'.$i]) && $myobj['level_'.$i]){
+</span><span class='line'>        $mylevel = $i;
+</span><span class='line'>        break;
+</span><span class='line'>    }
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>アクセス可能な権限をレベルで判別</h3>
+
+<p>あとは取得したレベルと、権限の一覧のレベルを比べて、自分の方が大きければ取得していけばよい。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>global $wp_roles;
+</span><span class='line'>
+</span><span class='line'>$aste_user_role = [];
+</span><span class='line'>foreach($wp_roles-&gt;role_objects as $key=&gt;$role){
+</span><span class='line'>    $level = 0;
+</span><span class='line'>    for($i = 10; $i&gt;=0; $i--){
+</span><span class='line'>        if(isset($role-&gt;capabilities['level_'.$i]) && $role-&gt;capabilities['level_'.$i]){
+</span><span class='line'>            $level = $i;
+</span><span class='line'>            break;
+</span><span class='line'>        }
+</span><span class='line'>    }
+</span><span class='line'>    if($mylevel &gt;= $level){
+</span><span class='line'>        $aste_user_role[] = [$key, $wp_roles-&gt;role_names[$key]];
+</span><span class='line'>    }
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<p>結果</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>array (size=8)
+</span><span class='line'>  0 =&gt; 
+</span><span class='line'>    array (size=2)
+</span><span class='line'>      0 =&gt; string 'administrator' (length=13)
+</span><span class='line'>      1 =&gt; string 'システム管理者' (length=21)
+</span><span class='line'>  1 =&gt; 
+</span><span class='line'>    array (size=2)
+</span><span class='line'>      0 =&gt; string 'staff' (length=5)
+</span><span class='line'>      1 =&gt; string 'スタッフ' (length=12)
+</span><span class='line'>  2 =&gt; 
+</span><span class='line'>    array (size=2)
+</span><span class='line'>...
+</span><span class='line'>...</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>表示</h2>
+
+<h3>新規登録</h3>
+
+<p>新規登録画面への表示は、<code>user_new_form</code>のフックで行う。<br/>
+フック内でHTMLを直接書いて対応。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>//ユーザー登録画面
+</span><span class='line'>function user_new_form_css() {
+</span><span class='line'>  ?&gt;
+</span><span class='line'>  &lt;table class="form-table"&gt;
+</span><span class='line'>  &lt;tr&gt;
+</span><span class='line'>      &lt;th scope="row"&gt;権限ロール &lt;span class="description"&gt;(必須)&lt;/span&gt;&lt;/th&gt;
+</span><span class='line'>      &lt;td&gt;&lt;select name="user_role"&gt;
+</span><span class='line'>                &lt;?php
+</span><span class='line'>                $tempo = '';
+</span><span class='line'>                foreach ($aste_user_role as $val) {
+</span><span class='line'>                    $selected = 'selected';
+</span><span class='line'>                    if($val[0] == 'subscriber'){
+</span><span class='line'>                        $tempo .= '&lt;option value="' . $val[0] . '"' . $selected . '&gt;' . $val[1] . '&lt;/option&gt;';
+</span><span class='line'>                    }else{
+</span><span class='line'>                        $tempo .= '&lt;option value="' . $val[0] . '" &gt;' . $val[1] . '&lt;/option&gt;';
+</span><span class='line'>                    }
+</span><span class='line'>                }
+</span><span class='line'>                echo $tempo;
+</span><span class='line'>                ?&gt;
+</span><span class='line'>            &lt;/select&gt;
+</span><span class='line'>        &lt;/td&gt;
+</span><span class='line'>    &lt;/tr&gt;
+</span><span class='line'>    &lt;/table&gt;
+</span><span class='line'>    &lt;?php
+</span><span class='line'>}
+</span><span class='line'>add_action( 'user_new_form', 'user_new_form_css' );</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>編集</h3>
+
+<p>編集画面は、<code>personal_options</code>のフックで対応。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>function add_profile_custom ($profileuser) {
+</span><span class='line'>  //権限
+</span><span class='line'>    global $aste_user_role; //自身が参照可能な権限リスト
+</span><span class='line'>    set_aste_role();
+</span><span class='line'>    $html = '&lt;tr&gt;&lt;th scope="row"&gt;権限ロール &lt;span class="description"&gt;(必須)&lt;/span&gt;&lt;/th&gt;';
+</span><span class='line'>    $html .= '&lt;td&gt;&lt;select name="user_role"&gt;';
+</span><span class='line'>    //このユーザーの権現を取得
+</span><span class='line'>    $current_role = get_user_meta($profileuser-&gt;ID, 'wp_capabilities', true);
+</span><span class='line'>    $current_role = key($current_role);
+</span><span class='line'>    foreach ($aste_user_role as $val) {
+</span><span class='line'>        $r = $current_role;
+</span><span class='line'>        $selected = '';
+</span><span class='line'>        if ($r == $val[0]) {
+</span><span class='line'>            $selected = ' selected="selected" ';
+</span><span class='line'>        }
+</span><span class='line'>        $html .= '&lt;option value="' . $val[0] . '"' . $selected . '&gt;' . $val[1] . '&lt;/option&gt;';
+</span><span class='line'>    }
+</span><span class='line'>    $html .= '&lt;/select&gt;&lt;/td&gt;&lt;/tr&gt;';
+</span><span class='line'>    echo $html;
+</span><span class='line'>}
+</span><span class='line'>add_action( 'personal_options', 'add_profile_custom');</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>登録処理</h2>
+
+<p>登録は新規は、<code>user_register</code>、更新は、<code>profile_update</code>。<br/>
+どちらも処理としては同じ。<br/>
+<code>$_POST</code>から取得した値をシリアライズして入れる、のみ。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>function save_custom_options_fields( $user_id ) {
+</span><span class='line'>  //権限ロール
+</span><span class='line'>    $role_name = $_POST['user_role'];
+</span><span class='line'>    update_user_meta($user_id, 'wp_capabilities', [$role_name =&gt; 1]);
+</span><span class='line'>}
+</span><span class='line'>add_action( 'profile_update', 'save_custom_options_fields' ); //更新
+</span><span class='line'>add_action('user_register', 'save_custom_options_fields');  //新規登録</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>既存のものを非表示に</h2>
+
+<p>既存で表示されている権限設定のセレクトボックスを非表示に。</p>
+
+<h3>新規登録</h3>
+
+<p>上記、新規登録で項目を追加したフックと同じ関数内で実装する。<br/>
+特定のクラスもIDも振られてないので、x番目と指定して非表示とする。<br/>
+ただし、これはCSS3となっているので非対応のブラウザだと見えてしまうと思う。<br/>
+他にいい方法があれば知りたい。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>?&gt;&lt;style type="text/css"&gt;
+</span><span class='line'>  table.form-table tr.form-field:nth-of-type(9)
+</span><span class='line'>&lt;/style&gt;&lt;?php</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>編集</h3>
+
+<p>上記、編集で項目を追加したフックと同じ関数内で実装する。<br/>
+こちらはクラスが振ってあるので、それを指定して非表示とする。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>?&gt;&lt;style type="text/css"&gt;
+</span><span class='line'>  .user-role-wrap, /*権限グループ*/
+</span><span class='line'>&lt;/style&gt;&lt;?php</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>まとめ</h2>
+
+<p>これにて完成。<br/>
+非表示にする箇所がかなり無理矢理だけれども、なんとか見た目は整った。<br/>
+プラグインなどを使えばこの辺一発で出来たりするのだろうか。<br/>
+ちなみに、権限の編集にはプラグインを使用した。<br/>
+<a href="https://ja.wordpress.org/plugins/user-role-editor/">WordPress &#8250; User Role Editor &laquo; WordPress Plugins</a></p>
+
+<h2>参考</h2>
+
+<p><a href="http://wordpress.stackexchange.com/questions/1665/getting-a-list-of-currently-available-roles-on-a-wordpress-site">security &ndash; Getting a List of Currently Available Roles on a WordPress Site? &ndash; WordPress Development Stack Exchange</a><br/>
+<a href="http://detail.chiebukuro.yahoo.co.jp/qa/question_detail/q12132319417">wordpressのユーザ権限を管理画面以外から変更する必要があり、～ &ndash; Yahoo!知恵袋</a></p>
+
+    </div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-07-01T13:24:37+09:00" pubdate data-updated="true">Jul 1<span>st</span>, 2015</time></div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/wordpress/'>wordpress</a>
+
+
+</div>
+	
+</div>
+</article>
+
+	<div class="share">
+	<div class="addthis_toolbox addthis_default_style ">
+		
+        <div id="fb-root"></div>
+<script>(function(d, s, id) {
+    var js, fjs = d.getElementsByTagName(s)[0];
+    if (d.getElementById(id)) return;
+    js = d.createElement(s); js.id = id;
+    js.src = "//connect.facebook.net/ja_JP/all.js#xfbml=1&appId=509051419202319";
+    fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+        <div class="fb-like" data-href="http://kayakuguri.github.io/blog/2015/07/01/wordpress-capabilities/" data-layout="button_count" data-action="like" data-show-faces="true" data-share="false"></div>
+		
+		
+		
+		<a class="addthis_button_google_plusone" g:plusone:size="medium"></a>
+		
+		
+        
+        <a href="http://b.hatena.ne.jp/entry/http://kayakuguri.github.io/blog/2015/07/01/wordpress-capabilities/" class="hatena-bookmark-button" data-hatena-bookmark-title="[WordPress]新規ユーザー登録時に選べる権限を制限する - KayaMemo" data-hatena-bookmark-layout="standard-noballoon" data-hatena-bookmark-lang="ja" title="このエントリーをはてなブックマークに追加">
+<img src="http://b.st-hatena.com/images/entry-button/button-only@2x.png" alt="このエントリーをはてなブックマークに追加" width="20" height="20" style="border: none;" /></a>
+<script type="text/javascript" src="http://b.st-hatena.com/js/bookmark_button.js" charset="utf-8" async="async"></script>
+        
+	</div>
+	
+</div>
+
+
+<div class="share">
+    <script type="text/javascript"><!--
+    google_ad_client = "ca-pub-0887267957680144";
+    /* kayakuguri git */
+    google_ad_slot = "2041160274";
+    google_ad_width = 336;
+    google_ad_height = 280;
+    //-->
+    </script>
+    <script type="text/javascript"
+            src="//pagead2.googlesyndication.com/pagead/show_ads.js">
+    </script>
+</div>
+</div>
+	<footer id="footer" class="inner">Copyright &copy; 2015
+
+    萱潜
+
+</footer>
+	<script src="/javascripts/slash.js"></script>
+<script src="/javascripts/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+	$('.fancybox').fancybox();
+})(jQuery);
+</script> <!-- Delete or comment this line to disable Fancybox -->
+
+
+
+
+	<script type="text/javascript">
+		var _gaq = _gaq || [];
+		_gaq.push(['_setAccount', 'UA-3730932-4']);
+		_gaq.push(['_trackPageview']);
+
+		(function() {
+			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+		})();
+	</script>
+
+
+
+</body>
+</html>

@@ -4,7 +4,7 @@
   <title><![CDATA[Category: wordpress | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/wordpress/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-06-30T12:55:43+09:00</updated>
+  <updated>2015-07-01T13:26:34+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,283 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[WordPress]新規ユーザー登録時に選べる権限を制限する]]></title>
+    <link href="http://kayakuguri.github.io/blog/2015/07/01/wordpress-capabilities/"/>
+    <updated>2015-07-01T13:24:37+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2015/07/01/wordpress-capabilities</id>
+    <content type="html"><![CDATA[<p>Wordpressにて、自分に設定されている権限レベル以下の権限のみを取得して、<br/>
+新規登録画面で登録出来る権限を制御できるようにしてみた。</p>
+
+<!-- more  -->
+
+
+<h2>権限一覧の取得</h2>
+
+<p>```
+function xx(){</p>
+
+<pre><code>global $wp_roles;
+$all_roles = $wp_roles-&gt;roles;
+</code></pre>
+
+<p>}
+```</p>
+
+<p>出力</p>
+
+<p>```
+[(権限名-スラッグ)] => Array</p>
+
+<pre><code>    (
+        [name] =&gt; 権限名
+        [capabilities] =&gt; Array
+            (
+                [read] =&gt; 1
+                [level_0] =&gt; 1
+                権限内容                    
+            )
+
+    )
+</code></pre>
+
+<p>```</p>
+
+<h2>シリアライズ</h2>
+
+<p>自分に設定されている権限を取得する。<br/>
+ただし、DBを直接除くとシリアライズされている。</p>
+
+<p>とはいえ、取得は普通にWPの関数で可能。</p>
+
+<pre><code>get_user_meta(ID, 'wp_capabilities', true);
+</code></pre>
+
+<p>セットは以下のように</p>
+
+<pre><code>update_user_meta($user_id, 'wp_capabilities', ['staff' =&gt; 1]);
+</code></pre>
+
+<h2>取得</h2>
+
+<h3>自分のレベルを取得</h3>
+
+<p><code>
+global $current_user;
+$mylevel = $current_user-&gt;user_level;
+</code></p>
+
+<p>これで一見取れているようにみえたが、なぜかレベルの低いユーザーもレベルが10と取得されてしまった。<br/>
+なので、実際に入っているデータの、<code>level_xx</code>を見て一致させていく泥臭い手法をとった。</p>
+
+<p>```
+$uid = wp_get_current_user()&ndash;>get(&lsquo;ID&rsquo;);
+//自分のロール
+$my_role = get_user_meta($uid, &lsquo;wp_capabilities&rsquo;, true);
+$my_role = key($my_role);
+$myobj = $wp_roles->role_objects[$my_role]&ndash;>capabilities;
+$mylevel = 0;
+for($i = 10; $i>=0; $i&mdash;){</p>
+
+<pre><code>if(isset($myobj['level_'.$i]) &amp;&amp; $myobj['level_'.$i]){
+    $mylevel = $i;
+    break;
+}
+</code></pre>
+
+<p>}
+```</p>
+
+<h3>アクセス可能な権限をレベルで判別</h3>
+
+<p>あとは取得したレベルと、権限の一覧のレベルを比べて、自分の方が大きければ取得していけばよい。</p>
+
+<p>```
+global $wp_roles;</p>
+
+<p>$aste_user_role = [];
+foreach($wp_roles->role_objects as $key=>$role){</p>
+
+<pre><code>$level = 0;
+for($i = 10; $i&gt;=0; $i--){
+    if(isset($role-&gt;capabilities['level_'.$i]) &amp;&amp; $role-&gt;capabilities['level_'.$i]){
+        $level = $i;
+        break;
+    }
+}
+if($mylevel &gt;= $level){
+    $aste_user_role[] = [$key, $wp_roles-&gt;role_names[$key]];
+}
+</code></pre>
+
+<p>}
+```</p>
+
+<p>結果</p>
+
+<p>```
+array (size=8)
+  0 =></p>
+
+<pre><code>array (size=2)
+  0 =&gt; string 'administrator' (length=13)
+  1 =&gt; string 'システム管理者' (length=21)
+</code></pre>
+
+<p>  1 =></p>
+
+<pre><code>array (size=2)
+  0 =&gt; string 'staff' (length=5)
+  1 =&gt; string 'スタッフ' (length=12)
+</code></pre>
+
+<p>  2 =></p>
+
+<pre><code>array (size=2)
+</code></pre>
+
+<p>&hellip;
+&hellip;
+```</p>
+
+<h2>表示</h2>
+
+<h3>新規登録</h3>
+
+<p>新規登録画面への表示は、<code>user_new_form</code>のフックで行う。<br/>
+フック内でHTMLを直接書いて対応。</p>
+
+<p>```
+//ユーザー登録画面
+function user_new_form_css() {</p>
+
+<pre><code>?&gt;
+&lt;table class="form-table"&gt;
+&lt;tr&gt;
+    &lt;th scope="row"&gt;権限ロール &lt;span class="description"&gt;(必須)&lt;/span&gt;&lt;/th&gt;
+    &lt;td&gt;&lt;select name="user_role"&gt;
+            &lt;?php
+            $tempo = '';
+            foreach ($aste_user_role as $val) {
+                $selected = 'selected';
+                if($val[0] == 'subscriber'){
+                    $tempo .= '&lt;option value="' . $val[0] . '"' . $selected . '&gt;' . $val[1] . '&lt;/option&gt;';
+                }else{
+                    $tempo .= '&lt;option value="' . $val[0] . '" &gt;' . $val[1] . '&lt;/option&gt;';
+                }
+            }
+            echo $tempo;
+            ?&gt;
+        &lt;/select&gt;
+    &lt;/td&gt;
+&lt;/tr&gt;
+&lt;/table&gt;
+&lt;?php
+</code></pre>
+
+<p>}
+add_action( &lsquo;user_new_form&rsquo;, &lsquo;user_new_form_css&rsquo; );
+```</p>
+
+<h3>編集</h3>
+
+<p>編集画面は、<code>personal_options</code>のフックで対応。</p>
+
+<p>```
+function add_profile_custom ($profileuser) {</p>
+
+<pre><code>//権限
+global $aste_user_role; //自身が参照可能な権限リスト
+set_aste_role();
+$html = '&lt;tr&gt;&lt;th scope="row"&gt;権限ロール &lt;span class="description"&gt;(必須)&lt;/span&gt;&lt;/th&gt;';
+$html .= '&lt;td&gt;&lt;select name="user_role"&gt;';
+//このユーザーの権現を取得
+$current_role = get_user_meta($profileuser-&gt;ID, 'wp_capabilities', true);
+$current_role = key($current_role);
+foreach ($aste_user_role as $val) {
+    $r = $current_role;
+    $selected = '';
+    if ($r == $val[0]) {
+        $selected = ' selected="selected" ';
+    }
+    $html .= '&lt;option value="' . $val[0] . '"' . $selected . '&gt;' . $val[1] . '&lt;/option&gt;';
+}
+$html .= '&lt;/select&gt;&lt;/td&gt;&lt;/tr&gt;';
+echo $html;
+</code></pre>
+
+<p>}
+add_action( &lsquo;personal_options&rsquo;, &lsquo;add_profile_custom&rsquo;);
+```</p>
+
+<h2>登録処理</h2>
+
+<p>登録は新規は、<code>user_register</code>、更新は、<code>profile_update</code>。<br/>
+どちらも処理としては同じ。<br/>
+<code>$_POST</code>から取得した値をシリアライズして入れる、のみ。</p>
+
+<p>```
+function save_custom_options_fields( $user_id ) {</p>
+
+<pre><code>//権限ロール
+$role_name = $_POST['user_role'];
+update_user_meta($user_id, 'wp_capabilities', [$role_name =&gt; 1]);
+</code></pre>
+
+<p>}
+add_action( &lsquo;profile_update&rsquo;, &lsquo;save_custom_options_fields&rsquo; ); //更新
+add_action(&lsquo;user_register&rsquo;, &lsquo;save_custom_options_fields&rsquo;);  //新規登録
+```</p>
+
+<h2>既存のものを非表示に</h2>
+
+<p>既存で表示されている権限設定のセレクトボックスを非表示に。</p>
+
+<h3>新規登録</h3>
+
+<p>上記、新規登録で項目を追加したフックと同じ関数内で実装する。<br/>
+特定のクラスもIDも振られてないので、x番目と指定して非表示とする。<br/>
+ただし、これはCSS3となっているので非対応のブラウザだと見えてしまうと思う。<br/>
+他にいい方法があれば知りたい。</p>
+
+<p>```
+?><style type="text/css"></p>
+
+<pre><code>table.form-table tr.form-field:nth-of-type(9)
+</code></pre>
+
+<p></style>&lt;?php
+```</p>
+
+<h3>編集</h3>
+
+<p>上記、編集で項目を追加したフックと同じ関数内で実装する。<br/>
+こちらはクラスが振ってあるので、それを指定して非表示とする。</p>
+
+<p>```
+?><style type="text/css"></p>
+
+<pre><code>.user-role-wrap, /*権限グループ*/
+</code></pre>
+
+<p></style>&lt;?php
+```</p>
+
+<h2>まとめ</h2>
+
+<p>これにて完成。<br/>
+非表示にする箇所がかなり無理矢理だけれども、なんとか見た目は整った。<br/>
+プラグインなどを使えばこの辺一発で出来たりするのだろうか。<br/>
+ちなみに、権限の編集にはプラグインを使用した。<br/>
+<a href="https://ja.wordpress.org/plugins/user-role-editor/">WordPress &#8250; User Role Editor &laquo; WordPress Plugins</a></p>
+
+<h2>参考</h2>
+
+<p><a href="http://wordpress.stackexchange.com/questions/1665/getting-a-list-of-currently-available-roles-on-a-wordpress-site">security &ndash; Getting a List of Currently Available Roles on a WordPress Site? &ndash; WordPress Development Stack Exchange</a><br/>
+<a href="http://detail.chiebukuro.yahoo.co.jp/qa/question_detail/q12132319417">wordpressのユーザ権限を管理画面以外から変更する必要があり、～ &ndash; Yahoo!知恵袋</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[wordpress上のメディアをcloudinaryに自動アップロードして管理する]]></title>

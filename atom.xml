@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-06-30T12:55:43+09:00</updated>
+  <updated>2015-07-01T13:26:34+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,354 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[WordPress]新規ユーザー登録時に選べる権限を制限する]]></title>
+    <link href="http://kayakuguri.github.io/blog/2015/07/01/wordpress-capabilities/"/>
+    <updated>2015-07-01T13:24:37+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2015/07/01/wordpress-capabilities</id>
+    <content type="html"><![CDATA[<p>Wordpressにて、自分に設定されている権限レベル以下の権限のみを取得して、<br/>
+新規登録画面で登録出来る権限を制御できるようにしてみた。</p>
+
+<!-- more  -->
+
+
+<h2>権限一覧の取得</h2>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>function xx(){
+</span><span class='line'>  global $wp_roles;
+</span><span class='line'>  $all_roles = $wp_roles-&gt;roles;
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<p>出力</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>[(権限名-スラッグ)] =&gt; Array
+</span><span class='line'>        (
+</span><span class='line'>            [name] =&gt; 権限名
+</span><span class='line'>            [capabilities] =&gt; Array
+</span><span class='line'>                (
+</span><span class='line'>                    [read] =&gt; 1
+</span><span class='line'>                    [level_0] =&gt; 1
+</span><span class='line'>                    権限内容                    
+</span><span class='line'>                )
+</span><span class='line'>
+</span><span class='line'>        )
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>シリアライズ</h2>
+
+<p>自分に設定されている権限を取得する。<br/>
+ただし、DBを直接除くとシリアライズされている。</p>
+
+<p>とはいえ、取得は普通にWPの関数で可能。</p>
+
+<pre><code>get_user_meta(ID, 'wp_capabilities', true);
+</code></pre>
+
+<p>セットは以下のように</p>
+
+<pre><code>update_user_meta($user_id, 'wp_capabilities', ['staff' =&gt; 1]);
+</code></pre>
+
+<h2>取得</h2>
+
+<h3>自分のレベルを取得</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>global $current_user;
+</span><span class='line'>$mylevel = $current_user-&gt;user_level;</span></code></pre></td></tr></table></div></figure>
+
+
+<p>これで一見取れているようにみえたが、なぜかレベルの低いユーザーもレベルが10と取得されてしまった。<br/>
+なので、実際に入っているデータの、<code>level_xx</code>を見て一致させていく泥臭い手法をとった。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$uid = wp_get_current_user()-&gt;get('ID');
+</span><span class='line'>//自分のロール
+</span><span class='line'>$my_role = get_user_meta($uid, 'wp_capabilities', true);
+</span><span class='line'>$my_role = key($my_role);
+</span><span class='line'>$myobj = $wp_roles-&gt;role_objects[$my_role]-&gt;capabilities;
+</span><span class='line'>$mylevel = 0;
+</span><span class='line'>for($i = 10; $i&gt;=0; $i--){
+</span><span class='line'>    if(isset($myobj['level_'.$i]) && $myobj['level_'.$i]){
+</span><span class='line'>        $mylevel = $i;
+</span><span class='line'>        break;
+</span><span class='line'>    }
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>アクセス可能な権限をレベルで判別</h3>
+
+<p>あとは取得したレベルと、権限の一覧のレベルを比べて、自分の方が大きければ取得していけばよい。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>global $wp_roles;
+</span><span class='line'>
+</span><span class='line'>$aste_user_role = [];
+</span><span class='line'>foreach($wp_roles-&gt;role_objects as $key=&gt;$role){
+</span><span class='line'>    $level = 0;
+</span><span class='line'>    for($i = 10; $i&gt;=0; $i--){
+</span><span class='line'>        if(isset($role-&gt;capabilities['level_'.$i]) && $role-&gt;capabilities['level_'.$i]){
+</span><span class='line'>            $level = $i;
+</span><span class='line'>            break;
+</span><span class='line'>        }
+</span><span class='line'>    }
+</span><span class='line'>    if($mylevel &gt;= $level){
+</span><span class='line'>        $aste_user_role[] = [$key, $wp_roles-&gt;role_names[$key]];
+</span><span class='line'>    }
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<p>結果</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>array (size=8)
+</span><span class='line'>  0 =&gt; 
+</span><span class='line'>    array (size=2)
+</span><span class='line'>      0 =&gt; string 'administrator' (length=13)
+</span><span class='line'>      1 =&gt; string 'システム管理者' (length=21)
+</span><span class='line'>  1 =&gt; 
+</span><span class='line'>    array (size=2)
+</span><span class='line'>      0 =&gt; string 'staff' (length=5)
+</span><span class='line'>      1 =&gt; string 'スタッフ' (length=12)
+</span><span class='line'>  2 =&gt; 
+</span><span class='line'>    array (size=2)
+</span><span class='line'>...
+</span><span class='line'>...</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>表示</h2>
+
+<h3>新規登録</h3>
+
+<p>新規登録画面への表示は、<code>user_new_form</code>のフックで行う。<br/>
+フック内でHTMLを直接書いて対応。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>//ユーザー登録画面
+</span><span class='line'>function user_new_form_css() {
+</span><span class='line'>  ?&gt;
+</span><span class='line'>  &lt;table class="form-table"&gt;
+</span><span class='line'>  &lt;tr&gt;
+</span><span class='line'>      &lt;th scope="row"&gt;権限ロール &lt;span class="description"&gt;(必須)&lt;/span&gt;&lt;/th&gt;
+</span><span class='line'>      &lt;td&gt;&lt;select name="user_role"&gt;
+</span><span class='line'>                &lt;?php
+</span><span class='line'>                $tempo = '';
+</span><span class='line'>                foreach ($aste_user_role as $val) {
+</span><span class='line'>                    $selected = 'selected';
+</span><span class='line'>                    if($val[0] == 'subscriber'){
+</span><span class='line'>                        $tempo .= '&lt;option value="' . $val[0] . '"' . $selected . '&gt;' . $val[1] . '&lt;/option&gt;';
+</span><span class='line'>                    }else{
+</span><span class='line'>                        $tempo .= '&lt;option value="' . $val[0] . '" &gt;' . $val[1] . '&lt;/option&gt;';
+</span><span class='line'>                    }
+</span><span class='line'>                }
+</span><span class='line'>                echo $tempo;
+</span><span class='line'>                ?&gt;
+</span><span class='line'>            &lt;/select&gt;
+</span><span class='line'>        &lt;/td&gt;
+</span><span class='line'>    &lt;/tr&gt;
+</span><span class='line'>    &lt;/table&gt;
+</span><span class='line'>    &lt;?php
+</span><span class='line'>}
+</span><span class='line'>add_action( 'user_new_form', 'user_new_form_css' );</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>編集</h3>
+
+<p>編集画面は、<code>personal_options</code>のフックで対応。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>function add_profile_custom ($profileuser) {
+</span><span class='line'>  //権限
+</span><span class='line'>    global $aste_user_role; //自身が参照可能な権限リスト
+</span><span class='line'>    set_aste_role();
+</span><span class='line'>    $html = '&lt;tr&gt;&lt;th scope="row"&gt;権限ロール &lt;span class="description"&gt;(必須)&lt;/span&gt;&lt;/th&gt;';
+</span><span class='line'>    $html .= '&lt;td&gt;&lt;select name="user_role"&gt;';
+</span><span class='line'>    //このユーザーの権現を取得
+</span><span class='line'>    $current_role = get_user_meta($profileuser-&gt;ID, 'wp_capabilities', true);
+</span><span class='line'>    $current_role = key($current_role);
+</span><span class='line'>    foreach ($aste_user_role as $val) {
+</span><span class='line'>        $r = $current_role;
+</span><span class='line'>        $selected = '';
+</span><span class='line'>        if ($r == $val[0]) {
+</span><span class='line'>            $selected = ' selected="selected" ';
+</span><span class='line'>        }
+</span><span class='line'>        $html .= '&lt;option value="' . $val[0] . '"' . $selected . '&gt;' . $val[1] . '&lt;/option&gt;';
+</span><span class='line'>    }
+</span><span class='line'>    $html .= '&lt;/select&gt;&lt;/td&gt;&lt;/tr&gt;';
+</span><span class='line'>    echo $html;
+</span><span class='line'>}
+</span><span class='line'>add_action( 'personal_options', 'add_profile_custom');</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>登録処理</h2>
+
+<p>登録は新規は、<code>user_register</code>、更新は、<code>profile_update</code>。<br/>
+どちらも処理としては同じ。<br/>
+<code>$_POST</code>から取得した値をシリアライズして入れる、のみ。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>function save_custom_options_fields( $user_id ) {
+</span><span class='line'>  //権限ロール
+</span><span class='line'>    $role_name = $_POST['user_role'];
+</span><span class='line'>    update_user_meta($user_id, 'wp_capabilities', [$role_name =&gt; 1]);
+</span><span class='line'>}
+</span><span class='line'>add_action( 'profile_update', 'save_custom_options_fields' ); //更新
+</span><span class='line'>add_action('user_register', 'save_custom_options_fields');  //新規登録</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>既存のものを非表示に</h2>
+
+<p>既存で表示されている権限設定のセレクトボックスを非表示に。</p>
+
+<h3>新規登録</h3>
+
+<p>上記、新規登録で項目を追加したフックと同じ関数内で実装する。<br/>
+特定のクラスもIDも振られてないので、x番目と指定して非表示とする。<br/>
+ただし、これはCSS3となっているので非対応のブラウザだと見えてしまうと思う。<br/>
+他にいい方法があれば知りたい。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>?&gt;&lt;style type="text/css"&gt;
+</span><span class='line'>  table.form-table tr.form-field:nth-of-type(9)
+</span><span class='line'>&lt;/style&gt;&lt;?php</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>編集</h3>
+
+<p>上記、編集で項目を追加したフックと同じ関数内で実装する。<br/>
+こちらはクラスが振ってあるので、それを指定して非表示とする。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>?&gt;&lt;style type="text/css"&gt;
+</span><span class='line'>  .user-role-wrap, /*権限グループ*/
+</span><span class='line'>&lt;/style&gt;&lt;?php</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>まとめ</h2>
+
+<p>これにて完成。<br/>
+非表示にする箇所がかなり無理矢理だけれども、なんとか見た目は整った。<br/>
+プラグインなどを使えばこの辺一発で出来たりするのだろうか。<br/>
+ちなみに、権限の編集にはプラグインを使用した。<br/>
+<a href="https://ja.wordpress.org/plugins/user-role-editor/">WordPress &#8250; User Role Editor &laquo; WordPress Plugins</a></p>
+
+<h2>参考</h2>
+
+<p><a href="http://wordpress.stackexchange.com/questions/1665/getting-a-list-of-currently-available-roles-on-a-wordpress-site">security &ndash; Getting a List of Currently Available Roles on a WordPress Site? &ndash; WordPress Development Stack Exchange</a><br/>
+<a href="http://detail.chiebukuro.yahoo.co.jp/qa/question_detail/q12132319417">wordpressのユーザ権限を管理画面以外から変更する必要があり、～ &ndash; Yahoo!知恵袋</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[wordpress上のメディアをcloudinaryに自動アップロードして管理する]]></title>
@@ -2751,133 +3099,6 @@ heroku上でこの時間を設定できるのかは今のところ不明。</p>
 
 <p><a href="https://blog.heroku.com/archives/2015/4/28/introducing_session_affinity">Heroku | Introducing Session Affinity</a><br/>
 <a href="https://devcenter.heroku.com/articles/session-affinity">Heroku Labs: Session Affinity | Heroku Dev Center</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[Salesforce]承認申請のアウトバウンドメッセージをPHPで受け取る]]></title>
-    <link href="http://kayakuguri.github.io/blog/2015/04/28/approval-process-outbound-massage/"/>
-    <updated>2015-04-28T20:20:01+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2015/04/28/approval-process-outbound-massage</id>
-    <content type="html"><![CDATA[<p>salesforceからのアウトバウンドメッセージの内容をPHPで受け取ってみた。</p>
-
-<!-- more -->
-
-
-<h2>アウトバウンドメッセージの設定</h2>
-
-<p>前回作成したものの申請時のアクション部分に<code>アウトバウンドメッセージ</code>を追加。<br/>
-<img src="http://kayakuguri.github.io/images/2015/04/outbound01.jpg" alt="" /></p>
-
-<p>以下のように設定した。<br/>
-<img src="http://kayakuguri.github.io/images/2015/04/outbound02.jpg" alt="" /></p>
-
-<p>設定完了<br/>
-<img src="http://kayakuguri.github.io/images/2015/04/outbound03.jpg" alt="" /></p>
-
-<h2>PHPで受け取る</h2>
-
-<p>アウトバウンドメッセージは<code>SOAP</code>で通信が行われる。<br/>
-なので、XML。<br/>
-以下のようにアクセスが記録されていた。</p>
-
-<pre><code>at=info method=POST path="/liam_dnes.php?id=1" host=shrouded-island-xxxx.herokuapp.com request_id=01b99464-c9dc-4e15-aa19-xxxxxxx fwd="xxx.xxx.78.8" dyno=web.1 connect=1ms service=4ms status=200 bytes=189
-</code></pre>
-
-<p>どうやらPOSTでアクセスされているよう。<br/>
-<code>$_POST</code>のままでは取得できなかった。<br/>
-どうやら生のPOSTデータを取得する必要があるらしい。</p>
-
-<p>以下で取得した。</p>
-
-<pre><code>$data = file_get_contents( 'php://input' );
-</code></pre>
-
-<p>取得すると、以下のようなXMLが取得できた。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
-</span><span class='line'>&lt;soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"&gt;
-</span><span class='line'>    &lt;soapenv:Body&gt;
-</span><span class='line'>        &lt;notifications xmlns="http://soap.sforce.com/2005/09/outbound"&gt;
-</span><span class='line'>            &lt;OrganizationId&gt;00D10000000Zyxxxxx&lt;/OrganizationId&gt;
-</span><span class='line'>            &lt;SessionId xsi:nil="true"/&gt;
-</span><span class='line'>            &lt;PartnerUrl&gt;https://ap.salesforce.com/services/Soap/u/33.0/00D100000xxxxx&lt;/PartnerUrl&gt;
-</span><span class='line'>            &lt;ActionId&gt;04k100000008STGAA2&lt;/ActionId&gt;
-</span><span class='line'>            &lt;EnterpriseUrl&gt;https://ap.salesforce.com/services/Soap/c/33.0/00D100000xxxxx&lt;/EnterpriseUrl&gt;
-</span><span class='line'>            &lt;Notification&gt;
-</span><span class='line'>                &lt;Id&gt;04l1000000xxxxxx&lt;/Id&gt;
-</span><span class='line'>                &lt;sObject xsi:type="sf:Opportunity" xmlns:sf="urn:sobject.enterprise.soap.sforce.com"&gt;
-</span><span class='line'>                    &lt;sf:Id&gt;0061000000cxxxxx&lt;/sf:Id&gt;
-</span><span class='line'>                    &lt;sf:Name&gt;アウトバウンドのテスト商談&lt;/sf:Name&gt;
-</span><span class='line'>                    &lt;sf:StageName&gt;Prospecting&lt;/sf:StageName&gt;
-</span><span class='line'>                    &lt;sf:IsClosed&gt;false&lt;/sf:IsClosed&gt;
-</span><span class='line'>                &lt;/sObject&gt;
-</span><span class='line'>            &lt;/Notification&gt;
-</span><span class='line'>        &lt;/notifications&gt;
-</span><span class='line'>    &lt;/soapenv:Body&gt;
-</span><span class='line'>&lt;/soapenv:Envelope&gt;</span></code></pre></td></tr></table></div></figure>
-
-
-<p>アウトバウンドの設定は以下のような形。</p>
-
-<p>ここからXMLをパースして、名前など設定した値を取得するには以下。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;?php
-</span><span class='line'>
-</span><span class='line'>$data = file_get_contents('php://input');
-</span><span class='line'>$xml = simplexml_load_string($data);
-</span><span class='line'>
-</span><span class='line'>//ID
-</span><span class='line'>$notification = $xml-&gt;children('http://schemas.xmlsoap.org/soap/envelope/')-&gt;Body-&gt;children('http://soap.sforce.com/2005/09/outbound')-&gt;notifications-&gt;Notification;
-</span><span class='line'>echo $notification-&gt;Id;
-</span><span class='line'>
-</span><span class='line'>//パラメータ
-</span><span class='line'>$params = $notification-&gt;sObject-&gt;children('urn:sobject.enterprise.soap.sforce.com');
-</span><span class='line'>echo $params-&gt;Id;
-</span><span class='line'>echo $params-&gt;Name;
-</span><span class='line'>echo $params-&gt;IsClosed;</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>参考</h2>
-
-<p><a href="http://php.net/manual/ja/wrappers.php.php#wrappers.php.input">php://input</a><br/>
-<a href="http://ivystar.jp/programming/php/what-is-phpinput/">「php://input」とは何？－POSTの生データ？ | アイビースター</a><br/>
-<a href="https://amigotechnotes.wordpress.com/2013/11/16/parse-xml-with-namespace-by-simplexml-in-php/">Parse XML with namespace by SimpleXML in PHP | Amigo&#039;s Technical Notes</a></p>
 ]]></content>
   </entry>
   
