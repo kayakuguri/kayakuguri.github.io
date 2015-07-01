@@ -4,7 +4,7 @@
   <title><![CDATA[Category: vagrant | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/vagrant/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-07-01T13:26:34+09:00</updated>
+  <updated>2015-07-01T18:56:35+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,56 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Vagrantを1.7.2にアップデートしたら起動しなくなったメモ]]></title>
+    <link href="http://kayakuguri.github.io/blog/2015/07/01/update-vagrant/"/>
+    <updated>2015-07-01T18:55:48+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2015/07/01/update-vagrant</id>
+    <content type="html"><![CDATA[<p>Vagrantを1.3くらいから1.7.2にアップデートしたら起動しなくなった。<br/>
+解決方法をメモ。</p>
+
+<!-- more -->
+
+
+<h2>対処方法</h2>
+
+<p>以下のファイルを書き換えた。</p>
+
+<p><code>~/.vagrant.d/setup_version</code><br/>
+元は、<code>1.5</code>という文字列が入っていたが、それを、<br/>
+<code>1.1</code>という文字に変更した。<br/>
+追記ではなく、変更。</p>
+
+<h2>実行</h2>
+
+<p>で、任意のディレクトリで<code>vagrant up</code>すると以下の文言が。</p>
+
+<blockquote><p>Vagrant is upgrading some internal state for the latest version.
+Please do not quit Vagrant at this time. While upgrading, Vagrant
+will need to copy all your boxes, so it will use a considerable
+amount of disk space. After it is done upgrading, the temporary disk
+space will be freed.</p>
+
+<p>Press ctrl-c now to exit if you want to remove some boxes or free
+up some disk space.</p>
+
+<p>Press the Enter or Return key to continue.</p></blockquote>
+
+<p>そのまま<code>Enter</code>キー叩く。<br/>
+しばらく待つと何やら表示されるが、無事、起動。</p>
+
+<pre><code>$ vagrant up
+default                   running (virtualbox)
+</code></pre>
+
+<p>そもそもvagrantのアップデートやインストールがパッケージってのがめんどくさい。。</p>
+
+<h2>参考</h2>
+
+<p><a href="http://qiita.com/hgsk/items/520b4160804d7299eb34">Vagrant1.5.1へのアップグレード後にvagrant upに失敗する場合の直し方 &ndash; Qiita</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Dockerをvagrantに入れてwebサーバーを立ち上げるまで]]></title>
