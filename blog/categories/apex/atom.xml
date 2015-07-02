@@ -4,7 +4,7 @@
   <title><![CDATA[Category: apex | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/apex/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-07-02T10:26:33+09:00</updated>
+  <updated>2015-07-02T10:27:49+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,68 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[salesforce]apexでレコードをフォローさせる]]></title>
+    <link href="http://kayakuguri.github.io/blog/2015/07/02/record-follow/"/>
+    <updated>2015-07-02T09:54:50+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2015/07/02/record-follow</id>
+    <content type="html"><![CDATA[<p>レコードを作った段階で自動的にフォローさせたかったので調べてみた。</p>
+
+<!-- more -->
+
+
+<h2>チャター</h2>
+
+<p>デフォルトでは一部のレコードを除いてレコードのフォロー機能はオフになっている。<br/>
+オンにするには、<code>フィード追跡</code>で有効にする。</p>
+
+<p><code>設定 -&gt; カスタマイズ -&gt; Chatter -&gt; フィード追跡</code>を選択。<br/>
+有効にしたいオブジェクトを選んで、<code>フィード追跡の有効化</code>にチェックを入れて保存。</p>
+
+<p><img src="/images/2015/07/feed_follow01.jpg" alt="" /></p>
+
+<p>すると、設定したレコード詳細の上部にフォローの表示とチャターコメントが出現する。<br/>
+フォローしたい場合はここをクリックしてフォロー出来る。</p>
+
+<p><img src="/images/2015/07/feed_follow02.jpg" alt="" /></p>
+
+<p>フォローすると以下のような表示に変わる。</p>
+
+<p><img src="/images/2015/07/feed_follow03.jpg" alt="" /></p>
+
+<h2>apexでのフォロー</h2>
+
+<p>フォローは、<code>EntitySubscription</code>なるオブジェクトで管理されている。<br/>
+現在のフォロー関係一覧を取得するSOQLは以下。</p>
+
+<pre><code>SELECT Id, ParentId, SubscriberId FROM EntitySubscription
+</code></pre>
+
+<p><code>ParentId</code>が、フォロー対象のユーザーやオブジェクトのレコードID。<br/>
+<code>SubscriberId</code>が、フォローするユーザーのID、となる。</p>
+
+<p>なので、このオブジェクトにフォロー対象とフォローするIDを入れてインサートしてやればよい。</p>
+
+<p>例）</p>
+
+<p><code>
+EntitySubscription follow = new EntitySubscription();
+follow.ParentId = 'ID'; //対象のレコード
+follow.SubscriberId = 'ID'; //ユーザーのID
+insert follow;
+</code></p>
+
+<p>トリガーで実装する場合は、レコードのIDが必要になるので、<code>after insert</code>で実行すること。</p>
+
+<h2>参考</h2>
+
+<p><a href="http://vaindespair.blogspot.jp/2011/01/blog-post.html">memo: Force.com&#12288;&#65306;&#12288;行動を作成したとき&#12289;自動的にフォローするようにしたい</a></p>
+
+<p>チャター関係は以下のPDFにまとまっていた。<br/>
+<a href="http://developerforcejp.s3.amazonaws.com/books/cheatsheets/Chatter-cheatsheet_Ja.pdf">http://developerforcejp.s3.amazonaws.com/books/cheatsheets/Chatter-cheatsheet_Ja.pdf</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[ApexRESTにてPOSTで送信された配列のデータを受け取る]]></title>
@@ -469,131 +531,6 @@ RestRequest req = new RestRequest();
 RestContext.request = req;
 userInfo_API.doPost();
 </code></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[apex][SF]InboundEmailHandlerを使ったリードの作成]]></title>
-    <link href="http://kayakuguri.github.io/blog/2015/04/17/inboundemailhandler-apex/"/>
-    <updated>2015-04-17T14:47:20+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2015/04/17/inboundemailhandler-apex</id>
-    <content type="html"><![CDATA[<p>salesforceでメールを受け取って、そのメールアドレスでリードを作る方法と、<br/>
-エラーで返信するときの方法。</p>
-
-<!-- more -->
-
-
-<h2>apex</h2>
-
-<p>メールサービスを作成する際にapexクラスを指定するので、先に作成しておきます。</p>
-
-<p>例えば今回は、送信元のメールアドレスを使用してリードを作成するとします。<br/>
-また、すでに登録されているメールアドレスの場合、エラーメールを返信するとします。</p>
-
-<p>```
-global class MailCreateLead implements Messaging.InboundEmailHandler {</p>
-
-<pre><code>global Messaging.InboundEmailResult handleInboundEmail(Messaging.InboundEmail email, Messaging.InboundEnvelope envelope) {
-    Messaging.InboundEmailResult result = new Messaging.InboundEmailresult();
-
-    //メールが重複しているかどうかをチェック
-    String mail_str = email.fromAddress;
-    List&lt;Lead&gt; check = [SELECT id FROM Lead WHERE Email=:mail_str LIMIT 1];
-    if(check.size() != 0){
-        result.message = '送信されたメールアドレスはすでに登録済です。';
-        result.success = false;
-    }else{
-        Lead l = new Lead();
-        l.Company = '-'; //(必須)
-        l.LastName = (email.fromName == null) ? 'メール会員' : email.fromName;
-        l.Email = email.fromAddress;
-        insert l;
-        result.success = true;
-    }
-
-    return result;
-}
-</code></pre>
-
-<p>}
-```</p>
-
-<p><code>Messaging.InboundEmailResult</code>を返却するが、<code>success</code>がfalseの場合は、<br/>
-受信を拒否し、設定されたエラーメッセージ(<code>message</code>)を送信元のメールアドレスに返す。<br/>
-この時返信されるメールは、<code>noreply@salesforce.com</code>となっており、これは変更できないっぽい。</p>
-
-<p>重複していない場合は、送信元のメールアドレスと名前(あれば)を使用してリードを作っている。</p>
-
-<h3>テストコード</h3>
-
-<p>```
-@isTest
-public class MailCreateLead_Test {</p>
-
-<pre><code>//正常時
-private static testMethod void execute_success() {
-    Test.startTest();
-
-    Messaging.InboundEmail email = new Messaging.InboundEmail() ;
-    Messaging.InboundEnvelope env = new Messaging.InboundEnvelope();
-    email.subject = 'Test Success';
-    email.fromname = 'FirstName LastName';
-    email.fromAddress = 'someaddress@email.com';
-    email.plainTextBody = '';
-
-    MailServiceToCreateLead emailService = new MailServiceToCreateLead();
-    Messaging.InboundEmailResult res = emailService.handleInboundEmail(email, env);
-
-    Test.stopTest();
-}
-
-//エラー時
-private static testMethod void execute_fail(){
-    //重複チェック
-    Lead le = new Lead();
-    le.Company = '-';
-    le.LastName = 'failed test';
-    le.Email = 'test@test.com';
-    Insert le;
-
-    Test.startTest();
-
-    Messaging.InboundEmail email = new Messaging.InboundEmail() ;
-    Messaging.InboundEnvelope env = new Messaging.InboundEnvelope();
-    email.subject = 'Test Failed';
-    email.fromname = 'FirstName LastName';
-    email.fromAddress = 'test@test.com'; //上記メールアドレスと被せる
-    email.plainTextBody = '';
-    MailServiceToCreateLead emailService = new MailServiceToCreateLead();
-    Messaging.InboundEmailResult res = emailService.handleInboundEmail(email, env);
-
-    Test.stopTest();
-}
-</code></pre>
-
-<p>}
-```</p>
-
-<h2>メールサービス</h2>
-
-<p><code>設定 &gt; 開発 &gt; メールサービス</code>から作成します。</p>
-
-<p><img src="/images/2015/04/inboundemailhandler01.jpg" alt="メールサービス" /></p>
-
-<p>設定内容は、サービス名と、先程作成したapexクラスを指定してやるくらいです。</p>
-
-<p><img src="/images/2015/04/inboundemailhandler02.jpg" alt="新規作成" /></p>
-
-<p>作成後、ユニークなメールアドレスが割り当てられるので、<br/>
-そのアドレス宛てに送信するとメールサービスが起動します。</p>
-
-<p><img src="/images/2015/04/inboundemailhandler03.jpg" alt="設定内容" /></p>
-
-<h2>参考</h2>
-
-<p><a href="https://help.salesforce.com/HTViewHelpDoc?id=code_inbound_email.htm&amp;language=ja">InboundEmail &#12458;&#12502;&#12472;&#12455;&#12463;&#12488;&#12398;&#20351;&#29992;</a><br/>
-<a href="https://developer.salesforce.com/page/An_Introduction_To_Email_Services_on_Force.com">An Introduction To Email Services on Force.com &ndash; developer.force.com</a><br/>
-<a href="http://tyoshikawa1106.hatenablog.com/entry/2013/07/31/213518">SFDC：Messaging.InboundEmailHandlerについて &ndash; tyoshikawa1106のブログ</a></p>
 ]]></content>
   </entry>
   

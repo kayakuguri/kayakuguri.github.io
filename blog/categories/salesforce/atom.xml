@@ -4,7 +4,7 @@
   <title><![CDATA[Category: salesforce | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/salesforce/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-07-02T10:26:33+09:00</updated>
+  <updated>2015-07-02T10:27:49+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,68 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[salesforce]apexでレコードをフォローさせる]]></title>
+    <link href="http://kayakuguri.github.io/blog/2015/07/02/record-follow/"/>
+    <updated>2015-07-02T09:54:50+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2015/07/02/record-follow</id>
+    <content type="html"><![CDATA[<p>レコードを作った段階で自動的にフォローさせたかったので調べてみた。</p>
+
+<!-- more -->
+
+
+<h2>チャター</h2>
+
+<p>デフォルトでは一部のレコードを除いてレコードのフォロー機能はオフになっている。<br/>
+オンにするには、<code>フィード追跡</code>で有効にする。</p>
+
+<p><code>設定 -&gt; カスタマイズ -&gt; Chatter -&gt; フィード追跡</code>を選択。<br/>
+有効にしたいオブジェクトを選んで、<code>フィード追跡の有効化</code>にチェックを入れて保存。</p>
+
+<p><img src="/images/2015/07/feed_follow01.jpg" alt="" /></p>
+
+<p>すると、設定したレコード詳細の上部にフォローの表示とチャターコメントが出現する。<br/>
+フォローしたい場合はここをクリックしてフォロー出来る。</p>
+
+<p><img src="/images/2015/07/feed_follow02.jpg" alt="" /></p>
+
+<p>フォローすると以下のような表示に変わる。</p>
+
+<p><img src="/images/2015/07/feed_follow03.jpg" alt="" /></p>
+
+<h2>apexでのフォロー</h2>
+
+<p>フォローは、<code>EntitySubscription</code>なるオブジェクトで管理されている。<br/>
+現在のフォロー関係一覧を取得するSOQLは以下。</p>
+
+<pre><code>SELECT Id, ParentId, SubscriberId FROM EntitySubscription
+</code></pre>
+
+<p><code>ParentId</code>が、フォロー対象のユーザーやオブジェクトのレコードID。<br/>
+<code>SubscriberId</code>が、フォローするユーザーのID、となる。</p>
+
+<p>なので、このオブジェクトにフォロー対象とフォローするIDを入れてインサートしてやればよい。</p>
+
+<p>例）</p>
+
+<p><code>
+EntitySubscription follow = new EntitySubscription();
+follow.ParentId = 'ID'; //対象のレコード
+follow.SubscriberId = 'ID'; //ユーザーのID
+insert follow;
+</code></p>
+
+<p>トリガーで実装する場合は、レコードのIDが必要になるので、<code>after insert</code>で実行すること。</p>
+
+<h2>参考</h2>
+
+<p><a href="http://vaindespair.blogspot.jp/2011/01/blog-post.html">memo: Force.com&#12288;&#65306;&#12288;行動を作成したとき&#12289;自動的にフォローするようにしたい</a></p>
+
+<p>チャター関係は以下のPDFにまとまっていた。<br/>
+<a href="http://developerforcejp.s3.amazonaws.com/books/cheatsheets/Chatter-cheatsheet_Ja.pdf">http://developerforcejp.s3.amazonaws.com/books/cheatsheets/Chatter-cheatsheet_Ja.pdf</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[salesforce]指定のユーザーでテスト実行]]></title>
@@ -623,49 +685,6 @@ Usage: force field</p>
 <a href="http://qiita.com/puttyo_bubu/items/4e60e42ff041f2474428">Macでgo言語開発環境を作る &ndash; Qiita</a><br/>
 <a href="http://blog.teapla.net/2010/12/1178">homebrewを使ってMercurialをインストールする | Ken&#039;s blog @teaplanet</a><br/>
 <a href="http://qiita.com/tailak/items/0eedc6d5c4cc71a5e1a0">Python &ndash; Macでpipのアップデートでエラー &ndash; Qiita</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[salesfroce]開発者コンソールでのFIELD_INTEGRITY_EXCEPTIONエラー]]></title>
-    <link href="http://kayakuguri.github.io/blog/2015/05/14/developper-console-error/"/>
-    <updated>2015-05-14T14:50:12+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2015/05/14/developper-console-error</id>
-    <content type="html"><![CDATA[<p>たまに起こっていつも調べている気がするのでメモ。</p>
-
-<!-- more -->
-
-
-<p>最近は開発者コンソールで開発をしている事が多いのだけれど、ファイルをいざ保存しようとしたらたまに以下のようなエラーが出て保存できない時がある。</p>
-
-<p><img src="/images/2015/05/Force_com_Developer_Console_01.jpg" alt="" /></p>
-
-<blockquote><p>FIELD_INTEGRITY_EXCEPTION<br/>
-Failde to create createContainerMember for containerId=undefined:null は無効な containerIdです。</p></blockquote>
-
-<p>保存しているファイルの種類や内容には関係ない。<br/>
-これが起こるとsavingのまま止まってしまう。</p>
-
-<p>で、解決方法は公式にある。</p>
-
-<p><a href="https://help.salesforce.com/apex/HTViewSolution?id=000204953&amp;language=en_US">Developer console cannot save classes/triggers/pages</a></p>
-
-<p>まず、開発者コンソールを閉じて、再度開く。(念のため)<br/>
-で、開発者コンソールのメニューから、<code>Workspace</code> &ndash;> <code>New Workspace</code>を選択。</p>
-
-<p><img src="/images/2015/05/Force_com_Developer_Console_02.jpg" alt="" /></p>
-
-<p>適当な名前で保存する。</p>
-
-<p><img src="/images/2015/05/Force_com_Developer_Console_03.jpg" alt="" /></p>
-
-<p>ワークスペースが新しく切り替わる(見た目は変わらない)。<br/>
-すると、無事保存出来るようになる。</p>
-
-<p>一度保存出来るようになったらもとのdefaultのワークスペースに戻しても問題なくなっているので、<br/>
-先程作った適当なワークスペース削除しても問題なし。</p>
-
-<p>開発者コンソールは便利なんだけど、いかんせん不安定な印象がある…。</p>
 ]]></content>
   </entry>
   
