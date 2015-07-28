@@ -4,7 +4,7 @@
   <title><![CDATA[Category: vagrant | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/vagrant/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-07-02T10:27:49+09:00</updated>
+  <updated>2015-07-28T18:18:20+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -345,7 +345,8 @@ httpdファイルへの追記が必要とのことで試してみた。</p>
 
 <h2>再起動</h2>
 
-<p>apacheの再起動ではだめで、vagrant自体の再起動が必要。</p>
+<p><s>apacheの再起動ではだめで、vagrant自体の再起動が必要。</s><br/>
+追記：apacheの再起動だけで大丈夫でした。</p>
 
 <pre><code>$ vagrant reload
 </code></pre>
