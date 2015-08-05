@@ -4,7 +4,7 @@
   <title><![CDATA[Category: apex | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/apex/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-07-28T18:18:20+09:00</updated>
+  <updated>2015-08-05T11:42:14+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,60 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[apex]バッチ実行時にカウントデータを引き継ぐ]]></title>
+    <link href="http://kayakuguri.github.io/blog/2015/08/05/apex-batch-data/"/>
+    <updated>2015-08-05T11:26:58+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2015/08/05/apex-batch-data</id>
+    <content type="html"><![CDATA[<p>apexでバッチを走らせる場合は、デフォルトでの200件ごとに処理を走らせる場合が多いけれれど、<br/>
+その時に処理の中でカウントアップしたデータを次の処理に引き継ぎたかった。</p>
+
+<!-- more -->
+
+
+<p>結論から言うと、 <code>Database.Stateful</code> を使うと、データの内容を保持した状態でバッチが走らせられた。</p>
+
+<p>具体的には以下。</p>
+
+<p>```
+public with sharing class Hogehoge_Batch implements Database.Batchable<sObject>, Database.Stateful{</p>
+
+<pre><code>private Integer count {get; set;}
+
+public Hogehoge_Batch(Boolean isLastBatch){
+    this.count = 0;
+}
+
+public Database.QueryLocator start(Database.BatchableContext BC){
+    String query = 'select id from Lead';
+     return Database.getQueryLocator(query);
+}
+
+public void execute(Database.BatchableContext BC, List&lt;Lead&gt; scope){
+    for(Lead user : scope){ 
+        user.count__c = this.count;
+        this.count++;
+    }
+    update scope;
+}
+
+public void finish(Database.BatchableContext BC){
+}
+</code></pre>
+
+<p>}
+```</p>
+
+<p>クラス定義の1行目の最後にくっついてる。<br/>
+これがないと<code>count</code>は毎回リセットされてしまう。</p>
+
+<h2>参考</h2>
+
+<p><a href="http://tyoshikawa1106.hatenablog.com/entry/2015/02/15/182505">SFDC：【大量データ処理】Apex Batchで一括更新処理を確認してみました &ndash; tyoshikawa1106のブログ</a><br/>
+<a href="http://salesforceapexcodecorner.blogspot.jp/2011/08/state-management-in-batch-apex-in.html">State Management In Batch Apex in Salesforce</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[salesforce]apexでレコードをフォローさせる]]></title>
@@ -468,69 +522,6 @@ alert(ret);
 
 <p><a href="https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_and_ajax.htm">Apex in AJAX | Force.com Apex Code Developer&#x27;s Guide | Salesforce Developers</a><br/>
 <a href="https://developer.salesforce.com/forums/ForumsMain?id=906F00000009BNkIAM">カスタムボタン押下時にSFDC上のWebServiceをコールする方法 &ndash; Salesforce Developer Community</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[apex][SF]ApexRESTのテストコードでのパラメータの渡し方]]></title>
-    <link href="http://kayakuguri.github.io/blog/2015/04/20/rest-apex-test/"/>
-    <updated>2015-04-20T15:43:39+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2015/04/20/rest-apex-test</id>
-    <content type="html"><![CDATA[<p>いくつくか方法があるような。<br/>
-そのうち一番楽だったものを。</p>
-
-<!-- more -->
-
-
-<p>例えば以下のようなクラスを作ったとする。</p>
-
-<p>```
-@RestResource(urlMapping=&lsquo;/user/*&rsquo;)
-global with sharing class userInfo_API {</p>
-
-<pre><code>@HttpPost
-global static ResultData doPost(){
-    RestRequest req = RestContext.request;
-    String user_id = req.params.get('user_id');
-
-    //何らかの処理
-}
-</code></pre>
-
-<p>}
-```</p>
-
-<p>この場合、<code>user_id</code>を渡すためには以下のように記述します。</p>
-
-<p>```
-@isTest
-private class Test_userInfo_API {</p>
-
-<pre><code>static testMethod void postTest(){
-    RestRequest req = new RestRequest();
-    RestContext.request = req;
-    req.addParameter('user_id', 'ユーザーID');
-    userInfo_API.doPost();
-}
-</code></pre>
-
-<p>}
-```</p>
-
-<p><code>RestRequest</code>のパラメータにセットしておくだけでOKなよう。</p>
-
-<p>余談。<br/>
-APIのクラスのみを実行させようとしてもエラーが出る。</p>
-
-<blockquote><p>System.NullPointerException: Attempt to de-reference a null object</p></blockquote>
-
-<p>なのでテストメソッド内では最低限以下は必要。</p>
-
-<p><code>
-RestRequest req = new RestRequest();
-RestContext.request = req;
-userInfo_API.doPost();
-</code></p>
 ]]></content>
   </entry>
   
