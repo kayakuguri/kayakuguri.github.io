@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-08-05T11:42:14+09:00</updated>
+  <updated>2015-08-06T18:39:12+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,195 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[heroku]PHPのセッションをherokuのRedisで管理する]]></title>
+    <link href="http://kayakuguri.github.io/blog/2015/08/06/session-storage-in-redis-on-heroku/"/>
+    <updated>2015-08-06T18:06:13+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2015/08/06/session-storage-in-redis-on-heroku</id>
+    <content type="html"><![CDATA[<p>heroku上でのPHPのセッション管理の定番は<a href="https://addons.heroku.com/memcachier">MemCachier</a>だけれど、<br/>
+今回はHerokuのRedisに保存さえてみた。</p>
+
+<h2>Redis</h2>
+
+<p>herokuで使えるRedis、といってもいくつか種類がある。<br/>
+それぞれどう違うのか、とか、設定方法の違い、とかは正直わからない。</p>
+
+<p><a href="http://qiita.com/Oakbow/items/98599da0fc62863fc1b8#%E3%81%A9%E3%81%AE-redis-%E3%81%AE%E3%82%A2%E3%83%89%E3%82%AA%E3%83%B3%E3%82%92%E4%BD%BF%E3%81%86">herokuでセッションの保存先をRedisにする &ndash; Qiita</a></p>
+
+<blockquote><p>現在、heroku には4つの Redis のアドオンがあります。<br/>
+早晩5つめが増えるようです。</p></blockquote>
+
+<p>この5つめ、にあたるものが今回使用する、Heroku Redis、です。　　
+これは他のredisと違って、<a href="https://elements.heroku.com/addons/heroku-postgresql">Postgres</a>と同じくheroku内部のものなのでまぁ間違いないのかも、ってことで使ってみました。</p>
+
+<p><a href="https://elements.heroku.com/addons/heroku-redis">Heroku Redis</a></p>
+
+<h2>インストール</h2>
+
+<p>公式の通り、インストールコマンドは以下。<br/>
+アプリページからポチポチっと入れても問題なし。</p>
+
+<pre><code>$ eroku addons:create heroku-redis:hobby-dev -a YOUR-APP-NAME
+</code></pre>
+
+<p><code>hobby-dev</code>は無料バージョン。</p>
+
+<h2>セットアップ</h2>
+
+<p>必要なソースはComposerで入れる。</p>
+
+<p>(公式より)</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>"require": {
+</span><span class='line'>  ...
+</span><span class='line'>  "predis/predis": "1.0.1",
+</span><span class='line'>  ...
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>接続先をredisに</h2>
+
+<p>以下のページを参考、というかほぼそのままで。<br/>
+<a href="http://www.sitepoint.com/saving-php-sessions-in-redis/">PHP Master | Saving PHP Sessions in Redis</a></p>
+
+<p>まずは、接続用のクラスを用意。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;?php
+</span><span class='line'>class RedisSessionHandler implements SessionHandlerInterface
+</span><span class='line'>{
+</span><span class='line'>    public $ttl = 1800; // 30 minutes default
+</span><span class='line'>    protected $db;
+</span><span class='line'>    protected $prefix;
+</span><span class='line'> 
+</span><span class='line'>    public function __construct(PredisClient $db, $prefix = 'PHPSESSID:') {
+</span><span class='line'>        $this-&gt;db = $db;
+</span><span class='line'>        $this-&gt;prefix = $prefix;
+</span><span class='line'>    }
+</span><span class='line'> 
+</span><span class='line'>    public function open($savePath, $sessionName) {
+</span><span class='line'>        // No action necessary because connection is injected
+</span><span class='line'>        // in constructor and arguments are not applicable.
+</span><span class='line'>    }
+</span><span class='line'> 
+</span><span class='line'>    public function close() {
+</span><span class='line'>        $this-&gt;db = null;
+</span><span class='line'>        unset($this-&gt;db);
+</span><span class='line'>    }
+</span><span class='line'> 
+</span><span class='line'>    public function read($id) {
+</span><span class='line'>        $id = $this-&gt;prefix . $id;
+</span><span class='line'>        $sessData = $this-&gt;db-&gt;get($id);
+</span><span class='line'>        $this-&gt;db-&gt;expire($id, $this-&gt;ttl);
+</span><span class='line'>        return $sessData;
+</span><span class='line'>    }
+</span><span class='line'> 
+</span><span class='line'>    public function write($id, $data) {
+</span><span class='line'>        $id = $this-&gt;prefix . $id;
+</span><span class='line'>        $this-&gt;db-&gt;set($id, $data);
+</span><span class='line'>        $this-&gt;db-&gt;expire($id, $this-&gt;ttl);
+</span><span class='line'>    }
+</span><span class='line'> 
+</span><span class='line'>    public function destroy($id) {
+</span><span class='line'>        $this-&gt;db-&gt;del($this-&gt;prefix . $id);
+</span><span class='line'>    }
+</span><span class='line'> 
+</span><span class='line'>    public function gc($maxLifetime) {
+</span><span class='line'>        // no action necessary because using EXPIRE
+</span><span class='line'>    }
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<p>で、最初に保存先を変更するページにて以下を実行する。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;?php
+</span><span class='line'>require_once( dirname(__FILE__). "/vendor/autoload.php" );
+</span><span class='line'>require_once( dirname(__FILE__). "/RedisSessionHandler.php" );
+</span><span class='line'>
+</span><span class='line'>$redis = new Predis\Client([
+</span><span class='line'>    'host' =&gt; parse_url($_ENV['REDIS_URL'], PHP_URL_HOST),
+</span><span class='line'>    'port' =&gt; parse_url($_ENV['REDIS_URL'], PHP_URL_PORT),
+</span><span class='line'>    'password' =&gt; parse_url($_ENV['REDIS_URL'], PHP_URL_PASS),
+</span><span class='line'>]);
+</span><span class='line'>$sessHandler = new RedisSessionHandler($redis);
+</span><span class='line'>session_set_save_handler($sessHandler);
+</span><span class='line'>session_start();</span></code></pre></td></tr></table></div></figure>
+
+
+<p>2行目はredisのライブラリを読み込むための設定。<br/>
+3行目は先程作成したクラス。<br/>
+で、5行目でnewしているが、ここが参考サイトから少し変えていて、Heroku Redis公式の方に合わせている。<br/>
+で、後は参考サイト通りに。</p>
+
+<p>これで後は普通にセッションを使えばRedisに保存されるようになる。</p>
+
+<h2>参考</h2>
+
+<p><a href="https://devcenter.heroku.com/articles/heroku-redis#connecting-in-php">Heroku Redis | Heroku Dev Center</a><br/>
+<a href="http://www.sitepoint.com/saving-php-sessions-in-redis/">PHP Master | Saving PHP Sessions in Redis</a><br/>
+<a href="http://qiita.com/Oakbow/items/98599da0fc62863fc1b8#%E3%81%A9%E3%81%AE-redis-%E3%81%AE%E3%82%A2%E3%83%89%E3%82%AA%E3%83%B3%E3%82%92%E4%BD%BF%E3%81%86">herokuでセッションの保存先をRedisにする &ndash; Qiita</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[apex]バッチ実行時にカウントデータを引き継ぐ]]></title>
@@ -2547,347 +2736,6 @@ OwinIDは入力しなくても大丈夫だった。<br/>
 <p><a href="http://support.cloudinary.com/hc/en-us/articles/202520342-Does-Cloudinary-support-uploading-private-images-">Does Cloudinary support uploading private images? &ndash; Cloudinary Support</a><br/>
 <a href="http://support.cloudinary.com/hc/en-us/articles/202520632--Can-our-users-upload-private-images-which-are-not-accessible-through-a-public-URL-">Can our users upload private images which are not accessible through a public URL? &ndash; Cloudinary Support</a><br/>
 <a href="http://cloudinary.com/blog/how_to_quickly_build_a_stock_photo_site_using_cloudinary">How to quickly build a stock photo site using Cloudinary | Cloudinary Blog</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[herokuアドオン]cloudinaryで動画を試してみた[PHP]]]></title>
-    <link href="http://kayakuguri.github.io/blog/2015/05/07/cloudinary-movie/"/>
-    <updated>2015-05-07T15:31:47+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2015/05/07/cloudinary-movie</id>
-    <content type="html"><![CDATA[<p>2015年5月5日に新しく発表された動画サポートを試してみた。</p>
-
-<!-- more -->
-
-
-<h2>アップロード</h2>
-
-<p>インストールなどは<a href="http://kayamemo.mrlittlebig.com/blog/2015/05/07/cloudinary-img/">前回の記事</a>参照。</p>
-
-<p>同一ディレクトリにある、movファイルをアップロードした。<br/>
-動画は、iPhoneで撮影したもの。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;?php
-</span><span class='line'>require '../vendor/autoload.php';
-</span><span class='line'>
-</span><span class='line'>use Cloudinary;
-</span><span class='line'>use Cloudinary\Uploader;
-</span><span class='line'>
-</span><span class='line'>$account = parse_url(getenv('CLOUDINARY_URL'));
-</span><span class='line'>
-</span><span class='line'>\Cloudinary::config(array(
-</span><span class='line'>    "cloud_name" =&gt; $account['host'],
-</span><span class='line'>    "api_key" =&gt; $account['user'],
-</span><span class='line'>    "api_secret" =&gt; $account['pass']
-</span><span class='line'>));
-</span><span class='line'>
-</span><span class='line'>$ret = \Cloudinary\Uploader::upload("iphone_movie.mov",array(
-</span><span class='line'>    "resource_type" =&gt; "video"
-</span><span class='line'>));
-</span><span class='line'>
-</span><span class='line'>print_r($ret);</span></code></pre></td></tr></table></div></figure>
-
-
-<p>結果は以下。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>Array ( 
-</span><span class='line'>  [public_id] =&gt; wfdpqg39qjoc6lnkr3cs 
-</span><span class='line'>  [version] =&gt; 1430967110 
-</span><span class='line'>  [signature] =&gt; 7f52af2c53ccc3b38f8b33300a40d6085c85c032 
-</span><span class='line'>  [width] =&gt; 1280 
-</span><span class='line'>  [height] =&gt; 720 
-</span><span class='line'>  [format] =&gt; mov 
-</span><span class='line'>  [resource_type] =&gt; video 
-</span><span class='line'>  [created_at] =&gt; 2015-05-07T02:51:50Z 
-</span><span class='line'>  [tags] =&gt; Array ( ) 
-</span><span class='line'>  [bytes] =&gt; 5572519 
-</span><span class='line'>  [type] =&gt; upload 
-</span><span class='line'>  [etag] =&gt; 3114c6de99a74817eef082b330754d1e 
-</span><span class='line'>  [url] =&gt; http://res.cloudinary.com/harslxcej/video/upload/v1430967110/wfdpqg39qjoc6lnkr3cs.mov 
-</span><span class='line'>  [secure_url] =&gt; https://res.cloudinary.com/harslxcej/video/upload/v1430967110/wfdpqg39qjoc6lnkr3cs.mov 
-</span><span class='line'>  [audio] =&gt; Array ( 
-</span><span class='line'>      [codec] =&gt; aac 
-</span><span class='line'>      [bit_rate] =&gt; 63431 
-</span><span class='line'>      [frequency] =&gt; 44100 
-</span><span class='line'>      [channels] =&gt; 1 
-</span><span class='line'>      [channel_layout] =&gt; mono 
-</span><span class='line'>  ) 
-</span><span class='line'>  [video] =&gt; Array ( 
-</span><span class='line'>      [pix_format] =&gt; yuv420p 
-</span><span class='line'>      [codec] =&gt; h264 
-</span><span class='line'>      [level] =&gt; 31 
-</span><span class='line'>      [bit_rate] =&gt; 4604806 
-</span><span class='line'>  ) 
-</span><span class='line'>  [frame_rate] =&gt; 29.97002997003 
-</span><span class='line'>  [bit_rate] =&gt; 4686070 
-</span><span class='line'>  [duration] =&gt; 9.538333 
-</span><span class='line'>  [rotation] =&gt; 0 
-</span><span class='line'>)</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>表示</h2>
-
-<p>PHPでは、<code>cl_video_tag</code>を利用することで<code>video</code>タグを出力してくれる。</p>
-
-<pre><code>cl_video_tag($public_id, array( "alt" =&gt; "Sample Video" ));
-</code></pre>
-
-<p>出力</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;video alt='Sample Video' poster='https://res.cloudinary.com/harslxcej/video/upload/wfdpqg39qjoc6lnkr3cs.jpg'&gt;
-</span><span class='line'>  &lt;source src='https://res.cloudinary.com/harslxcej/video/upload/wfdpqg39qjoc6lnkr3cs.webm' type='video/webm'&gt;
-</span><span class='line'>  &lt;source src='https://res.cloudinary.com/harslxcej/video/upload/wfdpqg39qjoc6lnkr3cs.mp4' type='video/mp4'&gt;
-</span><span class='line'>  &lt;source src='https://res.cloudinary.com/harslxcej/video/upload/wfdpqg39qjoc6lnkr3cs.ogv' type='video/ogg'&gt;
-</span><span class='line'>&lt;/video&gt;</span></code></pre></td></tr></table></div></figure>
-
-
-<p>このままだとコントローラーが表示されていないので、その辺のオプションも追加する。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>cl_video_tag($public_id, array(
-</span><span class='line'>    "width" =&gt; 600,
-</span><span class='line'>    "height" =&gt; 400,
-</span><span class='line'>    "crop" =&gt; "fill",
-</span><span class='line'>    "preload" =&gt; "none",
-</span><span class='line'>    "controls" =&gt; true,
-</span><span class='line'>));</span></code></pre></td></tr></table></div></figure>
-
-
-<p>出力</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;video controls='1' height='400' poster='https://res.cloudinary.com/harslxcej/video/upload/c_fill,h_400,w_600/wfdpqg39qjoc6lnkr3cs.jpg' preload='none' width='600'&gt;
-</span><span class='line'>  &lt;source src='https://res.cloudinary.com/harslxcej/video/upload/c_fill,h_400,w_600/wfdpqg39qjoc6lnkr3cs.webm' type='video/webm'&gt;
-</span><span class='line'>  &lt;source src='https://res.cloudinary.com/harslxcej/video/upload/c_fill,h_400,w_600/wfdpqg39qjoc6lnkr3cs.mp4' type='video/mp4'&gt;
-</span><span class='line'>  &lt;source src='https://res.cloudinary.com/harslxcej/video/upload/c_fill,h_400,w_600/wfdpqg39qjoc6lnkr3cs.ogv' type='video/ogg'&gt;
-</span><span class='line'>&lt;/video&gt;</span></code></pre></td></tr></table></div></figure>
-
-
-<p>サムネイルの出力は以下。<br/>
-public idに拡張子をつけてやらないと表示が出来なかった。<br/>
-(jpg, png, webp, wdpに対応しているよう)</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>cl_image_tag($public_id.".jpg", array(
-</span><span class='line'>    "width"=&gt;300,
-</span><span class='line'>    "height"=&gt;300,
-</span><span class='line'>    "crop"=&gt;"fill",
-</span><span class='line'>    "resource_type"=&gt;"video"
-</span><span class='line'>));</span></code></pre></td></tr></table></div></figure>
-
-
-<p>結果</p>
-
-<pre><code>&lt;img src='https://res.cloudinary.com/harslxcej/video/upload/c_fill,h_300,w_300/wfdpqg39qjoc6lnkr3cs.jpg' height='300' width='300'/&gt;
-</code></pre>
-
-<h2>フォームからアップロード</h2>
-
-<p><a href="http://kayamemo.mrlittlebig.com/blog/2015/04/16/heroku-transloadit-2/">前回、Transloaditでアップロード</a>した時と同じように、フォームから選択した動画をアップロードしてみる。</p>
-
-<h3>情報が取得できない</h3>
-
-<p>動画をフォームからアップロードしてみると情報が取得できない、と思ったが、<br/>
-どうやらサーバーの設定での最大アップロードサイズを超過していたよう。</p>
-
-<p>アップロードサイズはデフォルトでは、<code>2MB</code>。<br/>
-これの変更方法は以前に書いていた。<br/>
-<a href="http://kayamemo.mrlittlebig.com/blog/2014/02/18/change-max-filesize/">[PHP][heroku]upload_max_filesizeを変更する &ndash; KayaMemo</a></p>
-
-<h3>コード</h3>
-
-<p>以下、全コード。<br/>
-動画をアップロードされたら表示するところまで。<br/>
-(エラーチェックなどは全くしていないので注意)</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-<span class='line-number'>39</span>
-<span class='line-number'>40</span>
-<span class='line-number'>41</span>
-<span class='line-number'>42</span>
-<span class='line-number'>43</span>
-<span class='line-number'>44</span>
-<span class='line-number'>45</span>
-<span class='line-number'>46</span>
-<span class='line-number'>47</span>
-<span class='line-number'>48</span>
-<span class='line-number'>49</span>
-<span class='line-number'>50</span>
-<span class='line-number'>51</span>
-<span class='line-number'>52</span>
-<span class='line-number'>53</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;?php
-</span><span class='line'>require '../vendor/autoload.php';
-</span><span class='line'>use Cloudinary;
-</span><span class='line'>use Cloudinary\Uploader;
-</span><span class='line'>
-</span><span class='line'>$showFlg = false;
-</span><span class='line'>
-</span><span class='line'>if(isset($_FILES['userfile'])){
-</span><span class='line'>    if (move_uploaded_file($_FILES['userfile']['tmp_name'], $_FILES['userfile']['name'])) {
-</span><span class='line'>        $uploadFile = $_FILES['userfile']['name'];
-</span><span class='line'>
-</span><span class='line'>    $account = parse_url(getenv('CLOUDINARY_URL'));
-</span><span class='line'>    \Cloudinary::config(array(
-</span><span class='line'>        "cloud_name" =&gt; $account['host'],
-</span><span class='line'>        "api_key" =&gt; $account['user'],
-</span><span class='line'>        "api_secret" =&gt; $account['pass']
-</span><span class='line'>    ));
-</span><span class='line'>
-</span><span class='line'>    $ret = \Cloudinary\Uploader::upload($uploadFile,array(
-</span><span class='line'>        "resource_type" =&gt; "video"
-</span><span class='line'>    ));
-</span><span class='line'>    $public_id = $ret['public_id'];
-</span><span class='line'>    $showFlg = true;
-</span><span class='line'>    }
-</span><span class='line'>}
-</span><span class='line'>?&gt;
-</span><span class='line'>
-</span><span class='line'>&lt;!DOCTYPE html&gt;
-</span><span class='line'>&lt;html lang="ja"&gt;
-</span><span class='line'>&lt;head&gt;
-</span><span class='line'>    &lt;title&gt;ファイルアップロードテスト&lt;/title&gt;
-</span><span class='line'>    &lt;meta charset="utf-8"&gt;
-</span><span class='line'>&lt;/head&gt;
-</span><span class='line'>&lt;body&gt;
-</span><span class='line'>
-</span><span class='line'>&lt;?php if(!$showFlg){ ?&gt;
-</span><span class='line'>&lt;form enctype="multipart/form-data" method="post" action="upload-form-movie.php"&gt;
-</span><span class='line'>    &lt;input type="hidden" name="MAX_FILE_SIZE" value="20000000" /&gt;
-</span><span class='line'>    &lt;input name="userfile" type="file"&gt;
-</span><span class='line'>    &lt;input type="submit" value="Upload"&gt;
-</span><span class='line'>&lt;/form&gt;
-</span><span class='line'>&lt;?php }else{
-</span><span class='line'>    echo $resize = cl_video_tag($public_id, array(
-</span><span class='line'>        "width" =&gt; 600,
-</span><span class='line'>        "height" =&gt; 400,
-</span><span class='line'>        "crop" =&gt; "fill",
-</span><span class='line'>        "preload" =&gt; "none",
-</span><span class='line'>        "controls" =&gt; true,
-</span><span class='line'>    ));
-</span><span class='line'>} ?&gt;
-</span><span class='line'>
-</span><span class='line'>&lt;/body&gt;
-</span><span class='line'>&lt;/html&gt;</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>参考</h2>
-
-<p><a href="http://cloudinary.com/blog/introducing_cloud_based_service_for_video_upload_real_time_manipulation_and_optimized_viewing#api_example_1">Introducing cloud based service for video management | Cloudinary Blog</a><br/>
-<a href="http://cloudinary.com/documentation/video_manipulation_and_delivery">Video manipulation and delivery | Cloudinary</a></p>
-
-<p><a href="http://php.net/manual/ja/features.file-upload.post-method.php">PHP: POST メソッドによるアップロード &ndash; Manual </a><br/>
-<a href="http://www.php-factory.net/trivia/05.php">サーバーのアップロードファイルの最大容量の確認と容量制限の変更｜PHP工房</a><br/>
-<a href="https://devcenter.heroku.com/articles/custom-php-settings#user-ini-files-recommended">Customizing Web Server and Runtime Settings for PHP | Heroku Dev Center</a></p>
 ]]></content>
   </entry>
   
