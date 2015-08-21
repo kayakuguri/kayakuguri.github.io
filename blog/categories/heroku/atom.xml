@@ -4,7 +4,7 @@
   <title><![CDATA[Category: heroku | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/heroku/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-08-06T18:43:36+09:00</updated>
+  <updated>2015-08-21T18:16:45+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -309,7 +309,6 @@ if($type === null){
 //Cloudinaryへアップ
 $cl_upload = new CloudinaryUploader();
 $uploaded = $cl_upload-&gt;upload($imgPath, array(
-    "public_id" =&gt; $public_id,
 ));
 $public_id = $uploaded['public_id'];
 
@@ -323,6 +322,11 @@ return $metadata;
 <p>}
 add_filter( &ldquo;wp_generate_attachment_metadata&rdquo; , &ldquo;cldnry_wp_generate_attachment_metadata&rdquo;,10 ,2 );
 ```</p>
+
+<p>※2015/08/21追記<br/>
+cloudinaryへアップする際にpublic_idを指定してしまうと画像が次々と上書きされてしまうので、その部分を削除しました。</p>
+
+<p>  &ldquo;public_id&rdquo; => $public_id,</p>
 
 <p>まず、<code>get_attached_file( $postid )</code>でアップされたファイルのURLを取得。<br/>
 そのファイルが画像かどうかを一応チェックしている。<br/>

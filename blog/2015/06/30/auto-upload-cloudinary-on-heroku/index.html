@@ -256,7 +256,6 @@ cloudinaryへアップした、というフラグを立てています。<br/>
 <span class='line-number'>27</span>
 <span class='line-number'>28</span>
 <span class='line-number'>29</span>
-<span class='line-number'>30</span>
 </pre></td><td class='code'><pre><code class=''><span class='line'>function cldnry_wp_generate_attachment_metadata($metadata, $postid){
 </span><span class='line'>    $imgPath = get_attached_file( $postid );
 </span><span class='line'>
@@ -276,7 +275,6 @@ cloudinaryへアップした、というフラグを立てています。<br/>
 </span><span class='line'>    //Cloudinaryへアップ
 </span><span class='line'>    $cl_upload = new CloudinaryUploader();
 </span><span class='line'>    $uploaded = $cl_upload-&gt;upload($imgPath, array(
-</span><span class='line'>        "public_id" =&gt; $public_id,
 </span><span class='line'>    ));
 </span><span class='line'>    $public_id = $uploaded['public_id'];
 </span><span class='line'>
@@ -288,6 +286,11 @@ cloudinaryへアップした、というフラグを立てています。<br/>
 </span><span class='line'>}
 </span><span class='line'>add_filter( "wp_generate_attachment_metadata" , "cldnry_wp_generate_attachment_metadata",10 ,2 );</span></code></pre></td></tr></table></div></figure>
 
+
+<p>※2015/08/21追記<br/>
+cloudinaryへアップする際にpublic_idを指定してしまうと画像が次々と上書きされてしまうので、その部分を削除しました。</p>
+
+<p>  &ldquo;public_id&rdquo; => $public_id,</p>
 
 <p>まず、<code>get_attached_file( $postid )</code>でアップされたファイルのURLを取得。<br/>
 そのファイルが画像かどうかを一応チェックしている。<br/>
