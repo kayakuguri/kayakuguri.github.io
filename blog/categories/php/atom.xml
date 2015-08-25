@@ -4,7 +4,7 @@
   <title><![CDATA[Category: php | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/php/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-08-25T10:39:59+09:00</updated>
+  <updated>2015-08-25T10:43:15+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -52,15 +52,13 @@ Composer version 1.0-dev (f1aa655e6113e0efa979b8b09d7951a762eaa04c) 2015-08-20 1
 
 <h2>composer install</h2>
 
-<p>この状態で、composer.jsonがあるディレクトリに移動し、<code>$ composer install</code>を叩いて見る。<br/>
+<p>この状態で、composer.jsonがあるディレクトリに移動し、<code>$ composer install</code>を叩いてみる。<br/>
 これでインストール出来れば完了。<br/>
 ただし、PCにインストールされているPHPによってはモジュールの関係でエラーが出る場合がある。<br/>
 例）</p>
 
-<blockquote><p>Problem 1</p>
-
-<pre><code>- The requested PHP extension ext-mcrypt * is missing from your system.
-</code></pre></blockquote>
+<blockquote><p>Problem 1<br/>
+  &ndash; The requested PHP extension ext-mcrypt * is missing from your system.</p></blockquote>
 
 <p>この場合は、全部入りのPHPを入れ直すのが早い。</p>
 
