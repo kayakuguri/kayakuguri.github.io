@@ -4,7 +4,7 @@
   <title><![CDATA[Category: php | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/php/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-08-21T18:16:45+09:00</updated>
+  <updated>2015-08-25T10:39:59+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,114 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[herokuがcomposer.lock必須になったのでcomposerの入れ方をメモしておく]]></title>
+    <link href="http://kayakuguri.github.io/blog/2015/08/25/composer-lock-require/"/>
+    <updated>2015-08-25T10:38:40+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2015/08/25/composer-lock-require</id>
+    <content type="html"><![CDATA[<p>herokuにcomposerを使用したプロジェクトをデプロイする場合、今まではwarningは出ていたようだけど、composer.lockはなくてもデプロイ出来ていた。<br/>
+それが、2015/8/21にPHPのランタイムがアップデートされ、composer.lockが必須になった、とのこと。<br/>
+<a href="https://devcenter.heroku.com/changelog-items/704">PHP versions 5.5.28, 5.6.12, 7.0.0RC1 available; new composer.lock requirements | Heroku Dev Center</a></p>
+
+<!-- more -->
+
+
+<p>composer.lockがない場合は以下のようなエラーが出る。</p>
+
+<blockquote><p>ERROR: Your &lsquo;composer.json&rsquo; lists dependencies inside &lsquo;require&rsquo;,but no &lsquo;composer.lock&rsquo; was found. Please run &lsquo;composer update&rsquo; to re-generate &lsquo;composer.lock&rsquo; if necessary, and commit it into your repository. For more information, please refer to the docs at <a href="https://devcenter.heroku.com/articles/php-support#activation">https://devcenter.heroku.com/articles/php-support#activation</a></p></blockquote>
+
+<h2>composerのインストール</h2>
+
+<p>環境はmacで、デフォルト等のPHPが入っている前提で。<br/>
+以下のコマンドを適当なディレクトリで叩くだけ。</p>
+
+<p><code>
+$ curl -sS https://getcomposer.org/installer | php
+$ mv composer.phar /usr/local/bin/composer
+</code></p>
+
+<p>ターミナルを再起動して、確認。</p>
+
+<p><code>
+$ composer -v
+Composer version 1.0-dev (f1aa655e6113e0efa979b8b09d7951a762eaa04c) 2015-08-20 11:59:54
+</code></p>
+
+<h3>参考</h3>
+
+<p><a href="http://mawatari.jp/archives/install-composer-in-mac">http://mawatari.jp/archives/install-composer-in-mac</a></p>
+
+<h2>composer install</h2>
+
+<p>この状態で、composer.jsonがあるディレクトリに移動し、<code>$ composer install</code>を叩いて見る。<br/>
+これでインストール出来れば完了。<br/>
+ただし、PCにインストールされているPHPによってはモジュールの関係でエラーが出る場合がある。<br/>
+例）</p>
+
+<blockquote><p>Problem 1</p>
+
+<pre><code>- The requested PHP extension ext-mcrypt * is missing from your system.
+</code></pre></blockquote>
+
+<p>この場合は、全部入りのPHPを入れ直すのが早い。</p>
+
+<h2>PHPのインストール</h2>
+
+<p>以下のサイトに全部入りのものがまとまっているようなので、そこからインストール。<br/>
+<a href="http://php-osx.liip.ch/">PHP for OS X as binary package</a></p>
+
+<p>現時点で最新の5.6を入れる。</p>
+
+<pre><code>$ curl -s http://php-osx.liip.ch/install.sh | bash -s 5.6
+</code></pre>
+
+<p>このままだと使用するようにはなってないのでパスを通す。<br/>
+環境によって違うが、デフォルトでは、<code>.bash_profile</code>に記述すればよいよう。</p>
+
+<p><code>~/</code>ディレクトリ以下の<code>.bash_profile</code>をエディタ等で開いて記述。<br/>
+なければ作成する。<br/>
+コマンドで実行する場合は、なければ新規作成としてくれる。<br/>
+例えば、<code>vi</code>で開く場合は以下。<br/>
+<code>sudo</code>をつけてルート権限で実行している。</p>
+
+<pre><code>`$ sudo vi ~/.bash_profile`
+</code></pre>
+
+<p>以下を記述。</p>
+
+<pre><code>export PATH=/usr/local/php5/bin:$PATH
+</code></pre>
+
+<p>保存して終了。<br/>
+(viの場合は、<code>i</code>で入力モードに、<code>esc</code>で戻って、<code>:x</code>で保存して終了）<br/>
+<a href="http://net-newbie.com/linux/commands/vi.html">ｖｉエディタの使い方</a></p>
+
+<p>ターミナルを再起動してphpのバージョンを確認。</p>
+
+<pre><code>$ php -v
+PHP 5.6.11 (cli) (built: Jul 10 2015 21:46:48)
+</code></pre>
+
+<h2>composer install</h2>
+
+<p>この状態で、<code>$ composer install</code>すれば完了。<br/>
+実行後は実行したディレクトリ内に、<code>composer.lock</code>と<code>vendor/</code>が出来上がる。<br/>
+<code>vendor</code>ディレクトリ以下はgitで共有しないように、<code>.gitignore</code>に追記しておくこと。</p>
+
+<h2>.lockと.jsonの関係</h2>
+
+<p><code>composer.json</code>には、必要なパッケージとインストールするバージョンの指定があれば記述する。<br/>
+その状態で、<code>$ composer install</code>すると、パッケージがインストールされ、インストールされたパッケージのバージョン情報などが記述された、<code>composer.lock</code>ファイルが作成される。<br/>
+この状態で、他環境などで同じく<code>$ composer install</code>すると、<code>composer.lock</code>に書かれたバージョンのパッケージがインストールされ、全く同じ環境が構築される。</p>
+
+<p><code>$ copmoser update</code>をすると、再度<code>composer.json</code>の記述を元にパッケージがインストールされ、<code>composer.lock</code>が更新される。</p>
+
+<h2>参考</h2>
+
+<p><a href="http://qiita.com/nbkn/items/01a11392921119fa0153">MacでPATHを通す &ndash; Qiita</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[CentOSにて、PHPのエラー出力をターミナルで監視]]></title>
@@ -245,195 +353,6 @@ echo $params->IsClosed;
 <p><a href="http://php.net/manual/ja/wrappers.php.php#wrappers.php.input">php://input</a><br/>
 <a href="http://ivystar.jp/programming/php/what-is-phpinput/">「php://input」とは何？－POSTの生データ？ | アイビースター</a><br/>
 <a href="https://amigotechnotes.wordpress.com/2013/11/16/parse-xml-with-namespace-by-simplexml-in-php/">Parse XML with namespace by SimpleXML in PHP | Amigo&#039;s Technical Notes</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Laravel5をpostgresqlでHerokuにデプロイ]]></title>
-    <link href="http://kayakuguri.github.io/blog/2015/04/21/laravel5-on-heroku/"/>
-    <updated>2015-04-21T10:59:17+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2015/04/21/laravel5-on-heroku</id>
-    <content type="html"><![CDATA[<p>Laravel5をherokuに入れてみました。<br/>
-ブラウザやディレクトリでの操作は一切なしで、黒い画面のみで作成してみました。</p>
-
-<!-- more -->
-
-
-<h2>mcrypt</h2>
-
-<p>ローカルにてインストールしようとするとないと怒られたので導入。<br/>
-また、PHPのバージョンが古い場合は、<a href="http://kayamemo.mrlittlebig.com/blog/2015/04/15/mac-update-php/">アップデートが必要</a>。</p>
-
-<p>```
-$ php -v                                                                                                           [ruby-2.1.2]
-PHP 5.6.7 (cli) (built: Mar 22 2015 19:03:55)
-Copyright &copy; 1997-2015 The PHP Group
-Zend Engine v2.6.0, Copyright &copy; 1998-2015 Zend Technologies</p>
-
-<p>$ brew search mcrypt                                                                                               [ruby-2.1.2]
-libtomcrypt    mcrypt         php53-mcrypt   php54-mcrypt   php55-mcrypt   php56-mcrypt</p>
-
-<p>$ brew install php56-mcrypt
-&hellip;略&hellip;
-==> Summary
-  /usr/local/Cellar/php56-mcrypt/5.6.7: 3 files, 56K, built in 116 seconds
-```</p>
-
-<h2>laravelの導入</h2>
-
-<p>インストール</p>
-
-<p><code>
-$ composer create-project laravel/laravel --prefer-dist laravel-sample-on-heroku
-...略...
-$ cd laravel-sample-on-heroku
-</code></p>
-
-<p>ドキュメントルートの設定</p>
-
-<p><code>
-$ touch Procfile
-$ echo 'web: vendor/bin/heroku-php-apache2 public' &gt;&gt; Procfile
-</code></p>
-
-<p>Gitを作成</p>
-
-<p><code>
-$ git init
-$ git add .
-$ git commit -m 'init laravel'
-</code></p>
-
-<p>herokuアプリの作成</p>
-
-<p><code>
-$ heroku create laravel-sample-on-heroku
-Creating laravel-sample-on-heroku... done, stack is cedar-14
-https://laravel-sample-on-heroku.herokuapp.com/ | https://git.heroku.com/laravel-sample-on-heroku.git
-Git remote heroku added
-</code></p>
-
-<p>このままデプロイすると、<code>package.json</code>がルートディレクトリにあるため、<code>nodejs</code>のアプリになってしまう。<br/>
-なので、phpのビルドパックを追加。<br/>
-<a href="https://github.com/heroku/heroku-buildpack-php">https://github.com/heroku/heroku-buildpack-php</a></p>
-
-<p><code>
-$ heroku config:set BUILDPACK_URL=https://github.com/heroku/heroku-buildpack-php
-Setting config vars and restarting laravel-sample-on-heroku... done, v4
-BUILDPACK_URL: https://github.com/heroku/heroku-buildpack-php
-</code></p>
-
-<blockquote><p>アプリの作成と同時にするには、<code>create</code>の後に、<code>--buildpack URL</code>を追加してやると一回で設定できる。<br/>
-$ heroku create laravel-sample-on-heroku &mdash;buildpack URL xxx</p></blockquote>
-
-<p>すでにリモートリポジトリに追加されているので、pushしてデプロイ。</p>
-
-<pre><code>$ git push heroku master
-</code></pre>
-
-<p>ページを開くとすでに動作する状態。</p>
-
-<pre><code>$ heroku open
-</code></pre>
-
-<p>完了！</p>
-
-<h2>DBの設定</h2>
-
-<p>アドオンを追加(無料)</p>
-
-<pre><code>$ heroku addons:add heroku-postgresql:dev
-</code></pre>
-
-<p>DBの情報を取得</p>
-
-<pre><code>$ heroku config | grep HEROKU_POSTGRESQL
-HEROKU_POSTGRESQL_CRIMSON_URL: postgres://UserName:Password@Host.compute-1.amazonaws.com:Port/DatabaseName  
-</code></pre>
-
-<p>生成したDBをプライマリーに設定</p>
-
-<pre><code>$ heroku pg:promote HEROKU_POSTGRESQL_CRIMSON_URL
-Promoting HEROKU_POSTGRESQL_CRIMSON_URL (DATABASE_URL) to DATABASE_URL... done
-</code></pre>
-
-<p>ここからはファイル編集</p>
-
-<pre><code>$ vi config/database.php
----
-//29行目
-'default' =&gt; 'mysql',
-↓
-'default' =&gt; 'pgsql',
----
-//冒頭に追加
-$url = parse_url(getenv("DATABASE_URL"));
-
-$host = $url["host"];
-$username = $url["user"];
-$password = $url["pass"];
-$database = substr($url["path"], 1);
----
-//67行目から
-'pgsql' =&gt; [
-    'driver'   =&gt; 'pgsql',
-    'host'     =&gt; $host,
-    'database' =&gt; $database,
-    'username' =&gt; $username,
-    'password' =&gt; $password,
-    'charset'  =&gt; 'utf8',
-    'prefix'   =&gt; '',
-    'schema'   =&gt; 'public',
-],
-</code></pre>
-
-<p>pushしてデプロイ</p>
-
-<pre><code>$ git add .
-$ git commit -m 'setup Heroku PostgreSQL'
-$ git push heroku master
-</code></pre>
-
-<p>最後に<a href="http://laravel3.kore1server.com/docs/database/migrations">マイグレーション</a>を実行</p>
-
-<p><code>``
-$ heroku run php artisan migrate
-Running</code>php artisan migrate` attached to terminal&hellip; up, run.4728</p>
-
-<hr />
-
-<ul>
-<li>  Application In Production!     *</li>
-</ul>
-
-
-<hr />
-
-<p>Do you really wish to run this command? [y/N]y
-Migration table created successfully.
-Migrated: 2014_10_12_000000_create_users_table
-Migrated: 2014_10_12_100000_create_password_resets_table
-<code>``
-</code>/auth/register<code>で、ユーザー登録画面。  
-</code>/auth/login<code>でログイン。  
-</code>/password/email`でパスワードリセットになる。<br/>
-(メール送信は設定していないので出来ない)</p>
-
-<p>一通りの設定はこれで完了！<br/>
-あとはセッション保持に<a href="https://addons.heroku.com/memcachier">MemCachier</a>か<a href="https://addons.heroku.com/?q=redi">Redis To Go</a>の設定や、<br/>
-メール送信用に<a href="https://addons.heroku.com/sendgrid">SendGrid</a>などが必要になると思う。</p>
-
-<h2>サンプル</h2>
-
-<p>作成したアプリは以下。</p>
-
-<p><a href="http://laravel-sample-on-heroku.herokuapp.com">http://laravel-sample-on-heroku.herokuapp.com</a></p>
-
-<h2>参考</h2>
-
-<p><a href="http://qiita.com/MasatoYoshioka@github/items/1b4de4249dc40ff1d902">macosxのphpにmcryptをインストール &ndash; Qiita</a><br/>
-<a href="http://www.slideshare.net/esolves/deploy-laravel-on-heroku">Deploy Laravel on Heroku</a><br/>
-<a href="https://mattstauffer.co/blog/laravel-on-heroku-using-a-postgresql-database">Laravel on Heroku &ndash; Using a PostgreSQL database &ndash; MattStauffer.co</a></p>
 ]]></content>
   </entry>
   
