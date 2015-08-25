@@ -4,7 +4,7 @@
   <title><![CDATA[Category: heroku | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/heroku/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-08-25T10:43:15+09:00</updated>
+  <updated>2015-08-25T10:44:02+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -81,7 +81,7 @@ Composer version 1.0-dev (f1aa655e6113e0efa979b8b09d7951a762eaa04c) 2015-08-20 1
 例えば、<code>vi</code>で開く場合は以下。<br/>
 <code>sudo</code>をつけてルート権限で実行している。</p>
 
-<pre><code>`$ sudo vi ~/.bash_profile`
+<pre><code>$ sudo vi ~/.bash_profile
 </code></pre>
 
 <p>以下を記述。</p>
