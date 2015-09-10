@@ -4,7 +4,7 @@
   <title><![CDATA[Category: heroku | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/heroku/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-08-28T18:39:03+09:00</updated>
+  <updated>2015-09-10T15:40:04+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,127 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[heroku]HerokuのclearDBとPostgresでのインポートとエクスポートまとめ]]></title>
+    <link href="http://kayakuguri.github.io/blog/2015/09/10/mysql-postgres-import-export/"/>
+    <updated>2015-09-10T15:38:34+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2015/09/10/mysql-postgres-import-export</id>
+    <content type="html"><![CDATA[<p>herokuのmysqlとpostgresqlのDBのインポートエクスポートメモ。<br/>
+heroku上のDBの中身を別のheroku上のDBへ移行するという前提。</p>
+
+<!-- more -->
+
+
+<h2>入れ替える情報</h2>
+
+<table>
+<thead>
+<tr>
+<th></th>
+<th align="left"> 項目 </th>
+<th align="left"> 内容 </th>
+<th align="left"> 例(clearDB) </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td></td>
+<td align="left"> USER_NAME </td>
+<td align="left"> ユーザー名 </td>
+<td align="left"> b114d7xxxxxxxb |</td>
+</tr>
+<tr>
+<td></td>
+<td align="left"> PASSWORD </td>
+<td align="left"> パスワード </td>
+<td align="left"> d81xxxxb |</td>
+</tr>
+<tr>
+<td></td>
+<td align="left"> HOST </td>
+<td align="left"> ホスト名 </td>
+<td align="left"> us-cdbr-iron-xxxx-xx.cleardb.net |</td>
+</tr>
+<tr>
+<td></td>
+<td align="left"> DB_NAME </td>
+<td align="left"> DB名 </td>
+<td align="left"> heroku_5f996e9xxxxxxxx |</td>
+</tr>
+</tbody>
+</table>
+
+
+<p>アプリを指定して実行する場合は、すべてのコマンドのお尻に、<code>--app app_name</code>とつける。</p>
+
+<h2>ClearDB(mySql)</h2>
+
+<h3>情報の構成</h3>
+
+<p>環境変数にて取得可能な情報より。</p>
+
+<pre><code>CLEARDB_DATABASE_URL=mysql://ユーザ名:パスワード@サーバ名/データベース?reconnect=true
+</code></pre>
+
+<h3>エクスポート</h3>
+
+<pre><code>$ mysqldump -uUSER_NAME -pPASSWORD -h HOST -r backup.sql --single-transaction DB_NAME
+</code></pre>
+
+<h3>インポート</h3>
+
+<pre><code>$ mysql --host=HOST --user=USER_NAME --password=PASSWORD --reconnect DB_NAME &lt; backup.sql
+</code></pre>
+
+<h3>参考</h3>
+
+<p><a href="http://pronama.azurewebsites.net/2015/05/05/cleardb-to-azure-vm-mysql/">ClearDB から Azure VM 上の MySQL に移行 | プログラミング生放送</a><br/>
+<a href="http://stackoverflow.com/questions/11803496/dump-sql-file-to-cleardb-in-heroku">mysql &ndash; Dump sql file to ClearDB in Heroku &ndash; Stack Overflow</a></p>
+
+<h2>Heroku Postgres</h2>
+
+<h3>概要</h3>
+
+<p>Heroku Postgresに標準搭載されている<code>PG Backups</code>を使用します。</p>
+
+<h3>エクスポート</h3>
+
+<p>バックアップを取る</p>
+
+<pre><code>$ heroku pg:backups capture
+Use Ctrl-C at any time to stop monitoring progress; the backup
+will continue running. Use heroku pg:backups info to check progress.
+Stop a running backup with heroku pg:backups cancel.
+
+DATABASE ---backup---&gt; b002
+</code></pre>
+
+<p>URLを取得する</p>
+
+<pre><code>$ heroku pg:backups public-url b002
+The following URL will expire at 2015-09-10 07:33:23 +0000:
+  "https://xfrtu.s3.amazonaws.com/a53f7aa...."
+</code></pre>
+
+<p>ここで取得したS3のURLを、<code>S3_URL</code>とする。</p>
+
+<p>（ダウンロードする場合は以下）</p>
+
+<pre><code>$ curl -o latest.dump 'S3_URL'
+</code></pre>
+
+<h3>インポート</h3>
+
+<pre><code>$ heroku pg:backups restore 'S3_URL' DATABASE_URL
+</code></pre>
+
+<h3>参考</h3>
+
+<p><a href="https://devcenter.heroku.com/articles/heroku-postgres-import-export">Importing and Exporting Heroku Postgres Databases with PG Backups | Heroku Dev Center</a><br/>
+<a href="https://devcenter.heroku.com/articles/heroku-postgres-backups">Heroku PGBackups | Heroku Dev Center</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[herokuがcomposer.lock必須になったのでcomposerの入れ方をメモしておく]]></title>
@@ -499,81 +620,6 @@ composerを使えばインストール出来る、とのことなので以下の
 
 <p><a href="http://stackoverflow.com/questions/16224488/how-to-get-the-exif-php-extension-working-on-heroku">How to get the EXIF PHP extension working on Heroku? &ndash; Stack Overflow</a><br/>
 <a href="https://devcenter.heroku.com/articles/php-support#extensions">Extensions | Heroku PHP Support | Heroku Dev Center</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[wordpressをherokuにインストールする場合はルーティングのhtaccessを自分で設置すること]]></title>
-    <link href="http://kayakuguri.github.io/blog/2015/05/22/heroku-wp-htaccess/"/>
-    <updated>2015-05-22T16:11:35+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2015/05/22/heroku-wp-htaccess</id>
-    <content type="html"><![CDATA[<p>タイトルママ。<br/>
-ちょっとハマったのでメモ。</p>
-
-<!-- more -->
-
-
-<h2>WordPressのインストール</h2>
-
-<p>以下の手順で通常通りwordpressをインストールした。</p>
-
-<ol>
-<li>herokuにインストール用のアプリを作成</li>
-<li>gitでローカルにclone</li>
-<li>2のディレクトリ内に<a href="https://ja.wordpress.org/">Wordpress日本語版</a>をダウンロードして展開</li>
-<li>herokuのアプリにmySQLのアドオン、<a href="https://addons.heroku.com/cleardb">ClearDB</a>を入れる</li>
-<li>環境変数から、DBの接続情報を確認。<br/>
-<code>mysql://ユーザ名:パスワード@サーバ名/データベース?reconnect=true</code></li>
-<li>wp-config.phpにDB情報を反映</li>
-<li>PushしてDploy</li>
-<li>wp-admin/install.phpにアクセスして、サイト名やユーザー名などを設定してインストール。</li>
-<li>完了</li>
-</ol>
-
-
-<h2>固定ページにアクセス</h2>
-
-<p>通常の投稿でもたぶん同じ事が起こると思うが、<br/>
-最初から入っているサンプルの固定ページにアクセス。</p>
-
-<blockquote><p><a href="http://YOUR-APP-NAME.herokuapp.com/sample-page/">http://YOUR-APP-NAME.herokuapp.com/sample-page/</a></p></blockquote>
-
-<p>アクセスを確認してから、特にソースは触らずに<a href="http://kayakuguri.github.io/blog/2015/04/21/git-allow-empty/">空でdeploy</a>。</p>
-
-<p>再度上記の固定ページにアクセスすると、<strong>404 Notfound</strong>。</p>
-
-<h2>ルーティング</h2>
-
-<p>ローカルに入れていたWordPressのディレクトとファイルを見比べていると、<br/>
-ローカルのものはドキュメントルートに<code>.htaccess</code>がある。</p>
-
-<p>中身を見ていると、リダイレクトしているよう。</p>
-
-<p>どうやら、wordpressのインストール時に、wordpressのルートにルーティング用の<code>.htaccess</code>を自動で作成するよう。<br/>
-それがdeployのタイミングで消えてしまい、リダイレクトがかからず、404となっていた。</p>
-
-<p><code>.htaccess</code>の中身は以下。</p>
-
-<p>```</p>
-
-<h1>BEGIN WordPress</h1>
-
-<p><IfModule mod_rewrite.c>
-RewriteEngine On
-RewriteBase /
-RewriteRule ^index.php$ &ndash; [L]
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteCond %{REQUEST_FILENAME} !-d
-RewriteRule . /index.php [L]
-</IfModule></p>
-
-<h1>END WordPress</h1>
-
-<p>```</p>
-
-<p>これを<code>.htaccess</code>の名前でwordpressのルートに保存してやり、git管理下においてやればよい。</p>
-
-<p>これを置いた状態であれば、deployかけても問題なくアクセスが出来た。</p>
 ]]></content>
   </entry>
   
