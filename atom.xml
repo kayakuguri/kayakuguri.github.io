@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-09-10T15:40:04+09:00</updated>
+  <updated>2015-09-19T20:08:00+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,42 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[gitで現状のディレクトリのファイル一覧を表示]]></title>
+    <link href="http://kayakuguri.github.io/blog/2015/09/19/show-gitfilelist-with-status/"/>
+    <updated>2015-09-19T19:56:40+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2015/09/19/show-gitfilelist-with-status</id>
+    <content type="html"><![CDATA[<p>無視されているかどうかを確認したかったので。<br/>
+コピペ用。</p>
+
+<pre><code>git ls-files -v|perl -pe 's/\/.*/\//'|uniq
+</code></pre>
+
+<!-- more -->
+
+
+<p>ファイル一覧を表示するのは以下。</p>
+
+<pre><code>git ls-files
+</code></pre>
+
+<p><code>-v</code>オプションで無視されているかどうかを表示。<br/>
+<code>H</code>はリストの含まれている。<br/>
+<code>skip-worktree</code>の時は、<code>s</code>となる。<br/>
+<code>assume-unchanged</code>の時は、状態が表示される、よう。</p>
+
+<p>ただし、<code>ls-files</code>すると、管理しているファイル全てが表示されるので、多すぎて目的のファイルを見つけられない。<br/>
+なので、現在のディレクトリのファイルのみを表示する。<br/>
+git標準ではそんなオプションはないようで、正規表現で絞り込んでるよう。</p>
+
+<h2>参考</h2>
+
+<p><a href="http://qiita.com/zimathon/items/d964c4b3cc688cb2d114">git ls-files &ndash; Qiita</a><br/>
+<a href="http://qiita.com/usamik26/items/56d0d3ba7a1300625f92">既に git 管理しているファイルをあえて無視したい &ndash; Qiita</a><br/>
+<a href="http://iyukki.blog56.fc2.com/blog-entry-119.html">gitでファイル一覧を見る方法 CodingFirst</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[heroku]HerokuのclearDBとPostgresでのインポートとエクスポートまとめ]]></title>
@@ -2607,49 +2643,6 @@ session_regenerate_id();
 <a href="http://pentan.info/php/session_gc.html">セッションの有効期間とか設定とか挙動とかを調べました &ndash; [PHP + PHP] ぺんたん info</a><br/>
 <a href="http://pentan.info/php/session_fixation.html">セッション固定攻撃(session fixation) &ndash; [PHP + PHP] ぺんたん info</a><br/>
 <a href="http://blog.ohgaki.net/session_regenerate_id_wo">ログイン後にsession_regenerate_id()を実行するだけで十分か? | yohgaki&#039;s blog</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[salesfroce]開発者コンソールでのFIELD_INTEGRITY_EXCEPTIONエラー]]></title>
-    <link href="http://kayakuguri.github.io/blog/2015/05/14/developper-console-error/"/>
-    <updated>2015-05-14T14:50:12+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2015/05/14/developper-console-error</id>
-    <content type="html"><![CDATA[<p>たまに起こっていつも調べている気がするのでメモ。</p>
-
-<!-- more -->
-
-
-<p>最近は開発者コンソールで開発をしている事が多いのだけれど、ファイルをいざ保存しようとしたらたまに以下のようなエラーが出て保存できない時がある。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2015/05/Force_com_Developer_Console_01.jpg" alt="" /></p>
-
-<blockquote><p>FIELD_INTEGRITY_EXCEPTION<br/>
-Failde to create createContainerMember for containerId=undefined:null は無効な containerIdです。</p></blockquote>
-
-<p>保存しているファイルの種類や内容には関係ない。<br/>
-これが起こるとsavingのまま止まってしまう。</p>
-
-<p>で、解決方法は公式にある。</p>
-
-<p><a href="https://help.salesforce.com/apex/HTViewSolution?id=000204953&amp;language=en_US">Developer console cannot save classes/triggers/pages</a></p>
-
-<p>まず、開発者コンソールを閉じて、再度開く。(念のため)<br/>
-で、開発者コンソールのメニューから、<code>Workspace</code> &ndash;> <code>New Workspace</code>を選択。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2015/05/Force_com_Developer_Console_02.jpg" alt="" /></p>
-
-<p>適当な名前で保存する。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2015/05/Force_com_Developer_Console_03.jpg" alt="" /></p>
-
-<p>ワークスペースが新しく切り替わる(見た目は変わらない)。<br/>
-すると、無事保存出来るようになる。</p>
-
-<p>一度保存出来るようになったらもとのdefaultのワークスペースに戻しても問題なくなっているので、<br/>
-先程作った適当なワークスペース削除しても問題なし。</p>
-
-<p>開発者コンソールは便利なんだけど、いかんせん不安定な印象がある…。</p>
 ]]></content>
   </entry>
   
