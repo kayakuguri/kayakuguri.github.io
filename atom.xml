@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-09-19T20:08:00+09:00</updated>
+  <updated>2015-09-19T20:10:26+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -14,7 +14,7 @@
 
   
   <entry>
-    <title type="html"><![CDATA[gitで現状のディレクトリのファイル一覧を表示]]></title>
+    <title type="html"><![CDATA[gitでカレントディレクトリのファイル一覧を表示]]></title>
     <link href="http://kayakuguri.github.io/blog/2015/09/19/show-gitfilelist-with-status/"/>
     <updated>2015-09-19T19:56:40+09:00</updated>
     <id>http://kayakuguri.github.io/blog/2015/09/19/show-gitfilelist-with-status</id>
