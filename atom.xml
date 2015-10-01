@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-09-19T20:10:26+09:00</updated>
+  <updated>2015-10-01T17:58:07+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,120 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[jQuery File Uploadを利用した大容量ファイルのアップロードをChunked uploadで実現する]]></title>
+    <link href="http://kayakuguri.github.io/blog/2015/10/01/jquery-chunked-upload/"/>
+    <updated>2015-10-01T17:57:05+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2015/10/01/jquery-chunked-upload</id>
+    <content type="html"><![CDATA[<p>大容量のファイルをアップする際に、通常の<code>input type=file</code>で送ろうとすると<br/>
+herokuだとタイムアウトになったりして上手くいかなかった。<br/>
+なので、jQueryのファイルアップロードプラグインにある、<code>chunk upload</code>を利用してアップした。</p>
+
+<!-- more -->
+
+
+<p>・Github<br/>
+<a href="https://github.com/blueimp/jQuery-File-Upload">blueimp/jQuery-File-Upload</a></p>
+
+<p>公式のjQuery File Uploadのデモは以下。<br/>
+<a href="https://blueimp.github.io/jQuery-File-Upload/">https://blueimp.github.io/jQuery-File-Upload/</a></p>
+
+<p>セットアップの流れは以下を参考に。<br/>
+<a href="https://github.com/blueimp/jQuery-File-Upload/wiki/Setup">https://github.com/blueimp/jQuery-File-Upload/wiki/Setup</a></p>
+
+<h2>通常のアップロード</h2>
+
+<p>以下から最新バージョンをダウンロード。<br/>
+<a href="https://github.com/blueimp/jQuery-File-Upload/releases">https://github.com/blueimp/jQuery-File-Upload/releases</a></p>
+
+<p>解凍して、PHPが動作する環境のドキュメントルートにアップロード。<br/>
+そのままアクセスすると動作する。</p>
+
+<p>アップしたファイルは、<br/>
+<code>/server/php/files/</code>以下にアップされる。</p>
+
+<h2>Chunk File</h2>
+
+<p>このライブラリによるアップロードの容量制限はありますか？という質問には、一応、4GBです、とのこと。<br/>
+これはブラウザの制限のよう。<br/>
+ただし、Chunked file upload、という方法を使って、とのこと。</p>
+
+<p><a href="https://github.com/blueimp/jQuery-File-Upload/wiki/Frequently-Asked-Questions#what-is-the-maximum-file-size-limitation">requently Asked Questions · blueimp/jQuery-File-Upload Wiki · GitHub</a></p>
+
+<p>この<code>Chunked file upload</code>という方法は、大きいサイズのファイルを指定したサイズに分割して少しづつアップロードし、アップロード後に合体させる方法、とのこと。<br/>
+(特にこのライブラリ特有の話ではないよう。)</p>
+
+<p><a href="https://github.com/blueimp/jQuery-File-Upload/wiki/Chunked-file-uploads">Chunked file uploads · blueimp/jQuery-File-Upload Wiki · GitHub</a></p>
+
+<p>使い方はいたって簡単で、通常の<code>fileupload</code>のオプションに、<code>maxChunkSize</code>の指定を追加するだけ。</p>
+
+<p>例）通常</p>
+
+<pre><code>$('#fileupload').fileupload({
+    url: url,
+    dataType: 'json'
+});
+</code></pre>
+
+<p>Chunked upload</p>
+
+<pre><code>$('#fileupload').fileupload({
+    maxChunkSize: 20000000,
+    url: url,
+    dataType: 'json'
+});
+</code></pre>
+
+<h2>Callback Option</h2>
+
+<p>以下で一覧を参照可能。<br/>
+<a href="https://github.com/blueimp/jQuery-File-Upload/wiki/Options#callback-options">Options · blueimp/jQuery-File-Upload Wiki · GitHub</a></p>
+
+<p>Chunked Upload関連では以下のオプションがあった。</p>
+
+<ul>
+<li>fileuploadchunksend</li>
+<li>fileuploadchunkdone</li>
+<li>fileuploadchunkfail</li>
+<li>fileuploadchunkalways</li>
+</ul>
+
+
+<p>それぞれ分割したファイルがアップロードされる度に呼び出されるので、結構な回数呼ばれる。</p>
+
+<h2>ソース</h2>
+
+<p>一式全部上げておく。<br/>
+アップロードやエラーの処理については以下を参考にさせてもらいました。<br/>
+<a href="http://qiita.com/mpyw/items/62e6e415f86eb30a5ff4">JavaScript(jQuery)からPHPのAPIを利用する &ndash; Qiita</a></p>
+
+<p>ファイル構造は以下のようになっている。<br/>
+htmlファイル以外はダウンロードしてきたまんま。</p>
+
+<pre><code>public(ドキュメントルート)
+└─file_upload
+  ├─cors/
+  ├─css/
+  ├─img/
+  ├─js/
+  ├─server/
+  │   ├─php/
+  │   └─files/
+  └─chunked_upload.html
+</code></pre>
+
+<script src="https://gist.github.com/anonymous/2e523356346040f6758a.js"></script>
+
+
+<h2>まとめ</h2>
+
+<p>herokuではgit管理でアップしたもの以外はデプロイなどでの再起動時に消えてしまいます。<br/>
+なので、これでアップしてもそのまま残っているわけではないのでご注意ください。<br/>
+じゃあどうするかというと、一旦アップして、ここからどこかに転送する、とかそういうもののために作成した次第です。<br/>
+とはいえ、heroku以外でもchunked uploadを使えば、一時停止やリジュームなど、通信が切れても続きから再開したりとかが出来るようなので、普通のサーバー用途でも便利そう。</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[gitでカレントディレクトリのファイル一覧を表示]]></title>
@@ -2594,55 +2708,6 @@ httpdファイルへの追記が必要とのことで試してみた。</p>
 <p>これを<code>.htaccess</code>の名前でwordpressのルートに保存してやり、git管理下においてやればよい。</p>
 
 <p>これを置いた状態であれば、deployかけても問題なくアクセスが出来た。</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Session Fixation]]></title>
-    <link href="http://kayakuguri.github.io/blog/2015/05/21/session-fixation/"/>
-    <updated>2015-05-21T19:09:52+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2015/05/21/session-fixation</id>
-    <content type="html"><![CDATA[<p>今更ながら、Session Fixationなるものを知ったのでメモ。</p>
-
-<!-- more -->
-
-
-<p>内容は以下、徳丸先生が詳しい。<br/>
-<a href="http://blog.tokumaru.org/2009/01/introduction-to-session-fixation-attack.html">とくまるひろしのSession Fixation攻撃入門 | 徳丸浩の日記</a></p>
-
-<p>日本語では、<code>セッション固定攻撃</code>と呼ばれているようで、<br/>
-ログイン認証をセッションで行っているサイトに対して、何らかの方法でユーザーに意図した固定セッションIDを与えた状態でログインしてもらい、<br/>
-攻撃者はそのIDでログインしたことにする、というもののよう。</p>
-
-<p>対策としては以下いずれかになるよう。</p>
-
-<blockquote><p>(1) セッション変数内に特定の値を常に与えるようにし、もしその値が無かった場合には正しくふられたセッションIDではないと判断する。<br/>
-(セッションIDの正当性をセッション変数内に埋め込む)<br/>
-(2) ログイン処理など、そのサイトでの本来のセッションの使用を行う時点で(重要な情報を持たせるときに)、セッションIDを変更する。
-<a href="http://pentan.info/php/session_fixation.html">http://pentan.info/php/session_fixation.html</a></p></blockquote>
-
-<p>2のセッションの付け替えは以下のようにする。</p>
-
-<pre><code>session_start();
-session_destroy();
-session_start();
-session_regenerate_id();
-</code></pre>
-
-<p>ログインが成功し、ログイン認証をセッションに格納する直前に付け替えを入れてやれば、<br/>
-ログイン後には別のIDとなるので、攻撃側が用意した固定IDを回避することが出来る。</p>
-
-<p>ただしこの、<code>session_regenerate_id</code>は結構な負荷がかかるようで、<br/>
-連続して使用しているとセッションが切れてしまうらしい。<br/>
-なので、連続的に実行されないようにする事が重要っぽい。<br/>
-ログイン時に一回のみ実行されるようにしておけば特に問題なさそう。</p>
-
-<h2>参考</h2>
-
-<p><a href="http://canalize.jp/archives/009281.php">セッションハイジャック と session_regenerate_id( )関数 &ndash; Shoulder.jp</a> <br/>
-<a href="http://pentan.info/php/session_gc.html">セッションの有効期間とか設定とか挙動とかを調べました &ndash; [PHP + PHP] ぺんたん info</a><br/>
-<a href="http://pentan.info/php/session_fixation.html">セッション固定攻撃(session fixation) &ndash; [PHP + PHP] ぺんたん info</a><br/>
-<a href="http://blog.ohgaki.net/session_regenerate_id_wo">ログイン後にsession_regenerate_id()を実行するだけで十分か? | yohgaki&#039;s blog</a></p>
 ]]></content>
   </entry>
   
