@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-10-01T17:58:07+09:00</updated>
+  <updated>2015-10-05T16:48:05+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,105 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[herokuでhtaccessを使ってIPアドレスによる制限を設定する]]></title>
+    <link href="http://kayakuguri.github.io/blog/2015/10/05/heroku-htaccess-allow-ip/"/>
+    <updated>2015-10-05T16:25:49+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2015/10/05/heroku-htaccess-allow-ip</id>
+    <content type="html"><![CDATA[<p>herokuにて構築しているapacheアプリにて、特定のIPからしかアクセス出来ないようにするために、<br/>
+htaccessにて制限をかけようとしてたのだけど、どうも上手くいかなくてハマったのでメモ。</p>
+
+<!-- more -->
+
+
+<p>通常だと、以下のようになる。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>order deny,allow
+</span><span class='line'>deny from all
+</span><span class='line'>allow from 124.xx.xxx.xxx</span></code></pre></td></tr></table></div></figure>
+
+
+<p>この場合、制御は、拒否→許可、の順番で、<br/>
+まず全て拒否して、<code>124.xx.xxx.xxx</code>からのアクセスのみ許可、という流れ。</p>
+
+<p>しかし、herokuではこれでは上手くいかなかった。</p>
+
+<p>というのも、herokuではサーバー側で負荷分散するためにロードバランサが使用されている。<br/>
+(dynoが1の場合でも振り分けはされないけれど利用はされているみたい）<br/>
+これによって、実際にアプリに到達するIPアドレスが、アクセス元のIPアドレスからロードバランサを経由したものに変わってしまう。<br/>
+しかもそのIPは都度、変わってしまうよう。</p>
+
+<p>これだとIPアドレスによる制限がかけられないのだけど、それを解決する仕組みとして、<br/>
+<code>X-FORWARDED-FOR</code> という方法があるらしい。<br/>
+<a href="https://ja.wikipedia.org/wiki/X-Forwarded-For">X-Forwarded-For &ndash; Wikipedia</a></p>
+
+<p>それを利用する事で、アクセス元のIPアドレスをロードバランサやプロキシを挟んだとしてもそのままアプリに通知する事が出来るようになるよう。</p>
+
+<p>実際のコードは以下。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>SetEnvIf X-Forwarded-For 124.xx.xxx.xxx allowip
+</span><span class='line'>
+</span><span class='line'>order deny,allow
+</span><span class='line'>deny  from all
+</span><span class='line'>allow from env=allowip</span></code></pre></td></tr></table></div></figure>
+
+
+<p><code>allowip</code>は変数名なのでなんでもよい。<br/>
+こうやって記述することで、heroku上でも指定のIPアドレスのみ許可してやることが出来た。</p>
+
+<p>指定のIPアドレスのみ拒否する場合も書き方は同じ。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>SetEnvIf X-Forwarded-For 124.xx.xxx.xxx denyip
+</span><span class='line'>
+</span><span class='line'>order allow,deny
+</span><span class='line'>allow from all
+</span><span class='line'>deny from env=denyip</span></code></pre></td></tr></table></div></figure>
+
+
+<p>複数指定する場合は、変数を複数定義してやるだけで大丈夫だった。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>SetEnvIf X-Forwarded-For 124.xx.xxx.xxx allowip1
+</span><span class='line'>SetEnvIf X-Forwarded-For 196.xx.xxx.xxx allowip2
+</span><span class='line'>
+</span><span class='line'>order deny,allow
+</span><span class='line'>deny  from all
+</span><span class='line'>allow from env=allowip1
+</span><span class='line'>allow from env=allowip2</span></code></pre></td></tr></table></div></figure>
+
+
+<p>また、これはロードバランサ利用に限った話ではないけれど、IPアドレスの範囲指定をした場合には、<br/>
+CIDR(サイダー)形式での表記で書いてやると実現可能。<br/>
+以下のツールで厳密な範囲指定をしてやることが出来る。</p>
+
+<p><a href="http://ipvx.info/ipv4/twoip2cidr/">２つのIPアドレス範囲を厳密にCIDR化ツール | IPV46</a></p>
+
+<h2>参考</h2>
+
+<p><a href="http://blog.mizoshiri.com/archives/1753">ロードバランサーやプロキシー経由でも.htaccessでのIPアドレスを制限したい場合</a><br/>
+<a href="http://ipvx.info/2015/02/strictly-conv-range-to-cidr/">２つのIPアドレスの範囲をCIDRに厳密に変換するってどういう事？ | IPV46</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[jQuery File Uploadを利用した大容量ファイルのアップロードをChunked uploadで実現する]]></title>
@@ -2626,88 +2725,6 @@ httpdファイルへの追記が必要とのことで試してみた。</p>
 
 
 <p><a href="http://detail.chiebukuro.yahoo.co.jp/qa/question_detail/q11102244256">phpで環境変数$_ENVを使用しようとしていますが使用できない状態です。&hellip; &ndash; Yahoo!知恵袋</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[wordpressをherokuにインストールする場合はルーティングのhtaccessを自分で設置すること]]></title>
-    <link href="http://kayakuguri.github.io/blog/2015/05/22/heroku-wp-htaccess/"/>
-    <updated>2015-05-22T16:11:35+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2015/05/22/heroku-wp-htaccess</id>
-    <content type="html"><![CDATA[<p>タイトルママ。<br/>
-ちょっとハマったのでメモ。</p>
-
-<!-- more -->
-
-
-<h2>WordPressのインストール</h2>
-
-<p>以下の手順で通常通りwordpressをインストールした。</p>
-
-<ol>
-<li>herokuにインストール用のアプリを作成</li>
-<li>gitでローカルにclone</li>
-<li>2のディレクトリ内に<a href="https://ja.wordpress.org/">Wordpress日本語版</a>をダウンロードして展開</li>
-<li>herokuのアプリにmySQLのアドオン、<a href="https://addons.heroku.com/cleardb">ClearDB</a>を入れる</li>
-<li>環境変数から、DBの接続情報を確認。<br/>
-<code>mysql://ユーザ名:パスワード@サーバ名/データベース?reconnect=true</code></li>
-<li>wp-config.phpにDB情報を反映</li>
-<li>PushしてDploy</li>
-<li>wp-admin/install.phpにアクセスして、サイト名やユーザー名などを設定してインストール。</li>
-<li>完了</li>
-</ol>
-
-
-<h2>固定ページにアクセス</h2>
-
-<p>通常の投稿でもたぶん同じ事が起こると思うが、<br/>
-最初から入っているサンプルの固定ページにアクセス。</p>
-
-<blockquote><p><a href="http://YOUR-APP-NAME.herokuapp.com/sample-page/">http://YOUR-APP-NAME.herokuapp.com/sample-page/</a></p></blockquote>
-
-<p>アクセスを確認してから、特にソースは触らずに<a href="http://kayakuguri.github.io/blog/2015/04/21/git-allow-empty/">空でdeploy</a>。</p>
-
-<p>再度上記の固定ページにアクセスすると、<strong>404 Notfound</strong>。</p>
-
-<h2>ルーティング</h2>
-
-<p>ローカルに入れていたWordPressのディレクトとファイルを見比べていると、<br/>
-ローカルのものはドキュメントルートに<code>.htaccess</code>がある。</p>
-
-<p>中身を見ていると、リダイレクトしているよう。</p>
-
-<p>どうやら、wordpressのインストール時に、wordpressのルートにルーティング用の<code>.htaccess</code>を自動で作成するよう。<br/>
-それがdeployのタイミングで消えてしまい、リダイレクトがかからず、404となっていた。</p>
-
-<p><code>.htaccess</code>の中身は以下。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'># BEGIN WordPress
-</span><span class='line'>&lt;IfModule mod_rewrite.c&gt;
-</span><span class='line'>RewriteEngine On
-</span><span class='line'>RewriteBase /
-</span><span class='line'>RewriteRule ^index\.php$ - [L]
-</span><span class='line'>RewriteCond %{REQUEST_FILENAME} !-f
-</span><span class='line'>RewriteCond %{REQUEST_FILENAME} !-d
-</span><span class='line'>RewriteRule . /index.php [L]
-</span><span class='line'>&lt;/IfModule&gt;
-</span><span class='line'>
-</span><span class='line'># END WordPress</span></code></pre></td></tr></table></div></figure>
-
-
-<p>これを<code>.htaccess</code>の名前でwordpressのルートに保存してやり、git管理下においてやればよい。</p>
-
-<p>これを置いた状態であれば、deployかけても問題なくアクセスが出来た。</p>
 ]]></content>
   </entry>
   

@@ -4,7 +4,7 @@
   <title><![CDATA[Category: heroku | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/heroku/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-10-01T17:58:07+09:00</updated>
+  <updated>2015-10-05T16:48:05+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,89 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[herokuでhtaccessを使ってIPアドレスによる制限を設定する]]></title>
+    <link href="http://kayakuguri.github.io/blog/2015/10/05/heroku-htaccess-allow-ip/"/>
+    <updated>2015-10-05T16:25:49+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2015/10/05/heroku-htaccess-allow-ip</id>
+    <content type="html"><![CDATA[<p>herokuにて構築しているapacheアプリにて、特定のIPからしかアクセス出来ないようにするために、<br/>
+htaccessにて制限をかけようとしてたのだけど、どうも上手くいかなくてハマったのでメモ。</p>
+
+<!-- more -->
+
+
+<p>通常だと、以下のようになる。</p>
+
+<p><code>
+order deny,allow
+deny from all
+allow from 124.xx.xxx.xxx
+</code></p>
+
+<p>この場合、制御は、拒否→許可、の順番で、<br/>
+まず全て拒否して、<code>124.xx.xxx.xxx</code>からのアクセスのみ許可、という流れ。</p>
+
+<p>しかし、herokuではこれでは上手くいかなかった。</p>
+
+<p>というのも、herokuではサーバー側で負荷分散するためにロードバランサが使用されている。<br/>
+(dynoが1の場合でも振り分けはされないけれど利用はされているみたい）<br/>
+これによって、実際にアプリに到達するIPアドレスが、アクセス元のIPアドレスからロードバランサを経由したものに変わってしまう。<br/>
+しかもそのIPは都度、変わってしまうよう。</p>
+
+<p>これだとIPアドレスによる制限がかけられないのだけど、それを解決する仕組みとして、<br/>
+<code>X-FORWARDED-FOR</code> という方法があるらしい。<br/>
+<a href="https://ja.wikipedia.org/wiki/X-Forwarded-For">X-Forwarded-For &ndash; Wikipedia</a></p>
+
+<p>それを利用する事で、アクセス元のIPアドレスをロードバランサやプロキシを挟んだとしてもそのままアプリに通知する事が出来るようになるよう。</p>
+
+<p>実際のコードは以下。</p>
+
+<p>```
+SetEnvIf X-Forwarded-For 124.xx.xxx.xxx allowip</p>
+
+<p>order deny,allow
+deny  from all
+allow from env=allowip
+```</p>
+
+<p><code>allowip</code>は変数名なのでなんでもよい。<br/>
+こうやって記述することで、heroku上でも指定のIPアドレスのみ許可してやることが出来た。</p>
+
+<p>指定のIPアドレスのみ拒否する場合も書き方は同じ。</p>
+
+<p>```
+SetEnvIf X-Forwarded-For 124.xx.xxx.xxx denyip</p>
+
+<p>order allow,deny
+allow from all
+deny from env=denyip
+```</p>
+
+<p>複数指定する場合は、変数を複数定義してやるだけで大丈夫だった。</p>
+
+<p>```
+SetEnvIf X-Forwarded-For 124.xx.xxx.xxx allowip1
+SetEnvIf X-Forwarded-For 196.xx.xxx.xxx allowip2</p>
+
+<p>order deny,allow
+deny  from all
+allow from env=allowip1
+allow from env=allowip2
+```</p>
+
+<p>また、これはロードバランサ利用に限った話ではないけれど、IPアドレスの範囲指定をした場合には、<br/>
+CIDR(サイダー)形式での表記で書いてやると実現可能。<br/>
+以下のツールで厳密な範囲指定をしてやることが出来る。</p>
+
+<p><a href="http://ipvx.info/ipv4/twoip2cidr/">２つのIPアドレス範囲を厳密にCIDR化ツール | IPV46</a></p>
+
+<h2>参考</h2>
+
+<p><a href="http://blog.mizoshiri.com/archives/1753">ロードバランサーやプロキシー経由でも.htaccessでのIPアドレスを制限したい場合</a><br/>
+<a href="http://ipvx.info/2015/02/strictly-conv-range-to-cidr/">２つのIPアドレスの範囲をCIDRに厳密に変換するってどういう事？ | IPV46</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[jQuery File Uploadを利用した大容量ファイルのアップロードをChunked uploadで実現する]]></title>
@@ -492,211 +575,6 @@ session_start();
 <p><a href="https://devcenter.heroku.com/articles/heroku-redis#connecting-in-php">Heroku Redis | Heroku Dev Center</a><br/>
 <a href="http://www.sitepoint.com/saving-php-sessions-in-redis/">PHP Master | Saving PHP Sessions in Redis</a><br/>
 <a href="http://qiita.com/Oakbow/items/98599da0fc62863fc1b8#%E3%81%A9%E3%81%AE-redis-%E3%81%AE%E3%82%A2%E3%83%89%E3%82%AA%E3%83%B3%E3%82%92%E4%BD%BF%E3%81%86">herokuでセッションの保存先をRedisにする &ndash; Qiita</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[wordpress上のメディアをcloudinaryに自動アップロードして管理する]]></title>
-    <link href="http://kayakuguri.github.io/blog/2015/06/30/auto-upload-cloudinary-on-heroku/"/>
-    <updated>2015-06-30T12:54:33+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2015/06/30/auto-upload-cloudinary-on-heroku</id>
-    <content type="html"><![CDATA[<p>herokuでwordpressを使用した場合、通常ではアップロードした画像は<br/>
-heorkuの再起動のタイミングで全て消えてしまいます。</p>
-
-<!-- more -->
-
-
-<p>なので、そうならないようにクラウド上のストレージサービスである、cloudinaryに保存させたりします。<br/>
-cloudinaryには公式でwordpressのプラグインが用意されています。<br/>
-<a href="https://ja.wordpress.org/plugins/cloudinary-image-management-and-manipulation-in-the-cloud-cdn/">WordPress &#8250; Cloudinary &ndash; Image management and manipulation in the cloud + CDN &laquo; WordPress Plugins</a></p>
-
-<p>これを利用することでwordpress上の画像をcloudinaryで管理できるようになるのですが、<br/>
-アップロードした画像を手動でcloudinaryに反映させてやらねばなりません。<br/>
-それをなんとか自動でアップされるようにしてみました。</p>
-
-<h2>cloudinaryへのアップロード手順(通常)</h2>
-
-<p>通常と同じようにメディアライブラリ上から画像をアップロードします。<br/>
-一覧表示で、詳細まで表示される、テーブル表示に切り替えます。<br/>
-この時の右端に、<code>Upload to Cloudinary</code>というリンクがあるのでそれをクリックします。</p>
-
-<p><img src="/images/2015/06/cloudinary_heroku01.jpg" alt="" /></p>
-
-<p>するとアップロードされ、表記がアップロード済に変わります。</p>
-
-<p><img src="/images/2015/06/cloudinary_heroku02.jpg" alt="" /></p>
-
-<p>この時に内部では何をしているかと言うと、<br/>
-cloudinaryにアップロードし、アップ先のURLを使ってメタデータを書き換え、<br/>
-cloudinaryへアップした、というフラグを立てています。<br/>
-このフラグを立てているところがポイントになります。</p>
-
-<h2>メタデータ</h2>
-
-<p>wordpressでは画像は投稿データとして管理されています。<br/>
-データ構造は以下が詳しいのですが、画像部分だけを引用させてもらうとこんな感じです。<br/>
-<a href="http://hijiriworld.com/web/wp-data-register/">WordPress データ登録機構を知ってもっと自由で効率的なフローを  |  hijiriworld Web</a></p>
-
-<p><code>wp_posts</code>テーブル</p>
-
-<table>
-<thead>
-<tr>
-<th>post_title </th>
-<th> post_status </th>
-<th> post_name </th>
-<th> guid </th>
-<th> post_type </th>
-<th> post_mine_type</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>{$file_name} </td>
-<td> inherit </td>
-<td> {$file_name} </td>
-<td> {$guid} </td>
-<td> attachment </td>
-<td> {$mine_type}</td>
-</tr>
-</tbody>
-</table>
-
-
-<p><code>wp_postmeta</code>テーブル</p>
-
-<table>
-<thead>
-<tr>
-<th>post_id </th>
-<th> meta_key </th>
-<th> meta_value</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>{$attachment_id} </td>
-<td> _wp_attached_file </td>
-<td> {$file_name}</td>
-</tr>
-<tr>
-<td>{$attachment_id} </td>
-<td> _wp_attachment_metadata </td>
-<td> シリアライズされたメタデータ</td>
-</tr>
-</tbody>
-</table>
-
-
-<p>wp_postsの方は特に変更する必要はありません。<br/>
-重要なのはwp_postmetaのメタデータの方です。</p>
-
-<p>今回、変更する具体的な箇所は以下の２箇所です。<br/>
-<code>_wp_attached_file</code>をファイル名からcloudinaryのURLへ変更。<br/>
-<code>_wp_attachment_metadata</code>の中にcloudinaryフラグを立てる。</p>
-
-<h2>メディア管理とプラグインの仕組み</h2>
-
-<p>wordpressのメディアは都度URLを動的に生成しています。<br/>
-メイン画像の場合は以下。</p>
-
-<blockquote><p>ブログのパス + <code>_wp_attached_file</code>の$file_name</p></blockquote>
-
-<p>サムネイルの場合は以下。</p>
-
-<blockquote><p>ブログのパス + <code>_wp_attachment_metadata</code>の指定サイズのファイル名</p></blockquote>
-
-<p>なのでファイル名にcloudinaryの絶対パスを入れてしまうとURLが２重になってしまいます。</p>
-
-<p>で。<br/>
-これが、cloudinaryのフラグが立っているものに関しては、cloudinaryのプラグイン側でURLをうまい具合に置き換えて表示してくれます。<br/>
-なので、こちらとしてはフラグを立てるだけ、で大丈夫。</p>
-
-<h2>実作業</h2>
-
-<p>処理の流れは以下のように。</p>
-
-<ol>
-<li>画像をアップロード</li>
-<li>メタデータ作成のフック内で画像URLを取得</li>
-<li>取得したURLでcloudinaryにアップロード</li>
-<li>cloudinaryのURLでDBのファイル名を更新</li>
-<li>メタデータにフラグを立てる</li>
-</ol>
-
-
-<p><code>wp_generate_attachment_metadata</code>で、アップされたファイルのメタデータを作成する処理にフックをかけられるのでそれを使用します。</p>
-
-<p>functions.phpに以下を記述。</p>
-
-<p>```
-function cldnry_wp_generate_attachment_metadata($metadata, $postid){</p>
-
-<pre><code>$imgPath = get_attached_file( $postid );
-
-//ファイル形式のチェック
-$info = pathinfo($imgPath);
-$public_id = $info["filename"];
-$mime_types = array("png"=&gt;"image/png", "jpg"=&gt;"image/jpeg", "pdf"=&gt;"application/pdf", "gif"=&gt;"image/gif", "bmp"=&gt;"image/bmp");
-$extension = $info["extension"];
-$type = @$mime_types[$extension];
-//画像以外はcloudinaryにアップしない
-if($type === null){
-    $stderr = fopen( 'php://stderr', 'w' );
-    fwrite( $stderr, 'アップロードされたファイルが画像ではありません。file-type:'.$extension );
-    return $metadata;
-}
-
-//Cloudinaryへアップ
-$cl_upload = new CloudinaryUploader();
-$uploaded = $cl_upload-&gt;upload($imgPath, array(
-));
-$public_id = $uploaded['public_id'];
-
-//DBへ保存
-update_attached_file($postid, $uploaded['secure_url']);
-$metadata['cloudinary'] = true; //cloudinaryからアップしたことを記録
-
-return $metadata;
-</code></pre>
-
-<p>}
-add_filter( &ldquo;wp_generate_attachment_metadata&rdquo; , &ldquo;cldnry_wp_generate_attachment_metadata&rdquo;,10 ,2 );
-```</p>
-
-<p>※2015/08/21追記<br/>
-cloudinaryへアップする際にpublic_idを指定してしまうと画像が次々と上書きされてしまうので、その部分を削除しました。</p>
-
-<p>  &ldquo;public_id&rdquo; => $public_id,</p>
-
-<p>まず、<code>get_attached_file( $postid )</code>でアップされたファイルのURLを取得。<br/>
-そのファイルが画像かどうかを一応チェックしている。<br/>
-で、cloudinaryへアップロード。<br/>
-cloudinaryはプラグインのファイルから利用するので公式で解説されているコードとは少し異なります。<br/>
-で、アップされたらURLをファイル名として保存。<br/>
-最後にポイントとなる、フラグを立てて終了。</p>
-
-<p>これだけであとの表示周りの処理はcloudinaryがやってくれます。</p>
-
-<h2>結果</h2>
-
-<p>通常と同じように画像をアップすると、アップ完了時点でcloudinaryへ保存されます。<br/>
-以下のようにURLがcloudinaryになっている事が確認できるかと思います。</p>
-
-<p><img src="/images/2015/06/cloudinary_heroku03.jpg" alt="" /></p>
-
-<p>一覧でテーブル表示にすると、cloudinaryにはすでにアップロード済の表記となっています。</p>
-
-<h2>まとめ</h2>
-
-<p>herokuでwordpressを扱う場合、この画像問題がネックの一つとなっているのですが、<br/>
-herokuにはcloudinaryのアドオンがあるので、これでとりあえずは解消したのではないでしょうか。<br/>
-この解消は自分の中ではかなり大きいです。</p>
-
-<p>使用の際の注意点としては、wordpress上でデータを削除してもcloudinary上からは削除されない、という点です。<br/>
-cloudinaryのアップロード容量が決まっているため、メンテナンスが必要かもしれません。</p>
-
-<p>あとはアップデートの問題が解決すればすっきり出来るのですが。。</p>
 ]]></content>
   </entry>
   
