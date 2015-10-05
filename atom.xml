@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-10-05T16:48:05+09:00</updated>
+  <updated>2015-10-05T16:51:17+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -109,6 +109,11 @@ CIDR(サイダー)形式での表記で書いてやると実現可能。<br/>
 
 <p><a href="http://blog.mizoshiri.com/archives/1753">ロードバランサーやプロキシー経由でも.htaccessでのIPアドレスを制限したい場合</a><br/>
 <a href="http://ipvx.info/2015/02/strictly-conv-range-to-cidr/">２つのIPアドレスの範囲をCIDRに厳密に変換するってどういう事？ | IPV46</a></p>
+
+<hr />
+
+<p>ちなみに、herokuアプリから外にアクセスする際のIPアドレスの固定方法は以下を参考に。<br/>
+<a href="http://kayakuguri.github.io/blog/2014/09/26/static-ip-heroku/">[heroku]QuotaGuard Staticを使ってHerokuでのIP固定を試してみる</a></p>
 ]]></content>
   </entry>
   
