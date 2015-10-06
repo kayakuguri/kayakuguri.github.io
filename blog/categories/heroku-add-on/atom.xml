@@ -4,7 +4,7 @@
   <title><![CDATA[Category: heroku-add-on | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/heroku-add-on/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-10-06T17:32:52+09:00</updated>
+  <updated>2015-10-06T18:33:24+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -130,10 +130,8 @@ $client->addEvent(&lsquo;purchases&rsquo;, $event);
 <h2>まとめ</h2>
 
 <p>送信や取得のデータの基本がJSONになっているのはプログラム的には扱いやすそう。<br/>
-また、簡単な表示であれば管理画面からさくっと出来そうでよさげ。</p>
-
-<p>ただし、複雑な分析になると自前でJSなどを利用してプログラムを書かないといけなかったり、<br/>
-そもそもDBの形式ではないので他の解析ソフトなどが使えなさそう。</p>
+また、簡単な表示であれば管理画面からさくっと出来そうでよさげ。<br/>
+CSVの出力も出来た。</p>
 
 <p>お手軽に実装し解析する分にはよさそう。</p>
 
