@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-10-05T16:51:17+09:00</updated>
+  <updated>2015-10-06T17:32:52+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,152 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[heroku アドオン]keen.ioで簡単にアクセス解析を入れてみる]]></title>
+    <link href="http://kayakuguri.github.io/blog/2015/10/06/try-keen-io/"/>
+    <updated>2015-10-06T17:31:01+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2015/10/06/try-keen-io</id>
+    <content type="html"><![CDATA[<p>簡単なアクセス解析を実装するheroku addonとして、keen.ioなるものがあったので、使って見た。</p>
+
+<!-- more -->
+
+
+<h2>プラン</h2>
+
+<p>プランはイベントの保存数によって決まっており、月5万イベントまでは無料。</p>
+
+<p><a href="https://addons.heroku.com/keen?utm_campaign=category&amp;utm_medium=dashboard&amp;utm_source=addons#developer">Keen IO | Add-ons | Heroku</a></p>
+
+<p>herokuのaddonページには月、と書いてないけど、公式の方では<code>/Month</code>とあった。<br/>
+<a href="https://keen.io/plans/self-service">Self-Service | Keen IO &ndash; Analytics for Developers</a></p>
+
+<p><img src="http://kayakuguri.github.io/images/2015/10/keen01.jpg" alt="" /></p>
+
+<h2>インストール</h2>
+
+<p>環境はPHP。<br/>
+composerでインストールする。</p>
+
+<pre><code>$ composer require keen-io/keen-io:~2.5 
+</code></pre>
+
+<p>もしくは、composer.jsonに直接追加する。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>{
+</span><span class='line'>    "require": {
+</span><span class='line'>        "keen-io/keen-io": "~2.5"
+</span><span class='line'>    }
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<p><code>composer install</code>でインストール。</p>
+
+<h2>herokuに追加</h2>
+
+<p>Herokuには管理画面から、もしくは、以下のコマンドで追加。</p>
+
+<pre><code>$ heroku addons:create keen
+</code></pre>
+
+<p>環境変数に必要な情報が格納される。</p>
+
+<ul>
+<li><code>KEEN_PROJECT_ID</code></li>
+<li><code>KEEN_WRITE_KEY</code></li>
+<li><code>KEEN_READ_KEY</code></li>
+</ul>
+
+
+<h2>利用</h2>
+
+<p>公式のまんまだけど、以下で送信。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>use KeenIO\Client\KeenIOClient;
+</span><span class='line'>
+</span><span class='line'>$client = KeenIOClient::factory([
+</span><span class='line'>    'projectId' =&gt; getenv('KEEN_PROJECT_ID'),
+</span><span class='line'>    'writeKey'  =&gt; getenv('KEEN_WRITE_KEY'),
+</span><span class='line'>    'readKey'   =&gt; getenv('KEEN_READ_KEY')
+</span><span class='line'>]);
+</span><span class='line'>
+</span><span class='line'>$event = ['purchase' =&gt; ['item' =&gt; 'Golden Elephant']];
+</span><span class='line'>$client-&gt;addEvent('purchases', $event);</span></code></pre></td></tr></table></div></figure>
+
+
+<p><code>purchase</code>は自由に変更可能。<br/>
+<code>addEvent</code>の<code>purchases</code>は、Event Collectionの名前。<br/>
+送信する内容は日本語も可能。</p>
+
+<h2>取得</h2>
+
+<p>APIで取得も出来るようだけれど、とりあえず管理画面から確認。<br/>
+送信された生のJSONは以下のようになる。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>{
+</span><span class='line'>    "keen": {
+</span><span class='line'>        "timestamp": "2015-10-06T08:19:26.564Z",
+</span><span class='line'>        "created_at": "2015-10-06T08:19:26.564Z",
+</span><span class='line'>        "id": "5613840e672e6c1748501885"
+</span><span class='line'>    },
+</span><span class='line'>    "purchase": {
+</span><span class='line'>        "item": "Golden Elephant"
+</span><span class='line'>    }
+</span><span class='line'>}    </span></code></pre></td></tr></table></div></figure>
+
+
+<p><code>Exploer</code>から表示方法を選ぶことでグラフ表示などが可能。<br/>
+例えば以下は、<code>purchase</code>の<code>item</code>項目ごとに件数でグルーピングした場合。<br/>
+(1件しかないのでわかりにくいけれど）</p>
+
+<p><img src="http://kayakuguri.github.io/images/2015/10/keen02.jpg" alt="" /></p>
+
+<p>切り口は以下の様なものがあるよう。<br/>
+<a href="https://keen.io/docs/data-analysis/">Data Analysis | Keen IO</a></p>
+
+<h2>まとめ</h2>
+
+<p>送信や取得のデータの基本がJSONになっているのはプログラム的には扱いやすそう。<br/>
+また、簡単な表示であれば管理画面からさくっと出来そうでよさげ。</p>
+
+<p>ただし、複雑な分析になると自前でJSなどを利用してプログラムを書かないといけなかったり、<br/>
+そもそもDBの形式ではないので他の解析ソフトなどが使えなさそう。</p>
+
+<p>お手軽に実装し解析する分にはよさそう。</p>
+
+<h2>参考</h2>
+
+<p><a href="https://addons.heroku.com/keen?utm_campaign=category&amp;utm_medium=dashboard&amp;utm_source=addons#developer">Keen IO | Add-ons | Heroku</a><br/>
+<a href="https://github.com/keenlabs/KeenClient-PHP">keenlabs/KeenClient-PHP · GitHub</a><br/>
+<a href="http://onori.github.io/post/laravel-keenio-heroku/">laravel&#43;Keen.io&#43;herokuで簡易解析 &middot;  MAN.IN.BLOG</a><br/>
+<a href="http://factage.com/2014/02/21/growthhack-analytics-by-keen-io/">Keen IOでグロースハックするための分析をする | yujilog</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[herokuでhtaccessを使ってIPアドレスによる制限を設定する]]></title>
@@ -2630,106 +2776,6 @@ composerを使えばインストール出来る、とのことなので以下の
 
 <p><a href="http://stackoverflow.com/questions/16224488/how-to-get-the-exif-php-extension-working-on-heroku">How to get the EXIF PHP extension working on Heroku? &ndash; Stack Overflow</a><br/>
 <a href="https://devcenter.heroku.com/articles/php-support#extensions">Extensions | Heroku PHP Support | Heroku Dev Center</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Vagrant環境での環境変数の設定方法]]></title>
-    <link href="http://kayakuguri.github.io/blog/2015/05/26/vagrant-env/"/>
-    <updated>2015-05-26T17:54:23+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2015/05/26/vagrant-env</id>
-    <content type="html"><![CDATA[<p>vagrant環境で環境変数を使いたかったので調べてみたところ、<br/>
-httpdファイルへの追記が必要とのことで試してみた。</p>
-
-<!-- more -->
-
-
-<h2>httpd</h2>
-
-<p><code>/etc/sysconfig/httpd</code>このファイルへ必要な環境変数を記述し、<code>vagrant up</code>すればよい。</p>
-
-<pre><code>export SET_VALUE=hoge
-</code></pre>
-
-<p>httpdの中身はデフォルトでは全てコメントアウトされているので、上記だけを記述したファイルに差し替えてもOK。</p>
-
-<h2>再起動</h2>
-
-<p><s>apacheの再起動ではだめで、vagrant自体の再起動が必要。</s><br/>
-追記：apacheの再起動だけで大丈夫でした。</p>
-
-<pre><code>$ vagrant reload
-</code></pre>
-
-<p>phpinfoで出力させてみると、無事、反映されていた。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2015/05/enviroment.jpg" alt="" /></p>
-
-<h2>$_ENV</h2>
-
-<p>これで反映はされたが、環境変数を取得するための、<code>$_ENV</code>が動作しなかった。<br/>
-<code>getenv()</code>だと正しく取得出来る。</p>
-
-<p>調べて見ると、<code>php.ini</code>の設定で<code>ENV</code>を使用するかを設定出来るよう。<br/>
-デフォルトでは使用するようになっているようだが、なぜか使用しないようになっていた。</p>
-
-<p>設定する場合は以下のように記述。<br/>
-場所は、<code>/etc/php.ini</code>にあった。</p>
-
-<pre><code>variables_order = "EGPCS"
-</code></pre>
-
-<p>EGPCSというのは以下のように頭文字となっている。</p>
-
-<blockquote><p>EGPCS (Environment (環境変数)、 Get、Post、 Cookie (クッキー)、そして Server)<br/>
-<a href="http://php.net/manual/ja/ini.core.php">http://php.net/manual/ja/ini.core.php</a></p></blockquote>
-
-<p>これを反映して再起動。</p>
-
-<h2>Vagrantでの反映</h2>
-
-<p>ファイルは予め用意しておき、<code>vagrant up</code>だけで反映されるようにしてみる。<br/>
-とはいえ、シェルでコピーしているだけだけど。</p>
-
-<p>セットアップ用のシェルスクリプト内に以下を追記。<br/>
-設定用の<code>httpd</code>ファイルはVagrantfileと同階層の<code>vagrant.config</code>ディレクトリ以下に設置しているものとする。</p>
-
-<pre><code>cp /vagrant/vagrant.config/httpd /etc/sysconfig/httpd
-</code></pre>
-
-<p>この状態で、<code>vagrant up</code>すれば、<code>vagrant.config</code>内で設定したファイルがvagrant環境に反映される。</p>
-
-<h2>参考</h2>
-
-<p><a href="http://yukke.blog3.fc2.com/blog-entry-68.html">ブログ Apache＋PHPで環境変数を追加したい</a></p>
-
-<p>この参考記事でわかったけれど、同じく<code>Apache Environment</code>と<code>environment</code>でハマってた。<br/>
-以下のような関係になっているらしい。</p>
-
-<table>
-<thead>
-<tr>
-<th>方法 </th>
-<th> 反映先 </th>
-<th> 取得方法</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>httpd.conf </td>
-<td> Apache Environment </td>
-<td> $_SERVER</td>
-</tr>
-<tr>
-<td>httpd </td>
-<td> environment </td>
-<td> $_ENV</td>
-</tr>
-</tbody>
-</table>
-
-
-<p><a href="http://detail.chiebukuro.yahoo.co.jp/qa/question_detail/q11102244256">phpで環境変数$_ENVを使用しようとしていますが使用できない状態です。&hellip; &ndash; Yahoo!知恵袋</a></p>
 ]]></content>
   </entry>
   
