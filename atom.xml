@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-10-06T18:33:24+09:00</updated>
+  <updated>2015-10-08T11:15:19+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,105 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[heroku アドオン] Filepickerを試してみた]]></title>
+    <link href="http://kayakuguri.github.io/blog/2015/10/08/filepicker/"/>
+    <updated>2015-10-08T10:44:27+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2015/10/08/filepicker</id>
+    <content type="html"><![CDATA[<p>ファイルストレージサービスである、Filepickerを試してみた。</p>
+
+<!-- more -->
+
+
+<p><img src="http://kayakuguri.github.io/images/2015/10/filepicker01.jpg" alt="" /></p>
+
+<p><a href="https://www.filepicker.com/">Easy, Powerful File Uploads | Filepicker</a><br/>
+<a href="https://addons.heroku.com/filepicker">Filepicker | Add-ons | Heroku</a></p>
+
+<p>売りとしては、簡単に様々なクラウドサービスと連携出来る事、らしい。<br/>
+サポートされているサービスは以下のよう。</p>
+
+<ul>
+<li>Alfresco</li>
+<li>Amazon Cloud Drive</li>
+<li>Box</li>
+<li>Cloudapp</li>
+<li>Dropbox</li>
+<li>Evernote</li>
+<li>Facebook</li>
+<li>Flickr</li>
+<li>Github</li>
+<li>Google Drive</li>
+<li>Instagram</li>
+<li>One Drive</li>
+<li>Picasa</li>
+</ul>
+
+
+<h2>インストール</h2>
+
+<p>herokuにインストール。</p>
+
+<pre><code>$ heroku addons:create filepicker
+</code></pre>
+
+<p>フリープランの場合は、1ファイル20MBの、月500ファイルまで利用可能。<br/>
+herokuのプラントは少し違うけれど、値段は以下。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2015/10/filepicker02.jpg" alt="" /></p>
+
+<h2>導入</h2>
+
+<p>インストール後、herokuのダッシュボードからfilepickerのアドオンをクリックして、filepickerのダッシュボードに遷移すると、使い方の説明が色々出てきて最後に貼り付けるべきコードが表示される。<br/>
+後から表示させる場合は、アプリケーションを選んだ後、DachbordのGet Startedをクリックすると表示出来る。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2015/10/filepicker03.jpg" alt="" /></p>
+
+<p>ここで表示されるFor Engineersのコードを貼り付けるだけ。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2015/10/filepicker04.jpg" alt="" /></p>
+
+<pre><code>&lt;script type="text/javascript" src="http://kayakuguri.github.io//api.filepicker.io/v2/filepicker.js"&gt;&lt;/script&gt;
+&lt;input type="filepicker" data-fp-apikey="xxx" onchange="alert(event.fpfile.url)"&gt;
+</code></pre>
+
+<p>これを貼り付けたHTMLをアップすれば完了。以上。<br/>
+アップしてアクセスすると以下の画面となる。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2015/10/filepicker05.jpg" alt="" /></p>
+
+<p>ボタンをクリックするとダイアログが表示される。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2015/10/filepicker06.jpg" alt="" /></p>
+
+<p>アップロードすると、URLがアラートで表示。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2015/10/filepicker07.jpg" alt="" /></p>
+
+<p>FilepickerのAssets、にて確認が出来る。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2015/10/filepicker08.jpg" alt="" /></p>
+
+<p>たった２行追加するだけで完成。本当に簡単すぎてやることがない。</p>
+
+<p>フリープランでは1ファイル20Mの制限があるように書かれていたのだけど、<br/>
+試しに200Mくらいのファイルを上げてみても問題なくアップ出来た。<br/>
+アップ時に制限をかけているわけではなく、そのまま利用していると注意やプラン変更の指示がくる仕様なのかもしれない。</p>
+
+<p>とにかく、herokuからでも何の問題もなく大きいファイルをアップロード出来た。<br/>
+(クライアントから直接アップしているので、サーバーの環境は関係ない）</p>
+
+<h2>参考</h2>
+
+<p>様々な環境に組み込めるようにプラグインが用意されている。<br/>
+<a href="https://www.filepicker.com/documentation/integrations/libraries">Integration Libraries | Filepicker</a></p>
+
+<p>様々なツールを利用出来るようにしたりするカスタマイズなんかも詳しく説明されてる。<br/>
+ドキュメントも豊富っぽい。<br/>
+<a href="https://www.filepicker.com/documentation/">Documentation | Filepicker</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[heroku アドオン]keen.ioで簡単にアクセス解析を入れてみる]]></title>
@@ -2736,44 +2835,6 @@ panic: reflect: call of reflect.Value.Type on zero Value
 <a href="http://qiita.com/puttyo_bubu/items/4e60e42ff041f2474428">Macでgo言語開発環境を作る &ndash; Qiita</a><br/>
 <a href="http://blog.teapla.net/2010/12/1178">homebrewを使ってMercurialをインストールする | Ken&#039;s blog @teaplanet</a><br/>
 <a href="http://qiita.com/tailak/items/0eedc6d5c4cc71a5e1a0">Python &ndash; Macでpipのアップデートでエラー &ndash; Qiita</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[heroku]exif情報を扱う]]></title>
-    <link href="http://kayakuguri.github.io/blog/2015/05/29/heroku-exif/"/>
-    <updated>2015-05-29T12:26:34+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2015/05/29/heroku-exif</id>
-    <content type="html"><![CDATA[<p>heorkuで画像アップロード機能をつけた際、画像かを判定するのに、exif情報を利用したところ、エラーが出た。</p>
-
-<!-- more -->
-
-
-<p><code>exif_imagetype</code>を利用して画像かを判定していたのだけど、<br/>
-以下のように、そんな関数ないよ、と怒られた。</p>
-
-<blockquote><p>Fatal error: Call to undefined function exif_imagetype() i</p></blockquote>
-
-<p>調べてみると、herokuは標準ではexif情報を扱うためのPHPモジュールが入っていないよう。<br/>
-composerを使えばインストール出来る、とのことなので以下のように記述し再度deploy。<br/>
-これで解決出来た。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>{
-</span><span class='line'>    "require": {
-</span><span class='line'>        "ext-exif":"*"
-</span><span class='line'>    }
-</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>参考</h2>
-
-<p><a href="http://stackoverflow.com/questions/16224488/how-to-get-the-exif-php-extension-working-on-heroku">How to get the EXIF PHP extension working on Heroku? &ndash; Stack Overflow</a><br/>
-<a href="https://devcenter.heroku.com/articles/php-support#extensions">Extensions | Heroku PHP Support | Heroku Dev Center</a></p>
 ]]></content>
   </entry>
   
