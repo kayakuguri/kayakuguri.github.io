@@ -4,7 +4,7 @@
   <title><![CDATA[Category: heroku | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/heroku/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-10-08T11:15:19+09:00</updated>
+  <updated>2015-10-08T11:16:09+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,105 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[heroku アドオン] Filepickerを試してみた]]></title>
+    <link href="http://kayakuguri.github.io/blog/2015/10/08/filepicker/"/>
+    <updated>2015-10-08T10:44:27+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2015/10/08/filepicker</id>
+    <content type="html"><![CDATA[<p>ファイルストレージサービスである、Filepickerを試してみた。</p>
+
+<!-- more -->
+
+
+<p><img src="/images/2015/10/filepicker01.jpg" alt="" /></p>
+
+<p><a href="https://www.filepicker.com/">Easy, Powerful File Uploads | Filepicker</a><br/>
+<a href="https://addons.heroku.com/filepicker">Filepicker | Add-ons | Heroku</a></p>
+
+<p>売りとしては、簡単に様々なクラウドサービスと連携出来る事、らしい。<br/>
+サポートされているサービスは以下のよう。</p>
+
+<ul>
+<li>Alfresco</li>
+<li>Amazon Cloud Drive</li>
+<li>Box</li>
+<li>Cloudapp</li>
+<li>Dropbox</li>
+<li>Evernote</li>
+<li>Facebook</li>
+<li>Flickr</li>
+<li>Github</li>
+<li>Google Drive</li>
+<li>Instagram</li>
+<li>One Drive</li>
+<li>Picasa</li>
+</ul>
+
+
+<h2>インストール</h2>
+
+<p>herokuにインストール。</p>
+
+<pre><code>$ heroku addons:create filepicker
+</code></pre>
+
+<p>フリープランの場合は、1ファイル20MBの、月500ファイルまで利用可能。<br/>
+herokuのプラントは少し違うけれど、値段は以下。</p>
+
+<p><img src="/images/2015/10/filepicker02.jpg" alt="" /></p>
+
+<h2>導入</h2>
+
+<p>インストール後、herokuのダッシュボードからfilepickerのアドオンをクリックして、filepickerのダッシュボードに遷移すると、使い方の説明が色々出てきて最後に貼り付けるべきコードが表示される。<br/>
+後から表示させる場合は、アプリケーションを選んだ後、DachbordのGet Startedをクリックすると表示出来る。</p>
+
+<p><img src="/images/2015/10/filepicker03.jpg" alt="" /></p>
+
+<p>ここで表示されるFor Engineersのコードを貼り付けるだけ。</p>
+
+<p><img src="/images/2015/10/filepicker04.jpg" alt="" /></p>
+
+<pre><code>&lt;script type="text/javascript" src="http://kayakuguri.github.io//api.filepicker.io/v2/filepicker.js"&gt;&lt;/script&gt;
+&lt;input type="filepicker" data-fp-apikey="xxx" onchange="alert(event.fpfile.url)"&gt;
+</code></pre>
+
+<p>これを貼り付けたHTMLをアップすれば完了。以上。<br/>
+アップしてアクセスすると以下の画面となる。</p>
+
+<p><img src="/images/2015/10/filepicker05.jpg" alt="" /></p>
+
+<p>ボタンをクリックするとダイアログが表示される。</p>
+
+<p><img src="/images/2015/10/filepicker06.jpg" alt="" /></p>
+
+<p>アップロードすると、URLがアラートで表示。</p>
+
+<p><img src="/images/2015/10/filepicker07.jpg" alt="" /></p>
+
+<p>FilepickerのAssets、にて確認が出来る。</p>
+
+<p><img src="/images/2015/10/filepicker08.jpg" alt="" /></p>
+
+<p>たった２行追加するだけで完成。本当に簡単すぎてやることがない。</p>
+
+<p>フリープランでは1ファイル20Mの制限があるように書かれていたのだけど、<br/>
+試しに200Mくらいのファイルを上げてみても問題なくアップ出来た。<br/>
+アップ時に制限をかけているわけではなく、そのまま利用していると注意やプラン変更の指示がくる仕様なのかもしれない。</p>
+
+<p>とにかく、herokuからでも何の問題もなく大きいファイルをアップロード出来た。<br/>
+(クライアントから直接アップしているので、サーバーの環境は関係ない）</p>
+
+<h2>参考</h2>
+
+<p>様々な環境に組み込めるようにプラグインが用意されている。<br/>
+<a href="https://www.filepicker.com/documentation/integrations/libraries">Integration Libraries | Filepicker</a></p>
+
+<p>様々なツールを利用出来るようにしたりするカスタマイズなんかも詳しく説明されてる。<br/>
+ドキュメントも豊富っぽい。<br/>
+<a href="https://www.filepicker.com/documentation/">Documentation | Filepicker</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[heroku アドオン]keen.ioで簡単にアクセス解析を入れてみる]]></title>
@@ -464,112 +563,6 @@ The following URL will expire at 2015-09-10 07:33:23 +0000:
 
 <p><a href="https://devcenter.heroku.com/articles/heroku-postgres-import-export">Importing and Exporting Heroku Postgres Databases with PG Backups | Heroku Dev Center</a><br/>
 <a href="https://devcenter.heroku.com/articles/heroku-postgres-backups">Heroku PGBackups | Heroku Dev Center</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[herokuがcomposer.lock必須になったのでcomposerの入れ方をメモしておく]]></title>
-    <link href="http://kayakuguri.github.io/blog/2015/08/25/composer-lock-require/"/>
-    <updated>2015-08-25T10:38:40+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2015/08/25/composer-lock-require</id>
-    <content type="html"><![CDATA[<p>herokuにcomposerを使用したプロジェクトをデプロイする場合、今まではwarningは出ていたようだけど、composer.lockはなくてもデプロイ出来ていた。<br/>
-それが、2015/8/21にPHPのランタイムがアップデートされ、composer.lockが必須になった、とのこと。<br/>
-<a href="https://devcenter.heroku.com/changelog-items/704">PHP versions 5.5.28, 5.6.12, 7.0.0RC1 available; new composer.lock requirements | Heroku Dev Center</a></p>
-
-<!-- more -->
-
-
-<p>composer.lockがない場合は以下のようなエラーが出る。</p>
-
-<blockquote><p>ERROR: Your &lsquo;composer.json&rsquo; lists dependencies inside &lsquo;require&rsquo;,but no &lsquo;composer.lock&rsquo; was found. Please run &lsquo;composer update&rsquo; to re-generate &lsquo;composer.lock&rsquo; if necessary, and commit it into your repository. For more information, please refer to the docs at <a href="https://devcenter.heroku.com/articles/php-support#activation">https://devcenter.heroku.com/articles/php-support#activation</a></p></blockquote>
-
-<h2>composerのインストール</h2>
-
-<p>環境はmacで、デフォルト等のPHPが入っている前提で。<br/>
-以下のコマンドを適当なディレクトリで叩くだけ。</p>
-
-<p><code>
-$ curl -sS https://getcomposer.org/installer | php
-$ mv composer.phar /usr/local/bin/composer
-</code></p>
-
-<p>ターミナルを再起動して、確認。</p>
-
-<p><code>
-$ composer -v
-Composer version 1.0-dev (f1aa655e6113e0efa979b8b09d7951a762eaa04c) 2015-08-20 11:59:54
-</code></p>
-
-<h3>参考</h3>
-
-<p><a href="http://mawatari.jp/archives/install-composer-in-mac">http://mawatari.jp/archives/install-composer-in-mac</a></p>
-
-<h2>composer install</h2>
-
-<p>この状態で、composer.jsonがあるディレクトリに移動し、<code>$ composer install</code>を叩いてみる。<br/>
-これでインストール出来れば完了。<br/>
-ただし、PCにインストールされているPHPによってはモジュールの関係でエラーが出る場合がある。<br/>
-例）</p>
-
-<blockquote><p>Problem 1<br/>
-  &ndash; The requested PHP extension ext-mcrypt * is missing from your system.</p></blockquote>
-
-<p>この場合は、全部入りのPHPを入れ直すのが早い。</p>
-
-<h2>PHPのインストール</h2>
-
-<p>以下のサイトに全部入りのものがまとまっているようなので、そこからインストール。<br/>
-<a href="http://php-osx.liip.ch/">PHP for OS X as binary package</a></p>
-
-<p>現時点で最新の5.6を入れる。</p>
-
-<pre><code>$ curl -s http://php-osx.liip.ch/install.sh | bash -s 5.6
-</code></pre>
-
-<p>このままだと使用するようにはなってないのでパスを通す。<br/>
-環境によって違うが、デフォルトでは、<code>.bash_profile</code>に記述すればよいよう。</p>
-
-<p><code>~/</code>ディレクトリ以下の<code>.bash_profile</code>をエディタ等で開いて記述。<br/>
-なければ作成する。<br/>
-コマンドで実行する場合は、なければ新規作成としてくれる。<br/>
-例えば、<code>vi</code>で開く場合は以下。<br/>
-<code>sudo</code>をつけてルート権限で実行している。</p>
-
-<pre><code>$ sudo vi ~/.bash_profile
-</code></pre>
-
-<p>以下を記述。</p>
-
-<pre><code>export PATH=/usr/local/php5/bin:$PATH
-</code></pre>
-
-<p>保存して終了。<br/>
-(viの場合は、<code>i</code>で入力モードに、<code>esc</code>で戻って、<code>:x</code>で保存して終了）<br/>
-<a href="http://net-newbie.com/linux/commands/vi.html">ｖｉエディタの使い方</a></p>
-
-<p>ターミナルを再起動してphpのバージョンを確認。</p>
-
-<pre><code>$ php -v
-PHP 5.6.11 (cli) (built: Jul 10 2015 21:46:48)
-</code></pre>
-
-<h2>composer install</h2>
-
-<p>この状態で、<code>$ composer install</code>すれば完了。<br/>
-実行後は実行したディレクトリ内に、<code>composer.lock</code>と<code>vendor/</code>が出来上がる。<br/>
-<code>vendor</code>ディレクトリ以下はgitで共有しないように、<code>.gitignore</code>に追記しておくこと。</p>
-
-<h2>.lockと.jsonの関係</h2>
-
-<p><code>composer.json</code>には、必要なパッケージとインストールするバージョンの指定があれば記述する。<br/>
-その状態で、<code>$ composer install</code>すると、パッケージがインストールされ、インストールされたパッケージのバージョン情報などが記述された、<code>composer.lock</code>ファイルが作成される。<br/>
-この状態で、他環境などで同じく<code>$ composer install</code>すると、<code>composer.lock</code>に書かれたバージョンのパッケージがインストールされ、全く同じ環境が構築される。</p>
-
-<p><code>$ copmoser update</code>をすると、再度<code>composer.json</code>の記述を元にパッケージがインストールされ、<code>composer.lock</code>が更新される。</p>
-
-<h2>参考</h2>
-
-<p><a href="http://qiita.com/nbkn/items/01a11392921119fa0153">MacでPATHを通す &ndash; Qiita</a></p>
 ]]></content>
   </entry>
   

@@ -4,7 +4,7 @@
   <title><![CDATA[Category: heroku-add-on | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/heroku-add-on/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-10-08T11:15:19+09:00</updated>
+  <updated>2015-10-08T11:16:09+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,105 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[heroku アドオン] Filepickerを試してみた]]></title>
+    <link href="http://kayakuguri.github.io/blog/2015/10/08/filepicker/"/>
+    <updated>2015-10-08T10:44:27+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2015/10/08/filepicker</id>
+    <content type="html"><![CDATA[<p>ファイルストレージサービスである、Filepickerを試してみた。</p>
+
+<!-- more -->
+
+
+<p><img src="/images/2015/10/filepicker01.jpg" alt="" /></p>
+
+<p><a href="https://www.filepicker.com/">Easy, Powerful File Uploads | Filepicker</a><br/>
+<a href="https://addons.heroku.com/filepicker">Filepicker | Add-ons | Heroku</a></p>
+
+<p>売りとしては、簡単に様々なクラウドサービスと連携出来る事、らしい。<br/>
+サポートされているサービスは以下のよう。</p>
+
+<ul>
+<li>Alfresco</li>
+<li>Amazon Cloud Drive</li>
+<li>Box</li>
+<li>Cloudapp</li>
+<li>Dropbox</li>
+<li>Evernote</li>
+<li>Facebook</li>
+<li>Flickr</li>
+<li>Github</li>
+<li>Google Drive</li>
+<li>Instagram</li>
+<li>One Drive</li>
+<li>Picasa</li>
+</ul>
+
+
+<h2>インストール</h2>
+
+<p>herokuにインストール。</p>
+
+<pre><code>$ heroku addons:create filepicker
+</code></pre>
+
+<p>フリープランの場合は、1ファイル20MBの、月500ファイルまで利用可能。<br/>
+herokuのプラントは少し違うけれど、値段は以下。</p>
+
+<p><img src="/images/2015/10/filepicker02.jpg" alt="" /></p>
+
+<h2>導入</h2>
+
+<p>インストール後、herokuのダッシュボードからfilepickerのアドオンをクリックして、filepickerのダッシュボードに遷移すると、使い方の説明が色々出てきて最後に貼り付けるべきコードが表示される。<br/>
+後から表示させる場合は、アプリケーションを選んだ後、DachbordのGet Startedをクリックすると表示出来る。</p>
+
+<p><img src="/images/2015/10/filepicker03.jpg" alt="" /></p>
+
+<p>ここで表示されるFor Engineersのコードを貼り付けるだけ。</p>
+
+<p><img src="/images/2015/10/filepicker04.jpg" alt="" /></p>
+
+<pre><code>&lt;script type="text/javascript" src="http://kayakuguri.github.io//api.filepicker.io/v2/filepicker.js"&gt;&lt;/script&gt;
+&lt;input type="filepicker" data-fp-apikey="xxx" onchange="alert(event.fpfile.url)"&gt;
+</code></pre>
+
+<p>これを貼り付けたHTMLをアップすれば完了。以上。<br/>
+アップしてアクセスすると以下の画面となる。</p>
+
+<p><img src="/images/2015/10/filepicker05.jpg" alt="" /></p>
+
+<p>ボタンをクリックするとダイアログが表示される。</p>
+
+<p><img src="/images/2015/10/filepicker06.jpg" alt="" /></p>
+
+<p>アップロードすると、URLがアラートで表示。</p>
+
+<p><img src="/images/2015/10/filepicker07.jpg" alt="" /></p>
+
+<p>FilepickerのAssets、にて確認が出来る。</p>
+
+<p><img src="/images/2015/10/filepicker08.jpg" alt="" /></p>
+
+<p>たった２行追加するだけで完成。本当に簡単すぎてやることがない。</p>
+
+<p>フリープランでは1ファイル20Mの制限があるように書かれていたのだけど、<br/>
+試しに200Mくらいのファイルを上げてみても問題なくアップ出来た。<br/>
+アップ時に制限をかけているわけではなく、そのまま利用していると注意やプラン変更の指示がくる仕様なのかもしれない。</p>
+
+<p>とにかく、herokuからでも何の問題もなく大きいファイルをアップロード出来た。<br/>
+(クライアントから直接アップしているので、サーバーの環境は関係ない）</p>
+
+<h2>参考</h2>
+
+<p>様々な環境に組み込めるようにプラグインが用意されている。<br/>
+<a href="https://www.filepicker.com/documentation/integrations/libraries">Integration Libraries | Filepicker</a></p>
+
+<p>様々なツールを利用出来るようにしたりするカスタマイズなんかも詳しく説明されてる。<br/>
+ドキュメントも豊富っぽい。<br/>
+<a href="https://www.filepicker.com/documentation/">Documentation | Filepicker</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[heroku アドオン]keen.ioで簡単にアクセス解析を入れてみる]]></title>
@@ -662,201 +761,6 @@ $showFlg = true;
 <p><a href="http://php.net/manual/ja/features.file-upload.post-method.php">PHP: POST メソッドによるアップロード &ndash; Manual </a><br/>
 <a href="http://www.php-factory.net/trivia/05.php">サーバーのアップロードファイルの最大容量の確認と容量制限の変更｜PHP工房</a><br/>
 <a href="https://devcenter.heroku.com/articles/custom-php-settings#user-ini-files-recommended">Customizing Web Server and Runtime Settings for PHP | Heroku Dev Center</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[herokuアドオン]cloudinaryで画像のアップロードと表示[PHP]]]></title>
-    <link href="http://kayakuguri.github.io/blog/2015/05/07/cloudinary-img/"/>
-    <updated>2015-05-07T11:34:35+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2015/05/07/cloudinary-img</id>
-    <content type="html"><![CDATA[<p>PHPを利用して、cloudinaryにアップロードして、画像を表示させてみた。</p>
-
-<!-- more -->
-
-
-<h2>インストール</h2>
-
-<p>composerを利用。</p>
-
-<p>```
-{
-  &ldquo;require&rdquo;: {</p>
-
-<pre><code>"cloudinary/cloudinary_php": "dev-master"
-</code></pre>
-
-<p>  }
-}
-```</p>
-
-<p>インストール。</p>
-
-<p>```
-$ composer install
-Loading composer repositories with package information
-Installing dependencies (including require-dev)
-  &ndash; Installing cloudinary/cloudinary_php (dev-master cfa2fd7)</p>
-
-<pre><code>Cloning cfa2fd7d4043844b46411c213795eafb648703df
-</code></pre>
-
-<p>Writing lock file
-Generating autoload files
-```</p>
-
-<h2>herokuにインストール</h2>
-
-<p>アドオンを追加。</p>
-
-<p><img src="/images/2015/05/Cloudinary01.jpg" alt="add-on" /></p>
-
-<p><code>
-$ heroku addons:create cloudinary:starter
-Creating unwinding-truly-5886... done
-Adding unwinding-truly-5886 to your-app-name... done
-Setting CLOUDINARY_URL and restarting your-app-name... done, v3
-Use `heroku addons:docs cloudinary` to view documentation.
-</code></p>
-
-<p>環境変数の<code>CLOUDINARY_URL</code>でアカウント情報を取得できる。</p>
-
-<h2>アップロード</h2>
-
-<p>以下のコードを記述し、アクセス。<br/>
-flickr上にある画像をアップロードしている。</p>
-
-<p>```
-&lt;?php
-require &lsquo;../vendor/autoload.php&rsquo;;</p>
-
-<p>use Cloudinary;
-use Cloudinary\Uploader;</p>
-
-<p>$account = parse_url(getenv(&lsquo;CLOUDINARY_URL&rsquo;));</p>
-
-<p>\Cloudinary::config(array(</p>
-
-<pre><code>"cloud_name" =&gt; $account['host'],
-"api_key" =&gt; $account['user'],
-"api_secret" =&gt; $account['pass']
-</code></pre>
-
-<p>));</p>
-
-<p>$ret = \Cloudinary\Uploader::upload(&ldquo;<a href="https://farm9.staticflickr.com/8748/16531734384_afdd2327e5_z.jpg">https://farm9.staticflickr.com/8748/16531734384_afdd2327e5_z.jpg</a>&rdquo;);</p>
-
-<p>print_r($ret);
-```</p>
-
-<p>で、結果は以下のように返ってくる。</p>
-
-<p>```
-Array (</p>
-
-<pre><code>[public_id] =&gt; xa9kfgp9jvxouekmrrqu 
-[version] =&gt; 1430964069 
-[signature] =&gt; 088135f7c32ad04436a18eb35d05b28bfd9e7870 
-[width] =&gt; 640 
-[height] =&gt; 480 
-[format] =&gt; jpg 
-[resource_type] =&gt; image 
-[created_at] =&gt; 2015-05-07T02:01:09Z 
-[tags] =&gt; Array ( ) 
-[bytes] =&gt; 174550 
-[type] =&gt; upload 
-[etag] =&gt; 6fdff26d1bd4d9cc55c3c613743a8dc1 
-[url] =&gt; http://res.cloudinary.com/harslxcej/image/upload/v1430964069/xa9kfgp9jvxouekmrrqu.jpg 
-[secure_url] =&gt; https://res.cloudinary.com/harslxcej/image/upload/v1430964069/xa9kfgp9jvxouekmrrqu.jpg 
-</code></pre>
-
-<p>)
-```</p>
-
-<h2>URLでの表示</h2>
-
-<p>アップロードが完了したものはアクセスするURLを変更することでサイズなどを変更できる。</p>
-
-<h3>オリジナル</h3>
-
-<pre><code>http://res.cloudinary.com/dalir2yty/image/upload/xa9kfgp9jvxouekmrrqu_nml8db.jpg
-</code></pre>
-
-<p><img src="http://res.cloudinary.com/dalir2yty/image/upload/xa9kfgp9jvxouekmrrqu_nml8db.jpg" alt="オリジナル" /></p>
-
-<h3>リサイズ</h3>
-
-<pre><code>http://res.cloudinary.com/dalir2yty/image/upload/w_100,h_100/xa9kfgp9jvxouekmrrqu_nml8db.jpg
-</code></pre>
-
-<p><img src="http://res.cloudinary.com/dalir2yty/image/upload/w_100,h_100/xa9kfgp9jvxouekmrrqu_nml8db.jpg" alt="リサイズ" /></p>
-
-<h3>角丸</h3>
-
-<pre><code>http://res.cloudinary.com/dalir2yty/image/upload/w_320,h_240,c_fill,r_20/xa9kfgp9jvxouekmrrqu_nml8db.jpg
-</code></pre>
-
-<p><img src="http://res.cloudinary.com/dalir2yty/image/upload/w_320,h_240,c_fill,r_20/xa9kfgp9jvxouekmrrqu_nml8db.jpg" alt="角丸" /></p>
-
-<p>利用できるタグなどは以下を参照。<br/>
-<a href="http://cloudinary.com/documentation/image_transformations">Image transformations | Cloudinary</a></p>
-
-<h2>PHPでURLの生成</h2>
-
-<p>上記のURLをPHPのコードで生成する。</p>
-
-<h3>cl_image_tag</h3>
-
-<p><code>cl_image_tag</code>を利用すると、<code>&lt;img&gt;</code>のタグごと出力される。</p>
-
-<pre><code>$public_id = 'xa9kfgp9jvxouekmrrqu';
-echo cl_image_tag($public_id, array( "alt" =&gt; "Sample Image" ));
-</code></pre>
-
-<p>結果</p>
-
-<pre><code>&lt;img src='https://res.cloudinary.com/harslxcej/image/upload/xa9kfgp9jvxouekmrrqu' alt='Sample Image'/&gt;
-</code></pre>
-
-<p>加工</p>
-
-<pre><code>cl_image_tag($public_id, array(
-    "width" =&gt; 100,
-    "height" =&gt; 100,
-    "crop" =&gt; "fill",
-    "effect" =&gt; "grayscale"
-));
-</code></pre>
-
-<p>結果</p>
-
-<pre><code>&lt;img src='http://res.cloudinary.com/dalir2yty/image/upload/c_fill,e_grayscale,h_100,w_100/xa9kfgp9jvxouekmrrqu_nml8db.jpg' height='100' width='100'/&gt;
-</code></pre>
-
-<p><img src='http://res.cloudinary.com/dalir2yty/image/upload/c_fill,e_grayscale,h_100,w_100/xa9kfgp9jvxouekmrrqu_nml8db.jpg' height='100' width='100'/></p>
-
-<h3>cloudinary_url</h3>
-
-<p>URLを直接取得するには、<code>cloudinary_url</code>を使用する。</p>
-
-<pre><code>echo cloudinary_url($public_id);
-echo cloudinary_url($public_id, array(
-    "width" =&gt; 100,
-    "height" =&gt; 100,
-    "crop" =&gt; "fill",
-    "effect" =&gt; "grayscale"
-));
-</code></pre>
-
-<p>その他、詳しくは以下を参照。</p>
-
-<p><a href="http://cloudinary.com/documentation/php_image_manipulation">PHP image manipulation | Cloudinary</a></p>
-
-<h2>参考</h2>
-
-<p><a href="http://cloudinary.com/documentation/php_integration">PHP integration | Cloudinary</a><br/>
-<a href="http://programmer-jobs.blogspot.jp/2013/12/phpphalconcloudinary.html">PHPフレームワークのPhalconで&#12289;写真ストレージクラウドのCloudinaryと連携 一言多いプログラマーの独り言</a><br/>
-<a href="https://github.com/cloudinary/cloudinary_php">cloudinary/cloudinary_php</a></p>
 ]]></content>
   </entry>
   
