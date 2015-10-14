@@ -132,7 +132,7 @@ $param = array(
     'user'=&gt; $_ENV['MAILGUN_SMTP_LOGIN'],
     'pass' =&gt; $_ENV['MAILGUN_SMTP_PASSWORD'],
 );
-$mail -&gt;attach(array($_FILES["upfile"]["tmp_name"], $_FILES["upfile"]['name'])); //添付ファイル
+$mail -&gt;attach(array($_FILES\["upfile"\]\["tmp_name"\], $_FILES["upfile"]['name'])); //添付ファイル
 $mail -&gt;smtpServer($param);
 $mail -&gt;to('送信先アドレス');
 $mail -&gt;subject('件名');

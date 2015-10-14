@@ -4,7 +4,7 @@
   <title><![CDATA[Category: vagrant | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/vagrant/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-10-08T11:16:09+09:00</updated>
+  <updated>2015-10-14T09:49:46+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,121 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Vagrant内でArtisanコマンドの実行とPostgreSQLの接続]]></title>
+    <link href="http://kayakuguri.github.io/blog/2015/10/13/vagrant-postgresql/"/>
+    <updated>2015-10-13T18:48:30+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2015/10/13/vagrant-postgresql</id>
+    <content type="html"><![CDATA[<p><a href="https://box.scotch.io/">Scotchbox</a>で立てたvagrant環境にてlaravelを使用している中で、<br/>
+DB利用の際のartisanコマンドが実行出来なかったので調べてみた。</p>
+
+<!-- more -->
+
+
+<h2>artisan</h2>
+
+<p>そのままvagrantを実行しているローカルのディレクトリ上でartisanコマンドを実行しても仮想環境のDBへの接続が出来ないため、エラーが出てしまう。</p>
+
+<p>```
+$ php artisan migrate
+[PDOException]
+  SQLSTATE[08006] [7] could not connect to server: Connection refused</p>
+
+<pre><code>Is the server running on host "localhost" (::1) and accepting
+TCP/IP connections on port 5432?
+</code></pre>
+
+<p>  could not connect to server: Connection refused</p>
+
+<pre><code>Is the server running on host "localhost" (127.0.0.1) and accepting
+TCP/IP connections on port 5432?
+</code></pre>
+
+<p>  could not connect to server: Connection refused</p>
+
+<pre><code>Is the server running on host "localhost" (fe80::1) and accepting
+TCP/IP connections on port 5432?
+</code></pre>
+
+<p>```</p>
+
+<p>なので、vagrant内にSSHで入ってから実行する必要がある。<br/>
+実行するディレクトリは、<code>/var/www</code>となる。</p>
+
+<p><code>
+$ vagrant ssh
+vagrant@laravel-sample:~$ cd /var/www
+vagrant@laravel-sample:/var/www$ php artisan
+</code></p>
+
+<p>これでvagrant内のpostgreSQLに対してartisanを実行してテーブルの作成が出来た。</p>
+
+<h2>GUI接続</h2>
+
+<p>ついでに、vagrant内のpostgreSQLをローカルのGUI環境から確認したい場合は、接続情報のSSHの項目も設定してやることで接続が可能。</p>
+
+<p>利用しているソフトが<a href="https://eggerapps.at/postico/">Potico</a>なので、その設定内容のキャプチャ。<br/>
+DBの設定内容は、Scotchboxの場合。<br/>
+<a href="https://github.com/scotch-io/scotch-box#postgresql">https://github.com/scotch-io/scotch-box#postgresql</a></p>
+
+<p><img src="/images/2015/10/postico.png" alt="" /></p>
+
+<table>
+<thead>
+<tr>
+<th></th>
+<th align="left"> 項目 </th>
+<th align="left"> 内容 </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td></td>
+<td align="left"> Host </td>
+<td align="left"> localhost |</td>
+</tr>
+<tr>
+<td></td>
+<td align="left"> User </td>
+<td align="left"> root |</td>
+</tr>
+<tr>
+<td></td>
+<td align="left"> Password </td>
+<td align="left"> root |</td>
+</tr>
+<tr>
+<td></td>
+<td align="left"> Database </td>
+<td align="left"> scotchbox |</td>
+</tr>
+<tr>
+<td></td>
+<td align="left"> SSH Host </td>
+<td align="left"> 192.168.33.10 |</td>
+</tr>
+<tr>
+<td></td>
+<td align="left"> (SSH) User </td>
+<td align="left"> vagrant |</td>
+</tr>
+<tr>
+<td></td>
+<td align="left"> (SSH) Password </td>
+<td align="left"> vagrant |</td>
+</tr>
+</tbody>
+</table>
+
+
+<h2>参考</h2>
+
+<p><a href="https://laravel10.wordpress.com/2015/02/21/%E3%83%87%E3%83%BC%E3%82%BF%E3%83%99%E3%83%BC%E3%82%B9%E3%81%AE%E7%92%B0%E5%A2%83%E8%A8%AD%E5%AE%9A/">初めてのLaravel 5.1 : (6) データベースの環境設定 | ララ帳</a><br/>
+<a href="http://laravel.io/forum/02-11-2014-artisan-error-on-migrate-using-vagrant">aravel.io &ndash; The Laravel Community Portal</a><br/>
+<a href="https://snakeycode.wordpress.com/2015/01/02/vagrant-postgresql-and-pgadmin/">Vagrant, PostgreSQL and pgAdmin | Snakey Code</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Vagrantを1.7.2にアップデートしたら起動しなくなったメモ]]></title>

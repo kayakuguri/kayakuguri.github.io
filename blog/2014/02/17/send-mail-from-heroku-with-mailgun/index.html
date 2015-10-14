@@ -135,11 +135,11 @@ $_ENV['MAILGUN_API_KEY'] = key
 
 <pre><code>$mail = new PHPMailer;
 $mail-&gt;isSMTP();
-$mail-&gt;Host = $_ENV['MAILGUN_SMTP_SERVER'];
+$mail-&gt;Host = $_ENV\['MAILGUN_SMTP_SERVER'\];
 $mail-&gt;SMTPAuth = true;
-$mail-&gt;Username = $_ENV['MAILGUN_SMTP_LOGIN'];
-$mail-&gt;Password = $_ENV['MAILGUN_SMTP_PASSWORD'];
-$mail-&gt;Port     = $_ENV['MAILGUN_SMTP_PORT'];
+$mail-&gt;Username = $_ENV\['MAILGUN_SMTP_LOGIN'\];
+$mail-&gt;Password = $_ENV\['MAILGUN_SMTP_PASSWORD'\];
+$mail-&gt;Port     = $_ENV\['MAILGUN_SMTP_PORT'\];
 $mail-&gt;SMTPSecure = 'tls';
 $mail-&gt;From = MAIL_FROM;
 $mail-&gt;FromName = MAIL_FROM_NAME;

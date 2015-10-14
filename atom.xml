@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-10-08T11:16:09+09:00</updated>
+  <updated>2015-10-14T09:49:46+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,124 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Vagrant内でArtisanコマンドの実行とPostgreSQLの接続]]></title>
+    <link href="http://kayakuguri.github.io/blog/2015/10/13/vagrant-postgresql/"/>
+    <updated>2015-10-13T18:48:30+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2015/10/13/vagrant-postgresql</id>
+    <content type="html"><![CDATA[<p><a href="https://box.scotch.io/">Scotchbox</a>で立てたvagrant環境にてlaravelを使用している中で、<br/>
+DB利用の際のartisanコマンドが実行出来なかったので調べてみた。</p>
+
+<!-- more -->
+
+
+<h2>artisan</h2>
+
+<p>そのままvagrantを実行しているローカルのディレクトリ上でartisanコマンドを実行しても仮想環境のDBへの接続が出来ないため、エラーが出てしまう。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$ php artisan migrate
+</span><span class='line'>\[PDOException\]
+</span><span class='line'>  SQLSTATE\[08006\] \[7\] could not connect to server: Connection refused
+</span><span class='line'>      Is the server running on host "localhost" (::1) and accepting
+</span><span class='line'>      TCP/IP connections on port 5432?
+</span><span class='line'>  could not connect to server: Connection refused
+</span><span class='line'>      Is the server running on host "localhost" (127.0.0.1) and accepting
+</span><span class='line'>      TCP/IP connections on port 5432?
+</span><span class='line'>  could not connect to server: Connection refused
+</span><span class='line'>      Is the server running on host "localhost" (fe80::1) and accepting
+</span><span class='line'>      TCP/IP connections on port 5432?</span></code></pre></td></tr></table></div></figure>
+
+
+<p>なので、vagrant内にSSHで入ってから実行する必要がある。<br/>
+実行するディレクトリは、<code>/var/www</code>となる。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$ vagrant ssh
+</span><span class='line'>vagrant@laravel-sample:~$ cd /var/www
+</span><span class='line'>vagrant@laravel-sample:/var/www$ php artisan</span></code></pre></td></tr></table></div></figure>
+
+
+<p>これでvagrant内のpostgreSQLに対してartisanを実行してテーブルの作成が出来た。</p>
+
+<h2>GUI接続</h2>
+
+<p>ついでに、vagrant内のpostgreSQLをローカルのGUI環境から確認したい場合は、接続情報のSSHの項目も設定してやることで接続が可能。</p>
+
+<p>利用しているソフトが<a href="https://eggerapps.at/postico/">Potico</a>なので、その設定内容のキャプチャ。<br/>
+DBの設定内容は、Scotchboxの場合。<br/>
+<a href="https://github.com/scotch-io/scotch-box#postgresql">https://github.com/scotch-io/scotch-box#postgresql</a></p>
+
+<p><img src="http://kayakuguri.github.io/images/2015/10/postico.png" alt="" /></p>
+
+<table>
+<thead>
+<tr>
+<th></th>
+<th align="left"> 項目 </th>
+<th align="left"> 内容 </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td></td>
+<td align="left"> Host </td>
+<td align="left"> localhost |</td>
+</tr>
+<tr>
+<td></td>
+<td align="left"> User </td>
+<td align="left"> root |</td>
+</tr>
+<tr>
+<td></td>
+<td align="left"> Password </td>
+<td align="left"> root |</td>
+</tr>
+<tr>
+<td></td>
+<td align="left"> Database </td>
+<td align="left"> scotchbox |</td>
+</tr>
+<tr>
+<td></td>
+<td align="left"> SSH Host </td>
+<td align="left"> 192.168.33.10 |</td>
+</tr>
+<tr>
+<td></td>
+<td align="left"> (SSH) User </td>
+<td align="left"> vagrant |</td>
+</tr>
+<tr>
+<td></td>
+<td align="left"> (SSH) Password </td>
+<td align="left"> vagrant |</td>
+</tr>
+</tbody>
+</table>
+
+
+<h2>参考</h2>
+
+<p><a href="https://laravel10.wordpress.com/2015/02/21/%E3%83%87%E3%83%BC%E3%82%BF%E3%83%99%E3%83%BC%E3%82%B9%E3%81%AE%E7%92%B0%E5%A2%83%E8%A8%AD%E5%AE%9A/">初めてのLaravel 5.1 : (6) データベースの環境設定 | ララ帳</a><br/>
+<a href="http://laravel.io/forum/02-11-2014-artisan-error-on-migrate-using-vagrant">aravel.io &ndash; The Laravel Community Portal</a><br/>
+<a href="https://snakeycode.wordpress.com/2015/01/02/vagrant-postgresql-and-pgadmin/">Vagrant, PostgreSQL and pgAdmin | Snakey Code</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[heroku アドオン] Filepickerを試してみた]]></title>
@@ -2550,291 +2668,6 @@ CONTAINER ID        IMAGE               COMMAND                CREATED          
 
 <p><a href="https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_and_ajax.htm">Apex in AJAX | Force.com Apex Code Developer&#x27;s Guide | Salesforce Developers</a><br/>
 <a href="https://developer.salesforce.com/forums/ForumsMain?id=906F00000009BNkIAM">カスタムボタン押下時にSFDC上のWebServiceをコールする方法 &ndash; Salesforce Developer Community</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Force.com CLIをインストールして試してみた]]></title>
-    <link href="http://kayakuguri.github.io/blog/2015/05/29/forcecom-cli/"/>
-    <updated>2015-05-29T21:06:19+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2015/05/29/forcecom-cli</id>
-    <content type="html"><![CDATA[<blockquote><p>開発者の方は、Force.comのデータベースをいちいちブラウザを開いたりせずにコマンドラインから確認・操作したいと思う事があるかもしれません。</p></blockquote>
-
-<p>試してみました。</p>
-
-<!-- more -->
-
-
-<h1>Go</h1>
-
-<h2>go言語環境</h2>
-
-<p>Force.com CLIはGOで動作しているので、go言語が動くようにする。</p>
-
-<h3>Homebrewによるインストール</h3>
-
-<p>homebrew自体をアップデートしてインストールする。</p>
-
-<pre><code>$ brew update
-$ brew install go
-</code></pre>
-
-<p>確認</p>
-
-<pre><code>$ go version
-go version go1.4.2 darwin/amd64
-</code></pre>
-
-<h3>$GOPATH</h3>
-
-<p>パッケージ管理のためのパスを通すよう。<br/>
-<code>$HOME/.go/${GO_VERSION}</code>のパスにするのがいいようなんで、それにならう。</p>
-
-<pre><code>$ mkdir -p ~/.go/1.4/
-</code></pre>
-
-<p>zsh使ってるので、<code>.zshrc</code>にパスを追加。</p>
-
-<pre><code>export GOPATH=$HOME/.go/1.4
-export PATH=$PATH:$GOROOT/bin:$GOPATH/bin
-</code></pre>
-
-<p>再読み込みしておく。</p>
-
-<pre><code>$ source ~/.zshrc
-</code></pre>
-
-<h3>Mercurial</h3>
-
-<blockquote><p>Mercurial（マーキュリアル）は、クロスプラットフォームの分散型バージョン管理システム。 Pythonで実装されている（ただし、バイナリdiffに関してはC言語で実装されている）。 Mercurialはコマンドラインプログラムである。 全てのコマンドは hgで始まる。<br/>
-<a href="http://ja.wikipedia.org/wiki/Mercurial">http://ja.wikipedia.org/wiki/Mercurial</a></p></blockquote>
-
-<h4>Python</h4>
-
-<p>Pythonで動作するとのことなので、Pythonが必要。<br/>
-自分の環境には入っていた。</p>
-
-<pre><code>$ python -V
-Python 2.7.9
-</code></pre>
-
-<p>必要な場合は、homebrewでインストール出来るよう。</p>
-
-<pre><code>$ brew install python
-</code></pre>
-
-<h4>pip</h4>
-
-<p>あと、パッケージ管理のために<code>pip</code>が必要。<br/>
-これも入っていた。</p>
-
-<pre><code>$ pip -V
-pip 6.1.0 from /usr/local/lib/python2.7/site-packages/pip-6.1.0-py2.7.egg (python 2.7)
-</code></pre>
-
-<p>インストールする場合は以下。</p>
-
-<pre><code>$ brew install pip
-</code></pre>
-
-<p>ただ、最新版ではなさそうだったので、アップデート。</p>
-
-<pre><code>$ pip install --upgrade pip
-</code></pre>
-
-<p>アップデート出来た。</p>
-
-<pre><code>$ pip -V
-pip 7.0.1 from /usr/local/lib/python2.7/site-packages (python 2.7)
-</code></pre>
-
-<h4>Mercurialのインストール</h4>
-
-<p>で、ようやく、<code>Mercurial</code>のインストール。</p>
-
-<pre><code>$ pip install --upgrade pip
-...
-Successfully installed mercurial-3.4
-</code></pre>
-
-<p>これでようやく整った。</p>
-
-<h1>Force.com CLI</h1>
-
-<h2>インストール</h2>
-
-<pre><code>$ go get -u github.com/heroku/force
-</code></pre>
-
-<p>エラーが出た。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>.go/1.4/src/github.com/ddollar/config/windows.go:8: (*Config).homeDirectory redeclared in this block
-</span><span class='line'>  previous declaration at .go/1.4/src/github.com/ddollar/config/posix.go:9</span></code></pre></td></tr></table></div></figure>
-
-
-<p></p>
-
-<h2>エラー回避</h2>
-
-<p>どうやら関連プラグイン？のとあるファイルが悪さをしているとかなんとか。<br/>
-以下にあるファイルをリネームして退避させておく。</p>
-
-<pre><code>$ cd /Users/YOUR_NAME/.go/1.4/src/github.com/ddollar/config
-$ mv windows.go _windows.go
-$ go get .
-</code></pre>
-
-<p>これでエラーが回避された状態でプラグイン？のインストールが完了したので、<br/>
-あらためてインストール。</p>
-
-<pre><code>$ go get -n github.com/heroku/force
-</code></pre>
-
-<p>入った。</p>
-
-<p><a href="https://github.com/heroku/force/issues/138#issuecomment-86178284">Compiling from source not working · Issue #138 · heroku/force</a></p>
-
-<h2>ログイン</h2>
-
-<pre><code>$ force login
-</code></pre>
-
-<p>以下のように認証を求められるので、許可。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2015/05/Force_com_CLI_1.jpg" alt="" /></p>
-
-<p>許可すると以下の画面になって接続完了。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2015/05/Force_com_CLI_2.jpg" alt="" /></p>
-
-<pre><code>$ force login
-Logged in as 'YOUR-EMAIL'
-</code></pre>
-
-<h3>SELECT</h3>
-
-<p>とりあえず、select文でデータ取得</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>$ force query 'SELECT ID, NAME FROM Lead'
-</span><span class='line'> Id                 | Name
-</span><span class='line'>--------------------+---------------------
-</span><span class='line'> 00Q1000000DnnMvEAJ | Boxer Bertha
-</span><span class='line'> 00Q1000000DnnMwEAJ | Cotton Phyllis
-</span><span class='line'> ...</span></code></pre></td></tr></table></div></figure>
-
-
-<h3>カスタム項目の追加</h3>
-
-<p>コマンドからカスタム項目の追加も可能。<br/>
-だけど、エラーが。</p>
-
-<pre><code>$ force field create User__c Due:DateTime
-Attrs:  &lt;invalid Value&gt;
-panic: reflect: call of reflect.Value.Type on zero Value
-...
-</code></pre>
-
-<p>どうやら、型名を小文字で入れる必要があるよう。<br/>
-<a href="https://github.com/heroku/force/issues/52">Error when calling force field create · Issue #52 · heroku/force</a></p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>$ force field create User__c Due:datetime
-</span><span class='line'>Attrs:  &lt;main.DatetimeFieldRequired Value&gt;
-</span><span class='line'>
-</span><span class='line'>      &lt;metadata xsi:type="CustomField" xmlns:cmd="http://soap.sforce.com/2006/04/metadata"&gt;
-</span><span class='line'>          &lt;fullName&gt;User__c.Due__c&lt;/fullName&gt;
-</span><span class='line'>          &lt;label&gt;Due&lt;/label&gt;
-</span><span class='line'>          &lt;type&gt;DateTime&lt;/type&gt;
-</span><span class='line'>      &lt;/metadata&gt;
-</span><span class='line'>
-</span><span class='line'>Not done yet.  Will check again in five seconds.
-</span><span class='line'>Custom field created</span></code></pre></td></tr></table></div></figure>
-
-
-<p><img src="http://kayakuguri.github.io/images/2015/05/Force_com_CLI_3.jpg" alt="" /></p>
-
-<p>この指定方法だと、フィールド名とAPI参照名を別々に出来ない、、かも。</p>
-
-<h3>利用方法</h3>
-
-<pre><code>$ force
-</code></pre>
-
-<p>でヘルプを表示。<br/>
-さらに、コマンドをそのまま打つと使いと例も表示してくれる。<br/>
-先ほどの、<code>field</code>だとこんな感じ。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>$ force field
-</span><span class='line'>Usage: force field
-</span><span class='line'>
-</span><span class='line'>Manage sobject fields
-</span><span class='line'>
-</span><span class='line'>Usage:
-</span><span class='line'>
-</span><span class='line'>  force field list &lt;object&gt;
-</span><span class='line'>  force field create &lt;object&gt; &lt;field&gt;:&lt;type&gt; [&lt;option&gt;:&lt;value&gt;]
-</span><span class='line'>  force field delete &lt;object&gt; &lt;field&gt;
-</span><span class='line'>  force field type
-</span><span class='line'>  force field type &lt;fieldtype&gt;
-</span><span class='line'>
-</span><span class='line'>Examples:
-</span><span class='line'>
-</span><span class='line'>  force field list Todo__c
-</span><span class='line'>  force field create Inspection__c "Final Outcome":picklist picklist:"Pass, Fail, Redo"
-</span><span class='line'>  force field create Todo__c Due:DateTime required:true
-</span><span class='line'>  force field delete Todo__c Due
-</span><span class='line'>  force field type     #displays all the supported field types
-</span><span class='line'>  force field type email   #displays the required and optional attributes</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>参考</h2>
-
-<p><a href="https://force-cli.heroku.com/">Force.com CLI</a><br/>
-<a href="http://blogjp.sforce.com/2013/11/forcecom-cli---d403.html">Force.com CLI &ndash; コマンドラインインタフェース | Salesforce Developers Japan Blog</a><br/>
-<a href="http://qiita.com/zaki-yama/items/77b3aeff6b129a87019a">Salesforce &ndash; ターミナルからApexを実行できるforce.com CLIの使い方 &ndash; Qiita</a><br/>
-<a href="http://sixeight.hatenablog.com/entry/2013/12/12/031752">golang の環境作った &ndash; ちなみに</a><br/>
-<a href="http://qiita.com/puttyo_bubu/items/4e60e42ff041f2474428">Macでgo言語開発環境を作る &ndash; Qiita</a><br/>
-<a href="http://blog.teapla.net/2010/12/1178">homebrewを使ってMercurialをインストールする | Ken&#039;s blog @teaplanet</a><br/>
-<a href="http://qiita.com/tailak/items/0eedc6d5c4cc71a5e1a0">Python &ndash; Macでpipのアップデートでエラー &ndash; Qiita</a></p>
 ]]></content>
   </entry>
   

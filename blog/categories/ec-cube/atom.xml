@@ -4,7 +4,7 @@
   <title><![CDATA[Category: ec-cube | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/ec-cube/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-10-08T11:16:09+09:00</updated>
+  <updated>2015-10-14T09:49:46+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -51,7 +51,7 @@
 その他のテンプレートを使用したメールでも同じタイトルが使われるので、商品名がないものの場合、おかしくなってしまう。<br/>
 例えば、お問い合わせ受付、というタイトルのメールだとすると、以下のように商品名が抜けて、カッコのみになってしまうはず。</p>
 
-<pre><code>[]お問い合わせ受付
+<pre><code>\[\]お問い合わせ受付
 </code></pre>
 
 <p>参考：<a href="http://www.tokihouse.com/ec-cube/mail/mail_title.html">http://www.tokihouse.com/ec-cube/mail/mail_title.html</a></p>

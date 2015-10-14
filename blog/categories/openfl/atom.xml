@@ -4,7 +4,7 @@
   <title><![CDATA[Category: openfl | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/openfl/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-10-08T11:16:09+09:00</updated>
+  <updated>2015-10-14T09:49:46+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -111,7 +111,7 @@ $ sudo chown -R myusername /usr/lib/haxe
 <p>lime commandをインストールするか聞かれる。<br/>
 たぶん、必要っぽいので、<code>y</code>で。</p>
 
-<pre><code>Do you want to install the "lime" command? [y/n/a] ? y
+<pre><code>Do you want to install the "lime" command? \[y/n/a\] ? y
 </code></pre>
 
 <h4>OpenFLをインストール</h4>
@@ -161,7 +161,7 @@ $ sudo chown -R myusername /opt/android-sdk
 
 <p>で、改めて、アウトプットのディレクトリを指定。</p>
 
-<pre><code>Output directory [/opt/android-sdk]: /opt/android-sdk
+<pre><code>Output directory \[/opt/android-sdk\]: /opt/android-sdk
 </code></pre>
 
 <p>すると、<code>Android SDK Manager</code>なるものが立ち上がる。<br/>
@@ -176,8 +176,8 @@ $ sudo chown -R myusername /opt/android-sdk
 <p>次に、<code>android-ndk</code>をインストールしますか？と出た。<br/>
 インストールしようとすると、ここでもディレクトリが必要。。。</p>
 
-<pre><code>Download and install the Android NDK? [y/n/a] ? y
-Output directory [/opt/android-ndk]: /opt/android-ndk
+<pre><code>Download and install the Android NDK? \[y/n/a\] ? y
+Output directory \[/opt/android-ndk\]: /opt/android-ndk
 </code></pre>
 
 <p>もちろんないので、再度、作成して、インストール。</p>
@@ -187,7 +187,7 @@ Output directory [/opt/android-ndk]: /opt/android-ndk
 <p>次は、<code>Apatch Ant</code>。同じようにディレクリ作成。<br/>
 (事前にこれだけいる、と言ってくれたらいいのに。。。)</p>
 
-<pre><code>Download and install the apache ant? [y/n/a] ? y
+<pre><code>Download and install the apache ant? \[y/n/a\] ? y
 Output directory [/opt/apache-ant]: /opt/apache-ant
 </code></pre>
 
@@ -266,8 +266,7 @@ $ lime test html5
 
 <p>冒頭で上げた<a href="https://plus.google.com/102594170131511973965/pos]ts">池田さん</a>のインストール動画は以下。</p>
 
-<iframe width="100%" height="315" src="http://kayakuguri.github.io//www.youtube.com/embed/MYHFJICUzzI" frameborder="0" allowfullscreen></iframe>
-
+<p><a href="http://www.youtube.com/embed/MYHFJICUzzI">http://www.youtube.com/embed/MYHFJICUzzI</a></p>
 ]]></content>
   </entry>
   
@@ -316,15 +315,9 @@ Haxe自体がワンソース・マルチユース的なものなのに、<br/>
 <blockquote class="twitter-tweet" lang="ja"><p>Haxe（とOpenFL）は結局のところ、ワンソース・マルチユースではなく、ワンスタディ・マルチクリエイト、みたいなものなので、本当に厳密なところでは同一挙動でなくてもいいと思っているのではないかなー。</p>&mdash; 尾野（しっぽ） (@tail_y) <a href="https://twitter.com/tail_y/statuses/428926391619313664">2014, 1月 30</a></blockquote>
 
 
-<script async src="http://kayakuguri.github.io//platform.twitter.com/widgets.js" charset="utf-8"></script>
-
-
 
 
 <blockquote class="twitter-tweet" lang="ja"><p>FlashCCを使い素材管理し、JSFL経由でHaxeからOpenFLとCreateJSをを切り替えて利用するという、とんでもないワークフローは既に白玉さんが確立しているのです <a href="https://t.co/speVyDSv9x">https://t.co/speVyDSv9x</a> <a href="http://t.co/FG3dgktJB0">pic.twitter.com/FG3dgktJB0</a></p>&mdash; 尾野（しっぽ） (@tail_y) <a href="https://twitter.com/tail_y/statuses/428930765254979584">2014, 1月 30</a></blockquote>
-
-
-<script async src="http://kayakuguri.github.io//platform.twitter.com/widgets.js" charset="utf-8"></script>
 
 
 
@@ -332,15 +325,9 @@ Haxe自体がワンソース・マルチユース的なものなのに、<br/>
 <blockquote class="twitter-tweet" lang="ja"><p>OpenFL の SWF Library(Free)ドキュメントページを閲覧するには Add cart にて支払い設定(住所入力)等を行う必要あり。ユーザ登録だけでは認証に弾かれます。 <a href="http://t.co/xYhqayB6CG">http://t.co/xYhqayB6CG</a></p>&mdash; siratama (@dango_itimi) <a href="https://twitter.com/dango_itimi/statuses/426696977712050177">2014, 1月 24</a></blockquote>
 
 
-<script async src="http://kayakuguri.github.io//platform.twitter.com/widgets.js" charset="utf-8"></script>
-
-
 
 
 <blockquote class="twitter-tweet" lang="ja"><p>あとOpenFLも低レベル層がLimeというのに分離してたり、h3dもHeapsという名前に変わる？とかいろいろ複雑ｗ　落ちついたら面白そう。</p>&mdash; こりん (@k0rin) <a href="https://twitter.com/k0rin/statuses/426576961721233408">2014, 1月 24</a></blockquote>
-
-
-<script async src="http://kayakuguri.github.io//platform.twitter.com/widgets.js" charset="utf-8"></script>
 
 
 
@@ -348,15 +335,9 @@ Haxe自体がワンソース・マルチユース的なものなのに、<br/>
 <blockquote class="twitter-tweet" lang="ja"><p>OpenFL、人に勧めるにはまだ早い感してる。特にHTML5のバックエンドがDOMベースで速度出ないので。Haxe作者のh3d（Evolandに使われてる）に期待かなあ。</p>&mdash; こりん (@k0rin) <a href="https://twitter.com/k0rin/statuses/426574886643855361">2014, 1月 24</a></blockquote>
 
 
-<script async src="http://kayakuguri.github.io//platform.twitter.com/widgets.js" charset="utf-8"></script>
-
-
 
 
 <blockquote class="twitter-tweet" lang="ja"><p>OpenFLの続き。ちなみにWindowsネイティブアプリの出力にすると最もパフォーマンスが良い感じ。FlashやHTML5の6倍ほどのパフォーマンスが出ています。ちなみにNekoもなかなかパフォーマンスが良いです。 <a href="https://twitter.com/search?q=%23Haxe&amp;src=hash">#Haxe</a> <a href="http://t.co/x5wnV7BhZp">http://t.co/x5wnV7BhZp</a></p>&mdash; 池田 泰延 Yasunobu Ikeda (@clockmaker) <a href="https://twitter.com/clockmaker/statuses/425673916028170240">2014, 1月 21</a></blockquote>
-
-
-<script async src="http://kayakuguri.github.io//platform.twitter.com/widgets.js" charset="utf-8"></script>
 
 
 
@@ -364,15 +345,14 @@ Haxe自体がワンソース・マルチユース的なものなのに、<br/>
 <blockquote class="twitter-tweet" lang="ja"><p><a href="https://twitter.com/iphone_dev_jp">@iphone_dev_jp</a> Haxe OpenFL(NME)を使って落ち物パズルゲームを作りました <a href="http://t.co/YjY12G6JY8">http://t.co/YjY12G6JY8</a></p>&mdash; Androwk (@Androwk) <a href="https://twitter.com/Androwk/statuses/362866716004454400">2013, 8月 1</a></blockquote>
 
 
-<script async src="http://kayakuguri.github.io//platform.twitter.com/widgets.js" charset="utf-8"></script>
-
-
 
 
 <blockquote class="twitter-tweet" lang="ja"><p>この間 OpenFL を試したら TextField を BitmapData に draw するところで何も描画されないって問題があった。詳しくは調べてない</p>&mdash; 馬鹿全903 (@bkzen) <a href="https://twitter.com/bkzen/statuses/353097125619437568">2013, 7月 5</a></blockquote>
 
 
-<script async src="http://kayakuguri.github.io//platform.twitter.com/widgets.js" charset="utf-8"></script>
+
+
+<script src="http://platform.twitter.com/widgets.js" charset="utf-8"></script>
 
 ]]></content>
   </entry>

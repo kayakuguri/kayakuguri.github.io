@@ -6,9 +6,9 @@
 	<title>KayaMemo</title>
 
 	
-	<meta name="description" content="OWASP Nightの大阪サテライト、というものに参加させてもらいました。
-参加、というか、端っこで聞かせてもらっただけ、ですが。 東京で開催されているOWASP nightを大阪から中継で見よう、という、
-パブリックビューイング的なイベント。 続きを読む Dec 16th, 2013 &hellip;">
+	<meta name="description" content="接続の参考：PostgreSQLへ接続](http://www.phpbook.jp/tutorial/postgresql/index3.html) プレースホルダーでの発行は以下を参考
+PHPでのSQLインジェクション対策 &ndash; プレースホルダ編
+pg_execute 続きを読む &hellip;">
 	
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
@@ -85,6 +85,52 @@
 		
 	
 	<div id="content" class="inner">
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2013/12/17/postgresql-select/">
+		
+			PostgreSQLでプレースホルダーを使ってSELECT文を発行する方法</a>
+	</h2>
+	<div class="entry-content">
+		<p>接続の参考：PostgreSQLへ接続](<a href="http://www.phpbook.jp/tutorial/postgresql/index3.html">http://www.phpbook.jp/tutorial/postgresql/index3.html</a>)</p>
+
+<p>プレースホルダーでの発行は以下を参考<br/>
+<a href="http://lets.postgresql.jp/documents/tutorial/with_php/against_sql_injection/placeholder">PHPでのSQLインジェクション対策 &ndash; プレースホルダ編</a><br/>
+<a href="http://php.net/manual/ja/function.pg-execute.php">pg_execute</a></p>
+
+
+		
+		<a href="/blog/2013/12/17/postgresql-select/" class="more-link">続きを読む</a>
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-12-17T17:25:36+09:00" pubdate data-updated="true">Dec 17<span>th</span>, 2013</time></div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/php/'>php</a>, <a class='category' href='/blog/categories/sql/'>sql</a>
+
+
+</div>
+	
+</div>
+</article>
 
 
     <article class="post">
@@ -187,8 +233,7 @@
 	<div class="entry-content">
 		<p>パシフィック・リム、買いました。</p>
 
-<iframe src="http://rcm-fe.amazon-adsystem.com/e/cm?t=mrlittlebig01-22&o=9&p=8&l=as1&asins=B00F3WXFIE&ref=tf_til&fc1=666666&IS2=1&lt1=_blank&m=amazon&lc1=258FB8&bc1=DDDDDD&bg1=DDDDDD&f=ifr" style="width:120px;height:240px;" scrolling="no" marginwidth="0" marginheight="0" frameborder="0"></iframe>
-
+<p><a href="http://www.amazon.co.jp/gp/product/B00F3WXFAM/ref=as_li_ss_tl?ie=UTF8&amp;camp=247&amp;creative=7399&amp;creativeASIN=B00F3WXFAM&amp;linkCode=as2&amp;tag=mrlittlebig01-22">【Amazon.co.jp限定】パシフィック・リム ブルーレイ スチールブック仕様(完全数量限定) [Blu-ray]</a></p>
 
 <p>で、購入した商品にはデジタルデータをダウンロード出来る、という特典が封入されていました。</p>
 
@@ -527,61 +572,6 @@
 
 
 	<a class='category' href='/blog/categories/octopress/'>octopress</a>
-
-
-</div>
-	
-</div>
-</article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2013/11/30/php-csv/">
-		
-			PHPでCSVファイルを読み込んだ時に日本語が消える</a>
-	</h2>
-	<div class="entry-content">
-		<p>PHPで文字コードがUTF-8のCSVファイルを読み込んだ際、<br/>
-何故か日本語が消える、という現象が。</p>
-
-<p>文字化け、ではなく、消える。<br/>
-また、ローカルのXAMPP環境では消えなかったのに、<br/>
-サーバにアップすると消えた。</p>
-
-<p>どうやら、PHP5の問題、のようで、<br/>
-<code>fgetcsv</code>を使用している時に起こる現象のよう。<br/>
-以下のように文字コードの指定をしてやるだけで解決した。</p>
-
-<pre><code>setlocale(LC_ALL, 'ja_JP.UTF-8');
-</code></pre>
-
-<p>参考：<a href="http://pentan.info/php/fgetcsv_char.html">fgetcsv関数を文字化け対応 setlocaleの文字コード指定</a></p>
-
-		
-		
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2013-11-30T14:10:49+09:00" pubdate data-updated="true">Nov 30<span>th</span>, 2013</time></div>
-	<div class="tags">
-
-
-	<a class='category' href='/blog/categories/php/'>php</a>
 
 
 </div>
