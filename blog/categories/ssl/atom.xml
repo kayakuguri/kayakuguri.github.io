@@ -4,7 +4,7 @@
   <title><![CDATA[Category: ssl | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/ssl/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-11-10T14:09:44+09:00</updated>
+  <updated>2015-11-10T14:15:51+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -71,10 +71,33 @@ An optional company name []:</p></blockquote>
 
 <p>後はこのCSRを使用して証明書を発行する。</p>
 
+<h2>確認</h2>
+
+<p>CSRの内容確認。</p>
+
+<pre><code>$ openssl req -in req.pem -text
+</code></pre>
+
+<p>```
+Certificate Request:</p>
+
+<pre><code>Data:
+    Version: 0 (0x0)
+    Subject: C=JP, ST=Tokyo, L=xxx, O=xxx, CN=xxx.jp
+    Subject Public Key Info:
+    ...
+</code></pre>
+
+<p>```</p>
+
+<p>確認ツール<br/>
+<a href="http://tech-unlimited.com/csrcheck.html">CSR内容確認 | CSRの中身を再確認してミスを防止 | すぐに使える便利なWEBツール | Tech-Unlimited</a></p>
+
 <h2>参考</h2>
 
 <p><a href="http://www.karakaram.com/mac-apache-ssl">Macに最初から入っているApacheでSSL通信する環境を整えた | karakaram-blog</a><br/>
-<a href="https://www.geotrust.co.jp/support/ssl/csr/apache_openssl_new.html">Apache + OpenSSL CSR生成手順 (新規)｜CSRの生成方法｜マニュアル｜サポート｜SSLサーバ証明書 ジオトラスト</a></p>
+<a href="https://www.geotrust.co.jp/support/ssl/csr/apache_openssl_new.html">Apache + OpenSSL CSR生成手順 (新規)｜CSRの生成方法｜マニュアル｜サポート｜SSLサーバ証明書 ジオトラスト</a><br/>
+<a href="http://chinmai.net/~osakana/tech-memo/wiki.cgi?page=OpenSSL+CSR%2C+%BE%DA%CC%C0%BD%F1%A4%CA%A4%C9%B3%CE%C7%A7%A5%B3%A5%DE%A5%F3%A5%C9">OpenSSL CSR, 証明書など確認コマンド &ndash; tech-memo＠さかにゃ日記</a></p>
 ]]></content>
   </entry>
   
