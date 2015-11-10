@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: ssl | KayaMemo]]></title>
+  <link href="http://kayakuguri.github.io/blog/categories/ssl/atom.xml" rel="self"/>
+  <link href="http://kayakuguri.github.io/"/>
+  <updated>2015-11-10T14:09:44+09:00</updated>
+  <id>http://kayakuguri.github.io/</id>
+  <author>
+    <name><![CDATA[萱潜]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[CSRファイルを作成する]]></title>
+    <link href="http://kayakuguri.github.io/blog/2015/11/10/generate-csr/"/>
+    <updated>2015-11-10T13:57:43+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2015/11/10/generate-csr</id>
+    <content type="html"><![CDATA[<p>いつも忘れてググってしまうので備忘録。</p>
+
+<!-- more -->
+
+
+<h2>秘密鍵作成</h2>
+
+<h3>乱数ファイル</h3>
+
+<pre><code>$ openssl dgst -md5 /var/log/system.log &gt; rand.dat
+</code></pre>
+
+<h3>パスフレーズ付き秘密鍵</h3>
+
+<pre><code>$ openssl genrsa -des3 -rand rand.dat 2048 &gt; server.pem
+</code></pre>
+
+<p>キー長は<code>2048</code>が多かったのでそれで。</p>
+
+<h4>パスフレーズの解除方法</h4>
+
+<pre><code>$ openssl rsa -in server.pem -out server.pem
+</code></pre>
+
+<h4>パスフレーズなしの秘密鍵</h4>
+
+<pre><code>$ openssl genrsa -rand rand.dat 2048 &gt; server.pem
+</code></pre>
+
+<h2>CSR作成</h2>
+
+<blockquote><p>証明書署名要求(CSR:Certificate Signing Request)</p></blockquote>
+
+<pre><code>$ openssl req -new -key server.pem -out csr.pem
+</code></pre>
+
+<blockquote><p>Country Name (2 letter code) [AU]:(国名)<br/>
+State or Province Name (full name) [Some-State]:(都道府県)<br/>
+Locality Name (eg, city) []:(市町村)<br/>
+Organization Name (eg, company) [Internet Widgits Pty Ltd]:(組織名)<br/>
+Organizational Unit Name (eg, section) []:(部署名)<br/>
+Common Name (e.g. server FQDN or YOUR name) []:(サーバ名:FQDN)<br/>
+Email Address []:(メールアドレス)</p>
+
+<p>Please enter the following &lsquo;extra&rsquo; attributes<br/>
+to be sent with your certificate request<br/>
+A challenge password []:<br/>
+An optional company name []:</p></blockquote>
+
+<p>部署名、メールアドレスは空でよい。</p>
+
+<p>後はこのCSRを使用して証明書を発行する。</p>
+
+<h2>参考</h2>
+
+<p><a href="http://www.karakaram.com/mac-apache-ssl">Macに最初から入っているApacheでSSL通信する環境を整えた | karakaram-blog</a><br/>
+<a href="https://www.geotrust.co.jp/support/ssl/csr/apache_openssl_new.html">Apache + OpenSSL CSR生成手順 (新規)｜CSRの生成方法｜マニュアル｜サポート｜SSLサーバ証明書 ジオトラスト</a></p>
+]]></content>
+  </entry>
+  
+</feed>

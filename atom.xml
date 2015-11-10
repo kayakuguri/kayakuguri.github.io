@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-10-28T23:02:10+09:00</updated>
+  <updated>2015-11-10T14:09:44+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,71 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[CSRファイルを作成する]]></title>
+    <link href="http://kayakuguri.github.io/blog/2015/11/10/generate-csr/"/>
+    <updated>2015-11-10T13:57:43+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2015/11/10/generate-csr</id>
+    <content type="html"><![CDATA[<p>いつも忘れてググってしまうので備忘録。</p>
+
+<!-- more -->
+
+
+<h2>秘密鍵作成</h2>
+
+<h3>乱数ファイル</h3>
+
+<pre><code>$ openssl dgst -md5 /var/log/system.log &gt; rand.dat
+</code></pre>
+
+<h3>パスフレーズ付き秘密鍵</h3>
+
+<pre><code>$ openssl genrsa -des3 -rand rand.dat 2048 &gt; server.pem
+</code></pre>
+
+<p>キー長は<code>2048</code>が多かったのでそれで。</p>
+
+<h4>パスフレーズの解除方法</h4>
+
+<pre><code>$ openssl rsa -in server.pem -out server.pem
+</code></pre>
+
+<h4>パスフレーズなしの秘密鍵</h4>
+
+<pre><code>$ openssl genrsa -rand rand.dat 2048 &gt; server.pem
+</code></pre>
+
+<h2>CSR作成</h2>
+
+<blockquote><p>証明書署名要求(CSR:Certificate Signing Request)</p></blockquote>
+
+<pre><code>$ openssl req -new -key server.pem -out csr.pem
+</code></pre>
+
+<blockquote><p>Country Name (2 letter code) [AU]:(国名)<br/>
+State or Province Name (full name) [Some-State]:(都道府県)<br/>
+Locality Name (eg, city) []:(市町村)<br/>
+Organization Name (eg, company) [Internet Widgits Pty Ltd]:(組織名)<br/>
+Organizational Unit Name (eg, section) []:(部署名)<br/>
+Common Name (e.g. server FQDN or YOUR name) []:(サーバ名:FQDN)<br/>
+Email Address []:(メールアドレス)</p>
+
+<p>Please enter the following &lsquo;extra&rsquo; attributes<br/>
+to be sent with your certificate request<br/>
+A challenge password []:<br/>
+An optional company name []:</p></blockquote>
+
+<p>部署名、メールアドレスは空でよい。</p>
+
+<p>後はこのCSRを使用して証明書を発行する。</p>
+
+<h2>参考</h2>
+
+<p><a href="http://www.karakaram.com/mac-apache-ssl">Macに最初から入っているApacheでSSL通信する環境を整えた | karakaram-blog</a><br/>
+<a href="https://www.geotrust.co.jp/support/ssl/csr/apache_openssl_new.html">Apache + OpenSSL CSR生成手順 (新規)｜CSRの生成方法｜マニュアル｜サポート｜SSLサーバ証明書 ジオトラスト</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Vagrant内でArtisanコマンドの実行とPostgreSQLの接続]]></title>
@@ -2596,78 +2661,6 @@ CONTAINER ID        IMAGE               COMMAND                CREATED          
 
 <p><a href="http://dotinstall.com/lessons/basic_docker">Docker入門 (全11回) &ndash; プログラミングならドットインストール</a><br/>
 <a href="http://tech.lexues.co.jp/archives/1569">【社内勉強会】Docker入門してみました | LexTech</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[salesforce]レコードの詳細からカスタムボタンでapexを呼び出す]]></title>
-    <link href="http://kayakuguri.github.io/blog/2015/06/01/custom-btn-apex/"/>
-    <updated>2015-06-01T17:33:40+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2015/06/01/custom-btn-apex</id>
-    <content type="html"><![CDATA[<p>カスタムボタンを使用してJSからApexを呼び出して処理させてみる。</p>
-
-<!-- more -->
-
-
-<h2>Apex</h2>
-
-<p><code>webService</code>を使用して、apexクラスを作成しておく。<br/>
-戻り値は文字列としておく。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>global class SampleClass{
-</span><span class='line'>  webService static String hogeMethod(String id){
-</span><span class='line'>      return 'このレコードのIDは、' + msg_id + 'です。';
-</span><span class='line'>  }
-</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>カスタムボタン</h2>
-
-<p>リードの場合は以下にある。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2015/06/custom_btn02.jpg" alt="" /></p>
-
-<p><code>新規ボタンまたはリンク</code>をクリック。</p>
-
-<p><code>動作</code>を<code>JavaScriptを実行</code>に、<br/>
-<code>内容のソース</code>を<code>onClick JavaScript</code>にする。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2015/06/custom_btn01.jpg" alt="" /></p>
-
-<p>内容は以下の用に記述。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>{!REQUIRESCRIPT('/soap/ajax/31.0/connection.js')} 
-</span><span class='line'>{!REQUIRESCRIPT('/soap/ajax/31.0/apex.js')} 
-</span><span class='line'>var ret = sforce.apex.execute('SampleClass','hogeMethod',{id:"{!CustomObject__c.Id}"}); 
-</span><span class='line'>alert(ret);</span></code></pre></td></tr></table></div></figure>
-
-
-<p>このカスタムボタンがクリックされると、このJSが実行される。<br/>
-<code>sforce.apex.execute</code>で実行するapexとメソッドを指定している。<br/>
-第一引数がクラス名。第二引数がメソッド。第三引数が引数、となる。<br/>
-引数で実行しているレコードのIDを渡すように項目を差し込んでいる。</p>
-
-<h2>表示</h2>
-
-<p>表示は、レイアウトの編集で、ボタンから追加。<br/>
-<img src="http://kayakuguri.github.io/images/2015/06/custom_btn04.jpg" alt="" /></p>
-
-<p>レコードの詳細からボタンをクリックするとIDが渡されて実行される。<br/>
-<img src="http://kayakuguri.github.io/images/2015/06/custom_btn03.jpg" alt="" /></p>
-
-<h2>参考</h2>
-
-<p><a href="https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_and_ajax.htm">Apex in AJAX | Force.com Apex Code Developer&#x27;s Guide | Salesforce Developers</a><br/>
-<a href="https://developer.salesforce.com/forums/ForumsMain?id=906F00000009BNkIAM">カスタムボタン押下時にSFDC上のWebServiceをコールする方法 &ndash; Salesforce Developer Community</a></p>
 ]]></content>
   </entry>
   
