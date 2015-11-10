@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-11-10T14:15:51+09:00</updated>
+  <updated>2015-11-10T14:23:33+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -14,7 +14,7 @@
 
   
   <entry>
-    <title type="html"><![CDATA[CSRファイルを作成する]]></title>
+    <title type="html"><![CDATA[MacのOpenSSLでCSRファイルを作成する]]></title>
     <link href="http://kayakuguri.github.io/blog/2015/11/10/generate-csr/"/>
     <updated>2015-11-10T13:57:43+09:00</updated>
     <id>http://kayakuguri.github.io/blog/2015/11/10/generate-csr</id>
