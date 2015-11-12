@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-11-10T14:23:33+09:00</updated>
+  <updated>2015-11-12T15:50:31+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,120 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[WordPress] 別のユーザーグループが投稿した記事を編集出来ないようにする]]></title>
+    <link href="http://kayakuguri.github.io/blog/2015/11/12/wordpress-usergroup-edit/"/>
+    <updated>2015-11-12T15:49:20+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2015/11/12/wordpress-usergroup-edit</id>
+    <content type="html"><![CDATA[<p>ユーザーグループを作成し、別のユーザーグループが作成した記事を別のユーザーグループが編集出来ないように設定してみた。</p>
+
+<!-- more -->
+
+
+<h2>カスタムユーザー権限の作成</h2>
+
+<p>User Role Editorのプラグインを使用する。<br/>
+<a href="https://ja.wordpress.org/plugins/user-role-editor/">https://ja.wordpress.org/plugins/user-role-editor/</a></p>
+
+<p>インストール、有効化するとユーザーのメニュー内に、User Role Editorの項目が追加される。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2015/11/user_group01.jpg" alt="" /></p>
+
+<p>右側メニュー内の<code>Add Role</code>をクリックし、新しく権限を追加する。<br/>
+Role name(ID)は英数字で設定しておく。<br/>
+Display Role Nameはわかりやすいように日本語でも大丈夫。<br/>
+Make copy of で、コピー元の権限があれば選択する。<br/>
+今回は投稿者の権限を利用する事にする。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2015/11/user_group02.jpg" alt="" /></p>
+
+<p>もう一つ、white(白組)という権限も作成しておく。</p>
+
+<h2>ユーザーグループの設定</h2>
+
+<p>User Access Managerのプラグインを使用する。<br/>
+<a href="https://ja.wordpress.org/plugins/user-access-manager/">https://ja.wordpress.org/plugins/user-access-manager/</a></p>
+
+<p>インストール、有効化するとユーザーのメニュー内に、UAMというメニューが追加される。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2015/11/user_group03.jpg" alt="" /></p>
+
+<p>メニューをクリックするとグループが一つもない状態であれば、Add user groupが表示される状態となる。<br/>
+なので、ここでユーザーグループを作成する。</p>
+
+<p><code>User group name</code> はグループ名だが、日本語でも問題なかった。<br/>
+<code>User group description</code> はグループの説明。<br/>
+<code>IP range</code> はこのグループに属するユーザーのアクセスIPを制限する際に使用する。<br/>
+<code>Read access</code> は、このグループが投稿した記事をだれが閲覧できるか、を設定する。<br/>
+<code>All</code> にすれば誰でも閲覧可能。<br/>
+<code>only group users</code> にすればこのユーザーグループのユーザーしか閲覧が出来ない。<br/>
+今回は閲覧は全員可能としたかったので、allにした。<br/>
+<code>Write access</code> は、この投稿した記事をだれが編集できるか、を設定する。<br/>
+内容はReadと同じ。<br/>
+今回は正にここが肝で、作成したユーザーグループ以外のユーザーには編集させないので、 <code>only group users</code> とした。<br/>
+<code>Role affiliation</code>は、このユーザーグループに属する権限の設定。<br/>
+ここを設定するとユーザーを作成する際に選んだ権限に属するユーザーグループは必ず選ばれるようになる。<br/>
+要するに、権限を選べば自動でユーザーグループも指定されるので、設定しておいた方が楽。<br/>
+ユーザーグループに入れるユーザーを個別に選びたい場合は外しておけばいいと思う。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2015/11/user_group04.jpg" alt="" /></p>
+
+<p>同じく白組も登録しておく。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2015/11/user_group05.jpg" alt="" /></p>
+
+<h2>ユーザーの追加</h2>
+
+<p>ユーザーを追加する。<br/>
+今回の環境が色々カスタマイズしているため未確認だけど、どうやら新規登録の際にはユーザーグループを選択する項目はなさそう。<br/>
+とはいえ、権限を選べばグループも設定されるようになっているので問題はなし。<br/>
+(権限ロールで、作成した「白組」の権限を選択するのを忘れないように）</p>
+
+<p><img src="http://kayakuguri.github.io/images/2015/11/user_group06.jpg" alt="" /></p>
+
+<p>同様に赤組ユーザーも追加する。<br/>
+以下のように、権限ロールを設定しただけで、ユーザーグループも設定されていることがわかる。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2015/11/user_group07.jpg" alt="" /></p>
+
+<h2>記事の投稿</h2>
+
+<p>記事を投稿する。<br/>
+この時にその記事を編集可能なユーザーグループを選択するのだけど、<br/>
+ユーザーグループに所属しているユーザーで記事を作成しようとするとユーザーグループ選択の項目が表示されない。<br/>
+なので、User Access Managerの設定画面で以下の項目を <code>Yes</code> に変更する。</p>
+
+<blockquote><p>UAM &ndash;> Setting &ndash;> Authors settings &ndash;> Authors can add content to their own groups</p></blockquote>
+
+<p><img src="http://kayakuguri.github.io/images/2015/11/user_group08.jpg" alt="" /></p>
+
+<p>右側の列に以下のようなボックスが表示される。<br/>
+記事作成の際に、チェックを入れるのを忘れないようにする。<br/>
+(忘れてしまうとだれでも編集可能な記事となってしまう）</p>
+
+<p><img src="http://kayakuguri.github.io/images/2015/11/user_group09.jpg" alt="" /></p>
+
+<p>管理者権限でログインして一覧を見ると以下のような状況だが、</p>
+
+<p><img src="http://kayakuguri.github.io/images/2015/11/user_group10.jpg" alt="" /></p>
+
+<p>例えば白組のユーザーでログインして見ると以下のように白組に設定した記事のみが表示される。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2015/11/user_group11.jpg" alt="" /></p>
+
+<h2>まとめ</h2>
+
+<p>これで目的は達成出来た。<br/>
+記事投稿する際にグループを選択しないといけない、など少し運用がめんどうになりそうな気配はあるが、<br/>
+カスタムでここを触るのは現状不可能そうなので、プラグインでの対応しかなさそう。</p>
+
+<h2>参考</h2>
+
+<p><a href="http://ameblo.jp/signum21/entry-11468274679.html">WordPress会員制サイト構築 その7 User Access Manager｜オレオレWebサービス指南書！ 自分のチカラでサーバー世界を自由に創造するから面白い</a><br/>
+<a href="http://ameblo.jp/ifl-nagatsuma-noriyuki/entry-11093035839.html">【WordPress】ユーザーごとに投稿ページ・固定ページの閲覧権限を設定する｜長妻紀之のブログ</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[MacのOpenSSLでCSRファイルを作成する]]></title>
@@ -2404,288 +2518,6 @@ String arrs = convertArrayPostData(p, 'arr');  //1;2;3
 <p><a href="https://developer.salesforce.com/docs/atlas.ja-jp.apex_workbook.meta/apex_workbook/apex_scheduling_2.htm">スケジュール可能なクラスのテストの追加 | Apex ワークブック | Salesforce Developers</a><br/>
 <a href="http://blog.flect.co.jp/salesforce/2010/08/apex-2136.html">セールスフォースの豆知識: スケジュール実行するApexのテストメソッドと実行時刻の詳細設定</a><br/>
 <a href="http://blog.livedoor.jp/androidbeginner/archives/39179776.html">【Salesforce】Apexジョブの書き方 : 怠けろ！プログラマ！</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Dockerをvagrantに入れてwebサーバーを立ち上げるまで]]></title>
-    <link href="http://kayakuguri.github.io/blog/2015/06/09/my-first-docker/"/>
-    <updated>2015-06-09T20:21:19+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2015/06/09/my-first-docker</id>
-    <content type="html"><![CDATA[<p>dockerは話にはよく聞くけど全くわからなかったので、とりあえずインストールして動かすところまでやってみた。</p>
-
-<!-- more -->
-
-
-<h2>Ubuntu</h2>
-
-<p>Dockerはlinux環境でのみ動作可能、ということで、Vagrantにlinux環境を作って、そこにdockerをインストールする。<br/>
-さらに、dockerはUbuntuで開発されているとのことなので、同じくUbuntuにインストールしてやるのが一番無難っぽい。</p>
-
-<h3>VagrantBoxの作成</h3>
-
-<p>Ubuntu14の64bit版を使ってvagrantboxを作成する。<br/>
-<a href="http://www.vagrantbox.es/">http://www.vagrantbox.es/</a><br/>
-このページ内で、<code>trusty</code>で検索。<br/>
-(Ubuntu14はtrustyと呼ばれているらしい)</p>
-
-<p>その64bit版のURLをコピー。ちなみに以下のURL。</p>
-
-<blockquote><p><a href="https://cloud-images.ubuntu.com/vagrant/trusty/current/trusty-server-cloudimg-amd64-vagrant-disk1.box">https://cloud-images.ubuntu.com/vagrant/trusty/current/trusty-server-cloudimg-amd64-vagrant-disk1.box</a></p></blockquote>
-
-<h3>VagratBoxの追加</h3>
-
-<p>vagrantに追加する。</p>
-
-<pre><code>$ vagrant box add trusty64 https://cloud-images.ubuntu.com/vagrant/trusty/current/trusty-server-cloudimg-amd64-vagrant-disk1.box
-</code></pre>
-
-<p><code>box add</code>で先程コピーしたURLから追加する。<br/>
-<code>trusty64</code>としたところはboxの名前なので任意でよい。</p>
-
-<p>10分くらい待つと完了した。</p>
-
-<h3>初期化</h3>
-
-<p>導入したいディレクトリに移動して、初期化する。</p>
-
-<pre><code>$ vagrant init trusty64
-</code></pre>
-
-<p>先程指定したboxの名前を使用する。<br/>
-ここでもしばらく待つと完了。<br/>
-<code>Vagrantfile</code>というファイルが作成される。<br/>
-特に編集する必要はないが、IPアドレスのみ変更した。</p>
-
-<h3>起動</h3>
-
-<p>で、起動。</p>
-
-<pre><code>$ vagrant up
-</code></pre>
-
-<p>sshで入ってみる。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>$ vagrant ssh
-</span><span class='line'>Welcome to Ubuntu 14.04.2 LTS (GNU/Linux 3.13.0-53-generic x86_64)
-</span><span class='line'>...
-</span><span class='line'>vagrant@vagrant-ubuntu-trusty-64:~$</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>Doker</h2>
-
-<h3>インストール</h3>
-
-<p>で、Dockerをインストール。<br/>
-公式に沿って実行する。<br/>
-<a href="https://docs.docker.com/installation/ubuntulinux/">https://docs.docker.com/installation/ubuntulinux/</a></p>
-
-<p>まずは必要なパッケージをインストール。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>$ sudo apt-get update
-</span><span class='line'>$ sudo apt-get install linux-image-generic-lts-trusty
-</span><span class='line'>$ sudo reboot</span></code></pre></td></tr></table></div></figure>
-
-
-<p>再起動後、dockerのインストール。<br/>
-<code>wget</code>がインストールされているかを確認。<br/>
-インストールされていたので、そのまま進む。</p>
-
-<pre><code>$ which wget
-/usr/bin/wget
-</code></pre>
-
-<p>で、dockerパッケージをダウンロードし、インストールする。</p>
-
-<pre><code>$ wget -qO- https://get.docker.com/ | sh
-</code></pre>
-
-<p>しばらく待つと完了。</p>
-
-<pre><code>$ docker --version
-Docker version 1.6.2, build 7c8fca2
-</code></pre>
-
-<h2>Docker image</h2>
-
-<h3>pull</h3>
-
-<p><a href="https://registry.hub.docker.com/">https://registry.hub.docker.com/</a><br/>
-上記サイトから任意のimageを引っ張ってくる。<br/>
-<code>centos</code>のイメージを入れてみる。<br/>
-<a href="https://registry.hub.docker.com/search?q=centos&amp;searchfield=">centosの検索結果</a></p>
-
-<pre><code>$ sudo docker pull centos
-</code></pre>
-
-<p>入っているimageのリストは以下で確認できる。</p>
-
-<pre><code>$ sudo docker images
-REPOSITORY          TAG                 IMAGE ID            CREATED             VIRTUAL SIZE
-centos              latest              fd44297e2ddb        6 weeks ago         215.7 MB
-</code></pre>
-
-<h3>Container</h3>
-
-<p>で、落としてきたimageからcontainerを作成して、その上で簡単なコマンドを走らせてみる。</p>
-
-<pre><code>$ sudo docker run centos echo "hello world!"
-hello world!
-</code></pre>
-
-<p><code>docker run</code>で指定したimageからcontainerを作成。<br/>
-その後に続くコマンドをそのcontainer上で実行している。</p>
-
-<p>実行されたcontainerを確認スルには以下。<br/>
-(<code>-a</code>のオプションを外すすと実行中のcontainerが表示される。)</p>
-
-<pre><code>$ sudo docker ps -a
-CONTAINER ID        IMAGE               COMMAND                CREATED              STATUS                          PORTS               NAMES
-0a84f937b7c        centos:latest       "echo 'hello world!'   About a minute ago   Exited (0) About a minute ago                       agitated_banach
-</code></pre>
-
-<h2>Webサーバーの立ち上げ</h2>
-
-<h3>dockerfile</h3>
-
-<p>dockerfileを作る。</p>
-
-<pre><code>$ vim Dockerfile
-</code></pre>
-
-<p>中身は簡単に以下のように。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>FROM centos
-</span><span class='line'>MAINTAINER xxx
-</span><span class='line'>
-</span><span class='line'>RUN yum install -y httpd
-</span><span class='line'>ADD ./index.html /var/www/html/
-</span><span class='line'>EXPOSE 80
-</span><span class='line'>CMD ["/usr/sbin/httpd", "-D", "FOREGROUND"]</span></code></pre></td></tr></table></div></figure>
-
-
-<p><code>MAINTAINER</code>は作成者の名前などを書いてやるのが習慣らしい。</p>
-
-<p>index.htmlを適当に作成。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;html&gt;
-</span><span class='line'>&lt;body&gt;
-</span><span class='line'>hello docker world!
-</span><span class='line'>&lt;/body&gt;
-</span><span class='line'>&lt;/html&gt;</span></code></pre></td></tr></table></div></figure>
-
-
-<h3>build</h3>
-
-<p>で、ビルドする。<br/>
-ビルドで、imageからdockerfile内のコマンドを使用してcontainerを作成し、さらにその結果を新しくimageに出力する、ところまでをやってくれるコマンドのよう。</p>
-
-<pre><code>$ sudo docker build -t test/httpd .
-</code></pre>
-
-<p><code>test/httpd</code>はcontainerの名前。任意でよい。<br/>
-最後の<code>.</code>は現在のディレクトリでビルド、ということ。</p>
-
-<p>しばらく待って完了…と行きたいところだけど、どうやらエラーが出て止まってしまってるよう。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>Complete!
-</span><span class='line'>INFO[0012] The command [/bin/sh -c yum install -y httpd] returned a non-zero code: 1</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Complete!って出てるけど、その先のStepに進まない…。</p>
-
-<h3>エラー回避</h3>
-
-<p>ググってみると以下がヒット。<br/>
-<a href="http://fujita222.hateblo.jp/entry/2015/03/10/163657">Dockerのcentosでapacheインストール失敗する。rpmがうんちゃらとか言われる</a></p>
-
-<p>どうやらpullしてきたcentOSがあたらしすぎてダメだったよう。<br/>
-なので、この記事どおりcentos6をpullして使う。</p>
-
-<pre><code>$ sudo docker pull centos:centos6
-$ sudo docker images
-REPOSITORY          TAG                 IMAGE ID            CREATED             VIRTUAL SIZE
-centos              centos6             b9aeeaeb5e17        6 weeks ago         202.6 MB
-</code></pre>
-
-<p>で、<code>Dockerfile</code>の中身をcentos6を使うように修正。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>FROM centos:centos6
-</span><span class='line'>MAINTAINER xxx
-</span><span class='line'>
-</span><span class='line'>RUN yum install -y httpd
-</span><span class='line'>ADD ./index.html /var/www/html/
-</span><span class='line'>EXPOSE 80
-</span><span class='line'>CMD ["/usr/sbin/httpd", "-D", "FOREGROUND"]</span></code></pre></td></tr></table></div></figure>
-
-
-<p>これで再度実行。</p>
-
-<pre><code>$ sudo docker build -t test/httpd .
-</code></pre>
-
-<p>ようやく無事、完了。</p>
-
-<pre><code>$ sudo docker images
-REPOSITORY          TAG                 IMAGE ID            CREATED             VIRTUAL SIZE
-test/httpd          latest              74ea9508c04c        52 seconds ago      271.2 MB
-centos              centos6             b9aeeaeb5e17        6 weeks ago         202.6 MB
-</code></pre>
-
-<h3>run</h3>
-
-<p>ポートを指定してバックグラウンドで実行。</p>
-
-<pre><code>$ sudo docker run -p 8080:80 -d test/httpd
-</code></pre>
-
-<p>起動している。</p>
-
-<pre><code>$ sudo docker ps
-CONTAINER ID        IMAGE               COMMAND                CREATED             STATUS              PORTS                  NAMES
-4aca4268ffa3        test/httpd:latest   "/usr/sbin/httpd -D    15 seconds ago      Up 15 seconds       0.0.0.0:8080-&gt;80/tcp   compassionate_poincare
-</code></pre>
-
-<p>Vagrantfileで指定したIPアドレスに8080のポートをつけてやればアクセスが出来る。</p>
-
-<blockquote><p><a href="http://192.168.33.30:8080/">http://192.168.33.30:8080/</a></p></blockquote>
-
-<p>アクセスすると、先程作成した<code>index.html</code>が表示された。</p>
-
-<p>なんだかんだで大変だったけどとりあえず起動できた。</p>
-
-<h2>参考</h2>
-
-<p><a href="http://dotinstall.com/lessons/basic_docker">Docker入門 (全11回) &ndash; プログラミングならドットインストール</a><br/>
-<a href="http://tech.lexues.co.jp/archives/1569">【社内勉強会】Docker入門してみました | LexTech</a></p>
 ]]></content>
   </entry>
   

@@ -4,7 +4,7 @@
   <title><![CDATA[Category: wordpress | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/wordpress/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-11-10T14:23:33+09:00</updated>
+  <updated>2015-11-12T15:50:31+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,120 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[WordPress] 別のユーザーグループが投稿した記事を編集出来ないようにする]]></title>
+    <link href="http://kayakuguri.github.io/blog/2015/11/12/wordpress-usergroup-edit/"/>
+    <updated>2015-11-12T15:49:20+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2015/11/12/wordpress-usergroup-edit</id>
+    <content type="html"><![CDATA[<p>ユーザーグループを作成し、別のユーザーグループが作成した記事を別のユーザーグループが編集出来ないように設定してみた。</p>
+
+<!-- more -->
+
+
+<h2>カスタムユーザー権限の作成</h2>
+
+<p>User Role Editorのプラグインを使用する。<br/>
+<a href="https://ja.wordpress.org/plugins/user-role-editor/">https://ja.wordpress.org/plugins/user-role-editor/</a></p>
+
+<p>インストール、有効化するとユーザーのメニュー内に、User Role Editorの項目が追加される。</p>
+
+<p><img src="/images/2015/11/user_group01.jpg" alt="" /></p>
+
+<p>右側メニュー内の<code>Add Role</code>をクリックし、新しく権限を追加する。<br/>
+Role name(ID)は英数字で設定しておく。<br/>
+Display Role Nameはわかりやすいように日本語でも大丈夫。<br/>
+Make copy of で、コピー元の権限があれば選択する。<br/>
+今回は投稿者の権限を利用する事にする。</p>
+
+<p><img src="/images/2015/11/user_group02.jpg" alt="" /></p>
+
+<p>もう一つ、white(白組)という権限も作成しておく。</p>
+
+<h2>ユーザーグループの設定</h2>
+
+<p>User Access Managerのプラグインを使用する。<br/>
+<a href="https://ja.wordpress.org/plugins/user-access-manager/">https://ja.wordpress.org/plugins/user-access-manager/</a></p>
+
+<p>インストール、有効化するとユーザーのメニュー内に、UAMというメニューが追加される。</p>
+
+<p><img src="/images/2015/11/user_group03.jpg" alt="" /></p>
+
+<p>メニューをクリックするとグループが一つもない状態であれば、Add user groupが表示される状態となる。<br/>
+なので、ここでユーザーグループを作成する。</p>
+
+<p><code>User group name</code> はグループ名だが、日本語でも問題なかった。<br/>
+<code>User group description</code> はグループの説明。<br/>
+<code>IP range</code> はこのグループに属するユーザーのアクセスIPを制限する際に使用する。<br/>
+<code>Read access</code> は、このグループが投稿した記事をだれが閲覧できるか、を設定する。<br/>
+<code>All</code> にすれば誰でも閲覧可能。<br/>
+<code>only group users</code> にすればこのユーザーグループのユーザーしか閲覧が出来ない。<br/>
+今回は閲覧は全員可能としたかったので、allにした。<br/>
+<code>Write access</code> は、この投稿した記事をだれが編集できるか、を設定する。<br/>
+内容はReadと同じ。<br/>
+今回は正にここが肝で、作成したユーザーグループ以外のユーザーには編集させないので、 <code>only group users</code> とした。<br/>
+<code>Role affiliation</code>は、このユーザーグループに属する権限の設定。<br/>
+ここを設定するとユーザーを作成する際に選んだ権限に属するユーザーグループは必ず選ばれるようになる。<br/>
+要するに、権限を選べば自動でユーザーグループも指定されるので、設定しておいた方が楽。<br/>
+ユーザーグループに入れるユーザーを個別に選びたい場合は外しておけばいいと思う。</p>
+
+<p><img src="/images/2015/11/user_group04.jpg" alt="" /></p>
+
+<p>同じく白組も登録しておく。</p>
+
+<p><img src="/images/2015/11/user_group05.jpg" alt="" /></p>
+
+<h2>ユーザーの追加</h2>
+
+<p>ユーザーを追加する。<br/>
+今回の環境が色々カスタマイズしているため未確認だけど、どうやら新規登録の際にはユーザーグループを選択する項目はなさそう。<br/>
+とはいえ、権限を選べばグループも設定されるようになっているので問題はなし。<br/>
+(権限ロールで、作成した「白組」の権限を選択するのを忘れないように）</p>
+
+<p><img src="/images/2015/11/user_group06.jpg" alt="" /></p>
+
+<p>同様に赤組ユーザーも追加する。<br/>
+以下のように、権限ロールを設定しただけで、ユーザーグループも設定されていることがわかる。</p>
+
+<p><img src="/images/2015/11/user_group07.jpg" alt="" /></p>
+
+<h2>記事の投稿</h2>
+
+<p>記事を投稿する。<br/>
+この時にその記事を編集可能なユーザーグループを選択するのだけど、<br/>
+ユーザーグループに所属しているユーザーで記事を作成しようとするとユーザーグループ選択の項目が表示されない。<br/>
+なので、User Access Managerの設定画面で以下の項目を <code>Yes</code> に変更する。</p>
+
+<blockquote><p>UAM &ndash;> Setting &ndash;> Authors settings &ndash;> Authors can add content to their own groups</p></blockquote>
+
+<p><img src="/images/2015/11/user_group08.jpg" alt="" /></p>
+
+<p>右側の列に以下のようなボックスが表示される。<br/>
+記事作成の際に、チェックを入れるのを忘れないようにする。<br/>
+(忘れてしまうとだれでも編集可能な記事となってしまう）</p>
+
+<p><img src="/images/2015/11/user_group09.jpg" alt="" /></p>
+
+<p>管理者権限でログインして一覧を見ると以下のような状況だが、</p>
+
+<p><img src="/images/2015/11/user_group10.jpg" alt="" /></p>
+
+<p>例えば白組のユーザーでログインして見ると以下のように白組に設定した記事のみが表示される。</p>
+
+<p><img src="/images/2015/11/user_group11.jpg" alt="" /></p>
+
+<h2>まとめ</h2>
+
+<p>これで目的は達成出来た。<br/>
+記事投稿する際にグループを選択しないといけない、など少し運用がめんどうになりそうな気配はあるが、<br/>
+カスタムでここを触るのは現状不可能そうなので、プラグインでの対応しかなさそう。</p>
+
+<h2>参考</h2>
+
+<p><a href="http://ameblo.jp/signum21/entry-11468274679.html">WordPress会員制サイト構築 その7 User Access Manager｜オレオレWebサービス指南書！ 自分のチカラでサーバー世界を自由に創造するから面白い</a><br/>
+<a href="http://ameblo.jp/ifl-nagatsuma-noriyuki/entry-11093035839.html">【WordPress】ユーザーごとに投稿ページ・固定ページの閲覧権限を設定する｜長妻紀之のブログ</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[WordPress]新規ユーザー登録時に選べる権限を制限する]]></title>
