@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-11-12T15:53:30+09:00</updated>
+  <updated>2015-11-16T19:56:37+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,72 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[git-ftpを使ってGitでFTP更新を管理する]]></title>
+    <link href="http://kayakuguri.github.io/blog/2015/11/16/git-ftp/"/>
+    <updated>2015-11-16T19:19:22+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2015/11/16/git-ftp</id>
+    <content type="html"><![CDATA[<p>FTPでしか管理してないサイトの場合、いちいち差分を確認してちまちまFTPでアップしていくのはめんどくさいしミスのもとにもなる。<br/>
+しかし、git-ftpなるツールを使えば、gitで管理しつつFTPにアップ出来るようになる。</p>
+
+<!-- more -->
+
+
+<h2>インストール</h2>
+
+<p>macの場合は、homebrewを使ってインストール出来る。</p>
+
+<pre><code>$ brew install git-ftp
+</code></pre>
+
+<p>インストールされたかどうかは以下のようにして出来る。</p>
+
+<pre><code>$ git ftp
+git-ftp &lt;action&gt; [&lt;options&gt;] &lt;url&gt;
+</code></pre>
+
+<h2>設定</h2>
+
+<p><code>git config</code>で設定していく。<br/>
+その際、ステージング・本番環境を分ける、というように、複数の環境を設定出来る。</p>
+
+<pre><code>$ git config git-ftp.dev.url frp://&lt;ホスト名&gt;/&lt;アップするディレクトリ&gt;
+$ git config git-ftp.dev.user &lt;ユーザー名&gt;
+$ git config git-ftp.dev.password &lt;パスワード&gt;
+</code></pre>
+
+<p>git管理しているディレクトリがurlで設定したディレクトリと同期される。<br/>
+(同期するローカルのディレクトリは設定出来ない)<br/>
+vagrantなどで環境を作成している場合等は注意が必要。</p>
+
+<p>で、初期化。</p>
+
+<pre><code>$ git ftp init -s dev
+</code></pre>
+
+<p><code>-s</code>の後に設定した環境の名前を入れる。<br/>
+すると、git管理しているファイルが設定したサーバーのディレクトリにアップされる。<br/>
+(初期化すると全てアップされ、<code>.git-ftp.log</code>というファイルがサーバーにアップロードされる）</p>
+
+<h2>push</h2>
+
+<p>pushは以下で可能。</p>
+
+<pre><code>$ git ftp push -s dev
+</code></pre>
+
+<p>これで、ローカルでgit管理しつつコマンド一発で差分をFTPアップロード出来るようになった。</p>
+
+<h2>参考</h2>
+
+<p><a href="https://github.com/git-ftp/git-ftp">git-ftp/git-ftp</a><br/>
+<a href="https://github.com/git-ftp/git-ftp/blob/develop/INSTALL.md">git-ftp/INSTALL.md at develop · git-ftp/git-ftp</a></p>
+
+<p><a href="http://qiita.com/dojineko/items/b11d279d1ff8cfacf3dc">Gitでサイトを更新したい！ &ndash; Qiita</a><br/>
+<a href="http://www.moongift.jp/2014/02/git-ftp-git%C3%97ftp%E3%81%AA%E9%81%8B%E7%94%A8%E3%82%92%E3%82%B5%E3%83%9D%E3%83%BC%E3%83%88%EF%BC%81/">Git-ftp &ndash; Git×FTPな運用をサポート！ MOONGIFT</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[WordPress] 別のユーザーグループが投稿した記事を編集出来ないようにする]]></title>
@@ -2221,303 +2287,6 @@ String arrs = convertArrayPostData(p, 'arr');  //1;2;3
 
 <p><a href="http://blogjp.sforce.com/2013/07/systemrunas-29e3.html">System.runAs()を使う時の注意点 | Salesforce Developers Japan Blog</a><br/>
 <a href="view-source:http://developer.force.com/cookbook/recipe/using-system-runas-in-test-methods">Using System.runAs in Test Methods &ndash; null</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[salesforce]バッチスケジュールの一通りの書き方]]></title>
-    <link href="http://kayakuguri.github.io/blog/2015/06/11/apex-batch-schedule/"/>
-    <updated>2015-06-11T10:59:41+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2015/06/11/apex-batch-schedule</id>
-    <content type="html"><![CDATA[<p>複数クラスにわたってたりしてややこしかったのでメモ。</p>
-
-<!-- more -->
-
-
-<h2>バッチ</h2>
-
-<p>まずはバッチファイル。<br/>
-ここで実際に動作させたい内容を書く。<br/>
-枠はこんな感じ。</p>
-
-<p><code>Batch_sample.apex</code></p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>global with sharing class Batch_sample implements Database.Batchable&lt;sObject&gt;
-</span><span class='line'>{
-</span><span class='line'>  private String query;
-</span><span class='line'>  
-</span><span class='line'>  //コンストラクタ
-</span><span class='line'>  global Batch_UpdatePushlist(String q){
-</span><span class='line'>      query = q;
-</span><span class='line'>  }
-</span><span class='line'>  
-</span><span class='line'>  //データ取得
-</span><span class='line'>  global Database.QueryLocator start(Database.BatchableContext BC){
-</span><span class='line'>      return Database.getQueryLocator(query);
-</span><span class='line'>  }
-</span><span class='line'>  
-</span><span class='line'>  //開始
-</span><span class='line'>  global void execute(Database.BatchableContext BC, List&lt;sObject&gt; scope){
-</span><span class='line'>  
-</span><span class='line'>      //バッチの処理を記述
-</span><span class='line'>      
-</span><span class='line'>  }
-</span><span class='line'>  
-</span><span class='line'>  //完了
-</span><span class='line'>  global void finish(Database.BatchableContext BC)
-</span><span class='line'>  {
-</span><span class='line'>      //完了後の処理があれば
-</span><span class='line'>  }
-</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
-
-
-<p>バッチを起動させるには以下のようにSOQL文と件数を渡して実行する。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>String soql = 'SELECT ID FROM sObject';
-</span><span class='line'>Batch_sample b = new Batch_sample(soql);
-</span><span class='line'>Database.executeBatch(b, 200);</span></code></pre></td></tr></table></div></figure>
-
-
-<p>実行時に指定したSOQLで取得するレコード分、バッチが動作する。<br/>
-この際に取得出来る件数が、バッチの場合は500万件。<br/>
-とはいえ、実際には一度の処理では指定した件数分のみ処理し、ガバナ制限がリセットされて再度実行、を繰り返す。<br/>
-<code>executeBatch</code>の第二引数が一回の処理で実行する件数。<br/>
-(デフォルトは200件)</p>
-
-<p>バッチ全体の動作は10分以内、というガバナ制限もあり。<br/>
-(100万件単位になってくると結構厳しい数字っぽい)</p>
-
-<h2>スケジューラー</h2>
-
-<p>設定したバッチをスケジューラーとして実行させる。<br/>
-以下のように、<code>Schedulable</code>クラスをimplementsする。</p>
-
-<p><code>Schedule_sample.apxc</code></p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>global class Schedule_sample implements Schedulable {
-</span><span class='line'>  private final Integer BATCH_SIZE = 200;
-</span><span class='line'>  
-</span><span class='line'>  global void execute(SchedulableContext ctx) {
-</span><span class='line'>      String soql = 'SELECT ID FROM sObject';
-</span><span class='line'>      Batch_sample b = new Batch_sample(soql);
-</span><span class='line'>      Database.executeBatch(b, BATCH_SIZE);
-</span><span class='line'>  }
-</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
-
-
-<p>このクラスをジョブに追加することでバッチをスケジューリング出来る。</p>
-
-<h2>スケジュールに追加</h2>
-
-<p>追加方法は２つある</p>
-
-<h3>設定画面から追加</h3>
-
-<p><code>設定-&gt;開発-&gt;Apexクラス</code>を選択。<br/>
-画面内の<code>Apexをスケジュール</code>をクリック。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2015/06/apex_schedule01.jpg" alt="" /></p>
-
-<p>この中で毎月や毎日、などを選択できる。<br/>
-終了日も設定出来るので、ずっと動作するさせるものに関しては長めに設定しておく。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2015/06/apex_schedule02.jpg" alt="" /></p>
-
-<h3>コードで実行</h3>
-
-<p>設定画面から追加での最大のデメリットは実行時間が毎時0分のみ、と、分の指定ができないところ。<br/>
-これをさせようと思うとコードからジョブに追加してやる必要がある。</p>
-
-<p>以下が追加させるコード</p>
-
-<pre><code>System.schedule('ジョブ名','0 0 * * * ?', new Schedule_sample());
-</code></pre>
-
-<p>第二引数に指定しているものは、クーロン式、というもので、ここで時間指定をしている。<br/>
-これは、左から、秒、分、時、日、月、曜日、年となっている。<br/>
-(年は省略化)</p>
-
-<p>例）</p>
-
-<ul>
-<li>&lsquo;0 0 13 * * ?&#8217;：毎日13時に実行</li>
-<li>&lsquo;0 0 10 ? * MON-FRI&#8217;：月～金の10時に実行</li>
-<li>&lsquo;0 0 * * * ?&#8217;：毎時0分に実行</li>
-<li>&lsquo;0 30 * * * ?&#8217;：毎時30分に実行</li>
-</ul>
-
-
-<p>秒のみの指定は怖くて試してません。</p>
-
-<p>この実行式を開発者コンソールの匿名実行から実行することでジョブに追加させられる。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2015/06/apex_schedule03.jpg" alt="" /></p>
-
-<p>コードを書いて、実行ボタンをクリック。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2015/06/apex_schedule04.jpg" alt="" /></p>
-
-<p>追加されたジョブは設定画面の、<code>ジョブ-&gt;スケジュール済みジョブ</code>から確認できる。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2015/06/apex_schedule05.jpg" alt="" /></p>
-
-<h2>動作テスト</h2>
-
-<p>実際に開発中にいちいちスケジュールさせてジョブが実行されるのを待つのはあまりにもめんどくさい。<br/>
-バッチを起動させるコードを匿名実行から起動させてもよいがそれでも待ち時間が長いので、結局バッチ処理特有の部分をコメントアウトして、単なるクラスにしてそれを直接実行させる方法で確認した。</p>
-
-<p>以下のようにコメントアウトした。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>//global with sharing class Batch_sample implements Database.Batchable&lt;sObject&gt;
-</span><span class='line'>public class Batch_sample
-</span><span class='line'>{
-</span><span class='line'>  /*
-</span><span class='line'>  private String query;   
-</span><span class='line'>  //コンストラクタ
-</span><span class='line'>  global Batch_UpdatePushlist(String q){
-</span><span class='line'>      query = q;
-</span><span class='line'>  }
-</span><span class='line'>  
-</span><span class='line'>  //データ取得
-</span><span class='line'>  global Database.QueryLocator start(Database.BatchableContext BC){
-</span><span class='line'>      return Database.getQueryLocator(query);
-</span><span class='line'>  }
-</span><span class='line'>  */
-</span><span class='line'>  
-</span><span class='line'>  //開始
-</span><span class='line'>  public void execute(List&lt;sObject&gt; scope){
-</span><span class='line'>  //global void execute(Database.BatchableContext BC, List&lt;sObject&gt; scope){
-</span><span class='line'>  
-</span><span class='line'>      //バッチの処理を記述
-</span><span class='line'>      
-</span><span class='line'>  }
-</span><span class='line'>  
-</span><span class='line'>  //global void finish(Database.BatchableContext BC){}
-</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
-
-
-<p>これを匿名実行からSOQLでデータを取得してからそれを渡してやりつつ実行する。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>String soql = 'SELECT ID FROM sObject';
-</span><span class='line'>List&lt;sObject&gt; data = Database.query(soql);
-</span><span class='line'>Batch_sample batch = new Batch_sample();
-</span><span class='line'>batch.execute(data);</span></code></pre></td></tr></table></div></figure>
-
-
-<p>もっとスマートなやり方があったらぜひ。</p>
-
-<h2>テスト</h2>
-
-<p>テストコードはスケジューラに対して実行する。</p>
-
-<p><code>Schedule_sample_Test.apxc</code></p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>@isTest
-</span><span class='line'>public class Schedule_sample_Test {
-</span><span class='line'>  public static String CRON_EXP = '0 0 0 15 3 ? 2022';
-</span><span class='line'>  
-</span><span class='line'>  static testmethod void test() {
-</span><span class='line'>      //データ準備
-</span><span class='line'>  
-</span><span class='line'>      Test.startTest();
-</span><span class='line'>      String jobId = System.schedule('ScheduleApexClassTest', CRON_EXP, new Batch_sample());
-</span><span class='line'>      Test.stopTest();
-</span><span class='line'>      
-</span><span class='line'>      //バッチ後のデータ確認
-</span><span class='line'>  }
-</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
-
-
-<p>指定するクーロン式はなんでもよくて、<code>Test.stopTest();</code>の後にすぐにスケジュールが実行される。</p>
-
-<h2>参考</h2>
-
-<p><a href="https://developer.salesforce.com/docs/atlas.ja-jp.apex_workbook.meta/apex_workbook/apex_scheduling_2.htm">スケジュール可能なクラスのテストの追加 | Apex ワークブック | Salesforce Developers</a><br/>
-<a href="http://blog.flect.co.jp/salesforce/2010/08/apex-2136.html">セールスフォースの豆知識: スケジュール実行するApexのテストメソッドと実行時刻の詳細設定</a><br/>
-<a href="http://blog.livedoor.jp/androidbeginner/archives/39179776.html">【Salesforce】Apexジョブの書き方 : 怠けろ！プログラマ！</a></p>
 ]]></content>
   </entry>
   

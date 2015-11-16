@@ -4,7 +4,7 @@
   <title><![CDATA[Category: git | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/git/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-11-12T15:53:30+09:00</updated>
+  <updated>2015-11-16T19:56:37+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,72 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[git-ftpを使ってGitでFTP更新を管理する]]></title>
+    <link href="http://kayakuguri.github.io/blog/2015/11/16/git-ftp/"/>
+    <updated>2015-11-16T19:19:22+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2015/11/16/git-ftp</id>
+    <content type="html"><![CDATA[<p>FTPでしか管理してないサイトの場合、いちいち差分を確認してちまちまFTPでアップしていくのはめんどくさいしミスのもとにもなる。<br/>
+しかし、git-ftpなるツールを使えば、gitで管理しつつFTPにアップ出来るようになる。</p>
+
+<!-- more -->
+
+
+<h2>インストール</h2>
+
+<p>macの場合は、homebrewを使ってインストール出来る。</p>
+
+<pre><code>$ brew install git-ftp
+</code></pre>
+
+<p>インストールされたかどうかは以下のようにして出来る。</p>
+
+<pre><code>$ git ftp
+git-ftp &lt;action&gt; [&lt;options&gt;] &lt;url&gt;
+</code></pre>
+
+<h2>設定</h2>
+
+<p><code>git config</code>で設定していく。<br/>
+その際、ステージング・本番環境を分ける、というように、複数の環境を設定出来る。</p>
+
+<pre><code>$ git config git-ftp.dev.url frp://&lt;ホスト名&gt;/&lt;アップするディレクトリ&gt;
+$ git config git-ftp.dev.user &lt;ユーザー名&gt;
+$ git config git-ftp.dev.password &lt;パスワード&gt;
+</code></pre>
+
+<p>git管理しているディレクトリがurlで設定したディレクトリと同期される。<br/>
+(同期するローカルのディレクトリは設定出来ない)<br/>
+vagrantなどで環境を作成している場合等は注意が必要。</p>
+
+<p>で、初期化。</p>
+
+<pre><code>$ git ftp init -s dev
+</code></pre>
+
+<p><code>-s</code>の後に設定した環境の名前を入れる。<br/>
+すると、git管理しているファイルが設定したサーバーのディレクトリにアップされる。<br/>
+(初期化すると全てアップされ、<code>.git-ftp.log</code>というファイルがサーバーにアップロードされる）</p>
+
+<h2>push</h2>
+
+<p>pushは以下で可能。</p>
+
+<pre><code>$ git ftp push -s dev
+</code></pre>
+
+<p>これで、ローカルでgit管理しつつコマンド一発で差分をFTPアップロード出来るようになった。</p>
+
+<h2>参考</h2>
+
+<p><a href="https://github.com/git-ftp/git-ftp">git-ftp/git-ftp</a><br/>
+<a href="https://github.com/git-ftp/git-ftp/blob/develop/INSTALL.md">git-ftp/INSTALL.md at develop · git-ftp/git-ftp</a></p>
+
+<p><a href="http://qiita.com/dojineko/items/b11d279d1ff8cfacf3dc">Gitでサイトを更新したい！ &ndash; Qiita</a><br/>
+<a href="http://www.moongift.jp/2014/02/git-ftp-git%C3%97ftp%E3%81%AA%E9%81%8B%E7%94%A8%E3%82%92%E3%82%B5%E3%83%9D%E3%83%BC%E3%83%88%EF%BC%81/">Git-ftp &ndash; Git×FTPな運用をサポート！ MOONGIFT</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[gitでカレントディレクトリのファイル一覧を表示]]></title>
@@ -143,77 +209,6 @@ Writing objects: 100% (1/1), 190 bytes | 0 bytes/s, done.
 <h4>[参考]</h4>
 
 <p><a href="http://qiita.com/usamik26/items/56d0d3ba7a1300625f92">既に git 管理しているファイルをあえて無視したい &ndash; Qiita</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[herokuからgitのアップグレードを促されたので対応する]]></title>
-    <link href="http://kayakuguri.github.io/blog/2014/12/24/git-update-for-mac/"/>
-    <updated>2014-12-24T11:56:25+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2014/12/24/git-update-for-mac</id>
-    <content type="html"><![CDATA[<p>コマンドからherokuを使おうと思うと、以下のようなメッセージが。</p>
-
-<blockquote><p>Your version of git is 2.1.2. <br/>
-Which has serious security vulnerabilities.<br/>
-More information here: <a href="https://blog.heroku.com/archives/2014/12/23/update_your_git_clients_on_windows_and_os_x">https://blog.heroku.com/archives/2014/12/23/update_your_git_clients_on_windows_and_os_x</a></p></blockquote>
-
-<p><a href="https://blog.heroku.com/archives/2014/12/23/update_your_git_clients_on_windows_and_os_x">Update Git clients on Windows and OS X</a><br/>
-どうやらgitが古いとセキュリティ的に危ないから最新にしてね、という事のよう。</p>
-
-<!-- more -->
-
-
-<h3>確認</h3>
-
-<p>現行の状態を確認。</p>
-
-<pre><code>$ git --version
-git version 2.1.2
-</code></pre>
-
-<h3>homebrewで</h3>
-
-<p><code>homebrew</code>でもアップグレード出来るよ、とあったので、コマンドをググって叩いてみた。</p>
-
-<pre><code>$ brew upgrade git
-Error: git-2.1.2 already installed
-</code></pre>
-
-<p>しかし、すでに最新が入っている、と起こられてしまう。<br/>
-まだ対応していないのかな？</p>
-
-<h3>パッケージでインストール</h3>
-
-<p>仕方ないので、直接gitのページからインストーラーをダウンロードして、<br/>
-道なりに(いい表現)インストール。</p>
-
-<p><a href="http://sourceforge.net/projects/git-osx-installer/files/">http://sourceforge.net/projects/git-osx-installer/files/</a></p>
-
-<p>しかし、変わらない。。</p>
-
-<h3>パスを変更</h3>
-
-<p>ググるとこんなパスが違う、とうい情報が。<br/>
-<a href="http://qiita.com/d_nishiyama85/items/d63da1e50405abc0929c">OSX で Git をバージョンアップする</a></p>
-
-<p>というわけで、heroku toolebeltのパスが記載されていた、<code>.bashrc</code>に以下を追記。</p>
-
-<pre><code>export PATH="/usr/local/git/bin:$PATH"
-</code></pre>
-
-<p>で、読み込みなおす。</p>
-
-<pre><code>$ source ~/.bashrc
-</code></pre>
-
-<p>バージョン確認。</p>
-
-<pre><code>$ git --version
-git version 2.2.1
-</code></pre>
-
-<p>無事、アップグレード完了。<br/>
-herokuコマンドを叩いても注意は出なくなりました。</p>
 ]]></content>
   </entry>
   
