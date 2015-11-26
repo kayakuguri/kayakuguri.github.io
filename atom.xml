@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-11-16T19:56:37+09:00</updated>
+  <updated>2015-11-26T18:17:16+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,56 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[CentOS6.5にPHP5.4を入れる]]></title>
+    <link href="http://kayakuguri.github.io/blog/2015/11/26/centos65-php54/"/>
+    <updated>2015-11-26T17:50:35+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2015/11/26/centos65-php54</id>
+    <content type="html"><![CDATA[<p>CentOS6.5の標準のPHPは5.3。<br/>
+5.4環境が欲しかったので作ってみたメモ。</p>
+
+<!-- more -->
+
+
+<p>PHPは入ってない状態から始める。</p>
+
+<pre><code>$ php -v
+-bash: php: command not found
+</code></pre>
+
+<h2>rpmでレポジトリを追加</h2>
+
+<p>あまり意味はわかってないですが、epelとremiレポジトリを追加。<br/>
+<code>vagrant</code>にSSHで入ってからの作業。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$ sudo rpm -Uvh http://dl.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm
+</span><span class='line'>$ sudo rpm -Uvh http://dl.iuscommunity.org/pub/ius/stable/Redhat/6/x86_64/ius-release-1.0-11.ius.el6.noarch.rpm
+</span><span class='line'>$ sudo rpm -Uvh http://rpms.famillecollet.com/enterprise/remi-release-6.rpm</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>PHPをインストール</h2>
+
+<pre><code>$ sudo yum install php --enablerepo=remi
+</code></pre>
+
+<h2>確認</h2>
+
+<pre><code>$ php -v
+PHP 5.4.45 (cli) (built: Sep 30 2015 15:56:06) 
+Copyright (c) 1997-2014 The PHP Group
+Zend Engine v2.4.0, Copyright (c) 1998-2014 Zend Technologies
+</code></pre>
+
+<h2>参考</h2>
+
+<p><a href="http://qiita.com/Chrowa3/items/6c045d952a191a1203b4">Vagrant chef/centos-6.5 に PHP 5.4 を突っ込む &ndash; Qiita</a><br/>
+<a href="http://blog.ybbo.net/2014/01/22/%E3%80%90%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%80%91centos6%E3%81%ABphp5-4%E3%82%92yum%E3%81%A7%E7%B0%A1%E5%8D%98%E3%81%AB%E3%82%A4%E3%83%B3%E3%82%B9%E3%83%88%E3%83%BC%E3%83%AB%E3%81%99%E3%82%8B/">【シンプル】CentOS6にPHP5.4をyumで簡単にインストールする手順田舎に住みたいエンジニアの日記 | 田舎に住みたいエンジニアの日記</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[git-ftpを使ってGitでFTP更新を管理する]]></title>
@@ -2222,71 +2272,6 @@ SFの形式に合わせて、<code>;</code>セミコロン区切りの文字列�
 Map&lt;String, String&gt; p = req.params;
 String arrs = convertArrayPostData(p, 'arr');  //1;2;3
 </code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[salesforce]指定のユーザーでテスト実行]]></title>
-    <link href="http://kayakuguri.github.io/blog/2015/06/11/system-run-as/"/>
-    <updated>2015-06-11T14:53:28+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2015/06/11/system-run-as</id>
-    <content type="html"><![CDATA[<p>salesforceのユーザーである、<code>User</code>オブジェクトにカスタム項目を作って、<br/>
-それを使ったコードなんかを書いた時にそのユーザーでの実行が必要になる。<br/>
-そんな時のメモ。</p>
-
-<!-- more -->
-
-
-<h2>テスト実行</h2>
-
-<p><code>system.runas(){}</code>を使う。<br/>
-引数に使用するユーザーを指定し、<code>{}</code>内で実行する処理を書く。</p>
-
-<h2>ユーザーの作成</h2>
-
-<p>指定するユーザーをテスト内で作成するには以下のようにする。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>Map&lt;String,ID&gt; profiles = new Map&lt;String,ID&gt;();
-</span><span class='line'>Profile ps = [select id, name from Profile where name = '標準ユーザ' LIMIT 1];
-</span><span class='line'>User standard = new User(alias = 'standt', 
-</span><span class='line'>  email='standarduser@testorg.com', 
-</span><span class='line'>  emailencodingkey='UTF-8', 
-</span><span class='line'>  lastname='Testing', languagelocalekey='en_US', 
-</span><span class='line'>  localesidkey='en_US', 
-</span><span class='line'>  ProfileId = ps.id,
-</span><span class='line'>  timezonesidkey='America/Los_Angeles', 
-</span><span class='line'>  username='standarduser-test@testorg.com'
-</span><span class='line'>);</span></code></pre></td></tr></table></div></figure>
-
-
-<p>標準ユーザーのプロフィール権限で作成している。<br/>
-この時に、<code>email</code>の項目と<code>username</code>を同じにしていると、すでにそのユーザーネームは使われています、とエラーが出た。</p>
-
-<p>で、実行。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>system.runas(standard){
-</span><span class='line'>  //実行する内容
-</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>参考</h2>
-
-<p><a href="http://blogjp.sforce.com/2013/07/systemrunas-29e3.html">System.runAs()を使う時の注意点 | Salesforce Developers Japan Blog</a><br/>
-<a href="view-source:http://developer.force.com/cookbook/recipe/using-system-runas-in-test-methods">Using System.runAs in Test Methods &ndash; null</a></p>
 ]]></content>
   </entry>
   

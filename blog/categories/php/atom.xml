@@ -4,7 +4,7 @@
   <title><![CDATA[Category: php | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/php/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-11-16T19:56:37+09:00</updated>
+  <updated>2015-11-26T18:17:16+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,54 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[CentOS6.5にPHP5.4を入れる]]></title>
+    <link href="http://kayakuguri.github.io/blog/2015/11/26/centos65-php54/"/>
+    <updated>2015-11-26T17:50:35+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2015/11/26/centos65-php54</id>
+    <content type="html"><![CDATA[<p>CentOS6.5の標準のPHPは5.3。<br/>
+5.4環境が欲しかったので作ってみたメモ。</p>
+
+<!-- more -->
+
+
+<p>PHPは入ってない状態から始める。</p>
+
+<pre><code>$ php -v
+-bash: php: command not found
+</code></pre>
+
+<h2>rpmでレポジトリを追加</h2>
+
+<p>あまり意味はわかってないですが、epelとremiレポジトリを追加。<br/>
+<code>vagrant</code>にSSHで入ってからの作業。</p>
+
+<p><code>
+$ sudo rpm -Uvh http://dl.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm
+$ sudo rpm -Uvh http://dl.iuscommunity.org/pub/ius/stable/Redhat/6/x86_64/ius-release-1.0-11.ius.el6.noarch.rpm
+$ sudo rpm -Uvh http://rpms.famillecollet.com/enterprise/remi-release-6.rpm
+</code></p>
+
+<h2>PHPをインストール</h2>
+
+<pre><code>$ sudo yum install php --enablerepo=remi
+</code></pre>
+
+<h2>確認</h2>
+
+<pre><code>$ php -v
+PHP 5.4.45 (cli) (built: Sep 30 2015 15:56:06) 
+Copyright (c) 1997-2014 The PHP Group
+Zend Engine v2.4.0, Copyright (c) 1998-2014 Zend Technologies
+</code></pre>
+
+<h2>参考</h2>
+
+<p><a href="http://qiita.com/Chrowa3/items/6c045d952a191a1203b4">Vagrant chef/centos-6.5 に PHP 5.4 を突っ込む &ndash; Qiita</a><br/>
+<a href="http://blog.ybbo.net/2014/01/22/%E3%80%90%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%80%91centos6%E3%81%ABphp5-4%E3%82%92yum%E3%81%A7%E7%B0%A1%E5%8D%98%E3%81%AB%E3%82%A4%E3%83%B3%E3%82%B9%E3%83%88%E3%83%BC%E3%83%AB%E3%81%99%E3%82%8B/">【シンプル】CentOS6にPHP5.4をyumで簡単にインストールする手順田舎に住みたいエンジニアの日記 | 田舎に住みたいエンジニアの日記</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[herokuがcomposer.lock必須になったのでcomposerの入れ方をメモしておく]]></title>
@@ -254,103 +302,6 @@ echo $response;
 <h2>参考</h2>
 
 <p><a href="http://www.tgerm.com/2014/08/testing-soap-outbound-messages-without-failures-saxexception.html">{!blog.concret.io}: Testing SOAP Outbound Messages without failures</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[Salesforce]承認申請のアウトバウンドメッセージをPHPで受け取る]]></title>
-    <link href="http://kayakuguri.github.io/blog/2015/04/28/approval-process-outbound-massage/"/>
-    <updated>2015-04-28T20:20:01+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2015/04/28/approval-process-outbound-massage</id>
-    <content type="html"><![CDATA[<p>salesforceからのアウトバウンドメッセージの内容をPHPで受け取ってみた。</p>
-
-<!-- more -->
-
-
-<h2>アウトバウンドメッセージの設定</h2>
-
-<p>前回作成したものの申請時のアクション部分に<code>アウトバウンドメッセージ</code>を追加。<br/>
-<img src="/images/2015/04/outbound01.jpg" alt="" /></p>
-
-<p>以下のように設定した。<br/>
-<img src="/images/2015/04/outbound02.jpg" alt="" /></p>
-
-<p>設定完了<br/>
-<img src="/images/2015/04/outbound03.jpg" alt="" /></p>
-
-<h2>PHPで受け取る</h2>
-
-<p>アウトバウンドメッセージは<code>SOAP</code>で通信が行われる。<br/>
-なので、XML。<br/>
-以下のようにアクセスが記録されていた。</p>
-
-<pre><code>at=info method=POST path="/liam_dnes.php?id=1" host=shrouded-island-xxxx.herokuapp.com request_id=01b99464-c9dc-4e15-aa19-xxxxxxx fwd="xxx.xxx.78.8" dyno=web.1 connect=1ms service=4ms status=200 bytes=189
-</code></pre>
-
-<p>どうやらPOSTでアクセスされているよう。<br/>
-<code>$_POST</code>のままでは取得できなかった。<br/>
-どうやら生のPOSTデータを取得する必要があるらしい。</p>
-
-<p>以下で取得した。</p>
-
-<pre><code>$data = file_get_contents( 'php://input' );
-</code></pre>
-
-<p>取得すると、以下のようなXMLが取得できた。</p>
-
-<p>```
-&lt;?xml version=&ldquo;1.0&rdquo; encoding=&ldquo;UTF-8&rdquo;?>
-&lt;soapenv:Envelope xmlns:soapenv=&ldquo;<a href="http://schemas.xmlsoap.org/soap/envelope/">http://schemas.xmlsoap.org/soap/envelope/</a>&rdquo; xmlns:xsd=&ldquo;<a href="http://www.w3.org/2001/XMLSchema">http://www.w3.org/2001/XMLSchema</a>&rdquo; xmlns:xsi=&ldquo;<a href="http://www.w3.org/2001/XMLSchema-instance">http://www.w3.org/2001/XMLSchema-instance</a>&rdquo;></p>
-
-<pre><code>&lt;soapenv:Body&gt;
-    &lt;notifications xmlns="http://soap.sforce.com/2005/09/outbound"&gt;
-        &lt;OrganizationId&gt;00D10000000Zyxxxxx&lt;/OrganizationId&gt;
-        &lt;SessionId xsi:nil="true"/&gt;
-        &lt;PartnerUrl&gt;https://ap.salesforce.com/services/Soap/u/33.0/00D100000xxxxx&lt;/PartnerUrl&gt;
-        &lt;ActionId&gt;04k100000008STGAA2&lt;/ActionId&gt;
-        &lt;EnterpriseUrl&gt;https://ap.salesforce.com/services/Soap/c/33.0/00D100000xxxxx&lt;/EnterpriseUrl&gt;
-        &lt;Notification&gt;
-            &lt;Id&gt;04l1000000xxxxxx&lt;/Id&gt;
-            &lt;sObject xsi:type="sf:Opportunity" xmlns:sf="urn:sobject.enterprise.soap.sforce.com"&gt;
-                &lt;sf:Id&gt;0061000000cxxxxx&lt;/sf:Id&gt;
-                &lt;sf:Name&gt;アウトバウンドのテスト商談&lt;/sf:Name&gt;
-                &lt;sf:StageName&gt;Prospecting&lt;/sf:StageName&gt;
-                &lt;sf:IsClosed&gt;false&lt;/sf:IsClosed&gt;
-            &lt;/sObject&gt;
-        &lt;/Notification&gt;
-    &lt;/notifications&gt;
-&lt;/soapenv:Body&gt;
-</code></pre>
-
-<p>&lt;/soapenv:Envelope>
-```</p>
-
-<p>アウトバウンドの設定は以下のような形。</p>
-
-<p>ここからXMLをパースして、名前など設定した値を取得するには以下。</p>
-
-<p>```
-&lt;?php</p>
-
-<p>$data = file_get_contents(&lsquo;php://input&rsquo;);
-$xml = simplexml_load_string($data);</p>
-
-<p>//ID
-$notification = $xml->children(&lsquo;<a href="http://schemas.xmlsoap.org/soap/envelope/">http://schemas.xmlsoap.org/soap/envelope/</a>&rsquo;)&ndash;>Body->children(&lsquo;<a href="http://soap.sforce.com/2005/09/outbound">http://soap.sforce.com/2005/09/outbound</a>&rsquo;)&ndash;>notifications->Notification;
-echo $notification->Id;</p>
-
-<p>//パラメータ
-$params = $notification->sObject->children(&lsquo;urn:sobject.enterprise.soap.sforce.com&rsquo;);
-echo $params->Id;
-echo $params->Name;
-echo $params->IsClosed;
-```</p>
-
-<h2>参考</h2>
-
-<p><a href="http://php.net/manual/ja/wrappers.php.php#wrappers.php.input">php://input</a><br/>
-<a href="http://ivystar.jp/programming/php/what-is-phpinput/">「php://input」とは何？－POSTの生データ？ | アイビースター</a><br/>
-<a href="https://amigotechnotes.wordpress.com/2013/11/16/parse-xml-with-namespace-by-simplexml-in-php/">Parse XML with namespace by SimpleXML in PHP | Amigo&#039;s Technical Notes</a></p>
 ]]></content>
   </entry>
   
