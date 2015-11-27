@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: mysql | KayaMemo]]></title>
+  <link href="http://kayakuguri.github.io/blog/categories/mysql/atom.xml" rel="self"/>
+  <link href="http://kayakuguri.github.io/"/>
+  <updated>2015-11-27T15:31:39+09:00</updated>
+  <id>http://kayakuguri.github.io/</id>
+  <author>
+    <name><![CDATA[萱潜]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[ローカルのWOrdPressをCloud9の環境へ引っ越す(DB)]]></title>
+    <link href="http://kayakuguri.github.io/blog/2015/11/27/cloud9-wordpress-mysqlimport/"/>
+    <updated>2015-11-27T15:30:19+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2015/11/27/cloud9-wordpress-mysqlimport</id>
+    <content type="html"><![CDATA[<p>ローカルで開発していたwordpressをCloud9に移動させるべく、DBのインポートをしてみた。</p>
+
+<!-- more -->
+
+
+<p>まずはCloud9でWordpressプロジェクトを作成する。<br/>
+これは順場に選んでくだけで簡単に可能。</p>
+
+<p><img src="/images/2015/11/c9_00.jpg" alt="" /></p>
+
+<h2>MySqlの起動など</h2>
+
+<p>mysqlの起動などは以下で可能。</p>
+
+<p>```</p>
+
+<h1>起動</h1>
+
+<p>$ mysql-ctl start</p>
+
+<h1>停止</h1>
+
+<p>$ mysql-ctl stop
+```</p>
+
+<p><code>mysql-ctl</code>コマンドは以下を実行可能。</p>
+
+<pre><code>[start|restart|stop|status|cli|install]
+</code></pre>
+
+<p>以下で、mysqlに入る事が出来る。</p>
+
+<pre><code>$ mysql-ctl cli
+...
+mysql&gt; 
+</code></pre>
+
+<p>もしくは、ユーザー指定で普通にログインも出来る。</p>
+
+<pre><code>$ mysql -u kayakuguri
+</code></pre>
+
+<p>この中でデータベースやテーブルを作成したり出来る。<br/>
+なので、インポートするDBを作成しておく。</p>
+
+<h2>ダンプファイルのアップロード</h2>
+
+<p>ローカルのファイルをアップするのと同じ手順でダンプしたSQLファイルをアップロードする。<br/>
+Cloud9のIDE上から、<code>File -&gt; Upload Local Files...</code>を選択。</p>
+
+<p><img src="/images/2015/11/c9_01.jpg" alt="" /></p>
+
+<p>アップしたいファイルをウインドウにドロップして完了。<br/>
+直下にアップした。</p>
+
+<p><img src="/images/2015/11/c9_02.jpg" alt="" /></p>
+
+<h2>インポート</h2>
+
+<p>これで準備は整ったのでダンプファイルをインポートする。<br/>
+下部のエリアから、<code>bash</code>タブを選択し、そこにコマンドを打ち込んでいく。</p>
+
+<p>mysqlのユーザー名はCloud9のログイン名と同じで、パスワードはかかっていない。<br/>
+なので以下のようになる。</p>
+
+<pre><code>$ mysql -u kayakuguri test_wp_db &lt; dump.sql
+</code></pre>
+
+<p><img src="/images/2015/11/c9_03.jpg" alt="" /></p>
+
+<h3>サイトURLの変更</h3>
+
+<p>このままだとローカルのサイトURLがwordpressのURLとして引き継がれてしまうので、コマンドで直接DBのデータをいじって変更してみる。</p>
+
+<pre><code>$ mysql -u kayakuguri
+</code></pre>
+
+<p>mysqlにログイン。</p>
+
+<pre><code># DBを選択
+mysql&gt; use test_wp_db;
+# 現状の設定を確認
+mysql&gt; SELECT * FROM wpoptions WHERE option_name='siteurl';
+# アップデート
+mysql&gt; UPDATE wpoptions SET option_value='https://your-project-kayakuguri.c9users.io' where option_name IN ('home', 'siteurl');
+</code></pre>
+
+<p>URLはRUNさせてみると確認出来る。<br/>
+(<code>https://プロジェクト名.ユーザー名.c9users.io/</code>っぽい)</p>
+
+<h3>wp-configの変更</h3>
+
+<p>wp-configにて、mysqlのユーザー名を指定していると思うので、それをCloud9用に変更しておく。<br/>
+パスワードはいらない。</p>
+
+<p>```
+/<em>* MySQL データベースのユーザー名 </em>/
+define(&lsquo;DB_USER&rsquo;, &lsquo;kayakuguri&rsquo;);</p>
+
+<p>/<em>* MySQL データベースのパスワード </em>/
+define(&lsquo;DB_PASSWORD&rsquo;, &lsquo;&rsquo;);
+```</p>
+
+<p>完了。</p>
+
+<h2>注意</h2>
+
+<p>wordpressプロジェクトで始めた場合、<code>wp-admin</code>、<code>wp-content</code>、<code>wp-includes</code>の主要なディレクトリを直下以外のディレクトリに移動が出来なかった。<br/>
+なので、ドキュメントルート以外でwordpressを稼働させるプロジェクトの場合は注意が必要。</p>
+
+<p>その場合は、PHPのプロジェクトとして作成し、自前で全ファイルをアップロードしてDBの設定などをすればよいかとも思ったが、どうも上手くいかなかった。<br/>
+要調査。</p>
+
+<p>ちなみにPHPの環境は今日現在、<code>PHP Version 5.5.9-1ubuntu4.13</code>だった。</p>
+
+<h2>参考</h2>
+
+<p><a href="https://docs.c9.io/docs/setting-up-mysql">Setting Up MySQL · Cloud9</a><br/>
+<a href="http://qiita.com/hishigataBOZE/items/bdd6009d3bfc1c7d313b">[WordPress + MySQL] DBからサイトURLを変更 &ndash; Qiita</a></p>
+]]></content>
+  </entry>
+  
+</feed>
