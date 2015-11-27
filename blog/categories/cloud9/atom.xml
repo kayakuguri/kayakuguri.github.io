@@ -4,7 +4,7 @@
   <title><![CDATA[Category: cloud9 | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/cloud9/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-11-27T15:32:25+09:00</updated>
+  <updated>2015-11-27T15:33:34+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -14,7 +14,7 @@
 
   
   <entry>
-    <title type="html"><![CDATA[ローカルのWOrdPressをCloud9の環境へ引っ越す(DB)]]></title>
+    <title type="html"><![CDATA[ローカルのWordPressをCloud9の環境へ引っ越す(DB)]]></title>
     <link href="http://kayakuguri.github.io/blog/2015/11/27/cloud9-wordpress-mysqlimport/"/>
     <updated>2015-11-27T15:30:19+09:00</updated>
     <id>http://kayakuguri.github.io/blog/2015/11/27/cloud9-wordpress-mysqlimport</id>
