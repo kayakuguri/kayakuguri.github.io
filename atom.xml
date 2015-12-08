@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-11-27T15:33:34+09:00</updated>
+  <updated>2015-12-08T19:13:29+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,172 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[ApexでJSONをパースする]]></title>
+    <link href="http://kayakuguri.github.io/blog/2015/12/08/json-apex-parse/"/>
+    <updated>2015-12-08T19:12:05+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2015/12/08/json-apex-parse</id>
+    <content type="html"><![CDATA[<p>Apex RestAPIなんかを作成している際に、インプットをJSONにしたい場合があります。<br/>
+その際に受け取ったJSONをApexでパースして使用する方法がややこしかったのでメモ。</p>
+
+<!-- more -->
+
+
+<h2>基本</h2>
+
+<p>基本としては、以下の記事が詳しいです。<br/>
+<a href="http://www.teamspirit.co.jp/blog/staff/2011/10/winter12json2.html">Winter&rsquo;12のJSONサポートを使いこなす(2) | チームスピリット</a></p>
+
+<p>ここにもある通り、例えば、<code>{a:xx, b:xxx}</code>などのJSONがある場合は、予めapex側でそのJSONの内容専用のクラスを用意してやる必要がある、とのこと。<br/>
+何もなしでいきなりパースしていくことが出来ない。</p>
+
+<p>そのためにクラスを用意してオブジェクトにして……が非常にめんどくさい。</p>
+
+<h2>変換ツール</h2>
+
+<p>そんなめんどくさいJSONのクラス作成を一発で変換してくれるwebツールが以下。</p>
+
+<p><a href="http://json2apex.herokuapp.com/">JSON2Apex</a></p>
+
+<p>例の通り、例えば以下の様なJSONを入力してapexを作成すると、以下のようなコードが生成される。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>public class JSON2Apex {
+</span><span class='line'>
+</span><span class='line'>  public class User {
+</span><span class='line'>      public String name;
+</span><span class='line'>      public String twitter;
+</span><span class='line'>  }
+</span><span class='line'>
+</span><span class='line'>  public User user;
+</span><span class='line'>
+</span><span class='line'>  
+</span><span class='line'>  public static JSON2Apex parse(String json) {
+</span><span class='line'>      return (JSON2Apex) System.JSON.deserialize(json, JSON2Apex.class);
+</span><span class='line'>  }
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<p>そしてなんと一緒にテストコードまで出力してくれる。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>@IsTest
+</span><span class='line'>public class JSON2Apex_Test {
+</span><span class='line'>  
+</span><span class='line'>  static testMethod void testParse() {
+</span><span class='line'>      String json = '{ ¥"user¥" : { ¥"name¥" : ¥"Simon Fell¥", ¥"twitter¥" : ¥"@superfell¥" } }';
+</span><span class='line'>      JSON2Apex obj = JSON2Apex.parse(json);
+</span><span class='line'>      System.assert(obj != null);
+</span><span class='line'>  }
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<p>これをコピペするなりしてapexクラスとして作成すればOK。</p>
+
+<h2>配列のJSON</h2>
+
+<p>以下の様な配列になっているJSONをパースしたい場合。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>{"data":[
+</span><span class='line'>  {
+</span><span class='line'>      "userid":1,
+</span><span class='line'>      "name":"hoge"
+</span><span class='line'>  },
+</span><span class='line'>  {   "userid":2,
+</span><span class='line'>      "name":"fuga"
+</span><span class='line'>  }
+</span><span class='line'>]}    </span></code></pre></td></tr></table></div></figure>
+
+
+<p>これも上記ツールにかけると以下の様なクラスが生成される。<br/>
+(テストクラスは割愛)</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>public class JSON2Apex {
+</span><span class='line'>
+</span><span class='line'>  public List&lt;Data&gt; data;
+</span><span class='line'>
+</span><span class='line'>  public class Data {
+</span><span class='line'>      public Integer userid;
+</span><span class='line'>      public String name;
+</span><span class='line'>  }
+</span><span class='line'>
+</span><span class='line'>  
+</span><span class='line'>  public static JSON2Apex parse(String json) {
+</span><span class='line'>      return (JSON2Apex) System.JSON.deserialize(json, JSON2Apex.class);
+</span><span class='line'>  }
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<p>これを利用して<code>userid</code>を順番に取得したい場合は以下のようにすればいい。<br/>
+(json_strには上記のJSONが入っているものとする)</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>JSON2Apex_Thread obj = JSON2Apex_Thread.parse(json_str);
+</span><span class='line'>for(JSON2Apex.Data val : obj.data){
+</span><span class='line'>    System.debug(val. userid);
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>まとめ</h2>
+
+<p>いちいちJSONの内容に合わせてクラスを作成しないといけないのは非常にめんどくさい。<br/>
+<code>JSON.deserialize</code>の他にも、<code>JSON.createParser()</code>もあるが、これも同じくクラスの作成は必要。<br/>
+型が厳密なだけにいちいち指定が必要になるのかもしれない。</p>
+
+<h2>参考</h2>
+
+<p><a href="http://salesforce.stackexchange.com/questions/5427/json-deserialize-array-of-objects">apex &ndash; JSON.deserialize Array of Objects &ndash; Salesforce Stack Exchange</a><br/>
+<a href="https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_class_System_JsonParser.htm">JSONParser Class | Force.com Apex Code Developer&#x27;s Guide | Salesforce Developers</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[ローカルのWordPressをCloud9の環境へ引っ越す(DB)]]></title>
@@ -2268,37 +2434,6 @@ herokuにはcloudinaryのアドオンがあるので、これでとりあえず�
 cloudinaryのアップロード容量が決まっているため、メンテナンスが必要かもしれません。</p>
 
 <p>あとはアップデートの問題が解決すればすっきり出来るのですが。。</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[CentOSにて、PHPのエラー出力をターミナルで監視]]></title>
-    <link href="http://kayakuguri.github.io/blog/2015/06/24/php-error-tail/"/>
-    <updated>2015-06-24T21:26:49+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2015/06/24/php-error-tail</id>
-    <content type="html"><![CDATA[<p>いつも忘れるのでメモ。</p>
-
-<!-- more -->
-
-
-<p>Vagrant環境にて、PHPのエラー出力をターミナルで監視する方法。<br/>
-まずは、エラーの出力ファイルの場所。</p>
-
-<pre><code>/var/log/httpd/error_log
-</code></pre>
-
-<p>これを、<code>tail</code>コマンドで表示させる。<br/>
-常に監視、の<code>-f</code>オプション付きで。</p>
-
-<pre><code>tail /var/log/httpd/error_log -f
-</code></pre>
-
-<p>かなり常識的な事だと思うけど、ググるのが面倒なのでメモ。</p>
-
-<h2>参考</h2>
-
-<p><a href="http://www.atmarkit.co.jp/fwin2k/win2ktips/423tail/tail.html">tailコマンドでログ・ファイルをリアルタイムに監視する － ＠IT</a><br/>
-<a href="http://detail.chiebukuro.yahoo.co.jp/qa/question_detail/q1213302327">『　リナックスサーバー　』　にＰＨＰのエラーログ・アクセスログにか&hellip; &ndash; Yahoo!知恵袋</a></p>
 ]]></content>
   </entry>
   
