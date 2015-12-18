@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
 
-  <title><![CDATA[Category: linux | KayaMemo]]></title>
-  <link href="http://kayakuguri.github.io/blog/categories/linux/atom.xml" rel="self"/>
+  <title><![CDATA[Category: yum | KayaMemo]]></title>
+  <link href="http://kayakuguri.github.io/blog/categories/yum/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
   <updated>2015-12-18T18:10:44+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
@@ -114,37 +114,6 @@ CentOS6.x系では、PHP5.3、のようです。</p>
 
 <p>とりあえずyum、リポジトリ、remiなどの関係がざっくりと理解できました。<br/>
 linux系の記事とかを調べているとこの辺の用語が当たり前に出てくるのでつらかったのですが、これである程度整理しながら読むことが出来そうです。</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[CentOSにて、PHPのエラー出力をターミナルで監視]]></title>
-    <link href="http://kayakuguri.github.io/blog/2015/06/24/php-error-tail/"/>
-    <updated>2015-06-24T21:26:49+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2015/06/24/php-error-tail</id>
-    <content type="html"><![CDATA[<p>いつも忘れるのでメモ。</p>
-
-<!-- more -->
-
-
-<p>Vagrant環境にて、PHPのエラー出力をターミナルで監視する方法。<br/>
-まずは、エラーの出力ファイルの場所。</p>
-
-<pre><code>/var/log/httpd/error_log
-</code></pre>
-
-<p>これを、<code>tail</code>コマンドで表示させる。<br/>
-常に監視、の<code>-f</code>オプション付きで。</p>
-
-<pre><code>tail /var/log/httpd/error_log -f
-</code></pre>
-
-<p>かなり常識的な事だと思うけど、ググるのが面倒なのでメモ。</p>
-
-<h2>参考</h2>
-
-<p><a href="http://www.atmarkit.co.jp/fwin2k/win2ktips/423tail/tail.html">tailコマンドでログ・ファイルをリアルタイムに監視する － ＠IT</a><br/>
-<a href="http://detail.chiebukuro.yahoo.co.jp/qa/question_detail/q1213302327">『　リナックスサーバー　』　にＰＨＰのエラーログ・アクセスログにか&hellip; &ndash; Yahoo!知恵袋</a></p>
 ]]></content>
   </entry>
   

@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-12-08T19:13:29+09:00</updated>
+  <updated>2015-12-18T18:10:44+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,110 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Linuxのパッケージ管理についての用語を理解する]]></title>
+    <link href="http://kayakuguri.github.io/blog/2015/12/18/linux-package/"/>
+    <updated>2015-12-18T18:06:02+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2015/12/18/linux-package</id>
+    <content type="html"><![CDATA[<p>vagrantで環境を構築する際に、PHPの各種バージョンを指定して作成した場合はありますが、<br/>
+その際にyumでリポジトリを追加してパッケージをインストール、、などと言われても意味がわかっていなかったので、ざっくりと調べてみました。</p>
+
+<!-- more -->
+
+
+<h2>yum</h2>
+
+<p>RedHat系ディストリビューションのパッケージ管理システムのこと。<br/>
+PHPでいう、composerのLinux(RedHat系)版、みたいなものでしょうか。<br/>
+ちなみにRedHat系ディストリビューションのLinux、とは、CentOSがそれにあたるよう。(Fedora、とか）<br/>
+<a href="https://ja.wikipedia.org/wiki/Linux%E3%83%87%E3%82%A3%E3%82%B9%E3%83%88%E3%83%AA%E3%83%93%E3%83%A5%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3%E3%81%AE%E6%AF%94%E8%BC%83">Linuxディストリビューションの比較 &ndash; Wikipedia</a><br/>
+(Debian系のディストリビューション、では、<code>apt-get</code>が使われる。<br/>
+UbuntuはDebian系ディストリビューション。）</p>
+
+<p>一方、<code>rpm</code>、というのもあるそうですが、rpmを機能拡張したものがyum、という位置づけのようです。<br/>
+<a href="http://blog.inouetakuya.info/entry/20111006/1317900802">初心者の頃に知っておきたかった rpm と yum の違いと使い分け &ndash; 彼女からは、おいちゃんと呼ばれています</a></p>
+
+<p>要するにyumで提供されているものはyumを使ったほうが楽だからyumを使うけれど、<br/>
+rpmでしかないものや、yumで提供されているものが古かったりするばあいは、rpmで直接指定する、みたいな感じっぽいです。</p>
+
+<p>また、上記サイトに用語の説明として以下のように記載されていました。</p>
+
+<blockquote><p>・パッケージ<br/>
+ソフトウェアの一連のファイルをまとめたもの<br/>
+・リポジトリ<br/>
+パッケージを集めて保管している場所。インターネット上にいろいろなリポジトリが存在する<br/>
+・RPM データベース<br/>
+rpm 形式のパッケージがインストールされると、その情報は「/usr/lib/rpm」に格納される。このデータのまとまりを「RPM データベース」という</p></blockquote>
+
+<h2>リポジトリ</h2>
+
+<p>今聞くとgitしか思い浮かびませんが、たぶん意味は同じ。<br/>
+リポジトリ、なのか、レポジトリなのか、揺れがあります。<br/>
+(リポジトリ、のほうが多い気がしました）</p>
+
+<p><a href="http://www.searchman.info/fedoracore4/sev1050.html">yumの概念を覚えよう。fedoracore4では標準でついてます。</a></p>
+
+<blockquote><p>最新バージョンのソフトウェアは、リポジトリというサイトに登録されていています。<br/>
+まあ、簡単にいうと、リポジトリとはソフトウェアの貯蔵庫みたいなもの。</p></blockquote>
+
+<p>PHPでいうところの、<code>composer.json</code>がネット上にアップされていて、どのパッケージのどのバージョンをインストールするか、みたなものが管理されており、それをリポジトリ、と呼ぶ、という事でしょうか。</p>
+
+<h2>remi</h2>
+
+<p><a href="http://oki2a24.com/2012/03/13/what-is-rpmforge-remi-epel/">yum が便利になる RPMforge、Remi、EPEL とは一体何なのか &#8211; oki2a24</a></p>
+
+<p>有名なサードパーティのリポジトリの一つのよう。<br/>
+あと有名なものは上記サイトにあるように、 <code>EPEL</code> とか、 <code>RPMforge</code> とかがあるみたいです。</p>
+
+<p><a href="http://rpms.famillecollet.com/">Remi&rsquo;s RPM repository</a></p>
+
+<p>人の名前らしい。<br/>
+<a href="http://snickerjp.blogspot.jp/2013/01/remi.html">&#12300;remiってなに&#65311;&#12301;って話 : 元うなぎ屋</a></p>
+
+<h2>CentOSのPHP</h2>
+
+<p>ようやく本題に近づいてきました。<br/>
+現状、CentOSの公式リポジトリで提供されているPHPは、5.4、らしいです。<br/>
+CentOS7.x系では、PHP5.4、なのだと思います。<br/>
+CentOS6.x系では、PHP5.3、のようです。</p>
+
+<p>ですので、最新のPHPを含め、他のバージョンのPHPをインストールするには、そのPHPがパッケージされたリポジトリを使用する必要があります。<br/>
+その際に上記のremi、を使うのがもっともポピュラーな方法のようです。</p>
+
+<h3>EPELリポジトリ</h3>
+
+<blockquote><p>Remi で提供されているソフトウェアをインストールするためには EPEL のリポジトリも必須要件となっていますので、EPELのリポジトリの追加を行った後に Remi のリポジトリを追加します。<br/>
+<a href="http://weblabo.oscasierra.net/centos7-php56-install/">CentOS 7 に PHP 5.6 を yum でインストールする手順 | WEB ARCH LABO</a></p></blockquote>
+
+<h2>用語の揺れ</h2>
+
+<p>remiのyumリポジトリなのか、yumのremiリポジトリなのか？</p>
+
+<blockquote><p>CentOS7では「EPEL」リポジトリを「yum」で追加することで追加することができます。<br/>
+<a href="http://www.server-memo.net/centos-settings/centos7/add-repo.html">CentOS7 サードパーティーリポジトリの追加 | server-memo.net</a></p></blockquote>
+
+<p>上記にある通り、EPELリポジトリをyumで追加するので、remiリポジトリ、が正解だと思います。</p>
+
+<h2>サードパーティリポジトリ</h2>
+
+<p>特にサードパーティのリポジトリをインストールしなかったばあいは、yum標準のリポジトリからインストールやアップデートが行われますが、<br/>
+サードパーティのリポジトリをインストールしている場合はyumを使用する際にインストールしたサードパーティのリポジトリからインストールやアップデートが行われる、ということのようです。</p>
+
+<p>remiやEPELなんかの有名どころでは信頼性も高いのかもしれないですが、セキュリティの観点から言うとやはり公式の標準リポジトリからインストールするのが一番安全だと思われます。<br/>
+なので、通常はyum標準のリポジトリを利用するが、足りないものやカスタマイズしたい場合のみ、remiなどのサードパーティのリポジトリを使う、という運用がよく行われるようです。</p>
+
+<blockquote><p>追加するリポジトリによっては、CentOS標準のパッケージを置き換えてしまったりするものがあり、それが問題を引き起こしてしまう場合があります。</p>
+
+<p>ですので、通常はCentOSデフォルトのリポジトリを使用し、そこに無いパッケージをインストールしたい場合のみ、明示的に追加したリポジトリを指定してパッケージのインストールを行うという運用に私はしています。<br/>
+<a href="http://www.server-memo.net/centos-settings/centos7/add-repo.html">CentOS7 サードパーティーリポジトリの追加 | server-memo.net</a></p></blockquote>
+
+<h1>まとめ</h1>
+
+<p>とりあえずyum、リポジトリ、remiなどの関係がざっくりと理解できました。<br/>
+linux系の記事とかを調べているとこの辺の用語が当たり前に出てくるのでつらかったのですが、これである程度整理しながら読むことが出来そうです。</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[ApexでJSONをパースする]]></title>
@@ -2204,236 +2308,6 @@ default                   running (virtualbox)
 
 <p><a href="http://wordpress.stackexchange.com/questions/1665/getting-a-list-of-currently-available-roles-on-a-wordpress-site">security &ndash; Getting a List of Currently Available Roles on a WordPress Site? &ndash; WordPress Development Stack Exchange</a><br/>
 <a href="http://detail.chiebukuro.yahoo.co.jp/qa/question_detail/q12132319417">wordpressのユーザ権限を管理画面以外から変更する必要があり、～ &ndash; Yahoo!知恵袋</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[wordpress上のメディアをcloudinaryに自動アップロードして管理する]]></title>
-    <link href="http://kayakuguri.github.io/blog/2015/06/30/auto-upload-cloudinary-on-heroku/"/>
-    <updated>2015-06-30T12:54:33+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2015/06/30/auto-upload-cloudinary-on-heroku</id>
-    <content type="html"><![CDATA[<p>herokuでwordpressを使用した場合、通常ではアップロードした画像は<br/>
-heorkuの再起動のタイミングで全て消えてしまいます。</p>
-
-<!-- more -->
-
-
-<p>なので、そうならないようにクラウド上のストレージサービスである、cloudinaryに保存させたりします。<br/>
-cloudinaryには公式でwordpressのプラグインが用意されています。<br/>
-<a href="https://ja.wordpress.org/plugins/cloudinary-image-management-and-manipulation-in-the-cloud-cdn/">WordPress &#8250; Cloudinary &ndash; Image management and manipulation in the cloud + CDN &laquo; WordPress Plugins</a></p>
-
-<p>これを利用することでwordpress上の画像をcloudinaryで管理できるようになるのですが、<br/>
-アップロードした画像を手動でcloudinaryに反映させてやらねばなりません。<br/>
-それをなんとか自動でアップされるようにしてみました。</p>
-
-<h2>cloudinaryへのアップロード手順(通常)</h2>
-
-<p>通常と同じようにメディアライブラリ上から画像をアップロードします。<br/>
-一覧表示で、詳細まで表示される、テーブル表示に切り替えます。<br/>
-この時の右端に、<code>Upload to Cloudinary</code>というリンクがあるのでそれをクリックします。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2015/06/cloudinary_heroku01.jpg" alt="" /></p>
-
-<p>するとアップロードされ、表記がアップロード済に変わります。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2015/06/cloudinary_heroku02.jpg" alt="" /></p>
-
-<p>この時に内部では何をしているかと言うと、<br/>
-cloudinaryにアップロードし、アップ先のURLを使ってメタデータを書き換え、<br/>
-cloudinaryへアップした、というフラグを立てています。<br/>
-このフラグを立てているところがポイントになります。</p>
-
-<h2>メタデータ</h2>
-
-<p>wordpressでは画像は投稿データとして管理されています。<br/>
-データ構造は以下が詳しいのですが、画像部分だけを引用させてもらうとこんな感じです。<br/>
-<a href="http://hijiriworld.com/web/wp-data-register/">WordPress データ登録機構を知ってもっと自由で効率的なフローを  |  hijiriworld Web</a></p>
-
-<p><code>wp_posts</code>テーブル</p>
-
-<table>
-<thead>
-<tr>
-<th>post_title </th>
-<th> post_status </th>
-<th> post_name </th>
-<th> guid </th>
-<th> post_type </th>
-<th> post_mine_type</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>{$file_name} </td>
-<td> inherit </td>
-<td> {$file_name} </td>
-<td> {$guid} </td>
-<td> attachment </td>
-<td> {$mine_type}</td>
-</tr>
-</tbody>
-</table>
-
-
-<p><code>wp_postmeta</code>テーブル</p>
-
-<table>
-<thead>
-<tr>
-<th>post_id </th>
-<th> meta_key </th>
-<th> meta_value</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>{$attachment_id} </td>
-<td> _wp_attached_file </td>
-<td> {$file_name}</td>
-</tr>
-<tr>
-<td>{$attachment_id} </td>
-<td> _wp_attachment_metadata </td>
-<td> シリアライズされたメタデータ</td>
-</tr>
-</tbody>
-</table>
-
-
-<p>wp_postsの方は特に変更する必要はありません。<br/>
-重要なのはwp_postmetaのメタデータの方です。</p>
-
-<p>今回、変更する具体的な箇所は以下の２箇所です。<br/>
-<code>_wp_attached_file</code>をファイル名からcloudinaryのURLへ変更。<br/>
-<code>_wp_attachment_metadata</code>の中にcloudinaryフラグを立てる。</p>
-
-<h2>メディア管理とプラグインの仕組み</h2>
-
-<p>wordpressのメディアは都度URLを動的に生成しています。<br/>
-メイン画像の場合は以下。</p>
-
-<blockquote><p>ブログのパス + <code>_wp_attached_file</code>の$file_name</p></blockquote>
-
-<p>サムネイルの場合は以下。</p>
-
-<blockquote><p>ブログのパス + <code>_wp_attachment_metadata</code>の指定サイズのファイル名</p></blockquote>
-
-<p>なのでファイル名にcloudinaryの絶対パスを入れてしまうとURLが２重になってしまいます。</p>
-
-<p>で。<br/>
-これが、cloudinaryのフラグが立っているものに関しては、cloudinaryのプラグイン側でURLをうまい具合に置き換えて表示してくれます。<br/>
-なので、こちらとしてはフラグを立てるだけ、で大丈夫。</p>
-
-<h2>実作業</h2>
-
-<p>処理の流れは以下のように。</p>
-
-<ol>
-<li>画像をアップロード</li>
-<li>メタデータ作成のフック内で画像URLを取得</li>
-<li>取得したURLでcloudinaryにアップロード</li>
-<li>cloudinaryのURLでDBのファイル名を更新</li>
-<li>メタデータにフラグを立てる</li>
-</ol>
-
-
-<p><code>wp_generate_attachment_metadata</code>で、アップされたファイルのメタデータを作成する処理にフックをかけられるのでそれを使用します。</p>
-
-<p>functions.phpに以下を記述。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>function cldnry_wp_generate_attachment_metadata($metadata, $postid){
-</span><span class='line'>    $imgPath = get_attached_file( $postid );
-</span><span class='line'>
-</span><span class='line'>    //ファイル形式のチェック
-</span><span class='line'>    $info = pathinfo($imgPath);
-</span><span class='line'>    $public_id = $info["filename"];
-</span><span class='line'>    $mime_types = array("png"=&gt;"image/png", "jpg"=&gt;"image/jpeg", "pdf"=&gt;"application/pdf", "gif"=&gt;"image/gif", "bmp"=&gt;"image/bmp");
-</span><span class='line'>    $extension = $info["extension"];
-</span><span class='line'>    $type = @$mime_types[$extension];
-</span><span class='line'>    //画像以外はcloudinaryにアップしない
-</span><span class='line'>    if($type === null){
-</span><span class='line'>        $stderr = fopen( 'php://stderr', 'w' );
-</span><span class='line'>        fwrite( $stderr, 'アップロードされたファイルが画像ではありません。file-type:'.$extension );
-</span><span class='line'>        return $metadata;
-</span><span class='line'>    }
-</span><span class='line'>
-</span><span class='line'>    //Cloudinaryへアップ
-</span><span class='line'>    $cl_upload = new CloudinaryUploader();
-</span><span class='line'>    $uploaded = $cl_upload-&gt;upload($imgPath, array(
-</span><span class='line'>    ));
-</span><span class='line'>    $public_id = $uploaded['public_id'];
-</span><span class='line'>
-</span><span class='line'>    //DBへ保存
-</span><span class='line'>    update_attached_file($postid, $uploaded['secure_url']);
-</span><span class='line'>    $metadata['cloudinary'] = true; //cloudinaryからアップしたことを記録
-</span><span class='line'>
-</span><span class='line'>    return $metadata;
-</span><span class='line'>}
-</span><span class='line'>add_filter( "wp_generate_attachment_metadata" , "cldnry_wp_generate_attachment_metadata",10 ,2 );</span></code></pre></td></tr></table></div></figure>
-
-
-<p>※2015/08/21追記<br/>
-cloudinaryへアップする際にpublic_idを指定してしまうと画像が次々と上書きされてしまうので、その部分を削除しました。</p>
-
-<p>  &ldquo;public_id&rdquo; => $public_id,</p>
-
-<p>まず、<code>get_attached_file( $postid )</code>でアップされたファイルのURLを取得。<br/>
-そのファイルが画像かどうかを一応チェックしている。<br/>
-で、cloudinaryへアップロード。<br/>
-cloudinaryはプラグインのファイルから利用するので公式で解説されているコードとは少し異なります。<br/>
-で、アップされたらURLをファイル名として保存。<br/>
-最後にポイントとなる、フラグを立てて終了。</p>
-
-<p>これだけであとの表示周りの処理はcloudinaryがやってくれます。</p>
-
-<h2>結果</h2>
-
-<p>通常と同じように画像をアップすると、アップ完了時点でcloudinaryへ保存されます。<br/>
-以下のようにURLがcloudinaryになっている事が確認できるかと思います。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2015/06/cloudinary_heroku03.jpg" alt="" /></p>
-
-<p>一覧でテーブル表示にすると、cloudinaryにはすでにアップロード済の表記となっています。</p>
-
-<h2>まとめ</h2>
-
-<p>herokuでwordpressを扱う場合、この画像問題がネックの一つとなっているのですが、<br/>
-herokuにはcloudinaryのアドオンがあるので、これでとりあえずは解消したのではないでしょうか。<br/>
-この解消は自分の中ではかなり大きいです。</p>
-
-<p>使用の際の注意点としては、wordpress上でデータを削除してもcloudinary上からは削除されない、という点です。<br/>
-cloudinaryのアップロード容量が決まっているため、メンテナンスが必要かもしれません。</p>
-
-<p>あとはアップデートの問題が解決すればすっきり出来るのですが。。</p>
 ]]></content>
   </entry>
   
