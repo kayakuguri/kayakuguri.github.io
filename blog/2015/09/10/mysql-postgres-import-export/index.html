@@ -207,6 +207,11 @@ The following URL will expire at 2015-09-10 07:33:23 +0000:
 <pre><code>$ heroku pg:backups restore 'S3_URL' DATABASE_URL
 </code></pre>
 
+<h4>ローカルのDBにインポートする場合</h4>
+
+<pre><code>$ pg_restore --verbose --clean --no-acl --no-owner -h localhost -U ユーザー名 -d DB名 バックアップファイル
+</code></pre>
+
 <h3>参考</h3>
 
 <p><a href="https://devcenter.heroku.com/articles/heroku-postgres-import-export">Importing and Exporting Heroku Postgres Databases with PG Backups | Heroku Dev Center</a><br/>

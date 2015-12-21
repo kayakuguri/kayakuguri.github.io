@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-12-18T18:10:44+09:00</updated>
+  <updated>2015-12-21T10:30:53+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -1462,6 +1462,11 @@ The following URL will expire at 2015-09-10 07:33:23 +0000:
 <h3>インポート</h3>
 
 <pre><code>$ heroku pg:backups restore 'S3_URL' DATABASE_URL
+</code></pre>
+
+<h4>ローカルのDBにインポートする場合</h4>
+
+<pre><code>$ pg_restore --verbose --clean --no-acl --no-owner -h localhost -U ユーザー名 -d DB名 バックアップファイル
 </code></pre>
 
 <h3>参考</h3>
