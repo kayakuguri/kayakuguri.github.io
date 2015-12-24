@@ -4,7 +4,7 @@
   <title><![CDATA[Category: vim | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/vim/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-12-24T18:24:41+09:00</updated>
+  <updated>2015-12-24T19:43:54+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,121 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[vim-refでvim上でPHPのマニュアルを参照してみる]]></title>
+    <link href="http://kayakuguri.github.io/blog/2015/12/24/vim-ref/"/>
+    <updated>2015-12-24T19:41:21+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2015/12/24/vim-ref</id>
+    <content type="html"><![CDATA[<p>vim上から直接PHPのマニュアルを参照して表示させてみた。</p>
+
+<!-- more -->
+
+
+<h2>vim-refをインストール</h2>
+
+<h3>NeoBundleでインストール</h3>
+
+<p><code>.vimrc</code>に以下を追記。</p>
+
+<pre><code>NeoBundle 'thinca/vim-ref'
+</code></pre>
+
+<p>vimを起動してインストール。<br/>
+(<code>:NeoBundleInstall</code>が必要であれば実行)</p>
+
+<h2>マニュアルのダウンロード</h2>
+
+<p>任意のディレクトリにマニュアルをダウンロード。<br/>
+<code>.vim/ref</code>にダウンロードした。</p>
+
+<p>各種マニュアルは以下にまとまっている。<br/>
+日本語の、Many HTML filesをダウンロードし。<br/>
+<code>.vim/ref/php-chunked-xhtml</code>に展開した。</p>
+
+<p><a href="http://php.benscom.com/download-docs.php">http://php.benscom.com/download-docs.php</a><br/>
+<a href="http://php.benscom.com/get/php_manual_ja.tar.gz/from/a/mirror">http://php.benscom.com/get/php_manual_ja.tar.gz/from/a/mirror</a></p>
+
+<h2>設定</h2>
+
+<p><code>.vimrc</code>に展開したディレクトリを指定。</p>
+
+<pre><code>let g:ref_phpmanual_path = $HOME . '/.vim/ref/php-chunked-xhtml'
+</code></pre>
+
+<h3>vimproc</h3>
+
+<p>vimprocが必要なよう？なので、インストール。<br/>
+<a href="https://github.com/Shougo/vimproc.vim">https://github.com/Shougo/vimproc.vim</a></p>
+
+<p><code>
+NeoBundle 'Shougo/vimproc.vim', {
+\ 'build' : {
+\     'windows' : 'tools\\update-dll-mingw',
+\     'cygwin' : 'make -f make_cygwin.mak',
+\     'mac' : 'make',
+\     'linux' : 'make',
+\     'unix' : 'gmake',
+\    },
+\ }
+</code></p>
+
+<h3>テキストブラウザ</h3>
+
+<p>なにかしらのテキストブラウザが必要。</p>
+
+<ul>
+<li>lynx</li>
+<li>w3m</li>
+</ul>
+
+
+<p>lynxを入れてみる。</p>
+
+<pre><code>$ brew install lynx
+</code></pre>
+
+<p>以下で起動出来る。</p>
+
+<pre><code>$ /usr/local/bin/lynx
+</code></pre>
+
+<p>起動後は、<code>g</code>を入力すると、<code>URL to open:</code>とURL入力を待機している除隊となるので、<code>www.yahoo.com</code>などと入力してエンターキーを入力してみると、<br/>
+クッキーの使用を許可するか、などと聞かれたあと、yahoo.comが開く。<br/>
+<img src="/images/2015/12/lynx.jpg" alt="" /></p>
+
+<p><a href="http://ext.omo3.com/linux/lynx.html">Lynx をインストールする | 渋谷生活</a></p>
+
+<p>設定ファイルは以下にある。<br/>
+<code>/usr/local/Cellar/lynx/2.8.8rel.2_1/etc/lynx.cfg</code></p>
+
+<p>439行目あたりに<code>#CHARACTER_SET:iso-8859-1</code>と文字コード設定がコメントアウトされた状態になっているので、その下にutf-8の設定を追加。</p>
+
+<pre><code>CHARACTER_SET:utf-8
+</code></pre>
+
+<p>602行目あたりに<code>#PREFERRED_LANGUAGE:en</code>というコメントアウトがあるので、以下を追加。</p>
+
+<pre><code>PREFERRED_LANGUAGE:ja
+</code></pre>
+
+<h2>使用</h2>
+
+<p>使用は、<code>:Ref</code>のコマンドで、、と書いてあるものもあったけど動かなかった。<br/>
+代わりに、php編集中に調べたい関数にカーソルと合わせた状態で、<code>shift-k</code>をタイプするとその単語のマニュアルを表示させることが出来た。</p>
+
+<p><img src="/images/2015/12/vim-ref.jpg" alt="" /></p>
+
+<p>ただし使用している間、ファンが唸るほどに処理が走っていたような……。要調査。</p>
+
+<h2>参考</h2>
+
+<p><a href="https://github.com/thinca/vim-ref">thinca/vim-re</a><br/>
+<a href="http://umeji.blogspot.jp/2011/09/phpvimrefvim.html">It&rsquo;s better.: phpマニュアルをvim上から見る(ref.vim)</a><br/>
+<a href="http://qiita.com/masa2sei/items/85a2c2cc3721c79a5322">vim-refを使う &ndash; Qiita</a><br/>
+<a href="http://www.karakaram.com/20120726-vim-ref">vim-refを導入する [2012年版] | karakaram-blog</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[vimにNeoBundleとNeoCompleteを入れる]]></title>

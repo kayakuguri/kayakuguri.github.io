@@ -1,0 +1,318 @@
+
+<!DOCTYPE HTML>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>vim-refでvim上でPHPのマニュアルを参照してみる - KayaMemo</title>
+
+	
+	<meta name="description" content="<!-- google_ad_client = "ca-pub-0887267957680144"; /* kayakuguri top */ google_ad_slot = "1210228675"; google_ad_width = 468; google_ad_height = 60 &hellip;">
+	
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+	<link href="/atom.xml" rel="alternate" title="KayaMemo" type="application/atom+xml">
+	<link rel="canonical" href="">
+	<link href="/favicon.png" rel="shortcut icon">
+	<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+	<script async="true" src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+	
+<meta property="og:title" content="vim-refでvim上でPHPのマニュアルを参照してみる - KayaMemo" />
+<meta property="og:type" content="article" />
+<meta property="og:description" content="<!-- google_ad_client = "ca-pub-0887267957680144"; /* kayakuguri top */ google_ad_slot = "1210228675"; google_ad_width = 468; google_ad_height = 60 &hellip;" />
+
+<meta property="og:url" content="" />
+<meta property="og:image" content="http://kayakuguri.github.io/images/about_me.jpg" />
+<meta property="og:author" content="kayakuguri" />
+<meta property="og:site_name" content="KayaMemo" />
+<meta property="og:locale" content="ja_JP" />
+<meta property="fb:app_id" content="509051419202319" />
+</head>
+
+
+<body>
+	<header id="header" class="inner"><h1><a href="/">KayaMemo</a></h1>
+<nav id="main-nav"><ul class="main">
+	<li><a href="/">Blog</a></li>
+	<li><a href="/blog/archives">Archives</a></li>
+</ul>
+</nav>
+<nav id="mobile-nav">
+	<div class="alignleft menu">
+		<a class="button">Menu</a>
+		<div class="container"><ul class="main">
+	<li><a href="/">Blog</a></li>
+	<li><a href="/blog/archives">Archives</a></li>
+</ul>
+</div>
+	</div>
+	<div class="alignright search">
+		<a class="button"></a>
+		<div class="container">
+			<form action="http://google.com/search" method="get">
+				<input type="text" name="q" results="0">
+				<input type="hidden" name="q" value="site:kayakuguri.github.io">
+			</form>
+		</div>
+	</div>
+</nav>
+<nav id="sub-nav" class="alignright">
+	<div class="social">
+		
+		
+		
+		
+    
+		
+		
+		
+		
+		
+		<a class="rss" href="/atom.xml" title="RSS">RSS</a>
+		
+    
+	</div>
+	<form class="search" action="http://google.com/search" method="get">
+		<input class="alignright" type="text" name="q" results="0">
+		<input type="hidden" name="q" value="site:kayakuguri.github.io">
+	</form>
+</nav>
+
+</header>
+	
+		
+	
+	<div id="content" class="inner"><article class="post">
+	<h2 class="title">vim-refでvim上でPHPのマニュアルを参照してみる</h2>
+	<div class="entry-content">
+        <div class="adArea">
+    <script type="text/javascript"><!--
+    google_ad_client = "ca-pub-0887267957680144";
+    /* kayakuguri top */
+    google_ad_slot = "1210228675";
+    google_ad_width = 468;
+    google_ad_height = 60;
+    //-->
+    </script>
+    <script type="text/javascript"
+            src="//pagead2.googlesyndication.com/pagead/show_ads.js">
+    </script>
+</div>
+        <p>vim上から直接PHPのマニュアルを参照して表示させてみた。</p>
+
+<!-- more -->
+
+
+<h2>vim-refをインストール</h2>
+
+<h3>NeoBundleでインストール</h3>
+
+<p><code>.vimrc</code>に以下を追記。</p>
+
+<pre><code>NeoBundle 'thinca/vim-ref'
+</code></pre>
+
+<p>vimを起動してインストール。<br/>
+(<code>:NeoBundleInstall</code>が必要であれば実行)</p>
+
+<h2>マニュアルのダウンロード</h2>
+
+<p>任意のディレクトリにマニュアルをダウンロード。<br/>
+<code>.vim/ref</code>にダウンロードした。</p>
+
+<p>各種マニュアルは以下にまとまっている。<br/>
+日本語の、Many HTML filesをダウンロードし。<br/>
+<code>.vim/ref/php-chunked-xhtml</code>に展開した。</p>
+
+<p><a href="http://php.benscom.com/download-docs.php">http://php.benscom.com/download-docs.php</a><br/>
+<a href="http://php.benscom.com/get/php_manual_ja.tar.gz/from/a/mirror">http://php.benscom.com/get/php_manual_ja.tar.gz/from/a/mirror</a></p>
+
+<h2>設定</h2>
+
+<p><code>.vimrc</code>に展開したディレクトリを指定。</p>
+
+<pre><code>let g:ref_phpmanual_path = $HOME . '/.vim/ref/php-chunked-xhtml'
+</code></pre>
+
+<h3>vimproc</h3>
+
+<p>vimprocが必要なよう？なので、インストール。<br/>
+<a href="https://github.com/Shougo/vimproc.vim">https://github.com/Shougo/vimproc.vim</a></p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>NeoBundle 'Shougo/vimproc.vim', {
+</span><span class='line'>\ 'build' : {
+</span><span class='line'>\     'windows' : 'tools\\update-dll-mingw',
+</span><span class='line'>\     'cygwin' : 'make -f make_cygwin.mak',
+</span><span class='line'>\     'mac' : 'make',
+</span><span class='line'>\     'linux' : 'make',
+</span><span class='line'>\     'unix' : 'gmake',
+</span><span class='line'>\    },
+</span><span class='line'>\ }</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>テキストブラウザ</h3>
+
+<p>なにかしらのテキストブラウザが必要。</p>
+
+<ul>
+<li>lynx</li>
+<li>w3m</li>
+</ul>
+
+
+<p>lynxを入れてみる。</p>
+
+<pre><code>$ brew install lynx
+</code></pre>
+
+<p>以下で起動出来る。</p>
+
+<pre><code>$ /usr/local/bin/lynx
+</code></pre>
+
+<p>起動後は、<code>g</code>を入力すると、<code>URL to open:</code>とURL入力を待機している除隊となるので、<code>www.yahoo.com</code>などと入力してエンターキーを入力してみると、<br/>
+クッキーの使用を許可するか、などと聞かれたあと、yahoo.comが開く。<br/>
+<img src="/images/2015/12/lynx.jpg" alt="" /></p>
+
+<p><a href="http://ext.omo3.com/linux/lynx.html">Lynx をインストールする | 渋谷生活</a></p>
+
+<p>設定ファイルは以下にある。<br/>
+<code>/usr/local/Cellar/lynx/2.8.8rel.2_1/etc/lynx.cfg</code></p>
+
+<p>439行目あたりに<code>#CHARACTER_SET:iso-8859-1</code>と文字コード設定がコメントアウトされた状態になっているので、その下にutf-8の設定を追加。</p>
+
+<pre><code>CHARACTER_SET:utf-8
+</code></pre>
+
+<p>602行目あたりに<code>#PREFERRED_LANGUAGE:en</code>というコメントアウトがあるので、以下を追加。</p>
+
+<pre><code>PREFERRED_LANGUAGE:ja
+</code></pre>
+
+<h2>使用</h2>
+
+<p>使用は、<code>:Ref</code>のコマンドで、、と書いてあるものもあったけど動かなかった。<br/>
+代わりに、php編集中に調べたい関数にカーソルと合わせた状態で、<code>shift-k</code>をタイプするとその単語のマニュアルを表示させることが出来た。</p>
+
+<p><img src="/images/2015/12/vim-ref.jpg" alt="" /></p>
+
+<p>ただし使用している間、ファンが唸るほどに処理が走っていたような……。要調査。</p>
+
+<h2>参考</h2>
+
+<p><a href="https://github.com/thinca/vim-ref">thinca/vim-re</a><br/>
+<a href="http://umeji.blogspot.jp/2011/09/phpvimrefvim.html">It&rsquo;s better.: phpマニュアルをvim上から見る(ref.vim)</a><br/>
+<a href="http://qiita.com/masa2sei/items/85a2c2cc3721c79a5322">vim-refを使う &ndash; Qiita</a><br/>
+<a href="http://www.karakaram.com/20120726-vim-ref">vim-refを導入する [2012年版] | karakaram-blog</a></p>
+
+    </div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-12-24T19:41:21+09:00" pubdate data-updated="true">Dec 24<span>th</span>, 2015</time></div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/vim/'>vim</a>
+
+
+</div>
+	
+</div>
+</article>
+
+	<div class="share">
+	<div class="addthis_toolbox addthis_default_style ">
+		
+        <div id="fb-root"></div>
+<script>(function(d, s, id) {
+    var js, fjs = d.getElementsByTagName(s)[0];
+    if (d.getElementById(id)) return;
+    js = d.createElement(s); js.id = id;
+    js.src = "//connect.facebook.net/ja_JP/all.js#xfbml=1&appId=509051419202319";
+    fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+        <div class="fb-like" data-href="http://kayakuguri.github.io/blog/2015/12/24/vim-ref/" data-layout="button_count" data-action="like" data-show-faces="true" data-share="false"></div>
+		
+		
+		
+		<a class="addthis_button_google_plusone" g:plusone:size="medium"></a>
+		
+		
+        
+        <a href="http://b.hatena.ne.jp/entry/http://kayakuguri.github.io/blog/2015/12/24/vim-ref/" class="hatena-bookmark-button" data-hatena-bookmark-title="vim-refでvim上でPHPのマニュアルを参照してみる - KayaMemo" data-hatena-bookmark-layout="standard-noballoon" data-hatena-bookmark-lang="ja" title="このエントリーをはてなブックマークに追加">
+<img src="http://b.st-hatena.com/images/entry-button/button-only@2x.png" alt="このエントリーをはてなブックマークに追加" width="20" height="20" style="border: none;" /></a>
+<script type="text/javascript" src="http://b.st-hatena.com/js/bookmark_button.js" charset="utf-8" async="async"></script>
+        
+	</div>
+	
+</div>
+
+
+<div class="share">
+    <script type="text/javascript"><!--
+    google_ad_client = "ca-pub-0887267957680144";
+    /* kayakuguri git */
+    google_ad_slot = "2041160274";
+    google_ad_width = 336;
+    google_ad_height = 280;
+    //-->
+    </script>
+    <script type="text/javascript"
+            src="//pagead2.googlesyndication.com/pagead/show_ads.js">
+    </script>
+</div>
+</div>
+	<footer id="footer" class="inner">Copyright &copy; 2015
+
+    萱潜
+
+</footer>
+	<script src="/javascripts/slash.js"></script>
+<script src="/javascripts/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+	$('.fancybox').fancybox();
+})(jQuery);
+</script> <!-- Delete or comment this line to disable Fancybox -->
+
+
+
+
+	<script type="text/javascript">
+		var _gaq = _gaq || [];
+		_gaq.push(['_setAccount', 'UA-3730932-4']);
+		_gaq.push(['_trackPageview']);
+
+		(function() {
+			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+		})();
+	</script>
+
+
+
+</body>
+</html>
