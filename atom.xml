@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2015-12-21T10:30:53+09:00</updated>
+  <updated>2015-12-24T18:22:23+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,302 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[NeoBundleとNeoComplete]]></title>
+    <link href="http://kayakuguri.github.io/blog/2015/12/24/neobundle-neocomplete/"/>
+    <updated>2015-12-24T15:09:50+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2015/12/24/neobundle-neocomplete</id>
+    <content type="html"><![CDATA[<p>vim環境を整えていくためにNeoCompleteを入れてみる。</p>
+
+<!-- more -->
+
+
+<h2>NeoBundle</h2>
+
+<p>NeoCompleteを入れるために、vimのプラグイン管理ツールである、NeoBundleを入れる。<br/>
+<a href="https://github.com/Shougo/neobundle.vim">Shougo/neobundle.vim</a></p>
+
+<p>インストール方法は上記公式のReadmeに従った。</p>
+
+<p>任意のディレクトリにインストール用ファイルをダウンロードし、実行。</p>
+
+<pre><code>$ curl https://raw.githubusercontent.com/Shougo/neobundle.vim/master/bin/install.sh &gt; install.sh
+$ sh ./install.sh
+$ rm ./install.sh
+</code></pre>
+
+<p>インストール時に表示される以下の設定を、<code>.vimrc</code>に記述。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>"NeoBundle Scripts-----------------------------
+</span><span class='line'>if has('vim_starting')
+</span><span class='line'>  if &compatible
+</span><span class='line'>    set nocompatible               " Be iMproved
+</span><span class='line'>  endif
+</span><span class='line'>
+</span><span class='line'>  " Required:
+</span><span class='line'>  set runtimepath+=~/.vim/bundle/neobundle.vim/
+</span><span class='line'>endif
+</span><span class='line'>
+</span><span class='line'>" Required:
+</span><span class='line'>call neobundle#begin(expand('~/.vim/bundle'))
+</span><span class='line'>
+</span><span class='line'>" Let NeoBundle manage NeoBundle
+</span><span class='line'>" Required:
+</span><span class='line'>NeoBundleFetch 'Shougo/neobundle.vim'
+</span><span class='line'>
+</span><span class='line'>" Add or remove your Bundles here:
+</span><span class='line'>NeoBundle 'Shougo/neosnippet.vim'
+</span><span class='line'>NeoBundle 'Shougo/neosnippet-snippets'
+</span><span class='line'>NeoBundle 'tpope/vim-fugitive'
+</span><span class='line'>NeoBundle 'ctrlpvim/ctrlp.vim'
+</span><span class='line'>NeoBundle 'flazz/vim-colorschemes'
+</span><span class='line'>
+</span><span class='line'>" You can specify revision/branch/tag.
+</span><span class='line'>NeoBundle 'Shougo/vimshell', { 'rev' : '3787e5' }
+</span><span class='line'>
+</span><span class='line'>" Required:
+</span><span class='line'>call neobundle#end()
+</span><span class='line'>
+</span><span class='line'>" Required:
+</span><span class='line'>filetype plugin indent on
+</span><span class='line'>
+</span><span class='line'>" If there are uninstalled bundles found on startup,
+</span><span class='line'>" this will conveniently prompt you to install them.
+</span><span class='line'>NeoBundleCheck
+</span><span class='line'>"End NeoBundle Scripts-------------------------</span></code></pre></td></tr></table></div></figure>
+
+
+<p>vimを起動すると、<code>NeoBundleCheck</code>の記述があるので、インストールできていないプラグインを自動でチェックしてくれて、インストールを促される。<br/>
+そのまま<code>y</code>を入力して、プラグインのインストールを完了させる。</p>
+
+<h3>プラグインのインストール</h3>
+
+<p>プラグインのインストールは、<code>.vimrc</code>内の、<br/>
+<code>call neobundle#begin</code>と、<code>call neobundle#end</code>の間に、<br/>
+<code>NeoBundle xxx/xxx</code>を記述し、vimを起動してやる。</p>
+
+<h2>NeoComplete</h2>
+
+<p>上記の方法に則って、以下を<code>.vimrc</code>に追加。</p>
+
+<pre><code>NeoBundle 'Shougo/neocomplete.vim'
+</code></pre>
+
+<h3>lua</h3>
+
+<p>luaという言語で作成されているため、luaが有効になったvimをインストールする必要がある。<br/>
+luaがインストールされているかどうかは、vimのバージョン確認で確認出来るよう。</p>
+
+<pre><code>$ vim --version | grep lua
++dialog_con_gui  +lua             +rightleft       +windows
+...
+</code></pre>
+
+<p><code>+lua</code>となっていればインストール済。<br/>
+<code>-lua</code>となっていればインストールされていない。</p>
+
+<p>自分の環境ではインストールされていたが、されていない場合はvimをlua付きでインストールし直す必要があるよう。</p>
+
+<pre><code>$ brew install vim --with-lua
+</code></pre>
+
+<p><a href="https://github.com/Shougo/neocomplete.vim#vim-for-mac-os-x">https://github.com/Shougo/neocomplete.vim#vim-for-mac-os-x</a></p>
+
+<h3>設定</h3>
+
+<p>設定を<code>.vimrc</code>に記述。<br/>
+公式サイトにある設定内容をそのまま使用した。<br/>
+<a href="https://github.com/Shougo/neocomplete.vim">Shougo/neocomplete.vim</a></p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+<span class='line-number'>61</span>
+<span class='line-number'>62</span>
+<span class='line-number'>63</span>
+<span class='line-number'>64</span>
+<span class='line-number'>65</span>
+<span class='line-number'>66</span>
+<span class='line-number'>67</span>
+<span class='line-number'>68</span>
+<span class='line-number'>69</span>
+<span class='line-number'>70</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>" Disable AutoComplPop.
+</span><span class='line'>let g:acp_enableAtStartup = 0
+</span><span class='line'>" Use neocomplete.
+</span><span class='line'>let g:neocomplete#enable_at_startup = 1
+</span><span class='line'>" Use smartcase.
+</span><span class='line'>let g:neocomplete#enable_smart_case = 1
+</span><span class='line'>" Set minimum syntax keyword length.
+</span><span class='line'>let g:neocomplete#sources#syntax#min_keyword_length = 3
+</span><span class='line'>let g:neocomplete#lock_buffer_name_pattern = '\*ku\*'
+</span><span class='line'>
+</span><span class='line'>" Define dictionary.
+</span><span class='line'>let g:neocomplete#sources#dictionary#dictionaries = {
+</span><span class='line'>    \ 'default' : '',
+</span><span class='line'>    \ 'vimshell' : $HOME.'/.vimshell_hist',
+</span><span class='line'>    \ 'scheme' : $HOME.'/.gosh_completions'
+</span><span class='line'>        \ }
+</span><span class='line'>
+</span><span class='line'>" Define keyword.
+</span><span class='line'>if !exists('g:neocomplete#keyword_patterns')
+</span><span class='line'>    let g:neocomplete#keyword_patterns = {}
+</span><span class='line'>endif
+</span><span class='line'>let g:neocomplete#keyword_patterns['default'] = '\h\w*'
+</span><span class='line'>
+</span><span class='line'>" Plugin key-mappings.
+</span><span class='line'>inoremap &lt;expr&gt;&lt;C-g&gt;     neocomplete#undo_completion()
+</span><span class='line'>inoremap &lt;expr&gt;&lt;C-l&gt;     neocomplete#complete_common_string()
+</span><span class='line'>
+</span><span class='line'>" Recommended key-mappings.
+</span><span class='line'>" &lt;CR&gt;: close popup and save indent.
+</span><span class='line'>inoremap &lt;silent&gt; &lt;CR&gt; &lt;C-r&gt;=&lt;SID&gt;my_cr_function()&lt;CR&gt;
+</span><span class='line'>function! s:my_cr_function()
+</span><span class='line'>  return (pumvisible() ? "\&lt;C-y&gt;" : "" ) . "\&lt;CR&gt;"
+</span><span class='line'>  " For no inserting &lt;CR&gt; key.
+</span><span class='line'>  "return pumvisible() ? "\&lt;C-y&gt;" : "\&lt;CR&gt;"
+</span><span class='line'>endfunction
+</span><span class='line'>" &lt;TAB&gt;: completion.
+</span><span class='line'>inoremap &lt;expr&gt;&lt;TAB&gt;  pumvisible() ? "\&lt;C-n&gt;" : "\&lt;TAB&gt;"
+</span><span class='line'>" &lt;C-h&gt;, &lt;BS&gt;: close popup and delete backword char.
+</span><span class='line'>inoremap &lt;expr&gt;&lt;C-h&gt; neocomplete#smart_close_popup()."\&lt;C-h&gt;"
+</span><span class='line'>inoremap &lt;expr&gt;&lt;BS&gt; neocomplete#smart_close_popup()."\&lt;C-h&gt;"
+</span><span class='line'>" Close popup by &lt;Space&gt;.
+</span><span class='line'>"inoremap &lt;expr&gt;&lt;Space&gt; pumvisible() ? "\&lt;C-y&gt;" : "\&lt;Space&gt;"
+</span><span class='line'>
+</span><span class='line'>" AutoComplPop like behavior.
+</span><span class='line'>"let g:neocomplete#enable_auto_select = 1
+</span><span class='line'>
+</span><span class='line'>" Shell like behavior(not recommended).
+</span><span class='line'>"set completeopt+=longest
+</span><span class='line'>"let g:neocomplete#enable_auto_select = 1
+</span><span class='line'>"let g:neocomplete#disable_auto_complete = 1
+</span><span class='line'>"inoremap &lt;expr&gt;&lt;TAB&gt;  pumvisible() ? "\&lt;Down&gt;" : "\&lt;C-x&gt;\&lt;C-u&gt;"
+</span><span class='line'>
+</span><span class='line'>" Enable omni completion.
+</span><span class='line'>autocmd FileType css setlocal omnifunc=csscomplete#CompleteCSS
+</span><span class='line'>autocmd FileType html,markdown setlocal omnifunc=htmlcomplete#CompleteTags
+</span><span class='line'>autocmd FileType javascript setlocal omnifunc=javascriptcomplete#CompleteJS
+</span><span class='line'>autocmd FileType python setlocal omnifunc=pythoncomplete#Complete
+</span><span class='line'>autocmd FileType xml setlocal omnifunc=xmlcomplete#CompleteTags
+</span><span class='line'>
+</span><span class='line'>" Enable heavy omni completion.
+</span><span class='line'>if !exists('g:neocomplete#sources#omni#input_patterns')
+</span><span class='line'>  let g:neocomplete#sources#omni#input_patterns = {}
+</span><span class='line'>endif
+</span><span class='line'>"let g:neocomplete#sources#omni#input_patterns.php = '[^. \t]-&gt;\h\w*\|\h\w*::'
+</span><span class='line'>"let g:neocomplete#sources#omni#input_patterns.c = '[^.[:digit:] *\t]\%(\.\|-&gt;\)'
+</span><span class='line'>"let g:neocomplete#sources#omni#input_patterns.cpp = '[^.[:digit:] *\t]\%(\.\|-&gt;\)\|\h\w*::'
+</span><span class='line'>
+</span><span class='line'>" For perlomni.vim setting.
+</span><span class='line'>" https://github.com/c9s/perlomni.vim
+</span><span class='line'>let g:neocomplete#sources#omni#input_patterns.perl = '\h\w*-&gt;\h\w*\|\h\w*::'</span></code></pre></td></tr></table></div></figure>
+
+
+<p>こんな感じで補完が効くようになる。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2015/12/neocomplete.jpg" alt="" /></p>
+
+<h2>参考</h2>
+
+<p><a href="http://cpp0302.hatenablog.com/entry/2015/04/10/033609">neocomplcacheからneocompleteへの乗り換え &ndash; 自分の速さで</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Linuxのパッケージ管理についての用語を理解する]]></title>
@@ -1965,354 +2261,6 @@ default                   running (virtualbox)
 <h2>参考</h2>
 
 <p><a href="http://qiita.com/hgsk/items/520b4160804d7299eb34">Vagrant1.5.1へのアップグレード後にvagrant upに失敗する場合の直し方 &ndash; Qiita</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[WordPress]新規ユーザー登録時に選べる権限を制限する]]></title>
-    <link href="http://kayakuguri.github.io/blog/2015/07/01/wordpress-capabilities/"/>
-    <updated>2015-07-01T13:24:37+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2015/07/01/wordpress-capabilities</id>
-    <content type="html"><![CDATA[<p>Wordpressにて、自分に設定されている権限レベル以下の権限のみを取得して、<br/>
-新規登録画面で登録出来る権限を制御できるようにしてみた。</p>
-
-<!-- more  -->
-
-
-<h2>権限一覧の取得</h2>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>function xx(){
-</span><span class='line'>  global $wp_roles;
-</span><span class='line'>  $all_roles = $wp_roles-&gt;roles;
-</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
-
-
-<p>出力</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>[(権限名-スラッグ)] =&gt; Array
-</span><span class='line'>        (
-</span><span class='line'>            [name] =&gt; 権限名
-</span><span class='line'>            [capabilities] =&gt; Array
-</span><span class='line'>                (
-</span><span class='line'>                    [read] =&gt; 1
-</span><span class='line'>                    [level_0] =&gt; 1
-</span><span class='line'>                    権限内容                    
-</span><span class='line'>                )
-</span><span class='line'>
-</span><span class='line'>        )
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>シリアライズ</h2>
-
-<p>自分に設定されている権限を取得する。<br/>
-ただし、DBを直接除くとシリアライズされている。</p>
-
-<p>とはいえ、取得は普通にWPの関数で可能。</p>
-
-<pre><code>get_user_meta(ID, 'wp_capabilities', true);
-</code></pre>
-
-<p>セットは以下のように</p>
-
-<pre><code>update_user_meta($user_id, 'wp_capabilities', ['staff' =&gt; 1]);
-</code></pre>
-
-<h2>取得</h2>
-
-<h3>自分のレベルを取得</h3>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>global $current_user;
-</span><span class='line'>$mylevel = $current_user-&gt;user_level;</span></code></pre></td></tr></table></div></figure>
-
-
-<p>これで一見取れているようにみえたが、なぜかレベルの低いユーザーもレベルが10と取得されてしまった。<br/>
-なので、実際に入っているデータの、<code>level_xx</code>を見て一致させていく泥臭い手法をとった。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>$uid = wp_get_current_user()-&gt;get('ID');
-</span><span class='line'>//自分のロール
-</span><span class='line'>$my_role = get_user_meta($uid, 'wp_capabilities', true);
-</span><span class='line'>$my_role = key($my_role);
-</span><span class='line'>$myobj = $wp_roles-&gt;role_objects[$my_role]-&gt;capabilities;
-</span><span class='line'>$mylevel = 0;
-</span><span class='line'>for($i = 10; $i&gt;=0; $i--){
-</span><span class='line'>    if(isset($myobj['level_'.$i]) && $myobj['level_'.$i]){
-</span><span class='line'>        $mylevel = $i;
-</span><span class='line'>        break;
-</span><span class='line'>    }
-</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
-
-
-<h3>アクセス可能な権限をレベルで判別</h3>
-
-<p>あとは取得したレベルと、権限の一覧のレベルを比べて、自分の方が大きければ取得していけばよい。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>global $wp_roles;
-</span><span class='line'>
-</span><span class='line'>$aste_user_role = [];
-</span><span class='line'>foreach($wp_roles-&gt;role_objects as $key=&gt;$role){
-</span><span class='line'>    $level = 0;
-</span><span class='line'>    for($i = 10; $i&gt;=0; $i--){
-</span><span class='line'>        if(isset($role-&gt;capabilities['level_'.$i]) && $role-&gt;capabilities['level_'.$i]){
-</span><span class='line'>            $level = $i;
-</span><span class='line'>            break;
-</span><span class='line'>        }
-</span><span class='line'>    }
-</span><span class='line'>    if($mylevel &gt;= $level){
-</span><span class='line'>        $aste_user_role[] = [$key, $wp_roles-&gt;role_names[$key]];
-</span><span class='line'>    }
-</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
-
-
-<p>結果</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>array (size=8)
-</span><span class='line'>  0 =&gt; 
-</span><span class='line'>    array (size=2)
-</span><span class='line'>      0 =&gt; string 'administrator' (length=13)
-</span><span class='line'>      1 =&gt; string 'システム管理者' (length=21)
-</span><span class='line'>  1 =&gt; 
-</span><span class='line'>    array (size=2)
-</span><span class='line'>      0 =&gt; string 'staff' (length=5)
-</span><span class='line'>      1 =&gt; string 'スタッフ' (length=12)
-</span><span class='line'>  2 =&gt; 
-</span><span class='line'>    array (size=2)
-</span><span class='line'>...
-</span><span class='line'>...</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>表示</h2>
-
-<h3>新規登録</h3>
-
-<p>新規登録画面への表示は、<code>user_new_form</code>のフックで行う。<br/>
-フック内でHTMLを直接書いて対応。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>//ユーザー登録画面
-</span><span class='line'>function user_new_form_css() {
-</span><span class='line'>  ?&gt;
-</span><span class='line'>  &lt;table class="form-table"&gt;
-</span><span class='line'>  &lt;tr&gt;
-</span><span class='line'>      &lt;th scope="row"&gt;権限ロール &lt;span class="description"&gt;(必須)&lt;/span&gt;&lt;/th&gt;
-</span><span class='line'>      &lt;td&gt;&lt;select name="user_role"&gt;
-</span><span class='line'>                &lt;?php
-</span><span class='line'>                $tempo = '';
-</span><span class='line'>                foreach ($aste_user_role as $val) {
-</span><span class='line'>                    $selected = 'selected';
-</span><span class='line'>                    if($val[0] == 'subscriber'){
-</span><span class='line'>                        $tempo .= '&lt;option value="' . $val[0] . '"' . $selected . '&gt;' . $val[1] . '&lt;/option&gt;';
-</span><span class='line'>                    }else{
-</span><span class='line'>                        $tempo .= '&lt;option value="' . $val[0] . '" &gt;' . $val[1] . '&lt;/option&gt;';
-</span><span class='line'>                    }
-</span><span class='line'>                }
-</span><span class='line'>                echo $tempo;
-</span><span class='line'>                ?&gt;
-</span><span class='line'>            &lt;/select&gt;
-</span><span class='line'>        &lt;/td&gt;
-</span><span class='line'>    &lt;/tr&gt;
-</span><span class='line'>    &lt;/table&gt;
-</span><span class='line'>    &lt;?php
-</span><span class='line'>}
-</span><span class='line'>add_action( 'user_new_form', 'user_new_form_css' );</span></code></pre></td></tr></table></div></figure>
-
-
-<h3>編集</h3>
-
-<p>編集画面は、<code>personal_options</code>のフックで対応。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>function add_profile_custom ($profileuser) {
-</span><span class='line'>  //権限
-</span><span class='line'>    global $aste_user_role; //自身が参照可能な権限リスト
-</span><span class='line'>    set_aste_role();
-</span><span class='line'>    $html = '&lt;tr&gt;&lt;th scope="row"&gt;権限ロール &lt;span class="description"&gt;(必須)&lt;/span&gt;&lt;/th&gt;';
-</span><span class='line'>    $html .= '&lt;td&gt;&lt;select name="user_role"&gt;';
-</span><span class='line'>    //このユーザーの権現を取得
-</span><span class='line'>    $current_role = get_user_meta($profileuser-&gt;ID, 'wp_capabilities', true);
-</span><span class='line'>    $current_role = key($current_role);
-</span><span class='line'>    foreach ($aste_user_role as $val) {
-</span><span class='line'>        $r = $current_role;
-</span><span class='line'>        $selected = '';
-</span><span class='line'>        if ($r == $val[0]) {
-</span><span class='line'>            $selected = ' selected="selected" ';
-</span><span class='line'>        }
-</span><span class='line'>        $html .= '&lt;option value="' . $val[0] . '"' . $selected . '&gt;' . $val[1] . '&lt;/option&gt;';
-</span><span class='line'>    }
-</span><span class='line'>    $html .= '&lt;/select&gt;&lt;/td&gt;&lt;/tr&gt;';
-</span><span class='line'>    echo $html;
-</span><span class='line'>}
-</span><span class='line'>add_action( 'personal_options', 'add_profile_custom');</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>登録処理</h2>
-
-<p>登録は新規は、<code>user_register</code>、更新は、<code>profile_update</code>。<br/>
-どちらも処理としては同じ。<br/>
-<code>$_POST</code>から取得した値をシリアライズして入れる、のみ。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>function save_custom_options_fields( $user_id ) {
-</span><span class='line'>  //権限ロール
-</span><span class='line'>    $role_name = $_POST['user_role'];
-</span><span class='line'>    update_user_meta($user_id, 'wp_capabilities', [$role_name =&gt; 1]);
-</span><span class='line'>}
-</span><span class='line'>add_action( 'profile_update', 'save_custom_options_fields' ); //更新
-</span><span class='line'>add_action('user_register', 'save_custom_options_fields');  //新規登録</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>既存のものを非表示に</h2>
-
-<p>既存で表示されている権限設定のセレクトボックスを非表示に。</p>
-
-<h3>新規登録</h3>
-
-<p>上記、新規登録で項目を追加したフックと同じ関数内で実装する。<br/>
-特定のクラスもIDも振られてないので、x番目と指定して非表示とする。<br/>
-ただし、これはCSS3となっているので非対応のブラウザだと見えてしまうと思う。<br/>
-他にいい方法があれば知りたい。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>?&gt;&lt;style type="text/css"&gt;
-</span><span class='line'>  table.form-table tr.form-field:nth-of-type(9)
-</span><span class='line'>&lt;/style&gt;&lt;?php</span></code></pre></td></tr></table></div></figure>
-
-
-<h3>編集</h3>
-
-<p>上記、編集で項目を追加したフックと同じ関数内で実装する。<br/>
-こちらはクラスが振ってあるので、それを指定して非表示とする。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>?&gt;&lt;style type="text/css"&gt;
-</span><span class='line'>  .user-role-wrap, /*権限グループ*/
-</span><span class='line'>&lt;/style&gt;&lt;?php</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>まとめ</h2>
-
-<p>これにて完成。<br/>
-非表示にする箇所がかなり無理矢理だけれども、なんとか見た目は整った。<br/>
-プラグインなどを使えばこの辺一発で出来たりするのだろうか。<br/>
-ちなみに、権限の編集にはプラグインを使用した。<br/>
-<a href="https://ja.wordpress.org/plugins/user-role-editor/">WordPress &#8250; User Role Editor &laquo; WordPress Plugins</a></p>
-
-<h2>参考</h2>
-
-<p><a href="http://wordpress.stackexchange.com/questions/1665/getting-a-list-of-currently-available-roles-on-a-wordpress-site">security &ndash; Getting a List of Currently Available Roles on a WordPress Site? &ndash; WordPress Development Stack Exchange</a><br/>
-<a href="http://detail.chiebukuro.yahoo.co.jp/qa/question_detail/q12132319417">wordpressのユーザ権限を管理画面以外から変更する必要があり、～ &ndash; Yahoo!知恵袋</a></p>
 ]]></content>
   </entry>
   

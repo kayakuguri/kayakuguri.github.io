@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: vim | KayaMemo]]></title>
+  <link href="http://kayakuguri.github.io/blog/categories/vim/atom.xml" rel="self"/>
+  <link href="http://kayakuguri.github.io/"/>
+  <updated>2015-12-24T18:22:23+09:00</updated>
+  <id>http://kayakuguri.github.io/</id>
+  <author>
+    <name><![CDATA[萱潜]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[NeoBundleとNeoComplete]]></title>
+    <link href="http://kayakuguri.github.io/blog/2015/12/24/neobundle-neocomplete/"/>
+    <updated>2015-12-24T15:09:50+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2015/12/24/neobundle-neocomplete</id>
+    <content type="html"><![CDATA[<p>vim環境を整えていくためにNeoCompleteを入れてみる。</p>
+
+<!-- more -->
+
+
+<h2>NeoBundle</h2>
+
+<p>NeoCompleteを入れるために、vimのプラグイン管理ツールである、NeoBundleを入れる。<br/>
+<a href="https://github.com/Shougo/neobundle.vim">Shougo/neobundle.vim</a></p>
+
+<p>インストール方法は上記公式のReadmeに従った。</p>
+
+<p>任意のディレクトリにインストール用ファイルをダウンロードし、実行。</p>
+
+<pre><code>$ curl https://raw.githubusercontent.com/Shougo/neobundle.vim/master/bin/install.sh &gt; install.sh
+$ sh ./install.sh
+$ rm ./install.sh
+</code></pre>
+
+<p>インストール時に表示される以下の設定を、<code>.vimrc</code>に記述。</p>
+
+<p>```
+&ldquo;NeoBundle Scripts&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&ndash;
+if has(&lsquo;vim_starting&rsquo;)
+  if &amp;compatible</p>
+
+<pre><code>set nocompatible               " Be iMproved
+</code></pre>
+
+<p>  endif</p>
+
+<p>  &ldquo; Required:
+  set runtimepath+=~/.vim/bundle/neobundle.vim/
+endif</p>
+
+<p>&ldquo; Required:
+call neobundle#begin(expand(&lsquo;~/.vim/bundle&rsquo;))</p>
+
+<p>&ldquo; Let NeoBundle manage NeoBundle
+&rdquo; Required:
+NeoBundleFetch &lsquo;Shougo/neobundle.vim&rsquo;</p>
+
+<p>&ldquo; Add or remove your Bundles here:
+NeoBundle &lsquo;Shougo/neosnippet.vim&rsquo;
+NeoBundle &lsquo;Shougo/neosnippet-snippets&rsquo;
+NeoBundle &lsquo;tpope/vim-fugitive&rsquo;
+NeoBundle &lsquo;ctrlpvim/ctrlp.vim&rsquo;
+NeoBundle &lsquo;flazz/vim-colorschemes&rsquo;</p>
+
+<p>&ldquo; You can specify revision/branch/tag.
+NeoBundle &lsquo;Shougo/vimshell&rsquo;, { &lsquo;rev&rsquo; : &lsquo;3787e5&rsquo; }</p>
+
+<p>&ldquo; Required:
+call neobundle#end()</p>
+
+<p>&ldquo; Required:
+filetype plugin indent on</p>
+
+<p>&ldquo; If there are uninstalled bundles found on startup,
+&rdquo; this will conveniently prompt you to install them.
+NeoBundleCheck
+&ldquo;End NeoBundle Scripts&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&ndash;
+```</p>
+
+<p>vimを起動すると、<code>NeoBundleCheck</code>の記述があるので、インストールできていないプラグインを自動でチェックしてくれて、インストールを促される。<br/>
+そのまま<code>y</code>を入力して、プラグインのインストールを完了させる。</p>
+
+<h3>プラグインのインストール</h3>
+
+<p>プラグインのインストールは、<code>.vimrc</code>内の、<br/>
+<code>call neobundle#begin</code>と、<code>call neobundle#end</code>の間に、<br/>
+<code>NeoBundle xxx/xxx</code>を記述し、vimを起動してやる。</p>
+
+<h2>NeoComplete</h2>
+
+<p>上記の方法に則って、以下を<code>.vimrc</code>に追加。</p>
+
+<pre><code>NeoBundle 'Shougo/neocomplete.vim'
+</code></pre>
+
+<h3>lua</h3>
+
+<p>luaという言語で作成されているため、luaが有効になったvimをインストールする必要がある。<br/>
+luaがインストールされているかどうかは、vimのバージョン確認で確認出来るよう。</p>
+
+<pre><code>$ vim --version | grep lua
++dialog_con_gui  +lua             +rightleft       +windows
+...
+</code></pre>
+
+<p><code>+lua</code>となっていればインストール済。<br/>
+<code>-lua</code>となっていればインストールされていない。</p>
+
+<p>自分の環境ではインストールされていたが、されていない場合はvimをlua付きでインストールし直す必要があるよう。</p>
+
+<pre><code>$ brew install vim --with-lua
+</code></pre>
+
+<p><a href="https://github.com/Shougo/neocomplete.vim#vim-for-mac-os-x">https://github.com/Shougo/neocomplete.vim#vim-for-mac-os-x</a></p>
+
+<h3>設定</h3>
+
+<p>設定を<code>.vimrc</code>に記述。<br/>
+公式サイトにある設定内容をそのまま使用した。<br/>
+<a href="https://github.com/Shougo/neocomplete.vim">Shougo/neocomplete.vim</a></p>
+
+<p>```
+&ldquo; Disable AutoComplPop.
+let g:acp_enableAtStartup = 0
+&rdquo; Use neocomplete.
+let g:neocomplete#enable_at_startup = 1
+&ldquo; Use smartcase.
+let g:neocomplete#enable_smart_case = 1
+&rdquo; Set minimum syntax keyword length.
+let g:neocomplete#sources#syntax#min_keyword_length = 3
+let g:neocomplete#lock_buffer_name_pattern = &lsquo;*ku*&rsquo;</p>
+
+<p>&ldquo; Define dictionary.
+let g:neocomplete#sources#dictionary#dictionaries = {</p>
+
+<pre><code>\ 'default' : '',
+\ 'vimshell' : $HOME.'/.vimshell_hist',
+\ 'scheme' : $HOME.'/.gosh_completions'
+    \ }
+</code></pre>
+
+<p>&ldquo; Define keyword.
+if !exists(&lsquo;g:neocomplete#keyword_patterns&rsquo;)</p>
+
+<pre><code>let g:neocomplete#keyword_patterns = {}
+</code></pre>
+
+<p>endif
+let g:neocomplete#keyword_patterns[&lsquo;default&rsquo;] = &lsquo;\h\w*&rsquo;</p>
+
+<p>&ldquo; Plugin key-mappings.
+inoremap <expr>&lt;C-g>     neocomplete#undo_completion()
+inoremap <expr>&lt;C-l>     neocomplete#complete_common_string()</p>
+
+<p>&ldquo; Recommended key-mappings.
+&rdquo; <CR>: close popup and save indent.
+inoremap <silent> <CR> &lt;C-r>=<SID>my_cr_function()<CR>
+function! s:my_cr_function()
+  return (pumvisible() ? &ldquo;&lt;C-y>&rdquo; : &ldquo;&rdquo; ) . &ldquo;&lt;CR>&rdquo;
+  &ldquo; For no inserting <CR> key.
+  "return pumvisible() ? &rdquo;&lt;C-y>&ldquo; : &rdquo;&lt;CR>&ldquo;
+endfunction
+&rdquo; <TAB>: completion.
+inoremap <expr><TAB>  pumvisible() ? &ldquo;&lt;C-n>&rdquo; : &ldquo;&lt;TAB>&rdquo;
+&ldquo; &lt;C-h>, <BS>: close popup and delete backword char.
+inoremap <expr>&lt;C-h> neocomplete#smart_close_popup().&rdquo;&lt;C-h>&ldquo;
+inoremap <expr><BS> neocomplete#smart_close_popup().&rdquo;&lt;C-h>&ldquo;
+&rdquo; Close popup by <Space>.
+&ldquo;inoremap <expr><Space> pumvisible() ? &rdquo;&lt;C-y>&ldquo; : &rdquo;&lt;Space>"</p>
+
+<p>&ldquo; AutoComplPop like behavior.
+"let g:neocomplete#enable_auto_select = 1</p>
+
+<p>&ldquo; Shell like behavior(not recommended).
+"set completeopt+=longest
+"let g:neocomplete#enable_auto_select = 1
+"let g:neocomplete#disable_auto_complete = 1
+"inoremap <expr><TAB>  pumvisible() ? &rdquo;&lt;Down>&ldquo; : &rdquo;&lt;C-x>&lt;C-u>"</p>
+
+<p>&ldquo; Enable omni completion.
+autocmd FileType css setlocal omnifunc=csscomplete#CompleteCSS
+autocmd FileType html,markdown setlocal omnifunc=htmlcomplete#CompleteTags
+autocmd FileType javascript setlocal omnifunc=javascriptcomplete#CompleteJS
+autocmd FileType python setlocal omnifunc=pythoncomplete#Complete
+autocmd FileType xml setlocal omnifunc=xmlcomplete#CompleteTags</p>
+
+<p>&ldquo; Enable heavy omni completion.
+if !exists(&lsquo;g:neocomplete#sources#omni#input_patterns&rsquo;)
+  let g:neocomplete#sources#omni#input_patterns = {}
+endif
+"let g:neocomplete#sources#omni#input_patterns.php = &lsquo;[^. \t]&ndash;>\h\w<em>\|\h\w</em>::&rsquo;
+"let g:neocomplete#sources#omni#input_patterns.c = &lsquo;[^.[:digit:] <em>\t]\%(.\|&ndash;>)&rsquo;
+"let g:neocomplete#sources#omni#input_patterns.cpp = &lsquo;[^.[:digit:] </em>\t]\%(.\|&ndash;>)\|\h\w*::&rsquo;</p>
+
+<p>&ldquo; For perlomni.vim setting.
+&rdquo; <a href="https://github.com/c9s/perlomni.vim">https://github.com/c9s/perlomni.vim</a>
+let g:neocomplete#sources#omni#input_patterns.perl = &lsquo;\h\w<em>&ndash;>\h\w</em>\|\h\w*::&rsquo;
+```</p>
+
+<p>こんな感じで補完が効くようになる。</p>
+
+<p><img src="/images/2015/12/neocomplete.jpg" alt="" /></p>
+
+<h2>参考</h2>
+
+<p><a href="http://cpp0302.hatenablog.com/entry/2015/04/10/033609">neocomplcacheからneocompleteへの乗り換え &ndash; 自分の速さで</a></p>
+]]></content>
+  </entry>
+  
+</feed>
