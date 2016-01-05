@@ -6,7 +6,10 @@
 	<title>KayaMemo</title>
 
 	
-	<meta name="description" content=" 参考:http://homepage2.nifty.com/sak/w_sak3/doc/sysbrd/sq_kj07_2.htm 文字列連結 concat(&ldquo;a&rdquo;,&ldquo;b&rdquo;)で文字列連結。 0埋め 続きを読む Nov 29th, 2013 sql ">
+	<meta name="description" content="PHPで文字コードがUTF-8のCSVファイルを読み込んだ際、
+何故か日本語が消える、という現象が。 文字化け、ではなく、消える。
+また、ローカルのXAMPP環境では消えなかったのに、
+サーバにアップすると消えた。 どうやら、PHP5の問題、のようで、 &hellip;">
 	
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
@@ -83,6 +86,61 @@
 		
 	
 	<div id="content" class="inner">
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2013/11/30/php-csv/">
+		
+			PHPでCSVファイルを読み込んだ時に日本語が消える</a>
+	</h2>
+	<div class="entry-content">
+		<p>PHPで文字コードがUTF-8のCSVファイルを読み込んだ際、<br/>
+何故か日本語が消える、という現象が。</p>
+
+<p>文字化け、ではなく、消える。<br/>
+また、ローカルのXAMPP環境では消えなかったのに、<br/>
+サーバにアップすると消えた。</p>
+
+<p>どうやら、PHP5の問題、のようで、<br/>
+<code>fgetcsv</code>を使用している時に起こる現象のよう。<br/>
+以下のように文字コードの指定をしてやるだけで解決した。</p>
+
+<pre><code>setlocale(LC_ALL, 'ja_JP.UTF-8');
+</code></pre>
+
+<p>参考：<a href="http://pentan.info/php/fgetcsv_char.html">fgetcsv関数を文字化け対応 setlocaleの文字コード指定</a></p>
+
+		
+		
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-11-30T14:10:49+09:00" pubdate data-updated="true">Nov 30<span>th</span>, 2013</time></div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/php/'>php</a>
+
+
+</div>
+	
+</div>
+</article>
 
 
     <article class="post">
@@ -268,7 +326,7 @@ git push -u bitbucket source
     
     <div class="center"><a href="/blog/archives">Blog Archives</a></div>
 </nav></div>
-	<footer id="footer" class="inner">Copyright &copy; 2015
+	<footer id="footer" class="inner">Copyright &copy; 2016
 
     萱潜
 
