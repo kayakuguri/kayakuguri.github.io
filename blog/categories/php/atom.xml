@@ -4,7 +4,7 @@
   <title><![CDATA[Category: php | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/php/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2016-02-01T15:16:13+09:00</updated>
+  <updated>2016-02-01T15:19:50+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,69 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[lumenのテーブル名を既存のものに合わせる]]></title>
+    <link href="http://kayakuguri.github.io/blog/2016/01/05/lumen-eloquent/"/>
+    <updated>2016-01-05T17:37:23+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2016/01/05/lumen-eloquent</id>
+    <content type="html"><![CDATA[<p>lumenやlaravelではモデル名が単数形で、DBのテーブル名はその複数形、が基本の仕様となっている。<br/>
+なので、新規にテーブル名を作成する場合や、テーブル名が複数形であればとくに問題ないのだが、<br/>
+既存のテーブル名を利用する際に単数形となってしまっている時には明示的に指定してやる必要がある。<br/>
+指定は<code>Eloquent</code>を利用してやる。</p>
+
+<!-- more -->
+
+
+<blockquote><p>Eloquentとは、PHPフレームワークのLaravelに最初から含まれているORM（Object-relational mapping:オブジェクト関係マッピング）です。</p></blockquote>
+
+<h2>lumenでの利用</h2>
+
+<p>lumenではデフォルトではEloquentの利用がオフになっている。<br/>
+なので、<code>bootstrap/app.php</code>内のコメントアウトを外して有効にしてやる。</p>
+
+<pre><code>$app-&gt;withEloquent();
+</code></pre>
+
+<h2>モデルの作成</h2>
+
+<p>モデルは、<code>app/</code>以下に作成する。<br/>
+例えば、user、というテーブル名を利用したい場合は、<code>app/User.php</code>を作成してやる。<br/>
+その中で、<code>protected $table</code>の箇所がテーブル名を指定している箇所となるので、ここで単数形のテーブル名を指定してやる。</p>
+
+<p>```
+&lt;?php namespace App;
+use Illuminate\Database\Eloquent\Model;
+class User extends Model {</p>
+
+<pre><code>protected $table = ‘user’;
+protected $fillable = [
+    ‘name’,
+    ‘username’,
+    ‘password’
+];
+protected $hidden = [ ‘password’ ];
+</code></pre>
+
+<p>}
+```</p>
+
+<h2>利用</h2>
+
+<p>マイグレーションは作成しなくても動作した。<br/>
+(項目をDBとコードで同期させる時にartisanから利用するよう。lumenでも利用できる）</p>
+
+<p>以下の様な形で取得できた。</p>
+
+<pre><code>DB::table('user')-&gt;get();
+</code></pre>
+
+<h2>参考</h2>
+
+<p><a href="http://laravel4.winroad.jp/2014/03/06/eloquent-orm%E3%81%AE%E5%9F%BA%E6%9C%AC%E7%9A%84%E3%81%AA%E4%BD%BF%E7%94%A8%E6%B3%95/">Eloquent ORMの基本的な使用法 | WinRoadのLaravel4初心者講座</a><br/>
+<a href="https://medium.com/@petehouston/enable-eloquent-orm-in-laravel-lumen-micro-framework-7a4f2fbcaf5d#.pe3a4ibc8">Enable Eloquent ORM in Laravel Lumen micro-framework — Medium</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[CentOS6.5にPHP5.4を入れる]]></title>
@@ -244,64 +307,6 @@ session_regenerate_id();
 <a href="http://pentan.info/php/session_gc.html">セッションの有効期間とか設定とか挙動とかを調べました &ndash; [PHP + PHP] ぺんたん info</a><br/>
 <a href="http://pentan.info/php/session_fixation.html">セッション固定攻撃(session fixation) &ndash; [PHP + PHP] ぺんたん info</a><br/>
 <a href="http://blog.ohgaki.net/session_regenerate_id_wo">ログイン後にsession_regenerate_id()を実行するだけで十分か? | yohgaki&#039;s blog</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[salesforce]アウトバウンドメッセージ送信時のエラー]]></title>
-    <link href="http://kayakuguri.github.io/blog/2015/05/01/salesforce-outbound-xml/"/>
-    <updated>2015-05-01T14:26:22+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2015/05/01/salesforce-outbound-xml</id>
-    <content type="html"><![CDATA[<p>先日、アウトバウンドメッセージをPHPで受けとる方法を紹介したけれど、試しているとアウトバウンドメッセージの送信がSalesforce側から何度も試行されていることがわかった。</p>
-
-<!-- more -->
-
-
-<p>salesforce側のログを見ていると、以下のようなエラーが出ている。<br/>
-<code>設定 &gt; 監視 &gt; アウトバウンドメッセージ</code></p>
-
-<p><img src="/images/2015/05/outbound_error.jpg" alt="エラー" /></p>
-
-<blockquote><p>org.xml.sax.SAXParseException; lineNumber: 1; columnNumber: 1; Content is not allowed in prolog.</p></blockquote>
-
-<p>どうやら、PHP側の応答が、SOAPの形式に則ってないとsalesforce側でXMLの解析ができずにエラーが出てしまうっぽい。<br/>
-なので、エラーが解消されるまで数回試行が続く、っぽい。</p>
-
-<p>応答はXMLの形式でなければならないので、headerでXMLとしてやる必要がある。</p>
-
-<pre><code>header("Content-Type: application/xml; charset=UTF-8");
-</code></pre>
-
-<p>また、返却するXMLは以下のような形でないといけないよう。</p>
-
-<p>```
-&lt;soapenv:Envelope xmlns:soapenv=&ldquo;<a href="http://schemas.xmlsoap.org/soap/envelope/">http://schemas.xmlsoap.org/soap/envelope/</a>&rdquo;></p>
-
-<pre><code>&lt;soapenv:Body&gt;
-    &lt;notificationsResponse xmlns="http://soap.sforce.com/2005/09/outbound"&gt;
-    &lt;Ack&gt;true&lt;/Ack&gt;
-&lt;/notificationsResponse&gt;
-&lt;/soapenv:Body&gt;
-</code></pre>
-
-<p>&lt;/soapenv:Envelope>
-```</p>
-
-<p>というわけで、以下のようにPHPを書いてやればエラーは出ない。</p>
-
-<p>```
-&lt;?php
-header(&ldquo;Content-Type: application/xml; charset=UTF-8&rdquo;);</p>
-
-<p>//&mdash;何らかの処理&mdash;</p>
-
-<p>$response = &lsquo;&lt;soapenv:Envelope xmlns:soapenv=&ldquo;<a href="http://schemas.xmlsoap.org/soap/envelope/">http://schemas.xmlsoap.org/soap/envelope/</a>&rdquo;>&lt;soapenv:Body><notificationsResponse xmlns="http://soap.sforce.com/2005/09/outbound"><Ack>true</Ack></notificationsResponse>&lt;/soapenv:Body>&lt;/soapenv:Envelope>&rsquo;;
-echo $response;
-```</p>
-
-<h2>参考</h2>
-
-<p><a href="http://www.tgerm.com/2014/08/testing-soap-outbound-messages-without-failures-saxexception.html">{!blog.concret.io}: Testing SOAP Outbound Messages without failures</a></p>
 ]]></content>
   </entry>
   

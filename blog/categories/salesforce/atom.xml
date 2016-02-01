@@ -4,7 +4,7 @@
   <title><![CDATA[Category: salesforce | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/salesforce/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2016-02-01T15:16:13+09:00</updated>
+  <updated>2016-02-01T15:19:50+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,174 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[カスタム設定を作成して取得してみる]]></title>
+    <link href="http://kayakuguri.github.io/blog/2016/02/01/custom-setting/"/>
+    <updated>2016-02-01T15:15:19+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2016/02/01/custom-setting</id>
+    <content type="html"><![CDATA[<p>カスタム設定、というカスタムオブジェクトの一種でSOQLいらずでもっと手軽に扱える <code>カスタム設定</code> とうものを知ったので、<br/>
+作り方から使い方を調べてみた。</p>
+
+<!-- more -->
+
+
+<blockquote><p>カスタム設定はカスタムオブジェクトと類似しており、アプリケーション開発者は、カスタムデータセットの作成の他に、組織、プロファイル、または特定のユーザに対しカスタムデータを作成して関連付けることができます。<br/>
+<a href="https://help.salesforce.com/HTViewHelpDoc?id=cs_about.htm&amp;language=ja">https://help.salesforce.com/HTViewHelpDoc?id=cs_about.htm&amp;language=ja</a></p></blockquote>
+
+<p>今回は全体で使用する、環境変数、としてカスタム設定を作成してみた。</p>
+
+<h2>作成</h2>
+
+<p>[開発] → [カスタム設定] にアクセス。<br/>
+まずは新規でカスタム設定、を作る。<br/>
+オブジェクトのようなもの。</p>
+
+<p><img src="/images/2016/01/custom_setting02.jpg" alt="" /></p>
+
+<p>今回は以下のように作成した。</p>
+
+<table>
+<thead>
+<tr>
+<th></th>
+<th align="left"> 項目 </th>
+<th align="left"> 内容 </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td></td>
+<td align="left"> 表示ラベル </td>
+<td align="left"> 環境変数 |</td>
+</tr>
+<tr>
+<td></td>
+<td align="left"> オブジェクト名 </td>
+<td align="left"> EnvironmentVars |</td>
+</tr>
+<tr>
+<td></td>
+<td align="left"> 設定種別 </td>
+<td align="left"> リスト | </td>
+</tr>
+<tr>
+<td></td>
+<td align="left"> 表示 </td>
+<td align="left"> 公開 |</td>
+</tr>
+<tr>
+<td></td>
+<td align="left"> 説明 </td>
+<td align="left"> (任意) |</td>
+</tr>
+</tbody>
+</table>
+
+
+<p><img src="/images/2016/01/custom_setting03.jpg" alt="" /></p>
+
+<p>設定種別は、リスト、と、階層、があり、<br/>
+階層、は、ユーザーやプロファイルごとに同じ項目で違う値を設定したり出来るよう。<br/>
+どのユーザーが使用しているかによって変数の値を変更できるようになるので、<br/>
+そういうことを実現したい時に便利っぽい。 <br/>
+今回は全員同じにしたいので、リスト、にしておいた。</p>
+
+<p>また、表示、は、公開・保護、とある。<br/>
+公開、だとSOAP APIでも取得できるようになったり、とオープンな状態？になるよう。<br/>
+特に秘匿する内容でもないので、公開、にしておいた。</p>
+
+<p>次に作成したカスタム設定内にカスタム項目を追加する。<br/>
+作成したカスタム設定から、新規、をクリック。</p>
+
+<p><img src="/images/2016/01/custom_setting04.jpg" alt="" /></p>
+
+<p>通常の項目作成と同じ流れで、型を選択し、内容を埋めていく。<br/>
+今回は以下のように作成した。<br/>
+目的としては、SitesのURLを環境変数として持っておくためのもの。</p>
+
+<table>
+<thead>
+<tr>
+<th></th>
+<th align="left"> 項目 </th>
+<th align="left"> 内容 </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td></td>
+<td align="left"> 型 </td>
+<td align="left"> テキスト |</td>
+</tr>
+<tr>
+<td></td>
+<td align="left"> 項目の表示ラベル </td>
+<td align="left"> Sites |</td>
+</tr>
+<tr>
+<td></td>
+<td align="left"> 文字数 </td>
+<td align="left"> 255 |</td>
+</tr>
+<tr>
+<td></td>
+<td align="left"> 項目名 </td>
+<td align="left"> Sites |</td>
+</tr>
+<tr>
+<td></td>
+<td align="left"> 説明、など </td>
+<td align="left"> (任意) |</td>
+</tr>
+</tbody>
+</table>
+
+
+<p><img src="/images/2016/01/custom_setting05.jpg" alt="" /></p>
+
+<p>ここまででオブジェクトと項目が作成出来たので、実際にデータを入れていく。<br/>
+作成したカスタム設定の<code>Manege</code>をクリック。</p>
+
+<p><img src="/images/2016/01/custom_setting06.jpg" alt="" /></p>
+
+<p>リストが表示されるので、新規、をクリック。</p>
+
+<p><img src="/images/2016/01/custom_setting07.jpg" alt="" /></p>
+
+<p>内容を記入して保存。</p>
+
+<p><img src="/images/2016/01/custom_setting08.jpg" alt="" /></p>
+
+<h2>取得</h2>
+
+<p>作成したデータをApexで取得する。</p>
+
+<p>前述の通り、取得の際にはSOQLを発行する必要がなく、以下のようにメソッドレベルで取得可能。</p>
+
+<p>```
+Map&lt;String, EnvironmentVars<strong>c> settingMap = EnvironmentVars</strong>c.getAll();</p>
+
+<p>for (String key : settingMap.keySet()) {</p>
+
+<pre><code>EnvironmentVars__c env = settingMap.get(key);
+System.debug('**DEBUG** ' key + ' / ' + env.SitesURL__c);
+</code></pre>
+
+<p>}
+```</p>
+
+<h2>まとめ</h2>
+
+<p>SOQLを発行しないので、ガバナ的にも優しく、内容はキャッシュされるので動作も高速。<br/>
+環境変数のように決まった値であれば便利に使えるかもしれない。</p>
+
+<h2>参考</h2>
+
+<p><a href="https://help.salesforce.com/HTViewHelpDoc?id=cs_accessing.htm&amp;language=ja">カスタム設定へのアクセス</a><br/>
+<a href="https://odekakeshimasyo.io/salesforce-apex-customsetting.html">Salesforce Apex カスタム設定 | odekakeshimasyo.io</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[apex]バッチ実行時にカウントデータを引き継ぐ]]></title>
@@ -417,74 +585,6 @@ static testmethod void test() {
 <p><a href="https://developer.salesforce.com/docs/atlas.ja-jp.apex_workbook.meta/apex_workbook/apex_scheduling_2.htm">スケジュール可能なクラスのテストの追加 | Apex ワークブック | Salesforce Developers</a><br/>
 <a href="http://blog.flect.co.jp/salesforce/2010/08/apex-2136.html">セールスフォースの豆知識: スケジュール実行するApexのテストメソッドと実行時刻の詳細設定</a><br/>
 <a href="http://blog.livedoor.jp/androidbeginner/archives/39179776.html">【Salesforce】Apexジョブの書き方 : 怠けろ！プログラマ！</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[salesforce]レコードの詳細からカスタムボタンでapexを呼び出す]]></title>
-    <link href="http://kayakuguri.github.io/blog/2015/06/01/custom-btn-apex/"/>
-    <updated>2015-06-01T17:33:40+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2015/06/01/custom-btn-apex</id>
-    <content type="html"><![CDATA[<p>カスタムボタンを使用してJSからApexを呼び出して処理させてみる。</p>
-
-<!-- more -->
-
-
-<h2>Apex</h2>
-
-<p><code>webService</code>を使用して、apexクラスを作成しておく。<br/>
-戻り値は文字列としておく。</p>
-
-<p>```
-global class SampleClass{</p>
-
-<pre><code>webService static String hogeMethod(String id){
-    return 'このレコードのIDは、' + msg_id + 'です。';
-}
-</code></pre>
-
-<p>}
-```</p>
-
-<h2>カスタムボタン</h2>
-
-<p>リードの場合は以下にある。</p>
-
-<p><img src="/images/2015/06/custom_btn02.jpg" alt="" /></p>
-
-<p><code>新規ボタンまたはリンク</code>をクリック。</p>
-
-<p><code>動作</code>を<code>JavaScriptを実行</code>に、<br/>
-<code>内容のソース</code>を<code>onClick JavaScript</code>にする。</p>
-
-<p><img src="/images/2015/06/custom_btn01.jpg" alt="" /></p>
-
-<p>内容は以下の用に記述。</p>
-
-<p><code>
-{!REQUIRESCRIPT('/soap/ajax/31.0/connection.js')}
-{!REQUIRESCRIPT('/soap/ajax/31.0/apex.js')}
-var ret = sforce.apex.execute('SampleClass','hogeMethod',{id:"{!CustomObject__c.Id}"});
-alert(ret);
-</code></p>
-
-<p>このカスタムボタンがクリックされると、このJSが実行される。<br/>
-<code>sforce.apex.execute</code>で実行するapexとメソッドを指定している。<br/>
-第一引数がクラス名。第二引数がメソッド。第三引数が引数、となる。<br/>
-引数で実行しているレコードのIDを渡すように項目を差し込んでいる。</p>
-
-<h2>表示</h2>
-
-<p>表示は、レイアウトの編集で、ボタンから追加。<br/>
-<img src="/images/2015/06/custom_btn04.jpg" alt="" /></p>
-
-<p>レコードの詳細からボタンをクリックするとIDが渡されて実行される。<br/>
-<img src="/images/2015/06/custom_btn03.jpg" alt="" /></p>
-
-<h2>参考</h2>
-
-<p><a href="https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_and_ajax.htm">Apex in AJAX | Force.com Apex Code Developer&#x27;s Guide | Salesforce Developers</a><br/>
-<a href="https://developer.salesforce.com/forums/ForumsMain?id=906F00000009BNkIAM">カスタムボタン押下時にSFDC上のWebServiceをコールする方法 &ndash; Salesforce Developer Community</a></p>
 ]]></content>
   </entry>
   

@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: laravel | KayaMemo]]></title>
+  <link href="http://kayakuguri.github.io/blog/categories/laravel/atom.xml" rel="self"/>
+  <link href="http://kayakuguri.github.io/"/>
+  <updated>2016-02-01T15:19:50+09:00</updated>
+  <id>http://kayakuguri.github.io/</id>
+  <author>
+    <name><![CDATA[萱潜]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[lumenのテーブル名を既存のものに合わせる]]></title>
+    <link href="http://kayakuguri.github.io/blog/2016/01/05/lumen-eloquent/"/>
+    <updated>2016-01-05T17:37:23+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2016/01/05/lumen-eloquent</id>
+    <content type="html"><![CDATA[<p>lumenやlaravelではモデル名が単数形で、DBのテーブル名はその複数形、が基本の仕様となっている。<br/>
+なので、新規にテーブル名を作成する場合や、テーブル名が複数形であればとくに問題ないのだが、<br/>
+既存のテーブル名を利用する際に単数形となってしまっている時には明示的に指定してやる必要がある。<br/>
+指定は<code>Eloquent</code>を利用してやる。</p>
+
+<!-- more -->
+
+
+<blockquote><p>Eloquentとは、PHPフレームワークのLaravelに最初から含まれているORM（Object-relational mapping:オブジェクト関係マッピング）です。</p></blockquote>
+
+<h2>lumenでの利用</h2>
+
+<p>lumenではデフォルトではEloquentの利用がオフになっている。<br/>
+なので、<code>bootstrap/app.php</code>内のコメントアウトを外して有効にしてやる。</p>
+
+<pre><code>$app-&gt;withEloquent();
+</code></pre>
+
+<h2>モデルの作成</h2>
+
+<p>モデルは、<code>app/</code>以下に作成する。<br/>
+例えば、user、というテーブル名を利用したい場合は、<code>app/User.php</code>を作成してやる。<br/>
+その中で、<code>protected $table</code>の箇所がテーブル名を指定している箇所となるので、ここで単数形のテーブル名を指定してやる。</p>
+
+<p>```
+&lt;?php namespace App;
+use Illuminate\Database\Eloquent\Model;
+class User extends Model {</p>
+
+<pre><code>protected $table = ‘user’;
+protected $fillable = [
+    ‘name’,
+    ‘username’,
+    ‘password’
+];
+protected $hidden = [ ‘password’ ];
+</code></pre>
+
+<p>}
+```</p>
+
+<h2>利用</h2>
+
+<p>マイグレーションは作成しなくても動作した。<br/>
+(項目をDBとコードで同期させる時にartisanから利用するよう。lumenでも利用できる）</p>
+
+<p>以下の様な形で取得できた。</p>
+
+<pre><code>DB::table('user')-&gt;get();
+</code></pre>
+
+<h2>参考</h2>
+
+<p><a href="http://laravel4.winroad.jp/2014/03/06/eloquent-orm%E3%81%AE%E5%9F%BA%E6%9C%AC%E7%9A%84%E3%81%AA%E4%BD%BF%E7%94%A8%E6%B3%95/">Eloquent ORMの基本的な使用法 | WinRoadのLaravel4初心者講座</a><br/>
+<a href="https://medium.com/@petehouston/enable-eloquent-orm-in-laravel-lumen-micro-framework-7a4f2fbcaf5d#.pe3a4ibc8">Enable Eloquent ORM in Laravel Lumen micro-framework — Medium</a></p>
+]]></content>
+  </entry>
+  
+</feed>
