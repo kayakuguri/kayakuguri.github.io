@@ -4,7 +4,7 @@
   <title><![CDATA[Category: apex | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/apex/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2016-02-01T15:45:28+09:00</updated>
+  <updated>2016-02-01T15:46:39+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -110,27 +110,27 @@
 <tr>
 <td></td>
 <td align="left"> 型 </td>
-<td align="left"> テキスト |</td>
+<td align="left"> テキスト</td>
 </tr>
 <tr>
 <td></td>
 <td align="left"> 項目の表示ラベル </td>
-<td align="left"> Sites |</td>
+<td align="left"> Sites</td>
 </tr>
 <tr>
 <td></td>
 <td align="left"> 文字数 </td>
-<td align="left"> 255 |</td>
+<td align="left"> 255</td>
 </tr>
 <tr>
 <td></td>
 <td align="left"> 項目名 </td>
-<td align="left"> Sites |</td>
+<td align="left"> Sites</td>
 </tr>
 <tr>
 <td></td>
 <td align="left"> 説明、など </td>
-<td align="left">  |</td>
+<td align="left"> </td>
 </tr>
 </tbody>
 </table>
