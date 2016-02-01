@@ -4,7 +4,7 @@
   <title><![CDATA[Category: salesforce | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/salesforce/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2016-02-01T15:40:41+09:00</updated>
+  <updated>2016-02-01T15:41:52+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -51,27 +51,27 @@
 <tr>
 <td></td>
 <td align="left"> 表示ラベル </td>
-<td align="left"> 環境変数 | </td>
+<td align="left"> 環境変数 </td>
 </tr>
 <tr>
 <td></td>
 <td align="left"> オブジェクト名 </td>
-<td align="left"> EnvironmentVars | </td>
+<td align="left"> EnvironmentVars </td>
 </tr>
 <tr>
 <td></td>
 <td align="left"> 設定種別 </td>
-<td align="left"> リスト | </td>
+<td align="left"> リスト </td>
 </tr>
 <tr>
 <td></td>
 <td align="left"> 表示 </td>
-<td align="left"> 公開 | </td>
+<td align="left"> 公開 </td>
 </tr>
 <tr>
 <td></td>
 <td align="left"> 説明 </td>
-<td align="left">  | </td>
+<td align="left">  </td>
 </tr>
 </tbody>
 </table>
