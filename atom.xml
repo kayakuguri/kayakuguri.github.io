@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2016-02-01T15:38:56+09:00</updated>
+  <updated>2016-02-01T15:40:41+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -71,7 +71,7 @@
 <tr>
 <td></td>
 <td align="left"> 説明 </td>
-<td align="left"> (任意) | </td>
+<td align="left">  | </td>
 </tr>
 </tbody>
 </table>
@@ -130,7 +130,7 @@
 <tr>
 <td></td>
 <td align="left"> 説明、など </td>
-<td align="left"> (任意) |</td>
+<td align="left">  |</td>
 </tr>
 </tbody>
 </table>
