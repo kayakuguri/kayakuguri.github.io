@@ -4,7 +4,7 @@
   <title><![CDATA[Category: cakephp | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/cakephp/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2016-02-01T15:46:39+09:00</updated>
+  <updated>2016-02-29T18:08:17+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,71 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Cakephpのtransitionコンポーネントで送信ボタンを複数配置する]]></title>
+    <link href="http://kayakuguri.github.io/blog/2016/02/29/cakephp-transition-multi-submit/"/>
+    <updated>2016-02-29T18:07:25+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2016/02/29/cakephp-transition-multi-submit</id>
+    <content type="html"><![CDATA[<p>cakephpのtransitionコンポーネント利用時に送信ボタンを複数配置し、どちらが押されたかを判定してみたメモ。</p>
+
+<!-- more -->
+
+
+<h1>ビュー</h1>
+
+<p>以下のように <code>name</code> 属性でわけておく。<br/>
+今回は、完了、と、一時保存、でわけた。</p>
+
+<p><code>
+&lt;?php echo $this-&gt;Form-&gt;submit('一時保存', array('name' =&gt; 'temp')); ?&gt;
+&lt;?php echo $this-&gt;Form-&gt;submit('完了', array('name' =&gt; 'comp')); ?&gt;
+</code></p>
+
+<h1>コントローラ</h1>
+
+<p>コントローラので受けた際に、以下のように取得する。</p>
+
+<p>```
+$all_data = $this->Transition->mergedData();</p>
+
+<p>if(isset($all_data[&ldquo;comp&rdquo;]){</p>
+
+<pre><code>//完了が押された時の処理
+</code></pre>
+
+<p>}else if(isset($all_data[&ldquo;temp&rdquo;])){</p>
+
+<pre><code>//一時保存が押された時の処理
+</code></pre>
+
+<p>}
+```</p>
+
+<p><code>mergedData</code> の中には以下のように格納されている。<br/>
+(<code>var_dump</code> した結果)</p>
+
+<p>```
+array(2) {
+  [&ldquo;hoge_model&rdquo;]=>
+  array(87) {</p>
+
+<pre><code>["huga"]=&gt;
+string(0) "test"
+["foo"]=&gt;
+string(0) "bar"
+...
+</code></pre>
+
+<p>  }
+  [&ldquo;temp&rdquo;]=>
+  string(12) &ldquo;一時保存&rdquo;
+}
+```</p>
+
+<p>これであるかどうかの判定で判別が出来るので、処理をそれぞれ変える事が出来た。</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[CakePhp]ログイン処理を外部APIを使用して実装する]]></title>
@@ -455,84 +520,6 @@ cakeの場合、オプションに<code>'required' =&gt; false</code>を指定�
 
 <p><a href="http://stackoverflow.com/questions/7168645/invalid-form-control-only-in-google-chrome">html &ndash; &quot;Invalid form control&quot; only in Google Chrome &ndash; Stack Overflow</a><br/>
 <a href="http://d.hatena.ne.jp/cakephper/20130211/1360589926">CakePHP2.3からinputタグにhtml5のrequired属性がつくようになった &ndash; cakephperの日記(CakePHP, Laravel, PHP)</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[CakePHP]URLからパラメータを受け取る]]></title>
-    <link href="http://kayakuguri.github.io/blog/2015/04/03/cakephp-routing-params/"/>
-    <updated>2015-04-03T14:37:52+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2015/04/03/cakephp-routing-params</id>
-    <content type="html"><![CDATA[<p>cake記法？で書かれたURLからパラメータを取得するメモ。</p>
-
-<!-- more -->
-
-
-<h2>コントローラーのみで制御</h2>
-
-<p>cakephpでのURLの基本は以下。</p>
-
-<blockquote><p>コントローラー名/アクション名</p></blockquote>
-
-<p>これにパラメータをつけたければ、その後ろに並べるのみ。</p>
-
-<blockquote><p>コントローラー名/アクション名/パラメータ1/パラメータ2</p></blockquote>
-
-<p>このパラメータを取得する方法は以下。</p>
-
-<pre><code>//URL - ctrl/act/param1/param2
-
-$this-&gt;params['pass'][0]; //param1
-$this-&gt;params['pass'][1]; //param2
-</code></pre>
-
-<p>で、指定の名前を付けたい場合は、以下のように。</p>
-
-<blockquote><p>コントローラー名/アクション/パラメータ名1:パラメータ/パラメータ名2:パラメータ</p></blockquote>
-
-<pre><code>//URL - ctrl/act/param1:hoge/param2:fuga
-
-$this-&gt;params['named']['param1'];
-$this-&gt;params['named']['param2'];
-</code></pre>
-
-<p>で、View側でこのリンクを作る方法は以下。</p>
-
-<p><code>
-&lt;?php echo $this-&gt;Html-&gt;link('リンクテキスト', array(
-  'controller' =&gt; 'ctrl',
-  'action' =&gt; 'act',
-  'param1' =&gt; 'hoge'
-)) ?&gt;
-</code></p>
-
-<p>これで上記の、<code>/ctrl/act/param1:hoge</code>が生成される</p>
-
-<h2>ルーティング</h2>
-
-<p>このままだとURLが冗長になるので、ルーティングを設定して、スッキリさせる。<br/>
-さらに予めパラメータ名を指定してやる。</p>
-
-<h4>ルーティング</h4>
-
-<pre><code>Router::connect('/ctrl/act/:param1', array('controller' =&gt; 'ctrl', 'action' =&gt; 'act'));
-</code></pre>
-
-<p>こうすると、上記で記述したリンクを貼ると、以下のURLが生成される。</p>
-
-<pre><code>/ctrl/act/hoge
-</code></pre>
-
-<p>これを取得するには以下。</p>
-
-<pre><code>$this-&gt;params['param1']
-</code></pre>
-
-<p>これの方が見た目も取得方法もすっきりしててよさげ。</p>
-
-<h2>参考</h2>
-
-<p><a href="http://creazy.net/2009/05/cakephp_routing.html">http://creazy.net/2009/05/cakephp_routing.html</a></p>
 ]]></content>
   </entry>
   

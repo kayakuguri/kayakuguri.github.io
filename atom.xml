@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2016-02-01T15:46:39+09:00</updated>
+  <updated>2016-02-29T18:08:17+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,82 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Cakephpのtransitionコンポーネントで送信ボタンを複数配置する]]></title>
+    <link href="http://kayakuguri.github.io/blog/2016/02/29/cakephp-transition-multi-submit/"/>
+    <updated>2016-02-29T18:07:25+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2016/02/29/cakephp-transition-multi-submit</id>
+    <content type="html"><![CDATA[<p>cakephpのtransitionコンポーネント利用時に送信ボタンを複数配置し、どちらが押されたかを判定してみたメモ。</p>
+
+<!-- more -->
+
+
+<h1>ビュー</h1>
+
+<p>以下のように <code>name</code> 属性でわけておく。<br/>
+今回は、完了、と、一時保存、でわけた。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;?php echo $this-&gt;Form-&gt;submit('一時保存', array('name' =&gt; 'temp')); ?&gt;
+</span><span class='line'>&lt;?php echo $this-&gt;Form-&gt;submit('完了', array('name' =&gt; 'comp')); ?&gt;</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>コントローラ</h1>
+
+<p>コントローラので受けた際に、以下のように取得する。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$all_data = $this-&gt;Transition-&gt;mergedData();
+</span><span class='line'>
+</span><span class='line'>if(isset($all_data["comp"]){
+</span><span class='line'>  //完了が押された時の処理
+</span><span class='line'>  
+</span><span class='line'>}else if(isset($all_data["temp"])){
+</span><span class='line'>  //一時保存が押された時の処理
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<p><code>mergedData</code> の中には以下のように格納されている。<br/>
+(<code>var_dump</code> した結果)</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>array(2) {
+</span><span class='line'>  ["hoge_model"]=&gt;
+</span><span class='line'>  array(87) {
+</span><span class='line'>    ["huga"]=&gt;
+</span><span class='line'>    string(0) "test"
+</span><span class='line'>    ["foo"]=&gt;
+</span><span class='line'>    string(0) "bar"
+</span><span class='line'>    ...
+</span><span class='line'>  }
+</span><span class='line'>  ["temp"]=&gt;
+</span><span class='line'>  string(12) "一時保存"
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<p>これであるかどうかの判定で判別が出来るので、処理をそれぞれ変える事が出来た。</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[カスタム設定を作成して取得してみる]]></title>
@@ -2240,198 +2316,6 @@ PHP 5.6.11 (cli) (built: Jul 10 2015 21:46:48)
 <h2>参考</h2>
 
 <p><a href="http://qiita.com/nbkn/items/01a11392921119fa0153">MacでPATHを通す &ndash; Qiita</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[heroku]PHPのセッションをherokuのRedisで管理する]]></title>
-    <link href="http://kayakuguri.github.io/blog/2015/08/06/session-storage-in-redis-on-heroku/"/>
-    <updated>2015-08-06T18:06:13+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2015/08/06/session-storage-in-redis-on-heroku</id>
-    <content type="html"><![CDATA[<p>heroku上でのPHPのセッション管理の定番は<a href="https://addons.heroku.com/memcachier">MemCachier</a>だけれど、<br/>
-今回はHerokuのRedisに保存さえてみた。</p>
-
-<!-- more -->
-
-
-<h2>Redis</h2>
-
-<p>herokuで使えるRedis、といってもいくつか種類がある。<br/>
-それぞれどう違うのか、とか、設定方法の違い、とかは正直わからない。</p>
-
-<p><a href="http://qiita.com/Oakbow/items/98599da0fc62863fc1b8#%E3%81%A9%E3%81%AE-redis-%E3%81%AE%E3%82%A2%E3%83%89%E3%82%AA%E3%83%B3%E3%82%92%E4%BD%BF%E3%81%86">herokuでセッションの保存先をRedisにする &ndash; Qiita</a></p>
-
-<blockquote><p>現在、heroku には4つの Redis のアドオンがあります。<br/>
-早晩5つめが増えるようです。</p></blockquote>
-
-<p>この5つめ、にあたるものが今回使用する、Heroku Redis、です。　　
-これは他のredisと違って、<a href="https://elements.heroku.com/addons/heroku-postgresql">Postgres</a>と同じくheroku内部のものなのでまぁ間違いないのかも、ってことで使ってみました。</p>
-
-<p><a href="https://elements.heroku.com/addons/heroku-redis">Heroku Redis</a></p>
-
-<h2>インストール</h2>
-
-<p>公式の通り、インストールコマンドは以下。<br/>
-アプリページからポチポチっと入れても問題なし。</p>
-
-<pre><code>$ eroku addons:create heroku-redis:hobby-dev -a YOUR-APP-NAME
-</code></pre>
-
-<p><code>hobby-dev</code>は無料バージョン。</p>
-
-<h2>セットアップ</h2>
-
-<p>必要なソースはComposerで入れる。</p>
-
-<p>(公式より)</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>"require": {
-</span><span class='line'>  ...
-</span><span class='line'>  "predis/predis": "1.0.1",
-</span><span class='line'>  ...
-</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>接続先をredisに</h2>
-
-<p>以下のページを参考、というかほぼそのままで。<br/>
-<a href="http://www.sitepoint.com/saving-php-sessions-in-redis/">PHP Master | Saving PHP Sessions in Redis</a></p>
-
-<p>まずは、接続用のクラスを用意。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-<span class='line-number'>39</span>
-<span class='line-number'>40</span>
-<span class='line-number'>41</span>
-<span class='line-number'>42</span>
-<span class='line-number'>43</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;?php
-</span><span class='line'>class RedisSessionHandler implements SessionHandlerInterface
-</span><span class='line'>{
-</span><span class='line'>    public $ttl = 1800; // 30 minutes default
-</span><span class='line'>    protected $db;
-</span><span class='line'>    protected $prefix;
-</span><span class='line'> 
-</span><span class='line'>    public function __construct(PredisClient $db, $prefix = 'PHPSESSID:') {
-</span><span class='line'>        $this-&gt;db = $db;
-</span><span class='line'>        $this-&gt;prefix = $prefix;
-</span><span class='line'>    }
-</span><span class='line'> 
-</span><span class='line'>    public function open($savePath, $sessionName) {
-</span><span class='line'>        // No action necessary because connection is injected
-</span><span class='line'>        // in constructor and arguments are not applicable.
-</span><span class='line'>    }
-</span><span class='line'> 
-</span><span class='line'>    public function close() {
-</span><span class='line'>        $this-&gt;db = null;
-</span><span class='line'>        unset($this-&gt;db);
-</span><span class='line'>    }
-</span><span class='line'> 
-</span><span class='line'>    public function read($id) {
-</span><span class='line'>        $id = $this-&gt;prefix . $id;
-</span><span class='line'>        $sessData = $this-&gt;db-&gt;get($id);
-</span><span class='line'>        $this-&gt;db-&gt;expire($id, $this-&gt;ttl);
-</span><span class='line'>        return $sessData;
-</span><span class='line'>    }
-</span><span class='line'> 
-</span><span class='line'>    public function write($id, $data) {
-</span><span class='line'>        $id = $this-&gt;prefix . $id;
-</span><span class='line'>        $this-&gt;db-&gt;set($id, $data);
-</span><span class='line'>        $this-&gt;db-&gt;expire($id, $this-&gt;ttl);
-</span><span class='line'>    }
-</span><span class='line'> 
-</span><span class='line'>    public function destroy($id) {
-</span><span class='line'>        $this-&gt;db-&gt;del($this-&gt;prefix . $id);
-</span><span class='line'>    }
-</span><span class='line'> 
-</span><span class='line'>    public function gc($maxLifetime) {
-</span><span class='line'>        // no action necessary because using EXPIRE
-</span><span class='line'>    }
-</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
-
-
-<p>で、最初に保存先を変更するページにて以下を実行する。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;?php
-</span><span class='line'>require_once( dirname(__FILE__). "/vendor/autoload.php" );
-</span><span class='line'>require_once( dirname(__FILE__). "/RedisSessionHandler.php" );
-</span><span class='line'>
-</span><span class='line'>$redis = new Predis\Client([
-</span><span class='line'>    'host' =&gt; parse_url($_ENV['REDIS_URL'], PHP_URL_HOST),
-</span><span class='line'>    'port' =&gt; parse_url($_ENV['REDIS_URL'], PHP_URL_PORT),
-</span><span class='line'>    'password' =&gt; parse_url($_ENV['REDIS_URL'], PHP_URL_PASS),
-</span><span class='line'>]);
-</span><span class='line'>$sessHandler = new RedisSessionHandler($redis);
-</span><span class='line'>session_set_save_handler($sessHandler);
-</span><span class='line'>session_start();</span></code></pre></td></tr></table></div></figure>
-
-
-<p>2行目はredisのライブラリを読み込むための設定。<br/>
-3行目は先程作成したクラス。<br/>
-で、5行目でnewしているが、ここが参考サイトから少し変えていて、Heroku Redis公式の方に合わせている。<br/>
-で、後は参考サイト通りに。</p>
-
-<p>これで後は普通にセッションを使えばRedisに保存されるようになる。</p>
-
-<h2>参考</h2>
-
-<p><a href="https://devcenter.heroku.com/articles/heroku-redis#connecting-in-php">Heroku Redis | Heroku Dev Center</a><br/>
-<a href="http://www.sitepoint.com/saving-php-sessions-in-redis/">PHP Master | Saving PHP Sessions in Redis</a><br/>
-<a href="http://qiita.com/Oakbow/items/98599da0fc62863fc1b8#%E3%81%A9%E3%81%AE-redis-%E3%81%AE%E3%82%A2%E3%83%89%E3%82%AA%E3%83%B3%E3%82%92%E4%BD%BF%E3%81%86">herokuでセッションの保存先をRedisにする &ndash; Qiita</a></p>
 ]]></content>
   </entry>
   
