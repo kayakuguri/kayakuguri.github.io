@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2016-03-30T11:07:48+09:00</updated>
+  <updated>2016-03-30T11:10:14+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -30,7 +30,7 @@ atomのパッケージからインストールする。</p>
 
 <p>上部メニューから、<code>Preference</code>を選んで、<code>Install</code>から、 <code>git-time-machine</code>で検索。</p>
 
-<p><img src="git-time-machine01.jpg" alt="" /></p>
+<p><img src="http://kayakuguri.github.io/images/2016/03/git-time-machine01.jpg" alt="" /></p>
 
 <p>インストールする。<br/>
 （少し時間がかかった。）</p>
@@ -40,16 +40,16 @@ atomのパッケージからインストールする。</p>
 <p>インストール後、念のため再起動しておく。<br/>
 <code>コマンド+シフト+P</code>を押して、<code>Git Time Machine</code>を起動。</p>
 
-<p><img src="git-time-machine02.jpg" alt="" /></p>
+<p><img src="http://kayakuguri.github.io/images/2016/03/git-time-machine02.jpg" alt="" /></p>
 
 <p>すると下部にコミットした場所がグラフのような形で表示される。</p>
 
-<p><img src="git-time-machine03.jpg" alt="" /></p>
+<p><img src="http://kayakuguri.github.io/images/2016/03/git-time-machine03.jpg" alt="" /></p>
 
 <p>グラフの●部分をクリックすると選択中のファイルとの差分が表示できる。<br/>
 (以下は公式のgitアニメから)</p>
 
-<p><img src="git-time-machine04.jpg" alt="" /></p>
+<p><img src="http://kayakuguri.github.io/images/2016/03/git-time-machine04.jpg" alt="" /></p>
 
 <p>もちろんそのままの状態でファイルを編集可能。</p>
 
