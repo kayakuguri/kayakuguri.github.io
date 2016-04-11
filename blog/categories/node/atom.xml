@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: node | KayaMemo]]></title>
+  <link href="http://kayakuguri.github.io/blog/categories/node/atom.xml" rel="self"/>
+  <link href="http://kayakuguri.github.io/"/>
+  <updated>2016-04-11T18:19:33+09:00</updated>
+  <id>http://kayakuguri.github.io/</id>
+  <author>
+    <name><![CDATA[萱潜]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Nodeでnode_modulesにパスを通す]]></title>
+    <link href="http://kayakuguri.github.io/blog/2016/04/11/node-express-server/"/>
+    <updated>2016-04-11T18:07:45+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2016/04/11/node-express-server</id>
+    <content type="html"><![CDATA[<p>nodeのexpressサーバを起動しようとしてexpressモジュールがない、と言われた。<br/>
+モジュールは入れているはずなのでパスが通ってない、ということだったのだが、モジュールのパスをどこに通したらいいのか、のメモ。</p>
+
+<!-- more -->
+
+
+<h1>expressのインストール</h1>
+
+<p>順を追って、まずはexpressのインストール。<br/>
+グローバルに入れた。</p>
+
+<p><code>
+$ npm install -g express
+</code></p>
+
+<p>参考にさせてもらったページでは、以下のようにパスを通す、とあったのだけれどそれではダメだった。</p>
+
+<p>```</p>
+
+<h1>node_modules</h1>
+
+<p>export NODE_PATH=/usr/local/lib/node_modules
+```</p>
+
+<p>動作させてみたコードは以下。</p>
+
+<p>```
+app = require(&lsquo;express&rsquo;)();</p>
+
+<p>app.get(&lsquo;/&rsquo;, function(req, res){</p>
+
+<pre><code>    res.send('hello world');
+});
+</code></pre>
+
+<p>app.listen(3000);
+```</p>
+
+<p>エラー内容は以下の様な感じ。</p>
+
+<p>```
+module.js:338</p>
+
+<pre><code>throw err;
+      ^
+</code></pre>
+
+<p>Error: Cannot find module &lsquo;express&rsquo;
+&hellip;
+```</p>
+
+<h1>足りないモジュールのインストール</h1>
+
+<p>expressのモジュールが足らない、と言われている。<br/>
+調べると、足りてないモジュールを一気にインストールするコマンドがある、とのことでそれも実行してみたが、expressはもちろん入っているので効果なし。</p>
+
+<p><code>
+$ npm install -g npm-install-missing
+</code></p>
+
+<h1>モジュールのパスを調べて通す</h1>
+
+<p>色々調べると、以下のコマンドでモジュールの場所を表示させることが可能だった。</p>
+
+<p><code>
+$ npm root -g
+/Users/{USER_NAME}/.nodebrew/node/v0.12.7/lib/node_modules
+</code></p>
+
+<p>実際に<code>li</code>してみると、<code>express</code>なども入っているようだったので、そこにパスを改めて通す。</p>
+
+<p>```</p>
+
+<h1>node_modules</h1>
+
+<p>export NODE_PATH=&ldquo;/Users/{USER_NAME}/.nodebrew/node/v0.12.7/lib/node_modules&rdquo;
+```</p>
+
+<p>設定ファイルを読み込み直すかターミナルを再起動。<br/>
+再び上記のコードからサーバを起動させてみたところ、無事、 <code>http://localhost:3000</code>にアクセス出来た。</p>
+
+<h1>参考</h1>
+
+<ul>
+<li><a href="http://qiita.com/pakiln/items/826a9199697576e2e24a">expressパッケージとコマンドのインストール &ndash; Qiita</a></li>
+<li><a href="http://qiita.com/KENJU/items/5b2fda95be4685a750e1">【Node.js】足りないモジュールをたったの一行でインストールするコマンド &ndash; Qiita</a></li>
+<li><a href="http://qiita.com/joe-re/items/12987cdeee506dea3889">グローバルにインストールしたnode moduleがnot foundになる時の対処 &ndash; Qiita</a></li>
+</ul>
+
+]]></content>
+  </entry>
+  
+</feed>

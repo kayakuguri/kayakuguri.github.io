@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2016-03-30T11:10:14+09:00</updated>
+  <updated>2016-04-11T18:19:33+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,107 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Nodeでnode_modulesにパスを通す]]></title>
+    <link href="http://kayakuguri.github.io/blog/2016/04/11/node-express-server/"/>
+    <updated>2016-04-11T18:07:45+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2016/04/11/node-express-server</id>
+    <content type="html"><![CDATA[<p>nodeのexpressサーバを起動しようとしてexpressモジュールがない、と言われた。<br/>
+モジュールは入れているはずなのでパスが通ってない、ということだったのだが、モジュールのパスをどこに通したらいいのか、のメモ。</p>
+
+<!-- more -->
+
+
+<h1>expressのインストール</h1>
+
+<p>順を追って、まずはexpressのインストール。<br/>
+グローバルに入れた。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$ npm install -g express</span></code></pre></td></tr></table></div></figure>
+
+
+<p>参考にさせてもらったページでは、以下のようにパスを通す、とあったのだけれどそれではダメだった。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'># node_modules
+</span><span class='line'>export NODE_PATH=/usr/local/lib/node_modules</span></code></pre></td></tr></table></div></figure>
+
+
+<p>動作させてみたコードは以下。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>app = require('express')();
+</span><span class='line'>
+</span><span class='line'>app.get('/', function(req, res){
+</span><span class='line'>        res.send('hello world');
+</span><span class='line'>    });
+</span><span class='line'>
+</span><span class='line'>app.listen(3000);</span></code></pre></td></tr></table></div></figure>
+
+
+<p>エラー内容は以下の様な感じ。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>module.js:338
+</span><span class='line'>    throw err;
+</span><span class='line'>          ^
+</span><span class='line'>Error: Cannot find module 'express'
+</span><span class='line'>...</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>足りないモジュールのインストール</h1>
+
+<p>expressのモジュールが足らない、と言われている。<br/>
+調べると、足りてないモジュールを一気にインストールするコマンドがある、とのことでそれも実行してみたが、expressはもちろん入っているので効果なし。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$ npm install -g npm-install-missing</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>モジュールのパスを調べて通す</h1>
+
+<p>色々調べると、以下のコマンドでモジュールの場所を表示させることが可能だった。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$ npm root -g
+</span><span class='line'>/Users/{USER_NAME}/.nodebrew/node/v0.12.7/lib/node_modules</span></code></pre></td></tr></table></div></figure>
+
+
+<p>実際に<code>li</code>してみると、<code>express</code>なども入っているようだったので、そこにパスを改めて通す。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'># node_modules
+</span><span class='line'>export NODE_PATH="/Users/{USER_NAME}/.nodebrew/node/v0.12.7/lib/node_modules"</span></code></pre></td></tr></table></div></figure>
+
+
+<p>設定ファイルを読み込み直すかターミナルを再起動。<br/>
+再び上記のコードからサーバを起動させてみたところ、無事、 <code>http://localhost:3000</code>にアクセス出来た。</p>
+
+<h1>参考</h1>
+
+<ul>
+<li><a href="http://qiita.com/pakiln/items/826a9199697576e2e24a">expressパッケージとコマンドのインストール &ndash; Qiita</a></li>
+<li><a href="http://qiita.com/KENJU/items/5b2fda95be4685a750e1">【Node.js】足りないモジュールをたったの一行でインストールするコマンド &ndash; Qiita</a></li>
+<li><a href="http://qiita.com/joe-re/items/12987cdeee506dea3889">グローバルにインストールしたnode moduleがnot foundになる時の対処 &ndash; Qiita</a></li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Atomのプラグイン、Git Time Machineを入れてみた]]></title>
@@ -2130,132 +2231,6 @@ git標準ではそんなオプションはないようで、正規表現で絞�
 <p><a href="http://qiita.com/zimathon/items/d964c4b3cc688cb2d114">git ls-files &ndash; Qiita</a><br/>
 <a href="http://qiita.com/usamik26/items/56d0d3ba7a1300625f92">既に git 管理しているファイルをあえて無視したい &ndash; Qiita</a><br/>
 <a href="http://iyukki.blog56.fc2.com/blog-entry-119.html">gitでファイル一覧を見る方法 CodingFirst</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[heroku]HerokuのclearDBとPostgresでのインポートとエクスポートまとめ]]></title>
-    <link href="http://kayakuguri.github.io/blog/2015/09/10/mysql-postgres-import-export/"/>
-    <updated>2015-09-10T15:38:34+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2015/09/10/mysql-postgres-import-export</id>
-    <content type="html"><![CDATA[<p>herokuのmysqlとpostgresqlのDBのインポートエクスポートメモ。<br/>
-heroku上のDBの中身を別のheroku上のDBへ移行するという前提。</p>
-
-<!-- more -->
-
-
-<h2>入れ替える情報</h2>
-
-<table>
-<thead>
-<tr>
-<th></th>
-<th align="left"> 項目 </th>
-<th align="left"> 内容 </th>
-<th align="left"> 例(clearDB) </th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td></td>
-<td align="left"> USER_NAME </td>
-<td align="left"> ユーザー名 </td>
-<td align="left"> b114d7xxxxxxxb |</td>
-</tr>
-<tr>
-<td></td>
-<td align="left"> PASSWORD </td>
-<td align="left"> パスワード </td>
-<td align="left"> d81xxxxb |</td>
-</tr>
-<tr>
-<td></td>
-<td align="left"> HOST </td>
-<td align="left"> ホスト名 </td>
-<td align="left"> us-cdbr-iron-xxxx-xx.cleardb.net |</td>
-</tr>
-<tr>
-<td></td>
-<td align="left"> DB_NAME </td>
-<td align="left"> DB名 </td>
-<td align="left"> heroku_5f996e9xxxxxxxx |</td>
-</tr>
-</tbody>
-</table>
-
-
-<p>アプリを指定して実行する場合は、すべてのコマンドのお尻に、<code>--app app_name</code>とつける。</p>
-
-<h2>ClearDB(mySql)</h2>
-
-<h3>情報の構成</h3>
-
-<p>環境変数にて取得可能な情報より。</p>
-
-<pre><code>CLEARDB_DATABASE_URL=mysql://ユーザ名:パスワード@サーバ名/データベース?reconnect=true
-</code></pre>
-
-<h3>エクスポート</h3>
-
-<pre><code>$ mysqldump -uUSER_NAME -pPASSWORD -h HOST -r backup.sql --single-transaction DB_NAME
-</code></pre>
-
-<h3>インポート</h3>
-
-<pre><code>$ mysql --host=HOST --user=USER_NAME --password=PASSWORD --reconnect DB_NAME &lt; backup.sql
-</code></pre>
-
-<h3>参考</h3>
-
-<p><a href="http://pronama.azurewebsites.net/2015/05/05/cleardb-to-azure-vm-mysql/">ClearDB から Azure VM 上の MySQL に移行 | プログラミング生放送</a><br/>
-<a href="http://stackoverflow.com/questions/11803496/dump-sql-file-to-cleardb-in-heroku">mysql &ndash; Dump sql file to ClearDB in Heroku &ndash; Stack Overflow</a></p>
-
-<h2>Heroku Postgres</h2>
-
-<h3>概要</h3>
-
-<p>Heroku Postgresに標準搭載されている<code>PG Backups</code>を使用します。</p>
-
-<h3>エクスポート</h3>
-
-<p>バックアップを取る</p>
-
-<pre><code>$ heroku pg:backups capture
-Use Ctrl-C at any time to stop monitoring progress; the backup
-will continue running. Use heroku pg:backups info to check progress.
-Stop a running backup with heroku pg:backups cancel.
-
-DATABASE ---backup---&gt; b002
-</code></pre>
-
-<p>URLを取得する</p>
-
-<pre><code>$ heroku pg:backups public-url b002
-The following URL will expire at 2015-09-10 07:33:23 +0000:
-  "https://xfrtu.s3.amazonaws.com/a53f7aa...."
-</code></pre>
-
-<p>ここで取得したS3のURLを、<code>S3_URL</code>とする。</p>
-
-<p>（ダウンロードする場合は以下）</p>
-
-<pre><code>$ curl -o latest.dump 'S3_URL'
-</code></pre>
-
-<h3>インポート</h3>
-
-<pre><code>$ heroku pg:backups restore 'S3_URL' DATABASE_URL
-</code></pre>
-
-<h4>ローカルのDBにインポートする場合</h4>
-
-<pre><code>$ pg_restore --verbose --clean --no-acl --no-owner -h localhost -U ユーザー名 -d DB名 バックアップファイル
-</code></pre>
-
-<h3>参考</h3>
-
-<p><a href="https://devcenter.heroku.com/articles/heroku-postgres-import-export">Importing and Exporting Heroku Postgres Databases with PG Backups | Heroku Dev Center</a><br/>
-<a href="https://devcenter.heroku.com/articles/heroku-postgres-backups">Heroku PGBackups | Heroku Dev Center</a></p>
 ]]></content>
   </entry>
   
