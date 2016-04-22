@@ -4,7 +4,7 @@
   <title><![CDATA[Category: php | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/php/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2016-04-11T18:19:33+09:00</updated>
+  <updated>2016-04-22T16:27:17+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,57 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[UbuntuでApacheの環境変数を設定する方法]]></title>
+    <link href="http://kayakuguri.github.io/blog/2016/04/22/ubuntu-env/"/>
+    <updated>2016-04-22T16:21:16+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2016/04/22/ubuntu-env</id>
+    <content type="html"><![CDATA[<p><a href="http://kayakuguri.github.io/blog/2015/05/26/vagrant-env/">以前に書いた環境変数の設定方法</a>は、centOS用だったので(後で知った）、ubuntuでの方法も書いておく。<br/>
+といってもパスのメモだけど。</p>
+
+<!-- more -->
+
+
+<p>Ubuntuでの設定が必要になった理由としては、いつも愛用している<a href="https://box.scotch.io/">Scotchbox</a>がUbuntuのディストリビューションだったため。</p>
+
+<h1>設定ファイルのパス</h1>
+
+<p>以下。</p>
+
+<p><code>
+/etc/apache2/envvars
+</code></p>
+
+<p>このファイルの末尾などに、以下のように追記する。</p>
+
+<p><code>
+export HOGE=xxx
+</code></p>
+
+<h1>apatch再起動</h1>
+
+<p><code>service</code>で再起動。</p>
+
+<p><code>
+$ sudo service apache2 restart
+</code></p>
+
+<p>以上で設定完了。</p>
+
+<h1>取得</h1>
+
+<p>取得は通常通り、<code>getenv</code>で可能。</p>
+
+<p><code>
+getenv('HOGE');
+</code></p>
+
+<h1>参考</h1>
+
+<p><a href="http://www.yamamo10.jp/yamamoto/comp/home_server/ubuntu_server/apache/index.php">自宅サーバー(ubuntu server Apache)</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Cakephpのtransitionコンポーネントで送信ボタンを複数配置する]]></title>
@@ -292,37 +343,6 @@ PHP 5.6.11 (cli) (built: Jul 10 2015 21:46:48)
 <h2>参考</h2>
 
 <p><a href="http://qiita.com/nbkn/items/01a11392921119fa0153">MacでPATHを通す &ndash; Qiita</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[CentOSにて、PHPのエラー出力をターミナルで監視]]></title>
-    <link href="http://kayakuguri.github.io/blog/2015/06/24/php-error-tail/"/>
-    <updated>2015-06-24T21:26:49+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2015/06/24/php-error-tail</id>
-    <content type="html"><![CDATA[<p>いつも忘れるのでメモ。</p>
-
-<!-- more -->
-
-
-<p>Vagrant環境にて、PHPのエラー出力をターミナルで監視する方法。<br/>
-まずは、エラーの出力ファイルの場所。</p>
-
-<pre><code>/var/log/httpd/error_log
-</code></pre>
-
-<p>これを、<code>tail</code>コマンドで表示させる。<br/>
-常に監視、の<code>-f</code>オプション付きで。</p>
-
-<pre><code>tail /var/log/httpd/error_log -f
-</code></pre>
-
-<p>かなり常識的な事だと思うけど、ググるのが面倒なのでメモ。</p>
-
-<h2>参考</h2>
-
-<p><a href="http://www.atmarkit.co.jp/fwin2k/win2ktips/423tail/tail.html">tailコマンドでログ・ファイルをリアルタイムに監視する － ＠IT</a><br/>
-<a href="http://detail.chiebukuro.yahoo.co.jp/qa/question_detail/q1213302327">『　リナックスサーバー　』　にＰＨＰのエラーログ・アクセスログにか&hellip; &ndash; Yahoo!知恵袋</a></p>
 ]]></content>
   </entry>
   

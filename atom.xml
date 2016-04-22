@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2016-04-11T18:19:33+09:00</updated>
+  <updated>2016-04-22T16:27:17+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,57 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[UbuntuでApacheの環境変数を設定する方法]]></title>
+    <link href="http://kayakuguri.github.io/blog/2016/04/22/ubuntu-env/"/>
+    <updated>2016-04-22T16:21:16+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2016/04/22/ubuntu-env</id>
+    <content type="html"><![CDATA[<p><a href="http://kayakuguri.github.io/blog/2015/05/26/vagrant-env/">以前に書いた環境変数の設定方法</a>は、centOS用だったので(後で知った）、ubuntuでの方法も書いておく。<br/>
+といってもパスのメモだけど。</p>
+
+<!-- more -->
+
+
+<p>Ubuntuでの設定が必要になった理由としては、いつも愛用している<a href="https://box.scotch.io/">Scotchbox</a>がUbuntuのディストリビューションだったため。</p>
+
+<h1>設定ファイルのパス</h1>
+
+<p>以下。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>/etc/apache2/envvars</span></code></pre></td></tr></table></div></figure>
+
+
+<p>このファイルの末尾などに、以下のように追記する。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>export HOGE=xxx</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>apatch再起動</h1>
+
+<p><code>service</code>で再起動。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$ sudo service apache2 restart</span></code></pre></td></tr></table></div></figure>
+
+
+<p>以上で設定完了。</p>
+
+<h1>取得</h1>
+
+<p>取得は通常通り、<code>getenv</code>で可能。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>getenv('HOGE');</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>参考</h1>
+
+<p><a href="http://www.yamamo10.jp/yamamoto/comp/home_server/ubuntu_server/apache/index.php">自宅サーバー(ubuntu server Apache)</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Nodeでnode_modulesにパスを通す]]></title>
@@ -2195,42 +2246,6 @@ htmlファイル以外はダウンロードしてきたまんま。</p>
 なので、これでアップしてもそのまま残っているわけではないのでご注意ください。<br/>
 じゃあどうするかというと、一旦アップして、ここからどこかに転送する、とかそういうもののために作成した次第です。<br/>
 とはいえ、heroku以外でもchunked uploadを使えば、一時停止やリジュームなど、通信が切れても続きから再開したりとかが出来るようなので、普通のサーバー用途でも便利そう。</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[gitでカレントディレクトリのファイル一覧を表示]]></title>
-    <link href="http://kayakuguri.github.io/blog/2015/09/19/show-gitfilelist-with-status/"/>
-    <updated>2015-09-19T19:56:40+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2015/09/19/show-gitfilelist-with-status</id>
-    <content type="html"><![CDATA[<p>無視されているかどうかを確認したかったので。<br/>
-コピペ用。</p>
-
-<pre><code>git ls-files -v|perl -pe 's/\/.*/\//'|uniq
-</code></pre>
-
-<!-- more -->
-
-
-<p>ファイル一覧を表示するのは以下。</p>
-
-<pre><code>git ls-files
-</code></pre>
-
-<p><code>-v</code>オプションで無視されているかどうかを表示。<br/>
-<code>H</code>はリストの含まれている。<br/>
-<code>skip-worktree</code>の時は、<code>s</code>となる。<br/>
-<code>assume-unchanged</code>の時は、状態が表示される、よう。</p>
-
-<p>ただし、<code>ls-files</code>すると、管理しているファイル全てが表示されるので、多すぎて目的のファイルを見つけられない。<br/>
-なので、現在のディレクトリのファイルのみを表示する。<br/>
-git標準ではそんなオプションはないようで、正規表現で絞り込んでるよう。</p>
-
-<h2>参考</h2>
-
-<p><a href="http://qiita.com/zimathon/items/d964c4b3cc688cb2d114">git ls-files &ndash; Qiita</a><br/>
-<a href="http://qiita.com/usamik26/items/56d0d3ba7a1300625f92">既に git 管理しているファイルをあえて無視したい &ndash; Qiita</a><br/>
-<a href="http://iyukki.blog56.fc2.com/blog-entry-119.html">gitでファイル一覧を見る方法 CodingFirst</a></p>
 ]]></content>
   </entry>
   
