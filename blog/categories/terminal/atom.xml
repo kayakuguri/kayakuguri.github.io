@@ -4,7 +4,7 @@
   <title><![CDATA[Category: terminal | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/terminal/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2016-04-26T13:42:44+09:00</updated>
+  <updated>2016-04-26T13:46:14+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -55,13 +55,13 @@ https://asciinema.org/connect/1b327ae7-6fdd-4784-81a0-xxxxxxxx
 
 <p>フォームからメールアドレスを入力して送信。</p>
 
-<p><img src="images/2016/04/asciinema01.jpg" alt="" /></p>
+<p><img src="/images/2016/04/asciinema01.jpg" alt="" /></p>
 
 <p>メールに登録用フォームのURLが送信されるので、15分以内にリンクをクリックします。 <br/>
 クリック後、任意のユーザー名を入力し、クリック。<br/>
 （ここで一度何故かエラーのようなページに飛ばされたが、無事登録ができていた。)</p>
 
-<p><img src="images/2016/04/asciinema02.jpg" alt="" /></p>
+<p><img src="/images/2016/04/asciinema02.jpg" alt="" /></p>
 
 <h1>録画開始</h1>
 
@@ -103,7 +103,7 @@ $ asciinema rec
 
 <p>これで動画を編集出来るようになった。</p>
 
-<p><img src="images/2016/04/asciinema03.jpg" alt="" /></p>
+<p><img src="/images/2016/04/asciinema03.jpg" alt="" /></p>
 
 <p>ちなみにアップロードしたままだと動画はプライベートの設定になっている。<br/>
 プライベート、といってもURLを知っていれば誰でも見られる状態。<br/>
