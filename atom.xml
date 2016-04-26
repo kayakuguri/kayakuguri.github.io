@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2016-04-22T16:27:17+09:00</updated>
+  <updated>2016-04-26T13:42:44+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,191 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[ターミナル録画サービスAsciinemaを使ってみてプロンプトも変更した]]></title>
+    <link href="http://kayakuguri.github.io/blog/2016/04/26/asciinema/"/>
+    <updated>2016-04-26T13:36:13+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2016/04/26/asciinema</id>
+    <content type="html"><![CDATA[<p>簡単にターミナルでの操作を録画してアップロード、シェア出来るサービス、Asciinema、を使ってみた。</p>
+
+<p><a href="https://asciinema.org/">https://asciinema.org/</a></p>
+
+<!-- more -->
+
+
+<h1>インストール</h1>
+
+<p>様々用意されている。<br/>
+<a href="https://asciinema.org/docs/installation">https://asciinema.org/docs/installation</a></p>
+
+<p>今回はHomebrewで入れてみた。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$ brew install asciinema</span></code></pre></td></tr></table></div></figure>
+
+
+<p>バージョン確認。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$ asciinema --version
+</span><span class='line'>asciinema 1.1.1</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>ユーザー登録</h1>
+
+<p>ユーザー登録用のURLを表示させる</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$ asciinema auth
+</span><span class='line'>Open the following URL in a browser to register your API token and assign any recorded asciicasts to your profile:
+</span><span class='line'>https://asciinema.org/connect/1b327ae7-6fdd-4784-81a0-xxxxxxxx</span></code></pre></td></tr></table></div></figure>
+
+
+<p>フォームからメールアドレスを入力して送信。</p>
+
+<p><img src="images/2016/04/asciinema01.jpg" alt="" /></p>
+
+<p>メールに登録用フォームのURLが送信されるので、15分以内にリンクをクリックします。 <br/>
+クリック後、任意のユーザー名を入力し、クリック。<br/>
+（ここで一度何故かエラーのようなページに飛ばされたが、無事登録ができていた。)</p>
+
+<p><img src="images/2016/04/asciinema02.jpg" alt="" /></p>
+
+<h1>録画開始</h1>
+
+<p>以下のコマンドで録画が開始される。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$ asciinema rec
+</span><span class='line'>~ Current terminal size is 150x50.
+</span><span class='line'>~ It may be too big to be properly replayed on smaller screens.
+</span><span class='line'>~ You can now resize it. Press &lt;Enter&gt; to start recording.
+</span><span class='line'>
+</span><span class='line'>~ Asciicast recording started.
+</span><span class='line'>~ Hit Ctrl-D or type "exit" to finish.</span></code></pre></td></tr></table></div></figure>
+
+
+<p>書いてある通り、<code>Ctrl-D</code>で録画終了。<br/>
+そのままアップロードするかどうかを聞かれる。<br/>
+アップロードを選択すると、完了後にURLが表示される。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>~ Asciicast recording finished.
+</span><span class='line'>~ Press &lt;Enter&gt; to upload, &lt;Ctrl-C&gt; to cancel.
+</span><span class='line'>
+</span><span class='line'>https://asciinema.org/a/2l7dg8ov3eftv7v9xxxxxxx</span></code></pre></td></tr></table></div></figure>
+
+
+<p>アップロードされたURLにアクセスすると、操作したものがそのまま録画されていることがわかる。<br/>
+注意としては、録画が始まってからは操作していない時間も含めてそのまま録画されるため、考えたり調べたりしてしまうと動画上は何もしてない時間になってしまう。<br/>
+予めメモっておくなどが必要そう。</p>
+
+<h1>紐付け</h1>
+
+<p>アップロードした動画を確認してみると、先程登録したユーザー名ではなく、ターミナルに表示されているコンピューター名のユーザーでアップロードされたことになっている。<br/>
+登録したユーザーと紐付いてない状態。<br/>
+このままでは動画を削除したり編集したりが出来ないため、紐付ける。</p>
+
+<p>紐付けは簡単で、ターミナルで先程と同じく、<code>$ asciinema auth</code>とコマンドするだけ。<br/>
+同じようにURLが表示されるのでそのURLにアクセスすると、すでにログインしている状態なので、アップした動画がさきほど登録したユーザーの動画として認識される。</p>
+
+<p>これで動画を編集出来るようになった。</p>
+
+<p><img src="images/2016/04/asciinema03.jpg" alt="" /></p>
+
+<p>ちなみにアップロードしたままだと動画はプライベートの設定になっている。<br/>
+プライベート、といってもURLを知っていれば誰でも見られる状態。<br/>
+これをpublicにすれば、公式のサイトから最近アップされたもの、として表示されたりするようになるみたい。</p>
+
+<h1>ターミナルの名前表記(プロンプト)</h1>
+
+<p>ターミナルの内容がそのまま録画されるため、<code>$</code>の左側もそのまま表示されます。<br/>
+(この部分を、プロンプト、というよう）<br/>
+自分の設定ではここに本名が表示されてしまっているのでこのままではちょっとイヤ。<br/>
+(usernameの部分に名前が出てる）</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>username@username ~/Desktop $</span></code></pre></td></tr></table></div></figure>
+
+
+<p>（デフォルトでは、<code>hostname:Desktop</code>になっているそう）</p>
+
+<p>これをカスタマイズする。</p>
+
+<p>ターミナルはzshを入れているので、出力内容は、<code>PROMPT</code>で設定されているよう。<br/>
+出力してみると以下のような内容。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$ echo $PROMPT
+</span><span class='line'>%F{135}%n%f@%F{166}%m%f %F{118}%~%f $git_info[prompt]$</span></code></pre></td></tr></table></div></figure>
+
+
+<p><code>%F{135}</code>といのは色の指定。<code>%F</code>と<code>%f</code>で囲まれた範囲に色をつける。<br/>
+<code>%n</code>はユーザー名。<br/>
+<code>%m</code>はコンピューターのホスト名。<br/>
+<code>%~</code>は、カレントディレクトリ。<br/>
+<code>$git_info[prompt]</code>は、現在のGitリポジトリ表記。<br/>
+(gitリポジトリ表記は色々バリエーションがある？）</p>
+
+<p>この辺は凝りだすと沼っぽいので、とりあえず名前だけいらないと思ったので、カレントディレクトリとGitのリポジトリ名だけでにしておいた。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>PROMPT='%F{8}%~%f $git_info[prompt] $ '</span></code></pre></td></tr></table></div></figure>
+
+
+<p>これをデフォルトの設定にするために、<code>~/.zshrc</code>に追記しておく。<br/>
+これでユーザー名などが表記されなくなった。</p>
+
+<h2>Rubyのバージョン表記</h2>
+
+<p>いつのまにやらrubyのバージョンが右側に表示されるようになっている。<br/>
+これはこれで便利なんだろうけれど、残念ながらruby使いではないので、これを非表示にしてみる。</p>
+
+<p>右側に表示させるには、<code>RPROMPT</code>という環境変数を使うよう。<br/>
+結局どこでこの設定をしているかがわからなかったので、同じく、<code>~/.zshrc</code>に設定し、上書きして対処した。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>RPROMPT=</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>参考</h1>
+
+<ul>
+<li><a href="http://qiita.com/ka_/items/f1ebdde1e7fdf41c80a3">Asciinema の紹介 &ndash; Qiita</a></li>
+<li><a href="http://rcmdnk.github.io/blog/2013/12/11/blog-asciinema/">ターミナル操作を録画して公開する: Asciinema</a></li>
+<li><a href="https://asciinema.org/docs/usage">Usage &ndash; asciinema</a></li>
+</ul>
+
+
+<h2>プロンプト関連</h2>
+
+<ul>
+<li><a href="http://qiita.com/Cside/items/8f618409ac8cc368f6d1">いまのPROMPT &ndash; Qiita</a></li>
+<li><a href="https://wiki.archlinuxjp.org/index.php/Zsh?rdfrom=https%3A%2F%2Fwiki.archlinux.org%2Findex.php%3Ftitle%3DZsh_%28%25E6%2597%25A5%25E6%259C%25AC%25E8%25AA%259E%29%26redirect%3Dno#.E3.83.97.E3.83.AD.E3.83.B3.E3.83.97.E3.83.88.E3.81.AE.E3.82.AB.E3.82.B9.E3.82.BF.E3.83.9E.E3.82.A4.E3.82.BA">Zsh &ndash; ArchWiki</a></li>
+<li><a href="http://tegetegekibaru.blogspot.jp/2012/08/zsh_2.html">てげてげきばる日記: zsh 設定 &ndash; プロンプト &ndash;</a></li>
+<li><a href="http://baqamore.hatenablog.com/entry/2014/05/26/221233">zsh のプロンプト &ndash; ばかもりだし</a></li>
+<li><a href="http://qiita.com/iwazer/items/5f57a80b8aac0f4e9839">Bashのプロンプトを変える(OSX) &ndash; Qiita</a></li>
+<li><a href="http://www.yoheim.net/blog.php?q=20140309">[Mac] ターミナルの$前の出力内容をカスタマイズする- YoheiM .NET</a></li>
+<li><a href="http://news.mynavi.jp/column/zsh/002/">漢のzsh (2) 取りあえず、プロンプトを整えておく。カッコつけたいからね | マイナビニュース</a></li>
+<li><a href="http://makimoto.hatenablog.com/entry/show-rbenv-version-on-zsh-prompt">zsh で rbenv の Ruby のバージョンをプロンプトに表示させる &ndash; Stats of the Rivers</a></li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[UbuntuでApacheの環境変数を設定する方法]]></title>
@@ -2132,120 +2317,6 @@ CIDR(サイダー)形式での表記で書いてやると実現可能。<br/>
 
 <p>ちなみに、herokuアプリから外にアクセスする際のIPアドレスの固定方法は以下を参考に。<br/>
 <a href="http://kayakuguri.github.io/blog/2014/09/26/static-ip-heroku/">[heroku]QuotaGuard Staticを使ってHerokuでのIP固定を試してみる</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[jQuery File Uploadを利用した大容量ファイルのアップロードをChunked uploadで実現する]]></title>
-    <link href="http://kayakuguri.github.io/blog/2015/10/01/jquery-chunked-upload/"/>
-    <updated>2015-10-01T17:57:05+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2015/10/01/jquery-chunked-upload</id>
-    <content type="html"><![CDATA[<p>大容量のファイルをアップする際に、通常の<code>input type=file</code>で送ろうとすると<br/>
-herokuだとタイムアウトになったりして上手くいかなかった。<br/>
-なので、jQueryのファイルアップロードプラグインにある、<code>chunk upload</code>を利用してアップした。</p>
-
-<!-- more -->
-
-
-<p>・Github<br/>
-<a href="https://github.com/blueimp/jQuery-File-Upload">blueimp/jQuery-File-Upload</a></p>
-
-<p>公式のjQuery File Uploadのデモは以下。<br/>
-<a href="https://blueimp.github.io/jQuery-File-Upload/">https://blueimp.github.io/jQuery-File-Upload/</a></p>
-
-<p>セットアップの流れは以下を参考に。<br/>
-<a href="https://github.com/blueimp/jQuery-File-Upload/wiki/Setup">https://github.com/blueimp/jQuery-File-Upload/wiki/Setup</a></p>
-
-<h2>通常のアップロード</h2>
-
-<p>以下から最新バージョンをダウンロード。<br/>
-<a href="https://github.com/blueimp/jQuery-File-Upload/releases">https://github.com/blueimp/jQuery-File-Upload/releases</a></p>
-
-<p>解凍して、PHPが動作する環境のドキュメントルートにアップロード。<br/>
-そのままアクセスすると動作する。</p>
-
-<p>アップしたファイルは、<br/>
-<code>/server/php/files/</code>以下にアップされる。</p>
-
-<h2>Chunk File</h2>
-
-<p>このライブラリによるアップロードの容量制限はありますか？という質問には、一応、4GBです、とのこと。<br/>
-これはブラウザの制限のよう。<br/>
-ただし、Chunked file upload、という方法を使って、とのこと。</p>
-
-<p><a href="https://github.com/blueimp/jQuery-File-Upload/wiki/Frequently-Asked-Questions#what-is-the-maximum-file-size-limitation">requently Asked Questions · blueimp/jQuery-File-Upload Wiki · GitHub</a></p>
-
-<p>この<code>Chunked file upload</code>という方法は、大きいサイズのファイルを指定したサイズに分割して少しづつアップロードし、アップロード後に合体させる方法、とのこと。<br/>
-(特にこのライブラリ特有の話ではないよう。)</p>
-
-<p><a href="https://github.com/blueimp/jQuery-File-Upload/wiki/Chunked-file-uploads">Chunked file uploads · blueimp/jQuery-File-Upload Wiki · GitHub</a></p>
-
-<p>使い方はいたって簡単で、通常の<code>fileupload</code>のオプションに、<code>maxChunkSize</code>の指定を追加するだけ。</p>
-
-<p>例）通常</p>
-
-<pre><code>$('#fileupload').fileupload({
-    url: url,
-    dataType: 'json'
-});
-</code></pre>
-
-<p>Chunked upload</p>
-
-<pre><code>$('#fileupload').fileupload({
-    maxChunkSize: 20000000,
-    url: url,
-    dataType: 'json'
-});
-</code></pre>
-
-<h2>Callback Option</h2>
-
-<p>以下で一覧を参照可能。<br/>
-<a href="https://github.com/blueimp/jQuery-File-Upload/wiki/Options#callback-options">Options · blueimp/jQuery-File-Upload Wiki · GitHub</a></p>
-
-<p>Chunked Upload関連では以下のオプションがあった。</p>
-
-<ul>
-<li>fileuploadchunksend</li>
-<li>fileuploadchunkdone</li>
-<li>fileuploadchunkfail</li>
-<li>fileuploadchunkalways</li>
-</ul>
-
-
-<p>それぞれ分割したファイルがアップロードされる度に呼び出されるので、結構な回数呼ばれる。</p>
-
-<h2>ソース</h2>
-
-<p>一式全部上げておく。<br/>
-アップロードやエラーの処理については以下を参考にさせてもらいました。<br/>
-<a href="http://qiita.com/mpyw/items/62e6e415f86eb30a5ff4">JavaScript(jQuery)からPHPのAPIを利用する &ndash; Qiita</a></p>
-
-<p>ファイル構造は以下のようになっている。<br/>
-htmlファイル以外はダウンロードしてきたまんま。</p>
-
-<pre><code>public(ドキュメントルート)
-└─file_upload
-  ├─cors/
-  ├─css/
-  ├─img/
-  ├─js/
-  ├─server/
-  │   ├─php/
-  │   └─files/
-  └─chunked_upload.html
-</code></pre>
-
-<script src="https://gist.github.com/anonymous/2e523356346040f6758a.js"></script>
-
-
-<h2>まとめ</h2>
-
-<p>herokuではgit管理でアップしたもの以外はデプロイなどでの再起動時に消えてしまいます。<br/>
-なので、これでアップしてもそのまま残っているわけではないのでご注意ください。<br/>
-じゃあどうするかというと、一旦アップして、ここからどこかに転送する、とかそういうもののために作成した次第です。<br/>
-とはいえ、heroku以外でもchunked uploadを使えば、一時停止やリジュームなど、通信が切れても続きから再開したりとかが出来るようなので、普通のサーバー用途でも便利そう。</p>
 ]]></content>
   </entry>
   

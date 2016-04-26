@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: terminal | KayaMemo]]></title>
+  <link href="http://kayakuguri.github.io/blog/categories/terminal/atom.xml" rel="self"/>
+  <link href="http://kayakuguri.github.io/"/>
+  <updated>2016-04-26T13:42:44+09:00</updated>
+  <id>http://kayakuguri.github.io/</id>
+  <author>
+    <name><![CDATA[萱潜]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[ターミナル録画サービスAsciinemaを使ってみてプロンプトも変更した]]></title>
+    <link href="http://kayakuguri.github.io/blog/2016/04/26/asciinema/"/>
+    <updated>2016-04-26T13:36:13+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2016/04/26/asciinema</id>
+    <content type="html"><![CDATA[<p>簡単にターミナルでの操作を録画してアップロード、シェア出来るサービス、Asciinema、を使ってみた。</p>
+
+<p><a href="https://asciinema.org/">https://asciinema.org/</a></p>
+
+<!-- more -->
+
+
+<h1>インストール</h1>
+
+<p>様々用意されている。<br/>
+<a href="https://asciinema.org/docs/installation">https://asciinema.org/docs/installation</a></p>
+
+<p>今回はHomebrewで入れてみた。</p>
+
+<p><code>
+$ brew install asciinema
+</code></p>
+
+<p>バージョン確認。</p>
+
+<p><code>
+$ asciinema --version
+asciinema 1.1.1
+</code></p>
+
+<h1>ユーザー登録</h1>
+
+<p>ユーザー登録用のURLを表示させる</p>
+
+<p><code>
+$ asciinema auth
+Open the following URL in a browser to register your API token and assign any recorded asciicasts to your profile:
+https://asciinema.org/connect/1b327ae7-6fdd-4784-81a0-xxxxxxxx
+</code></p>
+
+<p>フォームからメールアドレスを入力して送信。</p>
+
+<p><img src="images/2016/04/asciinema01.jpg" alt="" /></p>
+
+<p>メールに登録用フォームのURLが送信されるので、15分以内にリンクをクリックします。 <br/>
+クリック後、任意のユーザー名を入力し、クリック。<br/>
+（ここで一度何故かエラーのようなページに飛ばされたが、無事登録ができていた。)</p>
+
+<p><img src="images/2016/04/asciinema02.jpg" alt="" /></p>
+
+<h1>録画開始</h1>
+
+<p>以下のコマンドで録画が開始される。</p>
+
+<p>```
+$ asciinema rec
+~ Current terminal size is 150x50.
+~ It may be too big to be properly replayed on smaller screens.
+~ You can now resize it. Press <Enter> to start recording.</p>
+
+<p>~ Asciicast recording started.
+~ Hit Ctrl-D or type &ldquo;exit&rdquo; to finish.
+```</p>
+
+<p>書いてある通り、<code>Ctrl-D</code>で録画終了。<br/>
+そのままアップロードするかどうかを聞かれる。<br/>
+アップロードを選択すると、完了後にURLが表示される。</p>
+
+<p>```
+~ Asciicast recording finished.
+~ Press <Enter> to upload, &lt;Ctrl-C> to cancel.</p>
+
+<p><a href="https://asciinema.org/a/2l7dg8ov3eftv7v9xxxxxxx">https://asciinema.org/a/2l7dg8ov3eftv7v9xxxxxxx</a>
+```</p>
+
+<p>アップロードされたURLにアクセスすると、操作したものがそのまま録画されていることがわかる。<br/>
+注意としては、録画が始まってからは操作していない時間も含めてそのまま録画されるため、考えたり調べたりしてしまうと動画上は何もしてない時間になってしまう。<br/>
+予めメモっておくなどが必要そう。</p>
+
+<h1>紐付け</h1>
+
+<p>アップロードした動画を確認してみると、先程登録したユーザー名ではなく、ターミナルに表示されているコンピューター名のユーザーでアップロードされたことになっている。<br/>
+登録したユーザーと紐付いてない状態。<br/>
+このままでは動画を削除したり編集したりが出来ないため、紐付ける。</p>
+
+<p>紐付けは簡単で、ターミナルで先程と同じく、<code>$ asciinema auth</code>とコマンドするだけ。<br/>
+同じようにURLが表示されるのでそのURLにアクセスすると、すでにログインしている状態なので、アップした動画がさきほど登録したユーザーの動画として認識される。</p>
+
+<p>これで動画を編集出来るようになった。</p>
+
+<p><img src="images/2016/04/asciinema03.jpg" alt="" /></p>
+
+<p>ちなみにアップロードしたままだと動画はプライベートの設定になっている。<br/>
+プライベート、といってもURLを知っていれば誰でも見られる状態。<br/>
+これをpublicにすれば、公式のサイトから最近アップされたもの、として表示されたりするようになるみたい。</p>
+
+<h1>ターミナルの名前表記(プロンプト)</h1>
+
+<p>ターミナルの内容がそのまま録画されるため、<code>$</code>の左側もそのまま表示されます。<br/>
+(この部分を、プロンプト、というよう）<br/>
+自分の設定ではここに本名が表示されてしまっているのでこのままではちょっとイヤ。<br/>
+(usernameの部分に名前が出てる）</p>
+
+<p><code>
+username@username ~/Desktop $
+</code></p>
+
+<p>（デフォルトでは、<code>hostname:Desktop</code>になっているそう）</p>
+
+<p>これをカスタマイズする。</p>
+
+<p>ターミナルはzshを入れているので、出力内容は、<code>PROMPT</code>で設定されているよう。<br/>
+出力してみると以下のような内容。</p>
+
+<p><code>
+$ echo $PROMPT
+%F{135}%n%f@%F{166}%m%f %F{118}%~%f $git_info[prompt]$
+</code></p>
+
+<p><code>%F{135}</code>といのは色の指定。<code>%F</code>と<code>%f</code>で囲まれた範囲に色をつける。<br/>
+<code>%n</code>はユーザー名。<br/>
+<code>%m</code>はコンピューターのホスト名。<br/>
+<code>%~</code>は、カレントディレクトリ。<br/>
+<code>$git_info[prompt]</code>は、現在のGitリポジトリ表記。<br/>
+(gitリポジトリ表記は色々バリエーションがある？）</p>
+
+<p>この辺は凝りだすと沼っぽいので、とりあえず名前だけいらないと思ったので、カレントディレクトリとGitのリポジトリ名だけでにしておいた。</p>
+
+<p><code>
+PROMPT='%F{8}%~%f $git_info[prompt] $ '
+</code></p>
+
+<p>これをデフォルトの設定にするために、<code>~/.zshrc</code>に追記しておく。<br/>
+これでユーザー名などが表記されなくなった。</p>
+
+<h2>Rubyのバージョン表記</h2>
+
+<p>いつのまにやらrubyのバージョンが右側に表示されるようになっている。<br/>
+これはこれで便利なんだろうけれど、残念ながらruby使いではないので、これを非表示にしてみる。</p>
+
+<p>右側に表示させるには、<code>RPROMPT</code>という環境変数を使うよう。<br/>
+結局どこでこの設定をしているかがわからなかったので、同じく、<code>~/.zshrc</code>に設定し、上書きして対処した。</p>
+
+<p><code>
+RPROMPT=
+</code></p>
+
+<h1>参考</h1>
+
+<ul>
+<li><a href="http://qiita.com/ka_/items/f1ebdde1e7fdf41c80a3">Asciinema の紹介 &ndash; Qiita</a></li>
+<li><a href="http://rcmdnk.github.io/blog/2013/12/11/blog-asciinema/">ターミナル操作を録画して公開する: Asciinema</a></li>
+<li><a href="https://asciinema.org/docs/usage">Usage &ndash; asciinema</a></li>
+</ul>
+
+
+<h2>プロンプト関連</h2>
+
+<ul>
+<li><a href="http://qiita.com/Cside/items/8f618409ac8cc368f6d1">いまのPROMPT &ndash; Qiita</a></li>
+<li><a href="https://wiki.archlinuxjp.org/index.php/Zsh?rdfrom=https%3A%2F%2Fwiki.archlinux.org%2Findex.php%3Ftitle%3DZsh_%28%25E6%2597%25A5%25E6%259C%25AC%25E8%25AA%259E%29%26redirect%3Dno#.E3.83.97.E3.83.AD.E3.83.B3.E3.83.97.E3.83.88.E3.81.AE.E3.82.AB.E3.82.B9.E3.82.BF.E3.83.9E.E3.82.A4.E3.82.BA">Zsh &ndash; ArchWiki</a></li>
+<li><a href="http://tegetegekibaru.blogspot.jp/2012/08/zsh_2.html">てげてげきばる日記: zsh 設定 &ndash; プロンプト &ndash;</a></li>
+<li><a href="http://baqamore.hatenablog.com/entry/2014/05/26/221233">zsh のプロンプト &ndash; ばかもりだし</a></li>
+<li><a href="http://qiita.com/iwazer/items/5f57a80b8aac0f4e9839">Bashのプロンプトを変える(OSX) &ndash; Qiita</a></li>
+<li><a href="http://www.yoheim.net/blog.php?q=20140309">[Mac] ターミナルの$前の出力内容をカスタマイズする- YoheiM .NET</a></li>
+<li><a href="http://news.mynavi.jp/column/zsh/002/">漢のzsh (2) 取りあえず、プロンプトを整えておく。カッコつけたいからね | マイナビニュース</a></li>
+<li><a href="http://makimoto.hatenablog.com/entry/show-rbenv-version-on-zsh-prompt">zsh で rbenv の Ruby のバージョンをプロンプトに表示させる &ndash; Stats of the Rivers</a></li>
+</ul>
+
+]]></content>
+  </entry>
+  
+</feed>
