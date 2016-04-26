@@ -4,7 +4,7 @@
   <title><![CDATA[Category: terminal | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/terminal/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2016-04-26T13:46:14+09:00</updated>
+  <updated>2016-04-26T13:51:07+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -159,6 +159,12 @@ PROMPT='%F{8}%~%f $git_info[prompt] $ '
 <p><code>
 RPROMPT=
 </code></p>
+
+<h1>サンプル</h1>
+
+<p>最後に、Asciinemaのバージョンを表記しただけの内容を録画してアップロードしてみたものを埋め込んでおく。</p>
+
+<p><a href="https://asciinema.org/a/43594"><img src="https://asciinema.org/a/43594.png" alt="asciicast" /></a></p>
 
 <h1>参考</h1>
 
