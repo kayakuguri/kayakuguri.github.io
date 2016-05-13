@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2016-04-26T13:51:07+09:00</updated>
+  <updated>2016-05-13T18:26:41+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,207 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[salesforce] エラーが出てもエラーレコード以外は更新させる]]></title>
+    <link href="http://kayakuguri.github.io/blog/2016/05/13/database-upsert/"/>
+    <updated>2016-05-13T17:26:24+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2016/05/13/database-upsert</id>
+    <content type="html"><![CDATA[<p>salesforceでインサート・アップデートする場合、ガバナ制限の関係から都度DMLを発行せずにある程度まとめてやる事が多い。<br/>
+その際に、一件でもエラーが出てしまうと他もまきこまれてロールバックされてしまうので、エラー以外は更新させる方法。</p>
+
+<!-- more -->
+
+
+<h1>通常の方法</h1>
+
+<p>通常の方法、というか、簡易な方法としては、以下のようにインサートする。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>List&lt;Lead&gt; lists = new List&lt;Lead&gt;();
+</span><span class='line'>for(xx){
+</span><span class='line'>  //Leadを作ってaddする処理
+</span><span class='line'>}
+</span><span class='line'>insert lists;</span></code></pre></td></tr></table></div></figure>
+
+
+<p><code>for</code>文の中で<code>insert</code>せずに、リストにまとめておいて外で一回だけ<code>insert</code>する。<br/>
+これで、DMLは一回だけ発行したことになるので、節約が可能。<br/>
+ループの中ではSOQL、DMLはしない。これがapexの鉄則。</p>
+
+<p>しかしこれだと例えば全部で200件インサートする予定があって、そのうち150件目に不備がありエラーが出た場合、
+そこで処理がストップし、それまでにインサートした149件もすべてロールバックされインサート自体がなかったことになる。
+要件によってはこの方がいい場合もあるが、エラーが出たレコード以外は全てインサートしたい場合もある。</p>
+
+<h1>Database Class</h1>
+
+<p>そんな時は、<code>Database</code>クラスを使う。<br/>
+使い方は、<code>Database.insert()</code>とするだけ。</p>
+
+<p>このメソッドの第1引数に、インサートするオブジェクトのリストを、
+第２引数に、エラー時の挙動を入れる。</p>
+
+<ul>
+<li>trueの場合はエラー時には全てロールバック(上記の単純な<code>insert</code>と同じ)(デフォルト)</li>
+<li>falseの場合はエラーレコード以外はインサートする</li>
+</ul>
+
+
+<p>上記の例を書き換えると、以下のようになる。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>List&lt;Lead&gt; lists = new List&lt;Lead&gt;();
+</span><span class='line'>for(xx){
+</span><span class='line'>  //Leadを作ってaddする処理
+</span><span class='line'>}
+</span><span class='line'>Database.insert(lists, false);</span></code></pre></td></tr></table></div></figure>
+
+
+<p>これでエラーのレコード以外はインサートさせる事が出来た。<br/>
+<code>updata</code>、<code>upsert</code>、<code>delete</code> についても同じ。</p>
+
+<p><a href="https://developer.salesforce.com/docs/atlas.ja-jp.200.0.apexcode.meta/apexcode/apex_methods_system_database.htm">Database クラス</a></p>
+
+<h1>Upsert</h1>
+
+<p>upsertも上記と方法は同じだが、upsertでは外部IDの指定が可能になるが、その方法が少し簡易バージョンとは違った。</p>
+
+<p>例えば、<code>Lead</code>オブジェクトの、カスタム項目、<code>UserID__c</code>を外部IDとして指定する場合。<br/>
+簡易バージョンの場合は以下のようになる。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>List&lt;Lead&gt; lists = new List&lt;Lead&gt;();
+</span><span class='line'>//処理中略
+</span><span class='line'>upsert lists UserID__c;</span></code></pre></td></tr></table></div></figure>
+
+
+<p>上記、<code>Database</code>を使ったパターンだと、ドキュメントには以下のように書かれている。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>upsert(recordToUpsert, externalIdField, allOrNone)</span></code></pre></td></tr></table></div></figure>
+
+
+<p>この第二引数の<code>externalIdField</code>が外部IDの指定箇所になるが、型は、<code>Schema.SObjectField</code>となっていて、
+そのまま <code>Database.upsert(lists, UserID__c, false)</code>とやるとエラーが出る。</p>
+
+<p>なので以下のようにして指定したい項目の<code>Schema.SObjectField</code>を取得して指定してやる必要がある。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>List&lt;Lead&gt; lists = new List&lt;Lead&gt;();
+</span><span class='line'>//処理中略
+</span><span class='line'>Schema.DescribeFieldResult F = Lead. UserID__c.getDescribe();
+</span><span class='line'>Schema.sObjectField T = F.getSObjectField();
+</span><span class='line'>Database.upsert(lists, T, false);</span></code></pre></td></tr></table></div></figure>
+
+
+<p>これで外部IDを指定したアップサートが可能となる。</p>
+
+<p><a href="https://developer.salesforce.com/docs/atlas.ja-jp.200.0.apexcode.meta/apexcode/apex_class_Schema_SObjectField.htm">SObjectField クラス</a></p>
+
+<h1>エラーハンドリング</h1>
+
+<p>さて、DMLでエラーが発生した場合、その内容を取得するには、<code>try..catch</code>で例外を拾っていた。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>try{
+</span><span class='line'>  insert lists;
+</span><span class='line'>}catch(DmlException e){
+</span><span class='line'>  System.debug(e.getMessage());
+</span><span class='line'>  System.debug(e.getStackTraceString());
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<p></p>
+
+<p><a href="https://developer.salesforce.com/docs/atlas.ja-jp.200.0.apexcode.meta/apexcode/apex_classes_exception_methods.htm">Exception クラスおよび組み込み例外</a></p>
+
+<p>しかし、<code>Database</code>を使ってinsertなどをした場合は別の方法で取得する。<br/>
+というか、エラーだけでなく、結果を一件ずつ取得することが出来るため、それらからエラー分を取得する、という形になる。</p>
+
+<p><code>SaveResult</code>クラスを使用する。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>List&lt;Database.SaveResult&gt; res_lists = Database.insert(lists, false);</span></code></pre></td></tr></table></div></figure>
+
+
+<p>取得した結果から、成功、失敗を取得し、内容を取得したりする。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>List&lt;Database.SaveResult&gt; res_lists = Database.insert(lists, false);
+</span><span class='line'>for (Database.SaveResult res : res_lists) {
+</span><span class='line'>  if(res.isSuccess()){
+</span><span class='line'>      //成功時
+</span><span class='line'>  }else{
+</span><span class='line'>      //失敗時
+</span><span class='line'>      for(Database.Error err : res.getErrors()) {
+</span><span class='line'>          System.debug(err.getStatusCode());
+</span><span class='line'>          System.debug(err.getMessage());
+</span><span class='line'>      }
+</span><span class='line'>  }
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<p>例えば出力内容は以下のような感じ。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>DEBUG|REQUIRED_FIELD_MISSING
+</span><span class='line'>値を入力してください: [LastName]</span></code></pre></td></tr></table></div></figure>
+
+
+<p>この <code>SaveResult</code> は、インサート時の結果を取得するためのクラスで、
+インサート、アップサート、アップサート、デリート、それぞれのクラスが別々に用意されている。</p>
+
+<ul>
+<li>insert &ndash; SaveResult</li>
+<li>update &ndash; UndeleteResult</li>
+<li>upsert &ndash; UpsertResult</li>
+<li>delete &ndash; DeleteResult</li>
+</ul>
+
+
+<p>詳しくは、Apex 開発者ガイド、を参照。<br/>
+(直接のリンクがなぜか貼れなかった）</p>
+
+<p><a href="https://developer.salesforce.com/docs/atlas.ja-jp.apexcode.meta/apexcode/apex_namespace_Database.htm">Apex開発者ガイド &ndash; リファレンス &ndash; Database名前空間</a></p>
+
+<h1>まとめ</h1>
+
+<p>以上で一通り想定していた動作をさせることができた。<br/>
+エラー時に他をロールバックするかどうかとかは、結構忘れがちになるけれど、結構難しい問題。<br/>
+仕様策定時にきちんと考慮していきたい。</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[ターミナル録画サービスAsciinemaを使ってみてプロンプトも変更した]]></title>
@@ -2219,110 +2420,6 @@ CSVの出力も出来た。</p>
 <a href="https://github.com/keenlabs/KeenClient-PHP">keenlabs/KeenClient-PHP · GitHub</a><br/>
 <a href="http://onori.github.io/post/laravel-keenio-heroku/">laravel&#43;Keen.io&#43;herokuで簡易解析 &middot;  MAN.IN.BLOG</a><br/>
 <a href="http://factage.com/2014/02/21/growthhack-analytics-by-keen-io/">Keen IOでグロースハックするための分析をする | yujilog</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[herokuでhtaccessを使ってIPアドレスによる制限を設定する]]></title>
-    <link href="http://kayakuguri.github.io/blog/2015/10/05/heroku-htaccess-allow-ip/"/>
-    <updated>2015-10-05T16:25:49+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2015/10/05/heroku-htaccess-allow-ip</id>
-    <content type="html"><![CDATA[<p>herokuにて構築しているapacheアプリにて、特定のIPからしかアクセス出来ないようにするために、<br/>
-htaccessにて制限をかけようとしてたのだけど、どうも上手くいかなくてハマったのでメモ。</p>
-
-<!-- more -->
-
-
-<p>通常だと、以下のようになる。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>order deny,allow
-</span><span class='line'>deny from all
-</span><span class='line'>allow from 124.xx.xxx.xxx</span></code></pre></td></tr></table></div></figure>
-
-
-<p>この場合、制御は、拒否→許可、の順番で、<br/>
-まず全て拒否して、<code>124.xx.xxx.xxx</code>からのアクセスのみ許可、という流れ。</p>
-
-<p>しかし、herokuではこれでは上手くいかなかった。</p>
-
-<p>というのも、herokuではサーバー側で負荷分散するためにロードバランサが使用されている。<br/>
-(dynoが1の場合でも振り分けはされないけれど利用はされているみたい）<br/>
-これによって、実際にアプリに到達するIPアドレスが、アクセス元のIPアドレスからロードバランサを経由したものに変わってしまう。<br/>
-しかもそのIPは都度、変わってしまうよう。</p>
-
-<p>これだとIPアドレスによる制限がかけられないのだけど、それを解決する仕組みとして、<br/>
-<code>X-FORWARDED-FOR</code> という方法があるらしい。<br/>
-<a href="https://ja.wikipedia.org/wiki/X-Forwarded-For">X-Forwarded-For &ndash; Wikipedia</a></p>
-
-<p>それを利用する事で、アクセス元のIPアドレスをロードバランサやプロキシを挟んだとしてもそのままアプリに通知する事が出来るようになるよう。</p>
-
-<p>実際のコードは以下。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>SetEnvIf X-Forwarded-For 124.xx.xxx.xxx allowip
-</span><span class='line'>
-</span><span class='line'>order deny,allow
-</span><span class='line'>deny  from all
-</span><span class='line'>allow from env=allowip</span></code></pre></td></tr></table></div></figure>
-
-
-<p><code>allowip</code>は変数名なのでなんでもよい。<br/>
-こうやって記述することで、heroku上でも指定のIPアドレスのみ許可してやることが出来た。</p>
-
-<p>指定のIPアドレスのみ拒否する場合も書き方は同じ。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>SetEnvIf X-Forwarded-For 124.xx.xxx.xxx denyip
-</span><span class='line'>
-</span><span class='line'>order allow,deny
-</span><span class='line'>allow from all
-</span><span class='line'>deny from env=denyip</span></code></pre></td></tr></table></div></figure>
-
-
-<p>複数指定する場合は、変数を複数定義してやるだけで大丈夫だった。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>SetEnvIf X-Forwarded-For 124.xx.xxx.xxx allowip1
-</span><span class='line'>SetEnvIf X-Forwarded-For 196.xx.xxx.xxx allowip2
-</span><span class='line'>
-</span><span class='line'>order deny,allow
-</span><span class='line'>deny  from all
-</span><span class='line'>allow from env=allowip1
-</span><span class='line'>allow from env=allowip2</span></code></pre></td></tr></table></div></figure>
-
-
-<p>また、これはロードバランサ利用に限った話ではないけれど、IPアドレスの範囲指定をした場合には、<br/>
-CIDR(サイダー)形式での表記で書いてやると実現可能。<br/>
-以下のツールで厳密な範囲指定をしてやることが出来る。</p>
-
-<p><a href="http://ipvx.info/ipv4/twoip2cidr/">２つのIPアドレス範囲を厳密にCIDR化ツール | IPV46</a></p>
-
-<h2>参考</h2>
-
-<p><a href="http://blog.mizoshiri.com/archives/1753">ロードバランサーやプロキシー経由でも.htaccessでのIPアドレスを制限したい場合</a><br/>
-<a href="http://ipvx.info/2015/02/strictly-conv-range-to-cidr/">２つのIPアドレスの範囲をCIDRに厳密に変換するってどういう事？ | IPV46</a></p>
-
-<hr />
-
-<p>ちなみに、herokuアプリから外にアクセスする際のIPアドレスの固定方法は以下を参考に。<br/>
-<a href="http://kayakuguri.github.io/blog/2014/09/26/static-ip-heroku/">[heroku]QuotaGuard Staticを使ってHerokuでのIP固定を試してみる</a></p>
 ]]></content>
   </entry>
   
