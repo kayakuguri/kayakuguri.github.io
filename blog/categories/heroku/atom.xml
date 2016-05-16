@@ -4,7 +4,7 @@
   <title><![CDATA[Category: heroku | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/heroku/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2016-05-16T17:41:54+09:00</updated>
+  <updated>2016-05-16T17:42:39+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -23,6 +23,17 @@
 
 <!-- more -->
 
+
+<h1>共有する理由</h1>
+
+<p>環境変数にパスワードなどをコピペするよりも確実、という理由もあるが、一番大きなところとしては、
+メンテナンスなどでアドオンのDB名やユーザー名などの情報が変わってしまうことがあるよう。<br/>
+その時に、直接入れているアプリの方では自動的に環境変数も書き換わるため支障はないが、
+コピペで設定している他のアプリが合った場合には参照が出来なくなってしまう。
+その時に共有設定していれば、設定しているアプリの環境変数も自動で書き換わるためメンテナンスの手間がなくなる。
+なによりも突然アクセスできなくなる事がなくなる、というわけ。</p>
+
+<p>コピペなんていう不確定な方法よりもherokuの公式機能に乗った方が確実に安全。</p>
 
 <h1>アドオンの追加</h1>
 
@@ -113,17 +124,6 @@ $ heroku addons:destroy postgresql-opaque-93277</p>
 Destroying postgresql-opaque-93277 on dog&hellip; done, (free)
 Removing vars for DATABASE from dog and restarting&hellip; done, v13
 ```</p></blockquote>
-
-<h1>共有する理由</h1>
-
-<p>環境変数にパスワードなどをコピペするよりも確実、という理由もあるが、一番大きなところとしては、
-メンテナンスなどでアドオンのDB名やユーザー名などの情報が変わってしまうことがあるよう。<br/>
-その時に、直接入れているアプリの方では自動的に環境変数も書き換わるため支障はないが、
-コピペで設定している他のアプリが合った場合には参照が出来なくなってしまう。
-その時に共有設定していれば、設定しているアプリの環境変数も自動で書き換わるためメンテナンスの手間がなくなる。
-なによりも突然アクセスできなくなる事がなくなる、というわけ。</p>
-
-<p>コピペなんていう不確定な方法よりもherokuの公式機能に乗った方が確実に安全。</p>
 
 <h1>アドオン名の指定</h1>
 
