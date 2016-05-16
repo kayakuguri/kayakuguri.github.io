@@ -4,7 +4,7 @@
   <title><![CDATA[Category: heroku | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/heroku/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2016-05-16T17:42:39+09:00</updated>
+  <updated>2016-05-16T17:44:11+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -77,7 +77,7 @@ Setting DATABASE vars and restarting cat... done, v17
 </code></p>
 
 <p>ここでアドオンの名前を指定する。<br/>
-アドオン一覧で確認すると<code>dob</code>アプリから共有されていることがわかる。</p>
+アドオン一覧で確認すると<code>dog</code>アプリから共有されていることがわかる。</p>
 
 <p>```
 $ heroku addons -a cat</p>
