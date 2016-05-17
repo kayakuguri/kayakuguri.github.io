@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: swift | KayaMemo]]></title>
+  <link href="http://kayakuguri.github.io/blog/categories/swift/atom.xml" rel="self"/>
+  <link href="http://kayakuguri.github.io/"/>
+  <updated>2016-05-17T15:51:07+09:00</updated>
+  <id>http://kayakuguri.github.io/</id>
+  <author>
+    <name><![CDATA[萱潜]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[[swift]リターンキーが押されたら次の入力欄へ移動する]]></title>
+    <link href="http://kayakuguri.github.io/blog/2016/05/17/swift-textfield-change-forcus/"/>
+    <updated>2016-05-17T15:48:08+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2016/05/17/swift-textfield-change-forcus</id>
+    <content type="html"><![CDATA[<p>入力欄が複数ある画面で、リターンキーをタップして次の入力欄へ移動する処理を調べたのでメモ。</p>
+
+<!-- more -->
+
+
+<h1>入力欄の設定</h1>
+
+<p>以下のように、入力欄が２つあり、メールアドレスの入力欄でリターンキーをタップすると、次のパスワード入力欄にフォーカスが移動するようにする。</p>
+
+<p><img src="/images/2016/05/login01.jpg" alt="" /></p>
+
+<p>設定したい入力欄(ログインIDの入力欄)を選択し、inspecotrから<code>tag</code>を設定する。</p>
+
+<p><img src="/images/2016/05/login02.jpg" alt="" /></p>
+
+<p>フォーカスさせる順番に、1,2,3と設定する。</p>
+
+<h1>Delgate</h1>
+
+<p>リターンキーが押されたイベントを検知するために、クラスに<code>UITextFieldDelegate</code>を追加する。</p>
+
+<p>```swift
+class ViewController: UIViewController, UITextFieldDelegate {</p>
+
+<pre><code>...
+</code></pre>
+
+<p>```</p>
+
+<p>ロード時のコード内で判定するテキストフィールドの<code>delegate</code>を自身に設定する。</p>
+
+<p>```swift
+override func viewDidLoad() {</p>
+
+<pre><code>super.viewDidLoad()
+login_txt.delegate = self
+</code></pre>
+
+<p>}
+```</p>
+
+<p>ここまで設定すると、リターンキーが押された時に、<code>textFieldShouldReturn</code>の関数が自動で実行されるようになる。</p>
+
+<p>```swift
+func textFieldShouldReturn(textField: UITextField) &ndash;> Bool {</p>
+
+<pre><code>//リターンキーが押された時に実行される
+</code></pre>
+
+<p>}
+```</p>
+
+<h1>フォーカスの移動</h1>
+
+<p>これは以下の記事を使わせてもらった。<br/>
+<a href="http://qiita.com/mm36/items/848e93d590ef5c41e43f">ios アプリのテキスト入力で次のテキストボックスにサクッと移動する方法</a></p>
+
+<p>```swift
+func textFieldShouldReturn(textField: UITextField) &ndash;> Bool {</p>
+
+<pre><code>// 今フォーカスが当たっているテキストボックスからフォーカスを外す
+textField.resignFirstResponder()
+// 次のTag番号を持っているテキストボックスがあれば、フォーカスする
+let nextTag = textField.tag + 1
+if let nextTextField = self.view.viewWithTag(nextTag) {
+    nextTextField.becomeFirstResponder()
+}
+return true
+</code></pre>
+
+<p>}
+```</p>
+
+<h1>完成</h1>
+
+<p>これでリターンキーが押された時に指定した入力欄にフォーカスが移動出来るように設定出来た。</p>
+
+<h1>参考</h1>
+
+<ul>
+<li><a href="http://anthrgrnwrld.hatenablog.com/entry/2015/06/26/204031">テキストフィールドにテキスト入力後、Returnでキーボードを隠す方法 [Swift1.2][UITextField] &ndash; MILLEN BOX</a></li>
+</ul>
+
+]]></content>
+  </entry>
+  
+</feed>
