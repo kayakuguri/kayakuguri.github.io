@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2016-05-16T17:44:11+09:00</updated>
+  <updated>2016-05-17T15:53:28+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,100 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[swift]リターンキーが押されたら次の入力欄へ移動する]]></title>
+    <link href="http://kayakuguri.github.io/blog/2016/05/17/swift-textfield-change-forcus/"/>
+    <updated>2016-05-17T15:48:08+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2016/05/17/swift-textfield-change-forcus</id>
+    <content type="html"><![CDATA[<p>入力欄が複数ある画面で、リターンキーをタップして次の入力欄へ移動する処理を調べたのでメモ。</p>
+
+<!-- more -->
+
+
+<h1>入力欄の設定</h1>
+
+<p>以下のように、入力欄が２つあり、メールアドレスの入力欄でリターンキーをタップすると、次のパスワード入力欄にフォーカスが移動するようにする。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2016/05/login01.jpg" alt="" /></p>
+
+<p>設定したい入力欄(ログインIDの入力欄)を選択し、inspecotrから<code>tag</code>を設定する。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2016/05/login02.jpg" alt="" /></p>
+
+<p>フォーカスさせる順番に、1,2,3と設定する。</p>
+
+<h1>Delgate</h1>
+
+<p>リターンキーが押されたイベントを検知するために、クラスに<code>UITextFieldDelegate</code>を追加する。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>class ViewController: UIViewController, UITextFieldDelegate {
+</span><span class='line'>  ...</span></code></pre></td></tr></table></div></figure>
+
+
+<p>ロード時のコード内で判定するテキストフィールドの<code>delegate</code>を自身に設定する。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>override func viewDidLoad() {
+</span><span class='line'>  super.viewDidLoad()
+</span><span class='line'>  login_txt.delegate = self
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<p>ここまで設定すると、リターンキーが押された時に、<code>textFieldShouldReturn</code>の関数が自動で実行されるようになる。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>func textFieldShouldReturn(textField: UITextField) -&gt; Bool {
+</span><span class='line'>  //リターンキーが押された時に実行される
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>フォーカスの移動</h1>
+
+<p>これは以下の記事を使わせてもらった。<br/>
+<a href="http://qiita.com/mm36/items/848e93d590ef5c41e43f">ios アプリのテキスト入力で次のテキストボックスにサクッと移動する方法</a></p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>func textFieldShouldReturn(textField: UITextField) -&gt; Bool {
+</span><span class='line'>    // 今フォーカスが当たっているテキストボックスからフォーカスを外す
+</span><span class='line'>    textField.resignFirstResponder()
+</span><span class='line'>    // 次のTag番号を持っているテキストボックスがあれば、フォーカスする
+</span><span class='line'>    let nextTag = textField.tag + 1
+</span><span class='line'>    if let nextTextField = self.view.viewWithTag(nextTag) {
+</span><span class='line'>        nextTextField.becomeFirstResponder()
+</span><span class='line'>    }
+</span><span class='line'>    return true
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>完成</h1>
+
+<p>これでリターンキーが押された時に指定した入力欄にフォーカスが移動出来るように設定出来た。</p>
+
+<h1>参考</h1>
+
+<ul>
+<li><a href="http://anthrgrnwrld.hatenablog.com/entry/2015/06/26/204031">テキストフィールドにテキスト入力後、Returnでキーボードを隠す方法 [Swift1.2][UITextField] &ndash; MILLEN BOX</a></li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[Heroku] アドオンを共有機能を使って管理する]]></title>
@@ -2371,105 +2465,6 @@ DBの設定内容は、Scotchboxの場合。<br/>
 <p><a href="https://laravel10.wordpress.com/2015/02/21/%E3%83%87%E3%83%BC%E3%82%BF%E3%83%99%E3%83%BC%E3%82%B9%E3%81%AE%E7%92%B0%E5%A2%83%E8%A8%AD%E5%AE%9A/">初めてのLaravel 5.1 : (6) データベースの環境設定 | ララ帳</a><br/>
 <a href="http://laravel.io/forum/02-11-2014-artisan-error-on-migrate-using-vagrant">aravel.io &ndash; The Laravel Community Portal</a><br/>
 <a href="https://snakeycode.wordpress.com/2015/01/02/vagrant-postgresql-and-pgadmin/">Vagrant, PostgreSQL and pgAdmin | Snakey Code</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[heroku アドオン] Filepickerを試してみた]]></title>
-    <link href="http://kayakuguri.github.io/blog/2015/10/08/filepicker/"/>
-    <updated>2015-10-08T10:44:27+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2015/10/08/filepicker</id>
-    <content type="html"><![CDATA[<p>ファイルストレージサービスである、Filepickerを試してみた。</p>
-
-<!-- more -->
-
-
-<p><img src="http://kayakuguri.github.io/images/2015/10/filepicker01.jpg" alt="" /></p>
-
-<p><a href="https://www.filepicker.com/">Easy, Powerful File Uploads | Filepicker</a><br/>
-<a href="https://addons.heroku.com/filepicker">Filepicker | Add-ons | Heroku</a></p>
-
-<p>売りとしては、簡単に様々なクラウドサービスと連携出来る事、らしい。<br/>
-サポートされているサービスは以下のよう。</p>
-
-<ul>
-<li>Alfresco</li>
-<li>Amazon Cloud Drive</li>
-<li>Box</li>
-<li>Cloudapp</li>
-<li>Dropbox</li>
-<li>Evernote</li>
-<li>Facebook</li>
-<li>Flickr</li>
-<li>Github</li>
-<li>Google Drive</li>
-<li>Instagram</li>
-<li>One Drive</li>
-<li>Picasa</li>
-</ul>
-
-
-<h2>インストール</h2>
-
-<p>herokuにインストール。</p>
-
-<pre><code>$ heroku addons:create filepicker
-</code></pre>
-
-<p>フリープランの場合は、1ファイル20MBの、月500ファイルまで利用可能。<br/>
-herokuのプラントは少し違うけれど、値段は以下。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2015/10/filepicker02.jpg" alt="" /></p>
-
-<h2>導入</h2>
-
-<p>インストール後、herokuのダッシュボードからfilepickerのアドオンをクリックして、filepickerのダッシュボードに遷移すると、使い方の説明が色々出てきて最後に貼り付けるべきコードが表示される。<br/>
-後から表示させる場合は、アプリケーションを選んだ後、DachbordのGet Startedをクリックすると表示出来る。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2015/10/filepicker03.jpg" alt="" /></p>
-
-<p>ここで表示されるFor Engineersのコードを貼り付けるだけ。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2015/10/filepicker04.jpg" alt="" /></p>
-
-<pre><code>&lt;script type="text/javascript" src="http://kayakuguri.github.io//api.filepicker.io/v2/filepicker.js"&gt;&lt;/script&gt;
-&lt;input type="filepicker" data-fp-apikey="xxx" onchange="alert(event.fpfile.url)"&gt;
-</code></pre>
-
-<p>これを貼り付けたHTMLをアップすれば完了。以上。<br/>
-アップしてアクセスすると以下の画面となる。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2015/10/filepicker05.jpg" alt="" /></p>
-
-<p>ボタンをクリックするとダイアログが表示される。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2015/10/filepicker06.jpg" alt="" /></p>
-
-<p>アップロードすると、URLがアラートで表示。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2015/10/filepicker07.jpg" alt="" /></p>
-
-<p>FilepickerのAssets、にて確認が出来る。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2015/10/filepicker08.jpg" alt="" /></p>
-
-<p>たった２行追加するだけで完成。本当に簡単すぎてやることがない。</p>
-
-<p>フリープランでは1ファイル20Mの制限があるように書かれていたのだけど、<br/>
-試しに200Mくらいのファイルを上げてみても問題なくアップ出来た。<br/>
-アップ時に制限をかけているわけではなく、そのまま利用していると注意やプラン変更の指示がくる仕様なのかもしれない。</p>
-
-<p>とにかく、herokuからでも何の問題もなく大きいファイルをアップロード出来た。<br/>
-(クライアントから直接アップしているので、サーバーの環境は関係ない）</p>
-
-<h2>参考</h2>
-
-<p>様々な環境に組み込めるようにプラグインが用意されている。<br/>
-<a href="https://www.filepicker.com/documentation/integrations/libraries">Integration Libraries | Filepicker</a></p>
-
-<p>様々なツールを利用出来るようにしたりするカスタマイズなんかも詳しく説明されてる。<br/>
-ドキュメントも豊富っぽい。<br/>
-<a href="https://www.filepicker.com/documentation/">Documentation | Filepicker</a></p>
 ]]></content>
   </entry>
   

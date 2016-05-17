@@ -4,7 +4,7 @@
   <title><![CDATA[Category: swift | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/swift/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2016-05-17T15:51:07+09:00</updated>
+  <updated>2016-05-17T15:53:28+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -39,7 +39,7 @@
 
 <p>リターンキーが押されたイベントを検知するために、クラスに<code>UITextFieldDelegate</code>を追加する。</p>
 
-<p>```swift
+<p>```
 class ViewController: UIViewController, UITextFieldDelegate {</p>
 
 <pre><code>...
@@ -49,7 +49,7 @@ class ViewController: UIViewController, UITextFieldDelegate {</p>
 
 <p>ロード時のコード内で判定するテキストフィールドの<code>delegate</code>を自身に設定する。</p>
 
-<p>```swift
+<p>```
 override func viewDidLoad() {</p>
 
 <pre><code>super.viewDidLoad()
@@ -61,7 +61,7 @@ login_txt.delegate = self
 
 <p>ここまで設定すると、リターンキーが押された時に、<code>textFieldShouldReturn</code>の関数が自動で実行されるようになる。</p>
 
-<p>```swift
+<p>```
 func textFieldShouldReturn(textField: UITextField) &ndash;> Bool {</p>
 
 <pre><code>//リターンキーが押された時に実行される
@@ -75,7 +75,7 @@ func textFieldShouldReturn(textField: UITextField) &ndash;> Bool {</p>
 <p>これは以下の記事を使わせてもらった。<br/>
 <a href="http://qiita.com/mm36/items/848e93d590ef5c41e43f">ios アプリのテキスト入力で次のテキストボックスにサクッと移動する方法</a></p>
 
-<p>```swift
+<p>```
 func textFieldShouldReturn(textField: UITextField) &ndash;> Bool {</p>
 
 <pre><code>// 今フォーカスが当たっているテキストボックスからフォーカスを外す
