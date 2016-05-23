@@ -4,7 +4,7 @@
   <title><![CDATA[Category: salesforce | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/salesforce/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2016-05-23T20:27:24+09:00</updated>
+  <updated>2016-05-23T20:28:11+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -362,11 +362,11 @@ let req = NSMutableURLRequest(URL: URL!)</p>
 
 <p>req.addValue(&ldquo;(self.token_type) (self.access_token)&rdquo;, forHTTPHeaderField: &ldquo;Authorization&rdquo;) //ヘッダ</p>
 
-<p>let user_email = &ldquo;<a href="&#109;&#97;&#x69;&#x6c;&#x74;&#111;&#58;&#x78;&#x78;&#x78;&#64;&#x65;&#x78;&#x61;&#109;&#112;&#x6c;&#101;&#x2e;&#99;&#111;&#x6d;">&#120;&#120;&#120;&#64;&#101;&#120;&#97;&#x6d;&#112;&#108;&#x65;&#x2e;&#x63;&#111;&#x6d;</a>&rdquo;
+<p>let user_email = &ldquo;<a href="&#109;&#97;&#105;&#x6c;&#x74;&#111;&#58;&#x78;&#x78;&#120;&#64;&#x65;&#x78;&#x61;&#x6d;&#x70;&#x6c;&#x65;&#x2e;&#99;&#111;&#x6d;">&#120;&#x78;&#120;&#x40;&#x65;&#120;&#97;&#109;&#112;&#108;&#101;&#46;&#x63;&#111;&#109;</a>&rdquo;
 let user_pass = &ldquo;xxx&rdquo;</p>
 
 <p>req.HTTPMethod = &ldquo;POST&rdquo;
-let paramString = &ldquo;email=(user_email)@nobel.jp&amp;passwd=(user_pass)&rdquo;
+let paramString = &ldquo;email=(user_email)&amp;passwd=(user_pass)&rdquo;
 req.HTTPBody = paramString.dataUsingEncoding(NSUTF8StringEncoding)
 let configuration = NSURLSessionConfiguration.defaultSessionConfiguration()
 let session = NSURLSession(configuration: configuration, delegate: nil, delegateQueue: NSOperationQueue.mainQueue())</p>

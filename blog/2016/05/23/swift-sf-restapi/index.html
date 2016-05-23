@@ -542,7 +542,7 @@ apexの作り方は割愛。エンドポイントはapex内で以下のように
 </span><span class='line'>let user_pass = "xxx"
 </span><span class='line'>
 </span><span class='line'>req.HTTPMethod = "POST"
-</span><span class='line'>let paramString = "email=\(user_email)@nobel.jp&passwd=\(user_pass)"
+</span><span class='line'>let paramString = "email=\(user_email)&passwd=\(user_pass)"
 </span><span class='line'>req.HTTPBody = paramString.dataUsingEncoding(NSUTF8StringEncoding)
 </span><span class='line'>let configuration = NSURLSessionConfiguration.defaultSessionConfiguration()
 </span><span class='line'>let session = NSURLSession(configuration: configuration, delegate: nil, delegateQueue: NSOperationQueue.mainQueue())
