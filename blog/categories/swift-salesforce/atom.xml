@@ -1,0 +1,396 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: swift,salesforce | KayaMemo]]></title>
+  <link href="http://kayakuguri.github.io/blog/categories/swift-salesforce/atom.xml" rel="self"/>
+  <link href="http://kayakuguri.github.io/"/>
+  <updated>2016-05-23T20:21:25+09:00</updated>
+  <id>http://kayakuguri.github.io/</id>
+  <author>
+    <name><![CDATA[萱潜]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[swiftからsalesforceへOAuth認証してRestAPIへ接続する]]></title>
+    <link href="http://kayakuguri.github.io/blog/2016/05/23/swift-sf-restapi/"/>
+    <updated>2016-05-23T20:18:58+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2016/05/23/swift-sf-restapi</id>
+    <content type="html"><![CDATA[<p>iOSアプリからSalesforceとRestAPIで通信するためにOAuth認証してみた。</p>
+
+<!-- more -->
+
+
+<h1>認証方法の種類</h1>
+
+<p>Salesforceへ接続するためにはいくつか方法があるが、</p>
+
+<ul>
+<li><a href="https://help.salesforce.com/apex/HTViewHelpDoc?id=remoteaccess_oauth_jwt_flow.htm&amp;language=ja">OAuth 2.0 JWT べアラートークンフロー</a></li>
+<li><a href="https://help.salesforce.com/apex/HTViewHelpDoc?id=remoteaccess_oauth_SAML_bearer_flow.htm&amp;language=ja">OAuth 2.0 SAML ベアラーアサーションフロー</a></li>
+<li><a href="https://help.salesforce.com/apex/HTViewHelpDoc?id=remoteaccess_oauth_web_server_flow.htm&amp;language=ja">OAuth 2.0 Web サーバ認証フロー</a></li>
+<li><a href="https://help.salesforce.com/apex/HTViewHelpDoc?id=remoteaccess_oauth_username_password_flow.htm&amp;language=ja">OAuth 2.0 ユーザ名パスワードフロー</a></li>
+</ul>
+
+
+<p>今回はPHPでも利用したことがある、ユーザー名パスワードフロー、を利用してみる。
+たぶん、パスワードの保持などが必要など、セキュリティとしては一番低いものっぽいので、JWTなどで認証した方がいいのかもしれない。</p>
+
+<p>SwiftのライブラリとしてCocoapodsで提供されている認証用ライブラリがあるが、このライブラリではWebサーバ認証フローが使われており、不特定多数との接続には向いていない。
+(Webサーバ認証フローは、Salesforceのアカウントを取得している前提となる。Facebookログイン、のようなイメージ）</p>
+
+<h1>準備</h1>
+
+<p>Salesforce側へ接続するために必要になる情報は以下。
+接続アプリケーションは事前に作成しておく。</p>
+
+<ul>
+<li>ログインID</li>
+<li>ログインパスワード</li>
+<li>セキュリティトークン(IPアドレスを指定している場合は必要なし)</li>
+<li>コンシューマ鍵 (クライアントID)</li>
+<li>コンシューマの秘密 (クライアントシークレット)</li>
+</ul>
+
+
+<h1>環境変数</h1>
+
+<p>開発中はSandboxへ、リリース時には本番環境へ、と接続先を切り替えたいので、環境変数へ上記の内容を保存する。</p>
+
+<ul>
+<li>参考: <a href="http://shibuya-3percent.hatenablog.com/entry/2016/01/18/024948">Swiftでの環境変数を使ってDebug/Releaseで定数を使い分ける</a></li>
+</ul>
+
+
+<p>まず、Build Settingsに値を追加する。</p>
+
+<p><img src="/images/2016/05/sf-swift01.jpg" alt="" /></p>
+
+<p>プロジェクトから、<code>TARGETS</code>ファイルを選択。
+<code>Build Setting</code>を選んで、プラスマークをクリックして、<code>Add User-Defined Setting</code>を選ぶ。</p>
+
+<p>左側には設定したい項目名をKeyとして登録。
+自動的に、<code>Debug</code>と<code>Release</code>が表示されるので、それぞれの値を入れる。</p>
+
+<p><img src="/images/2016/05/sf-swift02.jpg" alt="" /></p>
+
+<p>次に、<code>Info.plist</code>に定義したキーを呼び出せるように設定する。
+<code>Infomation Property List</code>の<code>+</code>をクリックして追加する。</p>
+
+<p><code>Key</code>は実際にコードから呼び出す際に使用する名前となる。
+<code>Type</code>は<code>String</code>とする。
+<code>Value</code>は定義した値を呼び出すため、<code>${KEY}</code>というように記述する。</p>
+
+<p><img src="/images/2016/05/sf-swift03.jpg" alt="" /></p>
+
+<p>ここまでで設定は完了。
+以下のコードで呼び出せる。</p>
+
+<p><code>
+let SF_LOGIN_URL = NSBundle.mainBundle().objectForInfoDictionaryKey("SF_LOGIN_URL") as! String
+</code></p>
+
+<h1>OAuth認証</h1>
+
+<p>準備した値を使用してアクセストークンを要求する。
+アクセストークンの要求は、指定のエンドポイントへPOSTで値を送信する事で行う。</p>
+
+<p>エンドポイント
+* 本番 : <a href="https://login.salesforce.com/services/oauth2/token">https://login.salesforce.com/services/oauth2/token</a>
+* sandbox : <a href="https://test.salesforce.com/services/oauth2/token">https://test.salesforce.com/services/oauth2/token</a></p>
+
+<p>送信する値</p>
+
+<ul>
+<li>grant_type — <code>password</code></li>
+<li>client_id — 接続アプリケーション定義のコンシューマ鍵</li>
+<li>client_secret — 接続アプリケーション定義のコンシューマの秘密</li>
+<li>username — ユーザ名</li>
+<li>password — パスワード (+セキュリティトークン)</li>
+</ul>
+
+
+<p>パスワードはIPを指定していない場合は、パスワードの後ろにセキュリティトークンを繋げてやる必要がある。</p>
+
+<h2>POST送信</h2>
+
+<p>POST送信は、<code>NSURLConnection</code>がディスコンになったので、<code>NSURLSession</code>を使用する必要があるとのこと。
+非同期での通信が基本になったよう。</p>
+
+<ul>
+<li>参考: <a href="http://qiita.com/fmtonakai/items/30d8b9bcc3dd2b8d228b">Sayonara NSURLConnection &ndash; Qiita</a></li>
+</ul>
+
+
+<p>送信し、返ってきた値をJSONに変換して受け取る。
+以下を参考にしてコードを記述した。</p>
+
+<ul>
+<li><a href="http://swiftdeveloperblog.com/send-http-post-request-example-using-swift-and-php/">Send HTTP POST Request example using Swift and PHP &ndash; Swift Developer Blog</a></li>
+<li><a href="http://ohtacky.blogspot.jp/2015/09/swiftios9json.html">&#12304;swift&#12305;iOS9におけるjsonの取得 sendAsynchronousRequestが使えない&#12290; ~ ネットショップの立ち上げから運営までの作業ログ</a></li>
+</ul>
+
+
+<p>```
+let SF_LOGIN_URL = NSBundle.mainBundle().objectForInfoDictionaryKey(&ldquo;SF_LOGIN_URL&rdquo;) as! String
+let SF_CLIENT_ID = NSBundle.mainBundle().objectForInfoDictionaryKey(&ldquo;SF_CLIENT_ID&rdquo;) as! String
+let SF_CLIENT_SECRET = NSBundle.mainBundle().objectForInfoDictionaryKey(&ldquo;SF_CLIENT_SECRET&rdquo;) as! String
+let SF_USERNAME = NSBundle.mainBundle().objectForInfoDictionaryKey(&ldquo;SF_USERNAME&rdquo;) as! String
+let SF_PASSWORD = NSBundle.mainBundle().objectForInfoDictionaryKey(&ldquo;SF_PASSWORD&rdquo;) as! String</p>
+
+<p>let URL = NSURL(string: SF_LOGIN_URL + &ldquo;/services/oauth2/token&rdquo;)
+let req = NSMutableURLRequest(URL: URL!)
+req.HTTPMethod = &ldquo;POST&rdquo;
+let paramString = &ldquo;grant_type=password&amp;client_id=&rdquo; + SF_CLIENT_ID + &ldquo;&amp;client_secret=&rdquo; + SF_CLIENT_SECRET + &ldquo;&amp;username=&rdquo; + SF_USERNAME + &ldquo;&amp;password=&rdquo; + SF_PASSWORD
+req.HTTPBody = paramString.dataUsingEncoding(NSUTF8StringEncoding)</p>
+
+<p>let configuration = NSURLSessionConfiguration.defaultSessionConfiguration()
+let session = NSURLSession(configuration: configuration, delegate: nil, delegateQueue: NSOperationQueue.mainQueue())</p>
+
+<p>let task = session.dataTaskWithRequest(req, completionHandler: {</p>
+
+<pre><code>(let data, let response, let error) -&gt; Void in
+do{
+    let json = try NSJSONSerialization.JSONObjectWithData(data!, options: NSJSONReadingOptions.AllowFragments) as! NSDictionary
+    print(json)
+}catch{
+    print("error")
+}
+</code></pre>
+
+<p>})
+task.resume()
+```</p>
+
+<h3>参考</h3>
+
+<ul>
+<li><a href="http://qiita.com/sushichop/items/ac4ae99b905ce523c2fe">SwiftでHTTPリクエストする &ndash; Qiita</a></li>
+<li><a href="http://www.kaleidosblog.com/nsurlsession-in-swift-get-and-post-data">NSURLSession in Swift: get and post data</a></li>
+</ul>
+
+
+<h2>ATS</h2>
+
+<p>しかしこのまま送信するとエラーが返ってくる。</p>
+
+<p><code>
+2016-05-23 18:56:48.600 XXX-DEV[30024:28386036] CFNetwork SSLHandshake failed (-9824)
+2016-05-23 18:56:48.600 XXX-DEV[30024:28386036] NSURLSession/NSURLConnection HTTP load failed (kCFStreamErrorDomainSSL, -9824)
+</code></p>
+
+<p>これは、iOS9から導入されたATSという機能によるものらしい。
+外部への送信はHTTPSかつセキュアな証明書を使用していないと接続しない、というセキュリティ強化のための機能のよう。
+本来はサーバー側で証明書を変更するなどの対応が好ましいが、salesforce側の証明書を変更するのは不可能なため、例外ドメインを指定して通信を許可してやる。</p>
+
+<p>通信したいドメインがATSに対応しているかどうかは、<code>nscurl</code>コマンドを使用すると調べる事ができるよう。</p>
+
+<ul>
+<li>参考: <a href="http://blog.kishikawakatsumi.com/entry/2015/10/19/121257">接続先がATS (App Transport Security)に対応しているか、または例外の設定をnscurlコマンドで簡単に調べる &ndash; 24/7 twenty-four seven</a></li>
+</ul>
+
+
+<p>このコマンドではATSの設定を変えながらしらみつぶしにチェックしてくれるコマンド、となっている。
+なので、この結果をみながら接続がパスする設定を確認する。</p>
+
+<p><code>
+$ nscurl --ats-diagnostics https://test.salesforce.com/
+</code></p>
+
+<p><code>test.salesforce.com</code>の場合は、
+<code>TLS</code>のバージョンを変更しただけでは通信が失敗しているが、
+<code>Perfect Forward Secrecy</code>を<code>false</code>とした場合にはパスしていることがわかる。</p>
+
+<h1>```</h1>
+
+<p>Configuring TLS exceptions for test.salesforce.com</p>
+
+<hr />
+
+<p>TLSv1.2
+2016-05-23 19:06:14.743 nscurl[30351:28433837] CFNetwork SSLHandshake failed (-9824)
+2016-05-23 19:06:14.744 nscurl[30351:28433837] NSURLSession/NSURLConnection HTTP load failed (kCFStreamErrorDomainSSL, -9824)</p>
+
+<h2>Result : FAIL</h2>
+
+<hr />
+
+<p>TLSv1.1
+2016-05-23 19:06:14.814 nscurl[30351:28433837] CFNetwork SSLHandshake failed (-9824)
+2016-05-23 19:06:14.815 nscurl[30351:28433837] NSURLSession/NSURLConnection HTTP load failed (kCFStreamErrorDomainSSL, -9824)</p>
+
+<h2>Result : FAIL</h2>
+
+<hr />
+
+<p>TLSv1.0
+2016-05-23 19:06:14.883 nscurl[30351:28433837] CFNetwork SSLHandshake failed (-9824)
+2016-05-23 19:06:14.883 nscurl[30351:28433837] NSURLSession/NSURLConnection HTTP load failed (kCFStreamErrorDomainSSL, -9824)</p>
+
+<h2>Result : FAIL</h2>
+
+<p>================================================================================</p>
+
+<p>Configuring PFS exceptions for test.salesforce.com</p>
+
+<hr />
+
+<p>Disabling Perfect Forward Secrecy</p>
+
+<h2>Result : PASS</h2>
+
+<p>```</p>
+
+<p>コマンドで<code>--verbose</code>オプションをつけると設定の内容を具体的に表示させる事ができる。</p>
+
+<p><code>
+$ nscurl --ats-diagnostics --verbose https://test.salesforce.com/
+</code></p>
+
+<p>以下は失敗。
+```
+{</p>
+
+<pre><code>NSExceptionDomains =     {
+    "test.salesforce.com" =         {
+        NSExceptionMinimumTLSVersion = "TLSv1.2";
+    };
+};
+</code></pre>
+
+<p>}
+```</p>
+
+<p>以下は成功。</p>
+
+<p>```
+{</p>
+
+<pre><code>NSExceptionDomains =     {
+    "test.salesforce.com" =         {
+        NSExceptionRequiresForwardSecrecy = false;
+    };
+};
+</code></pre>
+
+<p>}
+```</p>
+
+<p>この結果から<code>info.plist</code>に設定を追加していく。</p>
+
+<ul>
+<li><p>参考: <a href="http://shirakiya.hatenablog.com/entry/2015/10/03/234816">iOS9から導入されたATSとは？そして回避する方法は？ &ndash; Be a Engineer.</a></p></li>
+<li><p>NSAppTransportSecurity (Dictionary)</p>
+
+<ul>
+<li>NSExceptionDomains (Dictionary)
+
+<ul>
+<li>test.salesforce.com (Dictionary)
+
+<ul>
+<li>NSExceptionRequiresForwardSecrecy (Boolean) &ndash; <code>NO</code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+
+<p><img src="/images/2016/05/sf-swift04.jpg" alt="" /></p>
+
+<p>これでようやく通信に成功し、アクセストークンを取得することが出来た。</p>
+
+<p><code>
+{
+  "access_token":"(ACCESS_TOKEN)",
+  "instance_url":"https://cs5.salesforce.com",
+  "id":"https://test.salesforce.com/id/xxx/xxx",
+  "token_type":"Bearer",
+  "issued_at":"1463998466487",
+  "signature":"(SIGNATURE)"
+}
+</code></p>
+
+<h1>APIへ接続</h1>
+
+<p>今回は自作したApex Rest APIに接続してみる。
+apexの作り方は割愛。エンドポイントはapex内で以下のように指定しているとする。</p>
+
+<p><code>
+@RestResource(urlMapping='/user/login')
+</code></p>
+
+<p>APIへの接続には、アクセストークンを取得した際に一緒に取得した<code>instance_url</code>へ接続する。
+このURLは環境によって変わることがある。
+しかしこのドメインもATSによって接続が失敗してしまう。
+今回は簡易だが、ATSの機能自体をオフにすることで対応する。</p>
+
+<p><code>NSAppTransportSecurity</code>の下に、<code>NSAllowsArbitraryLoads</code>を追加し、<code>true</code>にしてやることで機能自体をオフにすることができる。</p>
+
+<p><img src="/images/2016/05/sf-swift05.jpg" alt="" /></p>
+
+<p>APIへ接続する際には、ヘッダにさきほど取得したアクセストークンを入れてやる。</p>
+
+<ul>
+<li>参考: <a href="http://stackoverflow.com/questions/28526743/how-to-use-alamofire-with-custom-headers-for-post-request">swift &ndash; How to use Alamofire with custom headers for POST request &ndash; Stack Overflow</a></li>
+</ul>
+
+
+<p><code>
+req.addValue("Bearer \(self.access_token)", forHTTPHeaderField: "Authorization")
+</code></p>
+
+<p>アクセストークンを取得した後からのコードは以下となる。
+```
+//OAuth認証後に取得する
+var access_token = json[&ldquo;access_token&rdquo;] as? String
+var instance_url = json[&ldquo;instance_url&rdquo;] as? String
+var token_type = json[&ldquo;token_type&rdquo;] as? String</p>
+
+<p>//APIへ接続
+let URL = NSURL(string: self.instance_url + &ldquo;/services/apexrest/user/login&rdquo;)
+let req = NSMutableURLRequest(URL: URL!)</p>
+
+<p>req.addValue(&ldquo;(self.token_type) (self.access_token)&rdquo;, forHTTPHeaderField: &ldquo;Authorization&rdquo;) //ヘッダ</p>
+
+<p>let user_email = &ldquo;<a href="&#x6d;&#x61;&#x69;&#108;&#116;&#x6f;&#x3a;&#120;&#x78;&#120;&#x40;&#x65;&#120;&#97;&#109;&#x70;&#x6c;&#x65;&#46;&#99;&#x6f;&#x6d;">&#120;&#120;&#x78;&#64;&#101;&#120;&#x61;&#x6d;&#112;&#x6c;&#x65;&#x2e;&#x63;&#x6f;&#109;</a>&rdquo;
+let user_pass = &ldquo;xxx&rdquo;</p>
+
+<p>req.HTTPMethod = &ldquo;POST&rdquo;
+let paramString = &ldquo;email=(user_email)@nobel.jp&amp;passwd=(user_pass)&rdquo;
+req.HTTPBody = paramString.dataUsingEncoding(NSUTF8StringEncoding)
+let configuration = NSURLSessionConfiguration.defaultSessionConfiguration()
+let session = NSURLSession(configuration: configuration, delegate: nil, delegateQueue: NSOperationQueue.mainQueue())</p>
+
+<p>let task = session.dataTaskWithRequest(req, completionHandler: {</p>
+
+<pre><code>(let data, let response, let error) -&gt; Void in
+do{
+    let json = try NSJSONSerialization.JSONObjectWithData(data!, options: NSJSONReadingOptions.AllowFragments) as! NSDictionary
+    print(json)
+}catch{
+    print("error")
+}
+</code></pre>
+
+<p>})
+task.resume()
+```</p>
+
+<p>これで指定のエンドポイントへ接続が出来た。</p>
+
+<h1>まとめ</h1>
+
+<p>とりあえず、アクセストークンを取得してRest APIへ接続、まで一通り出来た。
+後は必要であれば、認証方式をJWTにしたり出来るといいかもしれない。</p>
+
+<p>もしSFへの接続でいいライブラリなどがあれば教えて下さい。</p>
+]]></content>
+  </entry>
+  
+</feed>
