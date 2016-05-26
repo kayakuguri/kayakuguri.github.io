@@ -4,7 +4,7 @@
   <title><![CDATA[Category: salesforce | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/salesforce/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2016-05-23T20:28:11+09:00</updated>
+  <updated>2016-05-26T18:40:33+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,218 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[swift]alamofireとswiftyjsonを使ってAPIからデータを取得する]]></title>
+    <link href="http://kayakuguri.github.io/blog/2016/05/26/alamofire-swiftyjson/"/>
+    <updated>2016-05-26T18:39:28+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2016/05/26/alamofire-swiftyjson</id>
+    <content type="html"><![CDATA[<p>一つ前の投稿でSalesforceへ接続出来たが、HTTP通信の部分とJSONへのパース部分はライブラリを使うのがデファクトスタンダードになりつつある、という情報を仕入れたので試してみる。</p>
+
+<!-- more -->
+
+
+<h1>インストール</h1>
+
+<p>インストールするライブラリは以下の２つ。</p>
+
+<ul>
+<li>Alamofire</li>
+<li>SwiftyJSON</li>
+</ul>
+
+
+<p><code>Alamofire-SwiftyJSON</code>というライブラリも同時に使用している紹介記事が多かったのだが、インストールしてみると以下の様な警告が出た。</p>
+
+<blockquote><p>Alamofire-SwiftyJSON has been deprecated in favor of AlamofireSwiftyJSON</p></blockquote>
+
+<p>気になって調べてみると、以下の様なページが。</p>
+
+<ul>
+<li><a href="https://github.com/pdutourgeerling/Alamofire-SwiftyJSON-Podspec">pdutourgeerling/Alamofire-SwiftyJSON-Podspec: Updated Podspec for Alamofire-SwiftyJSON</a></li>
+</ul>
+
+
+<p>機械翻訳にかけてみると、どうやらAlamofire-SwiftyJSONはAlamofireの古いバージョンである、1.3を使うようになっており、1.3はSwift2に対応していいない。なので、Alamofireの新しいバージョンをインストールするためには直接Githubのリポジトリを指定してやる必要がある、とのことのよう。</p>
+
+<p>今回は特に使わなくても大丈夫だったのでインストールはしないでおいた。</p>
+
+<p><code>Podfile</code>には以下を追加。</p>
+
+<p><code>
+pod 'Alamofire'
+pod 'SwiftyJSON'
+</code></p>
+
+<p><code>$ pod update</code>でインストールした。</p>
+
+<h1>利用</h1>
+
+<p>前回のアクセストークン取得の際のコードは以下。</p>
+
+<p>```
+let URL = NSURL(string: SF_LOGIN_URL + &ldquo;/services/oauth2/token&rdquo;)
+let req = NSMutableURLRequest(URL: URL!)
+req.HTTPMethod = &ldquo;POST&rdquo;
+let paramString = &ldquo;grant_type=password&amp;client_id=&rdquo; + SF_CLIENT_ID + &ldquo;&amp;client_secret=&rdquo; + SF_CLIENT_SECRET + &ldquo;&amp;username=&rdquo; + SF_USERNAME + &ldquo;&amp;password=&rdquo; + SF_PASSWORD
+req.HTTPBody = paramString.dataUsingEncoding(NSUTF8StringEncoding)</p>
+
+<p>let configuration = NSURLSessionConfiguration.defaultSessionConfiguration()
+let session = NSURLSession(configuration: configuration, delegate: nil, delegateQueue: NSOperationQueue.mainQueue())</p>
+
+<p>let task = session.dataTaskWithRequest(req, completionHandler: {</p>
+
+<pre><code>(let data, let response, let error) -&gt; Void in
+do{
+    let json = try NSJSONSerialization.JSONObjectWithData(data!, options: NSJSONReadingOptions.AllowFragments) as! NSDictionary
+    print(json)
+}catch{
+    print("error")
+}
+</code></pre>
+
+<p>})
+task.resume()
+```</p>
+
+<h2>import</h2>
+
+<p>ライブラリを読み込むために、ファイルの冒頭に<code>import</code>を追加しておくこと。</p>
+
+<p><code>
+import Alamofire
+import SwiftyJSON
+</code></p>
+
+<h2>HTTP通信</h2>
+
+<p>通信は、<code>responseJSON</code>を使う。<br/>
+少し前にAlamofireの仕様変更があったらしく、エラーハンドリングの方法が変わったよう。</p>
+
+<ul>
+<li>参考 &ndash; <a href="http://ja.stackoverflow.com/questions/16844/alamofire-3-0%E3%82%92%E4%BD%BF%E7%94%A8%E3%81%97%E3%81%A6json%E3%83%87%E3%83%BC%E3%82%BF%E3%82%92%E5%8F%96%E5%BE%97%E3%81%99%E3%82%8B%E6%96%B9%E6%B3%95">Alamofire 3.0を使用してJSONデータを取得する方法</a></li>
+</ul>
+
+
+<p>通信部分と結果だけ記述するとこんな感じ。</p>
+
+<p>```
+Alamofire.request(.POST, URL!, parameters: parameters)</p>
+
+<pre><code>.responseJSON { response in
+      print(response.result)
+      //SUCCESS or FAILURE
+</code></pre>
+
+<p>}
+```</p>
+
+<p>エラーハンドリング用に分岐させるとこうなる。</p>
+
+<p>```
+Alamofire.request(.POST, URL!, parameters: parameters)</p>
+
+<pre><code>.responseJSON { response in
+    switch response.result {
+    case .Success(let value):
+        print("value: \(value)")
+    case .Failure(let error):
+        print(error)
+    }
+</code></pre>
+
+<p>}
+```</p>
+
+<p>返ってくるエラーは<code>ErrorType</code>の型になっており、前回の記事と同じ取扱で大丈夫だった。</p>
+
+<h2>JSONへパース</h2>
+
+<p>取得した値をJSONへパースするには、以下だけでいける。</p>
+
+<p><code>
+let json = JSON(data)
+</code></p>
+
+<p>また、文字列への変換もプロパティで用意されている。</p>
+
+<p><code>
+let str:String = json["token"].string
+</code></p>
+
+<p>実に簡単。</p>
+
+<h1>完成</h1>
+
+<p>アクセストークンを取得する部分だけ書き換えたものコードは以下のようになる。</p>
+
+<p>```
+let URL = SF_LOGIN_URL + &ldquo;/services/oauth2/token&rdquo;
+let parameters = [</p>
+
+<pre><code>"grant_type":"password",
+"client_id":SF_CLIENT_ID,
+"client_secret":SF_CLIENT_SECRET,
+"username":SF_USERNAME,
+"password":SF_PASSWORD
+</code></pre>
+
+<p>]</p>
+
+<p>Alamofire.request(.POST, URL, parameters: parameters)</p>
+
+<pre><code>.responseJSON { response in
+    switch response.result {
+    case .Success(let value):
+        let json = JSON(value)
+        print(json)            
+
+        //let access_token = json["access_token"].string
+        //let instance_url = json["instance_url"].string
+        //let token_type = json["token_type"].string
+
+    case .Failure(let error):
+        print("error")
+    }
+</code></pre>
+
+<p>}
+```</p>
+
+<h2>ヘッダ</h2>
+
+<p>ちなみにヘッダの指定は以下のようにしてアクセストークンを送れた。</p>
+
+<p>```
+let headers = [</p>
+
+<pre><code>"Authorization": "\(self.token_type) \(self.access_token)"
+</code></pre>
+
+<p>]
+Alamofire.request(.POST, URL, parameters: parameters, headers: headers)</p>
+
+<pre><code>.responseJSON { response in
+    (略)
+</code></pre>
+
+<p>```</p>
+
+<h1>まとめ</h1>
+
+<p>コードはそこまで劇的に減るわけではないが、すっきりした。<br/>
+なによりパラメータの指定や、JSONの取り扱いがかなり見やすく簡単になったと思う。<br/>
+特に理由がなければライブラリを使えば良い気がする。</p>
+
+<h1>参考</h1>
+
+<ul>
+<li><a href="http://cocoadocs.org/docsets/Alamofire/3.4.0/">Alamofire Reference</a></li>
+<li><a href="http://qiita.com/yutat93/items/1b6dfe34fa8537cf3329">AlamofireとSwiftyJSONでAPIを叩くチュートリアル &ndash; Qiita</a></li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[swiftからsalesforceへOAuth認証してRestAPIへ接続する]]></title>
@@ -362,7 +574,7 @@ let req = NSMutableURLRequest(URL: URL!)</p>
 
 <p>req.addValue(&ldquo;(self.token_type) (self.access_token)&rdquo;, forHTTPHeaderField: &ldquo;Authorization&rdquo;) //ヘッダ</p>
 
-<p>let user_email = &ldquo;<a href="&#109;&#97;&#105;&#x6c;&#x74;&#111;&#58;&#x78;&#x78;&#120;&#64;&#x65;&#x78;&#x61;&#x6d;&#x70;&#x6c;&#x65;&#x2e;&#99;&#111;&#x6d;">&#120;&#x78;&#120;&#x40;&#x65;&#120;&#97;&#109;&#112;&#108;&#101;&#46;&#x63;&#111;&#109;</a>&rdquo;
+<p>let user_email = &ldquo;<a href="&#x6d;&#x61;&#105;&#108;&#116;&#x6f;&#58;&#x78;&#x78;&#x78;&#x40;&#x65;&#x78;&#97;&#109;&#x70;&#108;&#101;&#46;&#x63;&#111;&#109;">&#120;&#120;&#x78;&#x40;&#x65;&#120;&#97;&#x6d;&#112;&#x6c;&#101;&#46;&#x63;&#x6f;&#x6d;</a>&rdquo;
 let user_pass = &ldquo;xxx&rdquo;</p>
 
 <p>req.HTTPMethod = &ldquo;POST&rdquo;
@@ -678,65 +890,6 @@ insert follow;
 
 <p>チャター関係は以下のPDFにまとまっていた。<br/>
 <a href="http://developerforcejp.s3.amazonaws.com/books/cheatsheets/Chatter-cheatsheet_Ja.pdf">http://developerforcejp.s3.amazonaws.com/books/cheatsheets/Chatter-cheatsheet_Ja.pdf</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[salesforce]指定のユーザーでテスト実行]]></title>
-    <link href="http://kayakuguri.github.io/blog/2015/06/11/system-run-as/"/>
-    <updated>2015-06-11T14:53:28+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2015/06/11/system-run-as</id>
-    <content type="html"><![CDATA[<p>salesforceのユーザーである、<code>User</code>オブジェクトにカスタム項目を作って、<br/>
-それを使ったコードなんかを書いた時にそのユーザーでの実行が必要になる。<br/>
-そんな時のメモ。</p>
-
-<!-- more -->
-
-
-<h2>テスト実行</h2>
-
-<p><code>system.runas(){}</code>を使う。<br/>
-引数に使用するユーザーを指定し、<code>{}</code>内で実行する処理を書く。</p>
-
-<h2>ユーザーの作成</h2>
-
-<p>指定するユーザーをテスト内で作成するには以下のようにする。</p>
-
-<p>```
-Map&lt;String,ID> profiles = new Map&lt;String,ID>();
-Profile ps = [select id, name from Profile where name = &lsquo;標準ユーザ&rsquo; LIMIT 1];
-User standard = new User(alias = &lsquo;standt&rsquo;,</p>
-
-<pre><code>email='standarduser@testorg.com', 
-emailencodingkey='UTF-8', 
-lastname='Testing', languagelocalekey='en_US', 
-localesidkey='en_US', 
-ProfileId = ps.id,
-timezonesidkey='America/Los_Angeles', 
-username='standarduser-test@testorg.com'
-</code></pre>
-
-<p>);
-```</p>
-
-<p>標準ユーザーのプロフィール権限で作成している。<br/>
-この時に、<code>email</code>の項目と<code>username</code>を同じにしていると、すでにそのユーザーネームは使われています、とエラーが出た。</p>
-
-<p>で、実行。</p>
-
-<p>```
-system.runas(standard){</p>
-
-<pre><code>//実行する内容
-</code></pre>
-
-<p>}
-```</p>
-
-<h2>参考</h2>
-
-<p><a href="http://blogjp.sforce.com/2013/07/systemrunas-29e3.html">System.runAs()を使う時の注意点 | Salesforce Developers Japan Blog</a><br/>
-<a href="view-source:http://developer.force.com/cookbook/recipe/using-system-runas-in-test-methods">Using System.runAs in Test Methods &ndash; null</a></p>
 ]]></content>
   </entry>
   
