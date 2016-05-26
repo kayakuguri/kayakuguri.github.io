@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2016-05-26T18:40:33+09:00</updated>
+  <updated>2016-05-26T18:45:23+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -18,7 +18,7 @@
     <link href="http://kayakuguri.github.io/blog/2016/05/26/alamofire-swiftyjson/"/>
     <updated>2016-05-26T18:39:28+09:00</updated>
     <id>http://kayakuguri.github.io/blog/2016/05/26/alamofire-swiftyjson</id>
-    <content type="html"><![CDATA[<p>一つ前の投稿でSalesforceへ接続出来たが、HTTP通信の部分とJSONへのパース部分はライブラリを使うのがデファクトスタンダードになりつつある、という情報を仕入れたので試してみる。</p>
+    <content type="html"><![CDATA[<p><a href="http://kayakuguri.github.io/blog/2016/05/23/swift-sf-restapi/">一つ前の投稿</a>でSalesforceへ接続出来たが、HTTP通信の部分とJSONへのパース部分はライブラリを使うのがデファクトスタンダードになりつつある、という情報を仕入れたので試してみる。</p>
 
 <!-- more -->
 
@@ -370,6 +370,9 @@
 <p>パスワードはIPを指定していない場合は、パスワードの後ろにセキュリティトークンを繋げてやる必要がある。</p>
 
 <h2>POST送信</h2>
+
+<p>追記：HTTP通信とJSONのパースについてはライブラリを使ったバージョンの方がいいかも。<br/>
+<a href="http://kayakuguri.github.io/blog/2016/05/26/alamofire-swiftyjson/">[swift]alamofireとswiftyjsonを使ってAPIからデータを取得する</a></p>
 
 <p>POST送信は、<code>NSURLConnection</code>がディスコンになったので、<code>NSURLSession</code>を使用する必要があるとのこと。
 非同期での通信が基本になったよう。</p>
