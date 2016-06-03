@@ -4,7 +4,7 @@
   <title><![CDATA[Category: swift | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/swift/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2016-05-26T18:45:23+09:00</updated>
+  <updated>2016-06-03T12:07:03+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,61 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[StroyBoardのNavigationBarのタイトルを変更する方法あれこれ]]></title>
+    <link href="http://kayakuguri.github.io/blog/2016/06/03/navigation-title-change/"/>
+    <updated>2016-06-03T12:05:14+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2016/06/03/navigation-title-change</id>
+    <content type="html"><![CDATA[<p>ナビゲーションバー上のタイトルの変更方法をメモ。</p>
+
+<!-- more -->
+
+
+<h1>前提</h1>
+
+<p>作りの前提としては以下。</p>
+
+<ul>
+<li>Xcode7.3</li>
+<li>Swift2.2</li>
+<li>StoryBoard上でViewを配置し、メニューから<code>Navigation Controller</code>を配置</li>
+<li>ページ間は、セグエ、で接続</li>
+</ul>
+
+
+<h1>次ページがある場合</h1>
+
+<p>次ページがある場合は、ナビゲーションバーの部分をダブルクリックして変更すればそれが反映される。</p>
+
+<p><img src="/images/2016/06/change_ttl01.jpg" alt="" /></p>
+
+<h1>最後のページの場合</h1>
+
+<p>次ページがなく、そのページが遷移先の行き止まりの場合は、そのViewのタイトルをプロパティから設定することで変更が可能。</p>
+
+<p><img src="/images/2016/06/change_ttl02.jpg" alt="" /></p>
+
+<h1>コードから変更</h1>
+
+<p>コードからViewのタイトルを変更すれば動的にも変更可能。
+これは遷移先あるなしには関係なし。</p>
+
+<p><code>
+self.title = "hoge"
+</code></p>
+
+<p>このタイトルの設定を、<code>viewWillAppear</code>に入れておけばページを表示するたびにタイトルを変更することが可能。</p>
+
+<h1>参考</h1>
+
+<ul>
+<li><a href="http://grandbig.github.io/blog/2015/05/10/storyboard-navigationbar/">StoryboardでNavigationBarを表示する &ndash; Takahiro Octopress Blog</a></li>
+<li><a href="http://blog.77jp.net/iphone%E9%96%8B%E7%99%BA-uiviewcontroller-%E3%83%A9%E3%82%A4%E3%83%95%E3%82%B5%E3%82%A4%E3%82%AF%E3%83%AB-viewdidload-viewwillappear-viewdidappear-viewwilldisappear-viewdiddisappear-ios-%E9%80%86">【iOS】UIViewController ライフサイクル viewDidLoad viewWillAppear viewDidAppear viewWillDisappear viewDidDisappear | iOS &amp; Android &amp; Linux Labs</a></li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[swift]alamofireとswiftyjsonを使ってAPIからデータを取得する]]></title>
@@ -577,7 +632,7 @@ let req = NSMutableURLRequest(URL: URL!)</p>
 
 <p>req.addValue(&ldquo;(self.token_type) (self.access_token)&rdquo;, forHTTPHeaderField: &ldquo;Authorization&rdquo;) //ヘッダ</p>
 
-<p>let user_email = &ldquo;<a href="&#x6d;&#97;&#x69;&#x6c;&#x74;&#x6f;&#58;&#120;&#x78;&#120;&#64;&#x65;&#120;&#97;&#x6d;&#112;&#108;&#101;&#x2e;&#99;&#111;&#x6d;">&#x78;&#120;&#120;&#64;&#101;&#x78;&#97;&#109;&#112;&#x6c;&#101;&#x2e;&#99;&#111;&#109;</a>&rdquo;
+<p>let user_email = &ldquo;<a href="&#109;&#97;&#105;&#108;&#116;&#111;&#58;&#120;&#x78;&#120;&#64;&#x65;&#120;&#x61;&#109;&#112;&#108;&#101;&#x2e;&#99;&#x6f;&#109;">&#x78;&#x78;&#x78;&#64;&#x65;&#x78;&#97;&#x6d;&#x70;&#108;&#x65;&#x2e;&#x63;&#111;&#109;</a>&rdquo;
 let user_pass = &ldquo;xxx&rdquo;</p>
 
 <p>req.HTTPMethod = &ldquo;POST&rdquo;
