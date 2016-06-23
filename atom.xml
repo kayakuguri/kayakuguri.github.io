@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2016-06-09T15:00:11+09:00</updated>
+  <updated>2016-06-23T12:51:19+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,118 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Composerを使ってPEARのライブラリをインストールする]]></title>
+    <link href="http://kayakuguri.github.io/blog/2016/06/23/pear-composer-install/"/>
+    <updated>2016-06-23T12:43:47+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2016/06/23/pear-composer-install</id>
+    <content type="html"><![CDATA[<p>PEARのライブラリをComposer経由でインストールする方法。メモ。</p>
+
+<!-- more -->
+
+
+<p><code>PEAR::Log</code>をインストールする方法を例にする。</p>
+
+<h1>Pearのリポジトリから取得する</h1>
+
+<p><code>composer.json</code>に以下のように記述し、取得する。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>{
+</span><span class='line'>  "repositories": [
+</span><span class='line'>    {
+</span><span class='line'>        "type": "pear",
+</span><span class='line'>        "url": "http://pear.php.net"
+</span><span class='line'>    }
+</span><span class='line'>  ],
+</span><span class='line'>  "require": {
+</span><span class='line'>    "pear-pear.php.net/PEAR": "*@stable",
+</span><span class='line'>    "pear-pear.php.net/Log": "*@stable"
+</span><span class='line'>  }
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<p>このまま <code>$ composer install</code>すると以下の様なWarningが出てインストールエラーとなる。</p>
+
+<blockquote><p>PEAR repository from <a href="http://pear.php.net">http://pear.php.net</a> could not be loaded. Your configuration does not allow connections to <a href="http://pear.php.net/channel.xml.">http://pear.php.net/channel.xml.</a> See <a href="https://getcomposer.org/doc/06-config.md#secure-http">https://getcomposer.org/doc/06-config.md#secure-http</a> for details.</p></blockquote>
+
+<h1>セキュアじゃないURLからも取得</h1>
+
+<p>これは、取得先のURLが<code>http</code>になっているため。
+デフォルトではセキュアなURL、<code>https</code>からしか取得をしない設定になっているよう。</p>
+
+<p>そのため、これを解除して、<code>http</code>からも取得出来るようにしてやる。</p>
+
+<p><a href="https://getcomposer.org/doc/06-config.md#secure-http">https://getcomposer.org/doc/06-config.md#secure-http</a></p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>"config": {
+</span><span class='line'>  "secure-http": false
+</span><span class='line'>},</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>Composer.json</h1>
+
+<p>というわけで全文は以下。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>{
+</span><span class='line'>  "config": {
+</span><span class='line'>    "secure-http": false
+</span><span class='line'>  },
+</span><span class='line'>  "repositories": [
+</span><span class='line'>    {
+</span><span class='line'>        "type": "pear",
+</span><span class='line'>        "url": "http://pear.php.net"
+</span><span class='line'>    }
+</span><span class='line'>  ],
+</span><span class='line'>  "require": {
+</span><span class='line'>    "pear-pear.php.net/PEAR": "*@stable",
+</span><span class='line'>    "pear-pear.php.net/Log": "*@stable"
+</span><span class='line'>  }
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<p>これで無事、インストール出来た。
+使用の際はComposerのライブラリと同じく、<code>vendor/autoload.php</code>を読み込んで使う。</p>
+
+<h1>参考</h1>
+
+<ul>
+<li><a href="https://www.softel.co.jp/blogs/tech/archives/4057">【php】PEARをインストールする（Composerで）   at softelメモ</a></li>
+<li><a href="http://qiita.com/dozo/items/d892cc964bb28d7a95fc">composer:repositoriesでPEARパッケージをインストール &ndash; Qiita</a></li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Laravel HomesteadのPostgreSQLにPosticoから接続する]]></title>
@@ -2984,56 +3096,6 @@ mysql&gt; UPDATE wpoptions SET option_value='https://your-project-kayakuguri.c9u
 
 <p><a href="https://docs.c9.io/docs/setting-up-mysql">Setting Up MySQL · Cloud9</a><br/>
 <a href="http://qiita.com/hishigataBOZE/items/bdd6009d3bfc1c7d313b">[WordPress + MySQL] DBからサイトURLを変更 &ndash; Qiita</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[CentOS6.5にPHP5.4を入れる]]></title>
-    <link href="http://kayakuguri.github.io/blog/2015/11/26/centos65-php54/"/>
-    <updated>2015-11-26T17:50:35+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2015/11/26/centos65-php54</id>
-    <content type="html"><![CDATA[<p>CentOS6.5の標準のPHPは5.3。<br/>
-5.4環境が欲しかったので作ってみたメモ。</p>
-
-<!-- more -->
-
-
-<p>PHPは入ってない状態から始める。</p>
-
-<pre><code>$ php -v
--bash: php: command not found
-</code></pre>
-
-<h2>rpmでレポジトリを追加</h2>
-
-<p>あまり意味はわかってないですが、epelとremiレポジトリを追加。<br/>
-<code>vagrant</code>にSSHで入ってからの作業。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>$ sudo rpm -Uvh http://dl.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm
-</span><span class='line'>$ sudo rpm -Uvh http://dl.iuscommunity.org/pub/ius/stable/Redhat/6/x86_64/ius-release-1.0-11.ius.el6.noarch.rpm
-</span><span class='line'>$ sudo rpm -Uvh http://rpms.famillecollet.com/enterprise/remi-release-6.rpm</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>PHPをインストール</h2>
-
-<pre><code>$ sudo yum install php --enablerepo=remi
-</code></pre>
-
-<h2>確認</h2>
-
-<pre><code>$ php -v
-PHP 5.4.45 (cli) (built: Sep 30 2015 15:56:06) 
-Copyright (c) 1997-2014 The PHP Group
-Zend Engine v2.4.0, Copyright (c) 1998-2014 Zend Technologies
-</code></pre>
-
-<h2>参考</h2>
-
-<p><a href="http://qiita.com/Chrowa3/items/6c045d952a191a1203b4">Vagrant chef/centos-6.5 に PHP 5.4 を突っ込む &ndash; Qiita</a><br/>
-<a href="http://blog.ybbo.net/2014/01/22/%E3%80%90%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%80%91centos6%E3%81%ABphp5-4%E3%82%92yum%E3%81%A7%E7%B0%A1%E5%8D%98%E3%81%AB%E3%82%A4%E3%83%B3%E3%82%B9%E3%83%88%E3%83%BC%E3%83%AB%E3%81%99%E3%82%8B/">【シンプル】CentOS6にPHP5.4をyumで簡単にインストールする手順田舎に住みたいエンジニアの日記 | 田舎に住みたいエンジニアの日記</a></p>
 ]]></content>
   </entry>
   

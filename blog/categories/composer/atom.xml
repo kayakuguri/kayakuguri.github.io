@@ -4,7 +4,7 @@
   <title><![CDATA[Category: composer | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/composer/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2016-06-09T15:00:11+09:00</updated>
+  <updated>2016-06-23T12:51:19+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,106 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Composerを使ってPEARのライブラリをインストールする]]></title>
+    <link href="http://kayakuguri.github.io/blog/2016/06/23/pear-composer-install/"/>
+    <updated>2016-06-23T12:43:47+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2016/06/23/pear-composer-install</id>
+    <content type="html"><![CDATA[<p>PEARのライブラリをComposer経由でインストールする方法。メモ。</p>
+
+<!-- more -->
+
+
+<p><code>PEAR::Log</code>をインストールする方法を例にする。</p>
+
+<h1>Pearのリポジトリから取得する</h1>
+
+<p><code>composer.json</code>に以下のように記述し、取得する。</p>
+
+<p>```
+{
+  &ldquo;repositories&rdquo;: [</p>
+
+<pre><code>{
+    "type": "pear",
+    "url": "http://pear.php.net"
+}
+</code></pre>
+
+<p>  ],
+  &ldquo;require&rdquo;: {</p>
+
+<pre><code>"pear-pear.php.net/PEAR": "*@stable",
+"pear-pear.php.net/Log": "*@stable"
+</code></pre>
+
+<p>  }
+}
+```</p>
+
+<p>このまま <code>$ composer install</code>すると以下の様なWarningが出てインストールエラーとなる。</p>
+
+<blockquote><p>PEAR repository from <a href="http://pear.php.net">http://pear.php.net</a> could not be loaded. Your configuration does not allow connections to <a href="http://pear.php.net/channel.xml.">http://pear.php.net/channel.xml.</a> See <a href="https://getcomposer.org/doc/06-config.md#secure-http">https://getcomposer.org/doc/06-config.md#secure-http</a> for details.</p></blockquote>
+
+<h1>セキュアじゃないURLからも取得</h1>
+
+<p>これは、取得先のURLが<code>http</code>になっているため。
+デフォルトではセキュアなURL、<code>https</code>からしか取得をしない設定になっているよう。</p>
+
+<p>そのため、これを解除して、<code>http</code>からも取得出来るようにしてやる。</p>
+
+<p><a href="https://getcomposer.org/doc/06-config.md#secure-http">https://getcomposer.org/doc/06-config.md#secure-http</a></p>
+
+<p><code>
+"config": {
+  "secure-http": false
+},
+</code></p>
+
+<h1>Composer.json</h1>
+
+<p>というわけで全文は以下。</p>
+
+<p>```
+{
+  &ldquo;config&rdquo;: {</p>
+
+<pre><code>"secure-http": false
+</code></pre>
+
+<p>  },
+  &ldquo;repositories&rdquo;: [</p>
+
+<pre><code>{
+    "type": "pear",
+    "url": "http://pear.php.net"
+}
+</code></pre>
+
+<p>  ],
+  &ldquo;require&rdquo;: {</p>
+
+<pre><code>"pear-pear.php.net/PEAR": "*@stable",
+"pear-pear.php.net/Log": "*@stable"
+</code></pre>
+
+<p>  }
+}
+```</p>
+
+<p>これで無事、インストール出来た。
+使用の際はComposerのライブラリと同じく、<code>vendor/autoload.php</code>を読み込んで使う。</p>
+
+<h1>参考</h1>
+
+<ul>
+<li><a href="https://www.softel.co.jp/blogs/tech/archives/4057">【php】PEARをインストールする（Composerで）   at softelメモ</a></li>
+<li><a href="http://qiita.com/dozo/items/d892cc964bb28d7a95fc">composer:repositoriesでPEARパッケージをインストール &ndash; Qiita</a></li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Facebookのphp-sdk-v4をcomposerを使ってインストールした時のメモ]]></title>
