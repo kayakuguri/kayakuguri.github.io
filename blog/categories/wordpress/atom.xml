@@ -4,7 +4,7 @@
   <title><![CDATA[Category: wordpress | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/wordpress/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2016-06-23T12:51:19+09:00</updated>
+  <updated>2016-06-30T17:06:15+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,421 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[WordPress REST APIにOAuth1.0aで認証して投稿する]]></title>
+    <link href="http://kayakuguri.github.io/blog/2016/06/30/wp-rest-oauth/"/>
+    <updated>2016-06-30T17:04:32+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2016/06/30/wp-rest-oauth</id>
+    <content type="html"><![CDATA[<p>WordPress REST APIで投稿するには認証が必要となる。<br/>
+認証には、クッキーベース、ベーシック認証ベース、OAuth認証ベース、の方法があるが、
+その中でも一番セキュアな、OAuthでの認証を行ってみる。</p>
+
+<!-- more -->
+
+
+<h1>環境情報など</h1>
+
+<p>試した環境など。</p>
+
+<ul>
+<li>PHP 5.6</li>
+<li>WordPress ver.4.5.3
+
+<ul>
+<li>WP REST API ver.2.0-beta13.1</li>
+<li>WP REST API &ndash; OAuth 1.0a Server  ver.0.2.1</li>
+</ul>
+</li>
+<li>ドメイン : <code>http://wprest.local</code></li>
+</ul>
+
+
+<h1>WordPressのセットアップ</h1>
+
+<h2>WP REST API</h2>
+
+<p><a href="https://wordpress.org/plugins/rest-api/">WordPress REST API (Version 2) &mdash; WordPress Plugins</a><br/>
+プラグインの新規追加から検索すれば出てくる。
+そこからインストールして、有効化すればOK。</p>
+
+<h2>WP REST API &ndash; OAuth 1.0a Server</h2>
+
+<p><a href="https://github.com/WP-API/OAuth1">WP-API/OAuth1: OAuth server implementation for WP API</a><br/>
+上記からzipをダウンロードし、<code>プラグイン-&gt;新規追加</code>からzipをアップロードし、その後有効化する。</p>
+
+<p>ユーザー項目に、<code>Applicatons</code>が増えていれば正しく有効化出来ている。<br/>
+また、WP REST APIを追加していれば、<code>/wp-json/</code>にアクセスした際にOAuth認証するためのURLが表示されるようになる。</p>
+
+<p>```json
+authentication: {
+  oauth1: {</p>
+
+<pre><code>request: "http://wprest.local/oauth1/request",
+authorize: "http://wprest.local/oauth1/authorize",
+access: "http://wprest.local/oauth1/access",
+version: "0.1"
+</code></pre>
+
+<p>  }
+},
+```</p>
+
+<h2>アプリケーションの追加</h2>
+
+<p><code>ユーザー -&gt; Applications</code>を開き、<code>Add Application</code>をクリック。それぞれの項目を適当に入力する。
+<code>Callback</code>の値は適当に<code>/test</code>などと入れておいた。<br/>
+本来であれば、承認が行われた後にcallbackで指定されたURLへリダイレクトがかかるはずなのだが、不具合なのか動作しなかった。</p>
+
+<p><code>Add Consumer</code>をクリックすると<code>Client Key</code>と<code>Client Secret</code>が生成される。</p>
+
+<p><img src="/images/2016/06/wp_oauth01.jpg" alt="" /></p>
+
+<table>
+<thead>
+<tr>
+<th></th>
+<th align="left"> 項目 </th>
+<th align="left"> 内容 </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td></td>
+<td align="left"> Client Key </td>
+<td align="left"> NUmeekveMbG8 |</td>
+</tr>
+<tr>
+<td></td>
+<td align="left"> Client Secret </td>
+<td align="left"> E2k9ClRfElFCCzZGlcL9tWesqKV0zHmwHJEUvSF5m7oiFgq5 |</td>
+</tr>
+</tbody>
+</table>
+
+
+<h1>PHPで接続</h1>
+
+<h2>環境変数</h2>
+
+<p>環境変数に上記で取得したアプリケーションのキーなどを追加して使用することにする。</p>
+
+<p><code>
+WP_CLIENT_KEY=HaG1kHUFpDYc
+WP_CLIENT_SECRET=QQ8DvAdjfo2k2kZGCP0BPbPoII3YrDBw27MNe9PIpCclWNHe
+</code></p>
+
+<h2>PECL oauth</h2>
+
+<p><code>Oauth 1.0a</code>での認証を行うために、PECL oauthライブラリを使用する。<br/>
+公式のマニュアル: <a href="http://php.net/manual/ja/book.oauth.php">PHP: OAuth &ndash; Manual</a></p>
+
+<blockquote><p>PECL::OAuthは、OAuthコンシューマやプロバイダの機能をphpで手軽に実装できるようにする拡張モジュールです。
+<a href="http://blog.flatlabs.net/20100611_062745/">http://blog.flatlabs.net/20100611_062745/</a></p></blockquote>
+
+<p>HerokuでPHPの拡張モジュールを利用する場合には、composerで追加する事が出来る。
+以下のコマンドで追加が可能。</p>
+
+<p><code>
+$ composer require ext-oauth
+</code></p>
+
+<p>参考: <a href="https://devcenter.heroku.com/articles/php-support#extensions">Heroku PHP Support | Heroku Dev Center</a></p>
+
+<p>ローカル環境などのサーバに追加する場合は、直接インストールしてやる必要がある。<br/>
+参考: <a href="http://blog.unfindable.net/archives/5697">PECL/oauthの導入方法 | 配電盤</a></p>
+
+<p>今回はローカル環境には、<a href="https://box.scotch.io/">Scotchbox</a>を利用しているので、Ubuntuにインストール方法をメモしておく。</p>
+
+<h3>インストールと設定</h3>
+
+<p>上記参考サイトの通りだが、そのまま<code>oauth</code>をインストールしようとするとバージョンでエラーが出る。
+<code>oauth</code>の最新版では、PHP7.0以上のみサポートされているようなので、PHP5.6対応のバージョンを明示的に指定してやる必要がある。</p>
+
+<p><code>
+$ sudo apt-get install apache2 php5 php5-dev php-pear libpcre3-dev make
+$ sudo pecl install oauth-1.2.3
+</code></p>
+
+<p>最後に書かれている通り、<code>php.ini</code>に追記する。<br/>
+<code>/etc/php5/apache2/php.ini</code></p>
+
+<p><code>
+extension=oauth.so
+</code></p>
+
+<p>apache再起動。
+<code>
+$ sudo service apache2 restart
+</code></p>
+
+<p><code>phpinfo</code>でOAuthが有効と表示されていれば完了。</p>
+
+<p><img src="/images/2016/06/wp_oauth02.jpg" alt="" /></p>
+
+<h2>トークンの取得</h2>
+
+<p>今回の承認などに必要なPHPファイルは全て同一ドメイン・同一階層に置くものとする。</p>
+
+<p>OAuth1.0aの承認フローなどの動きは以下がとても参考になった。</p>
+
+<p>参考: <a href="http://nskw-style.com/2016/wordpress/wp-api/oauth1.html">WP REST API の OAuth 認証の方法と何が起こっているのかとなぜそんなことをしているのか &#8211; Shinichi Nishikawa&#039;s</a></p>
+
+<h2>コード</h2>
+
+<p>参考 : <a href="http://qiita.com/newton/items/1114e443a90e204746ad">Tumblr API OAuth認証の方法（PHPサンプル付き） &ndash; Qiita</a></p>
+
+<p>こちらのコードをほぼそのまま利用させてもらった。</p>
+
+<p><code>login.php</code></p>
+
+<p>```
+&lt;?php
+require_once &lsquo;./OAuthSample.php&rsquo;;</p>
+
+<p>$oauth_sample = new OAuthSample();
+try {</p>
+
+<pre><code>// リクエストトークンの取得とリダイレクト開始
+$oauth_sample-&gt;goToAuthorize();
+</code></pre>
+
+<p>} catch (\Exception $e) {</p>
+
+<pre><code>// エラー処理
+</code></pre>
+
+<p>}
+```</p>
+
+<p><code>OAuthSample.php</code></p>
+
+<p>```
+&lt;?php
+/<em>*
+ * Tumblr OAuth認証実装サンプル
+ *
+ * @author newton
+ </em>/
+class OAuthSample
+{</p>
+
+<pre><code>const REQUEST_TOKEN_URL  = 'http://wprest.local/oauth1/request';
+const AUTHORIZE_URL      = 'http://wprest.local/oauth1/authorize';
+const ACCESS_TOKEN_URL   = 'http://wprest.local/oauth1/access';
+
+public $CONSUMER_KEY = '';
+public $CONSUMER_SECRET = '';
+
+/**
+ * コントストラク
+ * セッションの初期化をやる
+ */
+public function __construct()
+{
+    $this-&gt;CONSUMER_KEY = getenv('WP_CLIENT_KEY');
+    $this-&gt;CONSUMER_SECRET = getenv('WP_CLIENT_SECRET');
+
+    if (!isset($_SESSION)) {
+        session_start();
+    }
+}
+
+/**
+ * リクエストトークンの取得～リダイレクト
+ */
+public function goToAuthorize()
+{
+    $oauth = new \OAuth($this-&gt;CONSUMER_KEY, $this-&gt;CONSUMER_SECRET);
+    // リクエストトークン取得
+    $request_token = $oauth-&gt;getRequestToken(self::REQUEST_TOKEN_URL);
+
+    if (!$request_token) {
+        throw new Exception('リクエストトークンの取得に失敗');
+    }
+
+    // リクエストトークンをセッションに保存する
+    $_SESSION['request_token'] = $request_token['oauth_token'];
+    $_SESSION['request_token_secret'] = $request_token['oauth_token_secret'];
+
+    $params = ['oauth_token' =&gt; $request_token['oauth_token']];
+    $path = self::AUTHORIZE_URL . '?' . http_build_query($params);
+
+    $this-&gt;redirect($path);
+}
+
+/**
+ * アクセストークンの取得
+ * コールバック後にコールされる用
+ *
+ * @return array アクセストークンのセットされたハッシュ
+ */
+public function getAccessToken()
+{
+    $oauth = new \OAuth(self::CONSUMER_KEY, self::CONSUMER_SECRET);
+    // アクセストークンの取得
+    $oauth-&gt;setToken($_SESSION['request_token'], $_SESSION['request_token_secret']);
+    $access_token = $oauth-&gt;getAccessToken(self::ACCESS_TOKEN_URL, $_GET['oauth_verifier']);
+
+    if (!$access_token) {
+        throw new \Exception('アクセストークンの取得に失敗');
+    }
+
+    return $access_token;
+}
+
+/**
+ * リダイレクト
+ *
+ * @param string $path   リダイレクト先URL
+ * @param int    $status ステータスコード
+ */
+private function redirect($path, $status = 302)
+{
+    header('Cache-Control: no-store, no-cache, must-revalidate');
+    header('Expires: Thu, 01 Jan 1970 00:00:00 GMT');
+    header("Location: {$path}", true, $status);
+    exit;
+}
+</code></pre>
+
+<p>}
+```</p>
+
+<p><code>callback.php</code></p>
+
+<p>```
+&lt;?php
+require_once &lsquo;./OAuthSample.php&rsquo;;</p>
+
+<p>$oauth_sample = new OAuthSample();
+try {</p>
+
+<pre><code>// アクセストークンの取得
+$access_token = $oauth_sample-&gt;getAccessToken();
+var_dump($access_token);
+</code></pre>
+
+<p>} catch (\Exception $e) {</p>
+
+<pre><code>// エラー処理
+</code></pre>
+
+<p>}
+```</p>
+
+<h2>承認</h2>
+
+<p>作成した<code>login.php</code>へアクセスすると（ログインしていない場合はログイン画面が表示されログイン後に）承認のページが表示される。</p>
+
+<p><img src="/images/2016/06/wp_oauth03.jpg" alt="" /></p>
+
+<p><code>Authorize</code>をクリックすると、許可されて、承認コードが表示される。
+(ここでコードが表示されるのではなく、コールバックURLへリダイレクトが行われるのが通常のフローだと思う）</p>
+
+<p><img src="/images/2016/06/wp_oauth04.jpg" alt="" /></p>
+
+<blockquote><p>Your verification token is j0lHiEOe07gOtUOkEA6J1q00</p></blockquote>
+
+<h2>アクセストークンの取得</h2>
+
+<p>コールバックが自動で行われないので、作成した<code>callback.php</code>へ直接アクセスしてやる。</p>
+
+<blockquote><p><a href="http://wprest.local/callback.php?oauth_verifier=j0lHiEOe07gOtUOkEA6J1q00">http://wprest.local/callback.php?oauth_verifier=j0lHiEOe07gOtUOkEA6J1q00</a></p></blockquote>
+
+<p>こうすることで、アクセストークンを取得できた。</p>
+
+<p><code>
+array(2) {
+  ["oauth_token"]=&amp;gt;
+  string(24) "UTriXsugNS1c0ddCc1UBuMPj"
+  ["oauth_token_secret"]=&amp;gt;
+  string(48) "6GAHfovkjdSPm2LZbtf06vV3ouBML8WaqiwPIfCGsGY0jVHA"
+}
+</code></p>
+
+<p>実際に投稿などをPOSTするには、アプリケーションのカスタマーキーなども合わせて必要になる。
+まとめると以下となる。</p>
+
+<table>
+<thead>
+<tr>
+<th></th>
+<th align="left"> 項目 </th>
+<th align="left"> 内容 </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td></td>
+<td align="left"> Client Key </td>
+<td align="left"> NUmeekveMbG8 |</td>
+</tr>
+<tr>
+<td></td>
+<td align="left"> Client Secret </td>
+<td align="left"> E2k9ClRfElFCCzZGlcL9tWesqKV0zHmwHJEUvSF5m7oiFgq5 |</td>
+</tr>
+<tr>
+<td></td>
+<td align="left"> OAuth Token </td>
+<td align="left"> UTriXsugNS1c0ddCc1UBuMPj |</td>
+</tr>
+<tr>
+<td></td>
+<td align="left"> OAuth Token Secret </td>
+<td align="left"> 6GAHfovkjdSPm2LZbtf06vV3ouBML8WaqiwPIfCGsGY0jVHA |</td>
+</tr>
+</tbody>
+</table>
+
+
+<h1>投稿</h1>
+
+<p>さて、ここまででアクセストークンなど投稿に必要なものが一通り揃ったので、ようやく新規投稿の準備が整った。
+投稿は簡単で、今までと同じようにトークンなどをセットして指定のエンドポイントへパラメータを投げてやるだけでおｙい。<br/>
+エンドポイントは、新規投稿となるので、<code>http://wprest.local/wp-json/wp/v2/posts</code>となる。<br/>
+これも、先ほどのTumblerへの投稿を書いた記事を参考にさせてもらった。</p>
+
+<p>```
+&lt;?php</p>
+
+<p>$consumer_key = &lsquo;NUmeekveMbG8&rsquo;;
+$consumer_secret = &lsquo;E2k9ClRfElFCCzZGlcL9tWesqKV0zHmwHJEUvSF5m7oiFgq5&rsquo;;
+$oauth_token = &lsquo;UTriXsugNS1c0ddCc1UBuMPj&rsquo;;
+$oauth_token_secret = &lsquo;6GAHfovkjdSPm2LZbtf06vV3ouBML8WaqiwPIfCGsGY0jVHA&rsquo;;
+$response = &lsquo;&rsquo;;</p>
+
+<p>try {</p>
+
+<pre><code>$oauth = new \OAuth($consumer_key, $consumer_secret);
+$oauth-&gt;setToken($oauth_token, $oauth_token_secret);
+//POST
+$params = ['title' =&gt; 'From PHP'];
+$oauth-&gt;fetch('http://wprest.local/wp-json/wp/v2/posts', $params, OAUTH_HTTP_METHOD_POST);
+$response_info = $oauth-&gt;getLastResponseInfo();
+if ($response_info['http_code'] == 201) {
+    $response = json_decode($oauth-&gt;getLastResponse(), true);
+}else{
+    throw new \Exception('記事の投稿に失敗');
+}
+</code></pre>
+
+<p>} catch (\Exception $e) {</p>
+
+<pre><code>// エラー処理
+var_dump($e);
+</code></pre>
+
+<p>}
+// 結果をダンプ
+var_dump($response);
+```</p>
+
+<p>これでこのファイルへアクセスすると、無事、新規投稿が行われる。
+以上。</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[ローカルのWordPressをCloud9の環境へ引っ越す(DB)]]></title>
@@ -733,81 +1148,6 @@ herokuにはcloudinaryのアドオンがあるので、これでとりあえず�
 cloudinaryのアップロード容量が決まっているため、メンテナンスが必要かもしれません。</p>
 
 <p>あとはアップデートの問題が解決すればすっきり出来るのですが。。</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[wordpressをherokuにインストールする場合はルーティングのhtaccessを自分で設置すること]]></title>
-    <link href="http://kayakuguri.github.io/blog/2015/05/22/heroku-wp-htaccess/"/>
-    <updated>2015-05-22T16:11:35+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2015/05/22/heroku-wp-htaccess</id>
-    <content type="html"><![CDATA[<p>タイトルママ。<br/>
-ちょっとハマったのでメモ。</p>
-
-<!-- more -->
-
-
-<h2>WordPressのインストール</h2>
-
-<p>以下の手順で通常通りwordpressをインストールした。</p>
-
-<ol>
-<li>herokuにインストール用のアプリを作成</li>
-<li>gitでローカルにclone</li>
-<li>2のディレクトリ内に<a href="https://ja.wordpress.org/">Wordpress日本語版</a>をダウンロードして展開</li>
-<li>herokuのアプリにmySQLのアドオン、<a href="https://addons.heroku.com/cleardb">ClearDB</a>を入れる</li>
-<li>環境変数から、DBの接続情報を確認。<br/>
-<code>mysql://ユーザ名:パスワード@サーバ名/データベース?reconnect=true</code></li>
-<li>wp-config.phpにDB情報を反映</li>
-<li>PushしてDploy</li>
-<li>wp-admin/install.phpにアクセスして、サイト名やユーザー名などを設定してインストール。</li>
-<li>完了</li>
-</ol>
-
-
-<h2>固定ページにアクセス</h2>
-
-<p>通常の投稿でもたぶん同じ事が起こると思うが、<br/>
-最初から入っているサンプルの固定ページにアクセス。</p>
-
-<blockquote><p><a href="http://YOUR-APP-NAME.herokuapp.com/sample-page/">http://YOUR-APP-NAME.herokuapp.com/sample-page/</a></p></blockquote>
-
-<p>アクセスを確認してから、特にソースは触らずに<a href="http://kayakuguri.github.io/blog/2015/04/21/git-allow-empty/">空でdeploy</a>。</p>
-
-<p>再度上記の固定ページにアクセスすると、<strong>404 Notfound</strong>。</p>
-
-<h2>ルーティング</h2>
-
-<p>ローカルに入れていたWordPressのディレクトとファイルを見比べていると、<br/>
-ローカルのものはドキュメントルートに<code>.htaccess</code>がある。</p>
-
-<p>中身を見ていると、リダイレクトしているよう。</p>
-
-<p>どうやら、wordpressのインストール時に、wordpressのルートにルーティング用の<code>.htaccess</code>を自動で作成するよう。<br/>
-それがdeployのタイミングで消えてしまい、リダイレクトがかからず、404となっていた。</p>
-
-<p><code>.htaccess</code>の中身は以下。</p>
-
-<p>```</p>
-
-<h1>BEGIN WordPress</h1>
-
-<p><IfModule mod_rewrite.c>
-RewriteEngine On
-RewriteBase /
-RewriteRule ^index.php$ &ndash; [L]
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteCond %{REQUEST_FILENAME} !-d
-RewriteRule . /index.php [L]
-</IfModule></p>
-
-<h1>END WordPress</h1>
-
-<p>```</p>
-
-<p>これを<code>.htaccess</code>の名前でwordpressのルートに保存してやり、git管理下においてやればよい。</p>
-
-<p>これを置いた状態であれば、deployかけても問題なくアクセスが出来た。</p>
 ]]></content>
   </entry>
   
