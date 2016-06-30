@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2016-06-23T12:51:19+09:00</updated>
+  <updated>2016-06-30T17:06:56+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,541 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[WordPress REST APIにOAuth1.0aで認証して投稿する]]></title>
+    <link href="http://kayakuguri.github.io/blog/2016/06/30/wp-rest-oauth/"/>
+    <updated>2016-06-30T17:04:32+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2016/06/30/wp-rest-oauth</id>
+    <content type="html"><![CDATA[<p>WordPress REST APIで投稿するには認証が必要となる。<br/>
+認証には、クッキーベース、ベーシック認証ベース、OAuth認証ベース、の方法があるが、
+その中でも一番セキュアな、OAuthでの認証を行ってみる。</p>
+
+<!-- more -->
+
+
+<h1>環境情報など</h1>
+
+<p>試した環境など。</p>
+
+<ul>
+<li>PHP 5.6</li>
+<li>WordPress ver.4.5.3
+
+<ul>
+<li>WP REST API ver.2.0-beta13.1</li>
+<li>WP REST API &ndash; OAuth 1.0a Server  ver.0.2.1</li>
+</ul>
+</li>
+<li>ドメイン : <code>http://wprest.local</code></li>
+</ul>
+
+
+<h1>WordPressのセットアップ</h1>
+
+<h2>WP REST API</h2>
+
+<p><a href="https://wordpress.org/plugins/rest-api/">WordPress REST API (Version 2) &mdash; WordPress Plugins</a><br/>
+プラグインの新規追加から検索すれば出てくる。
+そこからインストールして、有効化すればOK。</p>
+
+<h2>WP REST API &ndash; OAuth 1.0a Server</h2>
+
+<p><a href="https://github.com/WP-API/OAuth1">WP-API/OAuth1: OAuth server implementation for WP API</a><br/>
+上記からzipをダウンロードし、<code>プラグイン-&gt;新規追加</code>からzipをアップロードし、その後有効化する。</p>
+
+<p>ユーザー項目に、<code>Applicatons</code>が増えていれば正しく有効化出来ている。<br/>
+また、WP REST APIを追加していれば、<code>/wp-json/</code>にアクセスした際にOAuth認証するためのURLが表示されるようになる。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>authentication: {
+</span><span class='line'>  oauth1: {
+</span><span class='line'>    request: "http://wprest.local/oauth1/request",
+</span><span class='line'>    authorize: "http://wprest.local/oauth1/authorize",
+</span><span class='line'>    access: "http://wprest.local/oauth1/access",
+</span><span class='line'>    version: "0.1"
+</span><span class='line'>  }
+</span><span class='line'>},</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>アプリケーションの追加</h2>
+
+<p><code>ユーザー -&gt; Applications</code>を開き、<code>Add Application</code>をクリック。それぞれの項目を適当に入力する。
+<code>Callback</code>の値は適当に<code>/test</code>などと入れておいた。<br/>
+本来であれば、承認が行われた後にcallbackで指定されたURLへリダイレクトがかかるはずなのだが、不具合なのか動作しなかった。</p>
+
+<p><code>Add Consumer</code>をクリックすると<code>Client Key</code>と<code>Client Secret</code>が生成される。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2016/06/wp_oauth01.jpg" alt="" /></p>
+
+<table>
+<thead>
+<tr>
+<th></th>
+<th align="left"> 項目 </th>
+<th align="left"> 内容 </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td></td>
+<td align="left"> Client Key </td>
+<td align="left"> NUmeekveMbG8 |</td>
+</tr>
+<tr>
+<td></td>
+<td align="left"> Client Secret </td>
+<td align="left"> E2k9ClRfElFCCzZGlcL9tWesqKV0zHmwHJEUvSF5m7oiFgq5 |</td>
+</tr>
+</tbody>
+</table>
+
+
+<h1>PHPで接続</h1>
+
+<h2>環境変数</h2>
+
+<p>環境変数に上記で取得したアプリケーションのキーなどを追加して使用することにする。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>WP_CLIENT_KEY=HaG1kHUFpDYc
+</span><span class='line'>WP_CLIENT_SECRET=QQ8DvAdjfo2k2kZGCP0BPbPoII3YrDBw27MNe9PIpCclWNHe</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>PECL oauth</h2>
+
+<p><code>Oauth 1.0a</code>での認証を行うために、PECL oauthライブラリを使用する。<br/>
+公式のマニュアル: <a href="http://php.net/manual/ja/book.oauth.php">PHP: OAuth &ndash; Manual</a></p>
+
+<blockquote><p>PECL::OAuthは、OAuthコンシューマやプロバイダの機能をphpで手軽に実装できるようにする拡張モジュールです。
+<a href="http://blog.flatlabs.net/20100611_062745/">http://blog.flatlabs.net/20100611_062745/</a></p></blockquote>
+
+<p>HerokuでPHPの拡張モジュールを利用する場合には、composerで追加する事が出来る。
+以下のコマンドで追加が可能。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$ composer require ext-oauth</span></code></pre></td></tr></table></div></figure>
+
+
+<p>参考: <a href="https://devcenter.heroku.com/articles/php-support#extensions">Heroku PHP Support | Heroku Dev Center</a></p>
+
+<p>ローカル環境などのサーバに追加する場合は、直接インストールしてやる必要がある。<br/>
+参考: <a href="http://blog.unfindable.net/archives/5697">PECL/oauthの導入方法 | 配電盤</a></p>
+
+<p>今回はローカル環境には、<a href="https://box.scotch.io/">Scotchbox</a>を利用しているので、Ubuntuにインストール方法をメモしておく。</p>
+
+<h3>インストールと設定</h3>
+
+<p>上記参考サイトの通りだが、そのまま<code>oauth</code>をインストールしようとするとバージョンでエラーが出る。
+<code>oauth</code>の最新版では、PHP7.0以上のみサポートされているようなので、PHP5.6対応のバージョンを明示的に指定してやる必要がある。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$ sudo apt-get install apache2 php5 php5-dev php-pear libpcre3-dev make
+</span><span class='line'>$ sudo pecl install oauth-1.2.3</span></code></pre></td></tr></table></div></figure>
+
+
+<p>最後に書かれている通り、<code>php.ini</code>に追記する。<br/>
+<code>/etc/php5/apache2/php.ini</code></p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>extension=oauth.so</span></code></pre></td></tr></table></div></figure>
+
+
+<p>apache再起動。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$ sudo service apache2 restart</span></code></pre></td></tr></table></div></figure>
+
+
+<p><code>phpinfo</code>でOAuthが有効と表示されていれば完了。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2016/06/wp_oauth02.jpg" alt="" /></p>
+
+<h2>トークンの取得</h2>
+
+<p>今回の承認などに必要なPHPファイルは全て同一ドメイン・同一階層に置くものとする。</p>
+
+<p>OAuth1.0aの承認フローなどの動きは以下がとても参考になった。</p>
+
+<p>参考: <a href="http://nskw-style.com/2016/wordpress/wp-api/oauth1.html">WP REST API の OAuth 認証の方法と何が起こっているのかとなぜそんなことをしているのか &#8211; Shinichi Nishikawa&#039;s</a></p>
+
+<h2>コード</h2>
+
+<p>参考 : <a href="http://qiita.com/newton/items/1114e443a90e204746ad">Tumblr API OAuth認証の方法（PHPサンプル付き） &ndash; Qiita</a></p>
+
+<p>こちらのコードをほぼそのまま利用させてもらった。</p>
+
+<p><code>login.php</code></p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;?php
+</span><span class='line'>require_once './OAuthSample.php';
+</span><span class='line'>
+</span><span class='line'>$oauth_sample = new OAuthSample();
+</span><span class='line'>try {
+</span><span class='line'>    // リクエストトークンの取得とリダイレクト開始
+</span><span class='line'>    $oauth_sample-&gt;goToAuthorize();
+</span><span class='line'>} catch (\Exception $e) {
+</span><span class='line'>    // エラー処理
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<p><code>OAuthSample.php</code></p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+<span class='line-number'>61</span>
+<span class='line-number'>62</span>
+<span class='line-number'>63</span>
+<span class='line-number'>64</span>
+<span class='line-number'>65</span>
+<span class='line-number'>66</span>
+<span class='line-number'>67</span>
+<span class='line-number'>68</span>
+<span class='line-number'>69</span>
+<span class='line-number'>70</span>
+<span class='line-number'>71</span>
+<span class='line-number'>72</span>
+<span class='line-number'>73</span>
+<span class='line-number'>74</span>
+<span class='line-number'>75</span>
+<span class='line-number'>76</span>
+<span class='line-number'>77</span>
+<span class='line-number'>78</span>
+<span class='line-number'>79</span>
+<span class='line-number'>80</span>
+<span class='line-number'>81</span>
+<span class='line-number'>82</span>
+<span class='line-number'>83</span>
+<span class='line-number'>84</span>
+<span class='line-number'>85</span>
+<span class='line-number'>86</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;?php
+</span><span class='line'>/**
+</span><span class='line'> * Tumblr OAuth認証実装サンプル
+</span><span class='line'> *
+</span><span class='line'> * @author newton
+</span><span class='line'> */
+</span><span class='line'>class OAuthSample
+</span><span class='line'>{
+</span><span class='line'>    const REQUEST_TOKEN_URL  = 'http://wprest.local/oauth1/request';
+</span><span class='line'>    const AUTHORIZE_URL      = 'http://wprest.local/oauth1/authorize';
+</span><span class='line'>    const ACCESS_TOKEN_URL   = 'http://wprest.local/oauth1/access';
+</span><span class='line'>
+</span><span class='line'>    public $CONSUMER_KEY = '';
+</span><span class='line'>    public $CONSUMER_SECRET = '';
+</span><span class='line'>
+</span><span class='line'>    /**
+</span><span class='line'>     * コントストラク
+</span><span class='line'>     * セッションの初期化をやる
+</span><span class='line'>     */
+</span><span class='line'>    public function __construct()
+</span><span class='line'>    {
+</span><span class='line'>        $this-&gt;CONSUMER_KEY = getenv('WP_CLIENT_KEY');
+</span><span class='line'>        $this-&gt;CONSUMER_SECRET = getenv('WP_CLIENT_SECRET');
+</span><span class='line'>
+</span><span class='line'>        if (!isset($_SESSION)) {
+</span><span class='line'>            session_start();
+</span><span class='line'>        }
+</span><span class='line'>    }
+</span><span class='line'>
+</span><span class='line'>    /**
+</span><span class='line'>     * リクエストトークンの取得～リダイレクト
+</span><span class='line'>     */
+</span><span class='line'>    public function goToAuthorize()
+</span><span class='line'>    {
+</span><span class='line'>        $oauth = new \OAuth($this-&gt;CONSUMER_KEY, $this-&gt;CONSUMER_SECRET);
+</span><span class='line'>        // リクエストトークン取得
+</span><span class='line'>        $request_token = $oauth-&gt;getRequestToken(self::REQUEST_TOKEN_URL);
+</span><span class='line'>
+</span><span class='line'>        if (!$request_token) {
+</span><span class='line'>            throw new Exception('リクエストトークンの取得に失敗');
+</span><span class='line'>        }
+</span><span class='line'>
+</span><span class='line'>        // リクエストトークンをセッションに保存する
+</span><span class='line'>        $_SESSION['request_token'] = $request_token['oauth_token'];
+</span><span class='line'>        $_SESSION['request_token_secret'] = $request_token['oauth_token_secret'];
+</span><span class='line'>
+</span><span class='line'>        $params = ['oauth_token' =&gt; $request_token['oauth_token']];
+</span><span class='line'>        $path = self::AUTHORIZE_URL . '?' . http_build_query($params);
+</span><span class='line'>
+</span><span class='line'>        $this-&gt;redirect($path);
+</span><span class='line'>    }
+</span><span class='line'>
+</span><span class='line'>    /**
+</span><span class='line'>     * アクセストークンの取得
+</span><span class='line'>     * コールバック後にコールされる用
+</span><span class='line'>     *
+</span><span class='line'>     * @return array アクセストークンのセットされたハッシュ
+</span><span class='line'>     */
+</span><span class='line'>    public function getAccessToken()
+</span><span class='line'>    {
+</span><span class='line'>        $oauth = new \OAuth(self::CONSUMER_KEY, self::CONSUMER_SECRET);
+</span><span class='line'>        // アクセストークンの取得
+</span><span class='line'>        $oauth-&gt;setToken($_SESSION['request_token'], $_SESSION['request_token_secret']);
+</span><span class='line'>        $access_token = $oauth-&gt;getAccessToken(self::ACCESS_TOKEN_URL, $_GET['oauth_verifier']);
+</span><span class='line'>
+</span><span class='line'>        if (!$access_token) {
+</span><span class='line'>            throw new \Exception('アクセストークンの取得に失敗');
+</span><span class='line'>        }
+</span><span class='line'>
+</span><span class='line'>        return $access_token;
+</span><span class='line'>    }
+</span><span class='line'>
+</span><span class='line'>    /**
+</span><span class='line'>     * リダイレクト
+</span><span class='line'>     *
+</span><span class='line'>     * @param string $path   リダイレクト先URL
+</span><span class='line'>     * @param int    $status ステータスコード
+</span><span class='line'>     */
+</span><span class='line'>    private function redirect($path, $status = 302)
+</span><span class='line'>    {
+</span><span class='line'>        header('Cache-Control: no-store, no-cache, must-revalidate');
+</span><span class='line'>        header('Expires: Thu, 01 Jan 1970 00:00:00 GMT');
+</span><span class='line'>        header("Location: {$path}", true, $status);
+</span><span class='line'>        exit;
+</span><span class='line'>    }
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<p><code>callback.php</code></p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;?php
+</span><span class='line'>require_once './OAuthSample.php';
+</span><span class='line'>
+</span><span class='line'>$oauth_sample = new OAuthSample();
+</span><span class='line'>try {
+</span><span class='line'>    // アクセストークンの取得
+</span><span class='line'>    $access_token = $oauth_sample-&gt;getAccessToken();
+</span><span class='line'>    var_dump($access_token);
+</span><span class='line'>} catch (\Exception $e) {
+</span><span class='line'>    // エラー処理
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>承認</h2>
+
+<p>作成した<code>login.php</code>へアクセスすると（ログインしていない場合はログイン画面が表示されログイン後に）承認のページが表示される。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2016/06/wp_oauth03.jpg" alt="" /></p>
+
+<p><code>Authorize</code>をクリックすると、許可されて、承認コードが表示される。
+(ここでコードが表示されるのではなく、コールバックURLへリダイレクトが行われるのが通常のフローだと思う）</p>
+
+<p><img src="http://kayakuguri.github.io/images/2016/06/wp_oauth04.jpg" alt="" /></p>
+
+<blockquote><p>Your verification token is j0lHiEOe07gOtUOkEA6J1q00</p></blockquote>
+
+<h2>アクセストークンの取得</h2>
+
+<p>コールバックが自動で行われないので、作成した<code>callback.php</code>へ直接アクセスしてやる。</p>
+
+<blockquote><p><a href="http://wprest.local/callback.php?oauth_verifier=j0lHiEOe07gOtUOkEA6J1q00">http://wprest.local/callback.php?oauth_verifier=j0lHiEOe07gOtUOkEA6J1q00</a></p></blockquote>
+
+<p>こうすることで、アクセストークンを取得できた。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>array(2) {
+</span><span class='line'>  ["oauth_token"]=&gt;
+</span><span class='line'>  string(24) "UTriXsugNS1c0ddCc1UBuMPj"
+</span><span class='line'>  ["oauth_token_secret"]=&gt;
+</span><span class='line'>  string(48) "6GAHfovkjdSPm2LZbtf06vV3ouBML8WaqiwPIfCGsGY0jVHA"
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<p>実際に投稿などをPOSTするには、アプリケーションのカスタマーキーなども合わせて必要になる。
+まとめると以下となる。</p>
+
+<table>
+<thead>
+<tr>
+<th></th>
+<th align="left"> 項目 </th>
+<th align="left"> 内容 </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td></td>
+<td align="left"> Client Key </td>
+<td align="left"> NUmeekveMbG8 |</td>
+</tr>
+<tr>
+<td></td>
+<td align="left"> Client Secret </td>
+<td align="left"> E2k9ClRfElFCCzZGlcL9tWesqKV0zHmwHJEUvSF5m7oiFgq5 |</td>
+</tr>
+<tr>
+<td></td>
+<td align="left"> OAuth Token </td>
+<td align="left"> UTriXsugNS1c0ddCc1UBuMPj |</td>
+</tr>
+<tr>
+<td></td>
+<td align="left"> OAuth Token Secret </td>
+<td align="left"> 6GAHfovkjdSPm2LZbtf06vV3ouBML8WaqiwPIfCGsGY0jVHA |</td>
+</tr>
+</tbody>
+</table>
+
+
+<h1>投稿</h1>
+
+<p>さて、ここまででアクセストークンなど投稿に必要なものが一通り揃ったので、ようやく新規投稿の準備が整った。
+投稿は簡単で、今までと同じようにトークンなどをセットして指定のエンドポイントへパラメータを投げてやるだけでおｙい。<br/>
+エンドポイントは、新規投稿となるので、<code>http://wprest.local/wp-json/wp/v2/posts</code>となる。<br/>
+これも、先ほどのTumblerへの投稿を書いた記事を参考にさせてもらった。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;?php
+</span><span class='line'>
+</span><span class='line'>$consumer_key = 'NUmeekveMbG8';
+</span><span class='line'>$consumer_secret = 'E2k9ClRfElFCCzZGlcL9tWesqKV0zHmwHJEUvSF5m7oiFgq5';
+</span><span class='line'>$oauth_token = 'UTriXsugNS1c0ddCc1UBuMPj';
+</span><span class='line'>$oauth_token_secret = '6GAHfovkjdSPm2LZbtf06vV3ouBML8WaqiwPIfCGsGY0jVHA';
+</span><span class='line'>$response = '';
+</span><span class='line'>
+</span><span class='line'>try {
+</span><span class='line'>    $oauth = new \OAuth($consumer_key, $consumer_secret);
+</span><span class='line'>    $oauth-&gt;setToken($oauth_token, $oauth_token_secret);
+</span><span class='line'>    //POST
+</span><span class='line'>    $params = ['title' =&gt; 'From PHP'];
+</span><span class='line'>    $oauth-&gt;fetch('http://wprest.local/wp-json/wp/v2/posts', $params, OAUTH_HTTP_METHOD_POST);
+</span><span class='line'>    $response_info = $oauth-&gt;getLastResponseInfo();
+</span><span class='line'>    if ($response_info['http_code'] == 201) {
+</span><span class='line'>        $response = json_decode($oauth-&gt;getLastResponse(), true);
+</span><span class='line'>    }else{
+</span><span class='line'>        throw new \Exception('記事の投稿に失敗');
+</span><span class='line'>    }
+</span><span class='line'>} catch (\Exception $e) {
+</span><span class='line'>    // エラー処理
+</span><span class='line'>    var_dump($e);
+</span><span class='line'>}
+</span><span class='line'>// 結果をダンプ
+</span><span class='line'>var_dump($response);</span></code></pre></td></tr></table></div></figure>
+
+
+<p>これでこのファイルへアクセスすると、無事、新規投稿が行われる。
+以上。</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Composerを使ってPEARのライブラリをインストールする]]></title>
@@ -2964,138 +3499,6 @@ linux系の記事とかを調べているとこの辺の用語が当たり前に
 
 <p><a href="http://salesforce.stackexchange.com/questions/5427/json-deserialize-array-of-objects">apex &ndash; JSON.deserialize Array of Objects &ndash; Salesforce Stack Exchange</a><br/>
 <a href="https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_class_System_JsonParser.htm">JSONParser Class | Force.com Apex Code Developer&#x27;s Guide | Salesforce Developers</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[ローカルのWordPressをCloud9の環境へ引っ越す(DB)]]></title>
-    <link href="http://kayakuguri.github.io/blog/2015/11/27/cloud9-wordpress-mysqlimport/"/>
-    <updated>2015-11-27T15:30:19+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2015/11/27/cloud9-wordpress-mysqlimport</id>
-    <content type="html"><![CDATA[<p>ローカルで開発していたwordpressをCloud9に移動させるべく、DBのインポートをしてみた。</p>
-
-<!-- more -->
-
-
-<p>まずはCloud9でWordpressプロジェクトを作成する。<br/>
-これは順場に選んでくだけで簡単に可能。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2015/11/c9_00.jpg" alt="" /></p>
-
-<h2>MySqlの起動など</h2>
-
-<p>mysqlの起動などは以下で可能。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'># 起動
-</span><span class='line'>$ mysql-ctl start
-</span><span class='line'>
-</span><span class='line'># 停止
-</span><span class='line'>$ mysql-ctl stop</span></code></pre></td></tr></table></div></figure>
-
-
-<p><code>mysql-ctl</code>コマンドは以下を実行可能。</p>
-
-<pre><code>[start|restart|stop|status|cli|install]
-</code></pre>
-
-<p>以下で、mysqlに入る事が出来る。</p>
-
-<pre><code>$ mysql-ctl cli
-...
-mysql&gt; 
-</code></pre>
-
-<p>もしくは、ユーザー指定で普通にログインも出来る。</p>
-
-<pre><code>$ mysql -u kayakuguri
-</code></pre>
-
-<p>この中でデータベースやテーブルを作成したり出来る。<br/>
-なので、インポートするDBを作成しておく。</p>
-
-<h2>ダンプファイルのアップロード</h2>
-
-<p>ローカルのファイルをアップするのと同じ手順でダンプしたSQLファイルをアップロードする。<br/>
-Cloud9のIDE上から、<code>File -&gt; Upload Local Files...</code>を選択。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2015/11/c9_01.jpg" alt="" /></p>
-
-<p>アップしたいファイルをウインドウにドロップして完了。<br/>
-直下にアップした。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2015/11/c9_02.jpg" alt="" /></p>
-
-<h2>インポート</h2>
-
-<p>これで準備は整ったのでダンプファイルをインポートする。<br/>
-下部のエリアから、<code>bash</code>タブを選択し、そこにコマンドを打ち込んでいく。</p>
-
-<p>mysqlのユーザー名はCloud9のログイン名と同じで、パスワードはかかっていない。<br/>
-なので以下のようになる。</p>
-
-<pre><code>$ mysql -u kayakuguri test_wp_db &lt; dump.sql
-</code></pre>
-
-<p><img src="http://kayakuguri.github.io/images/2015/11/c9_03.jpg" alt="" /></p>
-
-<h3>サイトURLの変更</h3>
-
-<p>このままだとローカルのサイトURLがwordpressのURLとして引き継がれてしまうので、コマンドで直接DBのデータをいじって変更してみる。</p>
-
-<pre><code>$ mysql -u kayakuguri
-</code></pre>
-
-<p>mysqlにログイン。</p>
-
-<pre><code># DBを選択
-mysql&gt; use test_wp_db;
-# 現状の設定を確認
-mysql&gt; SELECT * FROM wpoptions WHERE option_name='siteurl';
-# アップデート
-mysql&gt; UPDATE wpoptions SET option_value='https://your-project-kayakuguri.c9users.io' where option_name IN ('home', 'siteurl');
-</code></pre>
-
-<p>URLはRUNさせてみると確認出来る。<br/>
-(<code>https://プロジェクト名.ユーザー名.c9users.io/</code>っぽい)</p>
-
-<h3>wp-configの変更</h3>
-
-<p>wp-configにて、mysqlのユーザー名を指定していると思うので、それをCloud9用に変更しておく。<br/>
-パスワードはいらない。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>/** MySQL データベースのユーザー名 */
-</span><span class='line'>define('DB_USER', 'kayakuguri');
-</span><span class='line'>
-</span><span class='line'>/** MySQL データベースのパスワード */
-</span><span class='line'>define('DB_PASSWORD', '');</span></code></pre></td></tr></table></div></figure>
-
-
-<p>完了。</p>
-
-<h2>注意</h2>
-
-<p>wordpressプロジェクトで始めた場合、<code>wp-admin</code>、<code>wp-content</code>、<code>wp-includes</code>の主要なディレクトリを直下以外のディレクトリに移動が出来なかった。<br/>
-なので、ドキュメントルート以外でwordpressを稼働させるプロジェクトの場合は注意が必要。</p>
-
-<p>その場合は、PHPのプロジェクトとして作成し、自前で全ファイルをアップロードしてDBの設定などをすればよいかとも思ったが、どうも上手くいかなかった。<br/>
-要調査。</p>
-
-<p>ちなみにPHPの環境は今日現在、<code>PHP Version 5.5.9-1ubuntu4.13</code>だった。</p>
-
-<h2>参考</h2>
-
-<p><a href="https://docs.c9.io/docs/setting-up-mysql">Setting Up MySQL · Cloud9</a><br/>
-<a href="http://qiita.com/hishigataBOZE/items/bdd6009d3bfc1c7d313b">[WordPress + MySQL] DBからサイトURLを変更 &ndash; Qiita</a></p>
 ]]></content>
   </entry>
   

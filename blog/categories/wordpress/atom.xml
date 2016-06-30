@@ -4,7 +4,7 @@
   <title><![CDATA[Category: wordpress | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/wordpress/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2016-06-30T17:06:15+09:00</updated>
+  <updated>2016-06-30T17:06:56+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -58,7 +58,7 @@
 <p>ユーザー項目に、<code>Applicatons</code>が増えていれば正しく有効化出来ている。<br/>
 また、WP REST APIを追加していれば、<code>/wp-json/</code>にアクセスした際にOAuth認証するためのURLが表示されるようになる。</p>
 
-<p>```json
+<p>```
 authentication: {
   oauth1: {</p>
 
