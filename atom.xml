@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2016-06-30T17:37:34+09:00</updated>
+  <updated>2016-06-30T17:42:46+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -30,6 +30,9 @@
 また、そのアプリケーションを使用して、アクセストークンまで取得しているものとする。</p>
 
 <p>通常は承認のフローなどはユーザー側が行うため、アクセストークンまでもった状態からスタートすることはないと思うが、今回は最後の投稿部分だけに絞って試してみた。</p>
+
+<p>WP REST APIでアクセストークンを取得するには、前回書いたこの記事を参考にどうぞ。<br/>
+<a href="http://kayakuguri.github.io/blog/2016/06/30/wp-rest-oauth/">WordPress REST APIにOAuth1.0aで認証して投稿する &ndash; KayaMemo</a></p>
 
 <h1>リモートサイトの登録</h1>
 
