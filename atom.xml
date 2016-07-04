@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2016-06-30T17:42:46+09:00</updated>
+  <updated>2016-07-04T16:33:18+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,92 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[CSVデータをMySQLにインポートする]]></title>
+    <link href="http://kayakuguri.github.io/blog/2016/07/04/mysql-import-csv/"/>
+    <updated>2016-07-04T16:32:34+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2016/07/04/mysql-import-csv</id>
+    <content type="html"><![CDATA[<p>CSVのデータをMySQLにインポートしたので方法のメモ。</p>
+
+<!-- more -->
+
+
+<h1>環境</h1>
+
+<ul>
+<li>Vagrant : <a href="https://box.scotch.io/">Scotchbox</a>
+
+<ul>
+<li>Ubuntu 14.04 LTS</li>
+<li>PHP 5.6</li>
+</ul>
+</li>
+</ul>
+
+
+<h1>準備</h1>
+
+<p>MySQLにテーブルを作成する。
+テーブルに作成した項目順にカンマ区切りで値を作成する。</p>
+
+<p>エクセルでCSVファイルを作成した場合は、MySQLの文字コードをUTF-8としたので、テキストエディタなどでUTF-8に変更しておく
+改行コードは、<code>CRLF</code>。</p>
+
+<p>作成したCSVファイルは、vagrantの共有フォルダに保存しておく。</p>
+
+<h1>インポート</h1>
+
+<p><code>$ vagrant ssh</code>から、<code>$ mysql -u root</code>でmysqlにログインし、以下のコマンドでインポートする。
+インポートするファイルは、<code>data.csv</code>とする。</p>
+
+<p>インポートするファイルはパスで指定するが、scotchboxの場合、共有フォルダの階層はvagrant内から見た場合は、<code>/var/www/</code>となるので、それを指定してやる。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>mysql&gt; LOAD DATA LOCAL INFILE '/var/www/data.csv' INTO TABLE SUB_ListAll FIELDS TERMINATED BY ',' LINES TERMINATED BY '\r\n';</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>注意点</h1>
+
+<h2>改行コード</h2>
+
+<p>インポートする際に使用する、<code>DATA INFILE</code>コマンドでは、デフォルトの改行コードは<code>LF</code>になっているよう。
+なので、明示的に改行コードを指定してやる必要がある。
+それが以下の部分。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>LINES TERMINATED BY '\r\n'</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>LOCAL INFILE</h2>
+
+<p><code>local infile</code>を利用するには、設定で許可されている必要があるよう。
+これが許可されていないと、以下のエラーが返ってくる。</p>
+
+<blockquote><p>The used command is not allowed with this MySQL version</p></blockquote>
+
+<p>デフォルトでは許可されていなかったので、mysqlへログインする際に許可してログインする。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$ mysql --local-infile=1 -u root</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>まとめ</h1>
+
+<p>ちょっとググっても色々と落とし穴があるようで、環境によってはその他の穴も空いてるかもしれない。
+とりあえず、冒頭にあげた環境では上記でいけた。</p>
+
+<p>ちなみに、ファイルはパーミッションを777に指定してやらなくてもそのままでいけた。</p>
+
+<h1>参考</h1>
+
+<ul>
+<li><a href="http://www.infoscoop.org/blogjp/2014/07/23/about-load-data-infile/">MySQLのLOAD DATA INFILEで大はまりした話 | infoScoop開発者ブロ</a></li>
+<li><a href="http://oshiete.goo.ne.jp/qa/1030943.html">CSVファイルのインポートについて &ndash; MySQL 解決済 | 教えて！goo</a></li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[SalesforceからWP REST APIへOAuth認証を利用して投稿する]]></title>
@@ -3373,110 +3459,6 @@ luaがインストールされているかどうかは、vimのバージョン�
 <h2>参考</h2>
 
 <p><a href="http://cpp0302.hatenablog.com/entry/2015/04/10/033609">neocomplcacheからneocompleteへの乗り換え &ndash; 自分の速さで</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Linuxのパッケージ管理についての用語を理解する]]></title>
-    <link href="http://kayakuguri.github.io/blog/2015/12/18/linux-package/"/>
-    <updated>2015-12-18T18:06:02+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2015/12/18/linux-package</id>
-    <content type="html"><![CDATA[<p>vagrantで環境を構築する際に、PHPの各種バージョンを指定して作成した場合はありますが、<br/>
-その際にyumでリポジトリを追加してパッケージをインストール、、などと言われても意味がわかっていなかったので、ざっくりと調べてみました。</p>
-
-<!-- more -->
-
-
-<h2>yum</h2>
-
-<p>RedHat系ディストリビューションのパッケージ管理システムのこと。<br/>
-PHPでいう、composerのLinux(RedHat系)版、みたいなものでしょうか。<br/>
-ちなみにRedHat系ディストリビューションのLinux、とは、CentOSがそれにあたるよう。(Fedora、とか）<br/>
-<a href="https://ja.wikipedia.org/wiki/Linux%E3%83%87%E3%82%A3%E3%82%B9%E3%83%88%E3%83%AA%E3%83%93%E3%83%A5%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3%E3%81%AE%E6%AF%94%E8%BC%83">Linuxディストリビューションの比較 &ndash; Wikipedia</a><br/>
-(Debian系のディストリビューション、では、<code>apt-get</code>が使われる。<br/>
-UbuntuはDebian系ディストリビューション。）</p>
-
-<p>一方、<code>rpm</code>、というのもあるそうですが、rpmを機能拡張したものがyum、という位置づけのようです。<br/>
-<a href="http://blog.inouetakuya.info/entry/20111006/1317900802">初心者の頃に知っておきたかった rpm と yum の違いと使い分け &ndash; 彼女からは、おいちゃんと呼ばれています</a></p>
-
-<p>要するにyumで提供されているものはyumを使ったほうが楽だからyumを使うけれど、<br/>
-rpmでしかないものや、yumで提供されているものが古かったりするばあいは、rpmで直接指定する、みたいな感じっぽいです。</p>
-
-<p>また、上記サイトに用語の説明として以下のように記載されていました。</p>
-
-<blockquote><p>・パッケージ<br/>
-ソフトウェアの一連のファイルをまとめたもの<br/>
-・リポジトリ<br/>
-パッケージを集めて保管している場所。インターネット上にいろいろなリポジトリが存在する<br/>
-・RPM データベース<br/>
-rpm 形式のパッケージがインストールされると、その情報は「/usr/lib/rpm」に格納される。このデータのまとまりを「RPM データベース」という</p></blockquote>
-
-<h2>リポジトリ</h2>
-
-<p>今聞くとgitしか思い浮かびませんが、たぶん意味は同じ。<br/>
-リポジトリ、なのか、レポジトリなのか、揺れがあります。<br/>
-(リポジトリ、のほうが多い気がしました）</p>
-
-<p><a href="http://www.searchman.info/fedoracore4/sev1050.html">yumの概念を覚えよう。fedoracore4では標準でついてます。</a></p>
-
-<blockquote><p>最新バージョンのソフトウェアは、リポジトリというサイトに登録されていています。<br/>
-まあ、簡単にいうと、リポジトリとはソフトウェアの貯蔵庫みたいなもの。</p></blockquote>
-
-<p>PHPでいうところの、<code>composer.json</code>がネット上にアップされていて、どのパッケージのどのバージョンをインストールするか、みたなものが管理されており、それをリポジトリ、と呼ぶ、という事でしょうか。</p>
-
-<h2>remi</h2>
-
-<p><a href="http://oki2a24.com/2012/03/13/what-is-rpmforge-remi-epel/">yum が便利になる RPMforge、Remi、EPEL とは一体何なのか &#8211; oki2a24</a></p>
-
-<p>有名なサードパーティのリポジトリの一つのよう。<br/>
-あと有名なものは上記サイトにあるように、 <code>EPEL</code> とか、 <code>RPMforge</code> とかがあるみたいです。</p>
-
-<p><a href="http://rpms.famillecollet.com/">Remi&rsquo;s RPM repository</a></p>
-
-<p>人の名前らしい。<br/>
-<a href="http://snickerjp.blogspot.jp/2013/01/remi.html">&#12300;remiってなに&#65311;&#12301;って話 : 元うなぎ屋</a></p>
-
-<h2>CentOSのPHP</h2>
-
-<p>ようやく本題に近づいてきました。<br/>
-現状、CentOSの公式リポジトリで提供されているPHPは、5.4、らしいです。<br/>
-CentOS7.x系では、PHP5.4、なのだと思います。<br/>
-CentOS6.x系では、PHP5.3、のようです。</p>
-
-<p>ですので、最新のPHPを含め、他のバージョンのPHPをインストールするには、そのPHPがパッケージされたリポジトリを使用する必要があります。<br/>
-その際に上記のremi、を使うのがもっともポピュラーな方法のようです。</p>
-
-<h3>EPELリポジトリ</h3>
-
-<blockquote><p>Remi で提供されているソフトウェアをインストールするためには EPEL のリポジトリも必須要件となっていますので、EPELのリポジトリの追加を行った後に Remi のリポジトリを追加します。<br/>
-<a href="http://weblabo.oscasierra.net/centos7-php56-install/">CentOS 7 に PHP 5.6 を yum でインストールする手順 | WEB ARCH LABO</a></p></blockquote>
-
-<h2>用語の揺れ</h2>
-
-<p>remiのyumリポジトリなのか、yumのremiリポジトリなのか？</p>
-
-<blockquote><p>CentOS7では「EPEL」リポジトリを「yum」で追加することで追加することができます。<br/>
-<a href="http://www.server-memo.net/centos-settings/centos7/add-repo.html">CentOS7 サードパーティーリポジトリの追加 | server-memo.net</a></p></blockquote>
-
-<p>上記にある通り、EPELリポジトリをyumで追加するので、remiリポジトリ、が正解だと思います。</p>
-
-<h2>サードパーティリポジトリ</h2>
-
-<p>特にサードパーティのリポジトリをインストールしなかったばあいは、yum標準のリポジトリからインストールやアップデートが行われますが、<br/>
-サードパーティのリポジトリをインストールしている場合はyumを使用する際にインストールしたサードパーティのリポジトリからインストールやアップデートが行われる、ということのようです。</p>
-
-<p>remiやEPELなんかの有名どころでは信頼性も高いのかもしれないですが、セキュリティの観点から言うとやはり公式の標準リポジトリからインストールするのが一番安全だと思われます。<br/>
-なので、通常はyum標準のリポジトリを利用するが、足りないものやカスタマイズしたい場合のみ、remiなどのサードパーティのリポジトリを使う、という運用がよく行われるようです。</p>
-
-<blockquote><p>追加するリポジトリによっては、CentOS標準のパッケージを置き換えてしまったりするものがあり、それが問題を引き起こしてしまう場合があります。</p>
-
-<p>ですので、通常はCentOSデフォルトのリポジトリを使用し、そこに無いパッケージをインストールしたい場合のみ、明示的に追加したリポジトリを指定してパッケージのインストールを行うという運用に私はしています。<br/>
-<a href="http://www.server-memo.net/centos-settings/centos7/add-repo.html">CentOS7 サードパーティーリポジトリの追加 | server-memo.net</a></p></blockquote>
-
-<h1>まとめ</h1>
-
-<p>とりあえずyum、リポジトリ、remiなどの関係がざっくりと理解できました。<br/>
-linux系の記事とかを調べているとこの辺の用語が当たり前に出てくるのでつらかったのですが、これである程度整理しながら読むことが出来そうです。</p>
 ]]></content>
   </entry>
   

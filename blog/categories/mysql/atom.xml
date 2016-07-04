@@ -4,7 +4,7 @@
   <title><![CDATA[Category: mysql | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/mysql/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2016-06-30T17:42:46+09:00</updated>
+  <updated>2016-07-04T16:33:18+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,92 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[CSVデータをMySQLにインポートする]]></title>
+    <link href="http://kayakuguri.github.io/blog/2016/07/04/mysql-import-csv/"/>
+    <updated>2016-07-04T16:32:34+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2016/07/04/mysql-import-csv</id>
+    <content type="html"><![CDATA[<p>CSVのデータをMySQLにインポートしたので方法のメモ。</p>
+
+<!-- more -->
+
+
+<h1>環境</h1>
+
+<ul>
+<li>Vagrant : <a href="https://box.scotch.io/">Scotchbox</a>
+
+<ul>
+<li>Ubuntu 14.04 LTS</li>
+<li>PHP 5.6</li>
+</ul>
+</li>
+</ul>
+
+
+<h1>準備</h1>
+
+<p>MySQLにテーブルを作成する。
+テーブルに作成した項目順にカンマ区切りで値を作成する。</p>
+
+<p>エクセルでCSVファイルを作成した場合は、MySQLの文字コードをUTF-8としたので、テキストエディタなどでUTF-8に変更しておく
+改行コードは、<code>CRLF</code>。</p>
+
+<p>作成したCSVファイルは、vagrantの共有フォルダに保存しておく。</p>
+
+<h1>インポート</h1>
+
+<p><code>$ vagrant ssh</code>から、<code>$ mysql -u root</code>でmysqlにログインし、以下のコマンドでインポートする。
+インポートするファイルは、<code>data.csv</code>とする。</p>
+
+<p>インポートするファイルはパスで指定するが、scotchboxの場合、共有フォルダの階層はvagrant内から見た場合は、<code>/var/www/</code>となるので、それを指定してやる。</p>
+
+<p><code>
+mysql&gt; LOAD DATA LOCAL INFILE '/var/www/data.csv' INTO TABLE SUB_ListAll FIELDS TERMINATED BY ',' LINES TERMINATED BY '\r\n';
+</code></p>
+
+<h1>注意点</h1>
+
+<h2>改行コード</h2>
+
+<p>インポートする際に使用する、<code>DATA INFILE</code>コマンドでは、デフォルトの改行コードは<code>LF</code>になっているよう。
+なので、明示的に改行コードを指定してやる必要がある。
+それが以下の部分。</p>
+
+<p><code>
+LINES TERMINATED BY '\r\n'
+</code></p>
+
+<h2>LOCAL INFILE</h2>
+
+<p><code>local infile</code>を利用するには、設定で許可されている必要があるよう。
+これが許可されていないと、以下のエラーが返ってくる。</p>
+
+<blockquote><p>The used command is not allowed with this MySQL version</p></blockquote>
+
+<p>デフォルトでは許可されていなかったので、mysqlへログインする際に許可してログインする。</p>
+
+<p><code>
+$ mysql --local-infile=1 -u root
+</code></p>
+
+<h1>まとめ</h1>
+
+<p>ちょっとググっても色々と落とし穴があるようで、環境によってはその他の穴も空いてるかもしれない。
+とりあえず、冒頭にあげた環境では上記でいけた。</p>
+
+<p>ちなみに、ファイルはパーミッションを777に指定してやらなくてもそのままでいけた。</p>
+
+<h1>参考</h1>
+
+<ul>
+<li><a href="http://www.infoscoop.org/blogjp/2014/07/23/about-load-data-infile/">MySQLのLOAD DATA INFILEで大はまりした話 | infoScoop開発者ブロ</a></li>
+<li><a href="http://oshiete.goo.ne.jp/qa/1030943.html">CSVファイルのインポートについて &ndash; MySQL 解決済 | 教えて！goo</a></li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[ローカルのWordPressをCloud9の環境へ引っ越す(DB)]]></title>
