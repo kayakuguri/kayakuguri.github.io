@@ -4,7 +4,7 @@
   <title><![CDATA[Category: php | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/php/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2016-07-04T16:33:18+09:00</updated>
+  <updated>2016-07-07T17:51:38+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,222 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[PHP]CurlでのSSL接続をOpenSSL方式に変更する]]></title>
+    <link href="http://kayakuguri.github.io/blog/2016/07/07/curl-openssl-tls/"/>
+    <updated>2016-07-07T17:50:07+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2016/07/07/curl-openssl-tls</id>
+    <content type="html"><![CDATA[<p>curlでsslを接続する際に、opensslを利用した接続になっていなかったために接続出来ない事例があったのだが、curlを入れ替えてopensslを利用するようにしたら接続出来たのでそのメモ。</p>
+
+<!-- more -->
+
+
+<h1>前提</h1>
+
+<p>接続をしている環境は以下とする。</p>
+
+<ul>
+<li>CnetOS 5.6</li>
+<li>PHP 5.3</li>
+</ul>
+
+
+<p>この環境で、SalesforceへRestAPIを利用して接続をする。<br/>
+接続する際の認証は以下のクラスを利用している。</p>
+
+<ul>
+<li><a href="https://github.com/nkjm/Force.com-OAuth-Toolkit-for-PHP">nkjm/Force.com-OAuth-Toolkit-for-PHP: A toolkit to enable OAuth in external Web Services developed in php</a></li>
+</ul>
+
+
+<p>自作の <code>/sample/login</code>のエンドポイントへ接続するものとする。<br/>
+接続に利用しているPHP。</p>
+
+<p>```
+&lt;?php
+require_once(&lsquo;oauth.php&rsquo;);</p>
+
+<p>define(&lsquo;CLIENT_ID&rsquo;, &lsquo;xxx&rsquo;);
+define(&lsquo;CLIENT_SECRET&rsquo;, &lsquo;xxx&rsquo;);
+define(&lsquo;CALLBACK_URL&rsquo;, &lsquo;<a href="http://localhost/">http://localhost/</a>&rsquo;);
+define(&lsquo;LOGIN_URL&rsquo;, &lsquo;<a href="https://test.salesforce.com">https://test.salesforce.com</a>&rsquo;);
+define(&lsquo;USERNAME&rsquo;, &lsquo;xxx&rsquo;);
+define(&lsquo;PASSWORD&rsquo;, &lsquo;xxx&rsquo;);</p>
+
+<p>$oauth = new oauth(CLIENT_ID, CLIENT_SECRET, CALLBACK_URL, LOGIN_URL);
+$oauth->auth_with_password(USERNAME, PASSWORD, 120);
+$url = &ldquo;$oauth->instance_url/services/apexrest/user/login&rdquo;;
+$curl = curl_init($url);
+$POST_DATA = array(</p>
+
+<pre><code>'email' =&gt; 'sample',
+'passwd' =&gt; 'password'
+</code></pre>
+
+<p>);</p>
+
+<p>curl_setopt($curl, CURLOPT_POST, TRUE);
+curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($POST_DATA));
+curl_setopt($curl, CURLOPT_HEADER, false);
+curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($curl, CURLOPT_HTTPHEADER, array(&lsquo;Content-type: application/x-www-form-urlencoded;charset=UTF-8&rsquo;, &ldquo;Authorization: OAuth &rdquo; . $oauth->access_token));
+$output= curl_exec($curl);
+curl_close($curl);
+$response = json_decode($output, true);</p>
+
+<p>echo $output;
+```</p>
+
+<p>この辺詳しくは以下をどうぞ。
+<a href="http://kayakuguri.github.io/blog/2014/10/27/apex-rest-post/">[Salesforce]apex Rest APIでPOSTでデータを送信する</a></p>
+
+<h1>失敗する</h1>
+
+<p>このまま送信をすると、以下のようなエラーが出て失敗する。<br/>
+ちなみに、ログイン履歴には残っている。</p>
+
+<p>```
+[</p>
+
+<pre><code>{
+    message: "この組織では TLS 1.0 が無効になりました。HTTPS を使用して Salesforce に接続するには、TLS 1.1 以降を使用してください。",
+    errorCode: "UNSUPPORTED_CLIENT"
+}
+</code></pre>
+
+<p>]
+```</p>
+
+<h1>TLS</h1>
+
+<p>ssl通信をする時の暗号化規格で、TLS1.0は暗号化のレベルが低い、とかで1.1以上が推奨されているよう。<br/>
+それに伴って、Salesforceでは、TLS1.0での接続を無効としている。<br/>
+変更内容など詳しくは公式で。</p>
+
+<ul>
+<li><a href="https://help.salesforce.com/apex/HTViewSolution?id=000221207&amp;language=ja">Salesforce による TLS 1.0 の無効化</a></li>
+</ul>
+
+
+<p>組織の設定から明示的に有効にする事も可能だが、強制的に切り替えが行われるタイミングは以下。</p>
+
+<ul>
+<li>Sandbox 組織 &ndash; 2016 年 6 月 25 日、午前 9:30 (太平洋夏時間) (16:30 UTC)</li>
+<li>本番組織 &ndash; 2017 年 3 月 4 日、午前 9:30 (太平洋標準時) (17:30 UTC)</li>
+</ul>
+
+
+<p>今回は、Sandboxでの設定が適用されたために接続が出来なくなったよう。</p>
+
+<h1>原因</h1>
+
+<p>上記環境で原因を探ってみると、<code>curl</code>でエンドポイントへ投げる際に<code>NSS</code>という方式が使われている事が原因となっている事がわかった。</p>
+
+<p><img src="/images/2016/07/tls01.jpg" alt="" /></p>
+
+<p><a href="https://developer.mozilla.org/ja/docs/NSS_FAQ">NSS FAQ | MDN</a></p>
+
+<p>NSSのバージョンは3.14だが、このバージョンでは一応TLS1.1には対応しているとリリースノートには書かれていたが…。詳細は不明。<br/>
+<a href="https://developer.mozilla.org/en-US/docs/Mozilla/Projects/NSS/NSS_3.14_release_notes">NSS 3.14 release notes &ndash; Mozilla | MDN</a></p>
+
+<h1>対処</h1>
+
+<p>というわけで、これを<code>NSS</code>ではなく、<code>OpenSSL</code>方式で接続するように変更する。<br/>
+といっても、設定変更で済むわけではなく、curlのインストールし直し、となる。</p>
+
+<p>作業内容は以下のサイトをそのまま利用させてもらった。<br/>
+<a href="http://www.apollo.jp/blog/?p=2382">wordpressの引っ越し | 紅い夕陽</a></p>
+
+<h2>作業</h2>
+
+<p>サーバー側での作業となる。<br/>
+今回はvagrant環境で作業をしたので、<code>$ vagrant ssh</code>でsshログインして作業した。<br/>
+また、ルートログインしておく。</p>
+
+<p>・必要なモジュールをインストール</p>
+
+<p>```</p>
+
+<h1>yum install gcc</h1>
+
+<h1>yum -y install openssl-devel</h1>
+
+<h1>yum -y install wget</h1>
+
+<h1>yum -y install lbzip2</h1>
+
+<p>```</p>
+
+<p>・curlを取得して展開(curlは少し前のバージョン)</p>
+
+<p>```</p>
+
+<h1>wget <a href="http://curl.haxx.se/download/curl-7.37.0.tar.bz2">http://curl.haxx.se/download/curl-7.37.0.tar.bz2</a></h1>
+
+<h1>tar xf curl-7.37.0.tar.bz2</h1>
+
+<h1>cd curl-7.37.0</h1>
+
+<h1>./configure &mdash;enable-libcurl-option</h1>
+
+<p>```</p>
+
+<p>・コンパイルしてインストール</p>
+
+<p>```</p>
+
+<h1>make</h1>
+
+<h1>make install</h1>
+
+<p>```</p>
+
+<p>・ライブラリを登録</p>
+
+<p>```</p>
+
+<h1>vi /etc/ld.so.conf.d/curl-x86_64.conf</h1>
+
+<p>```</p>
+
+<p>内容</p>
+
+<p><code>
+/usr/local/lib
+</code></p>
+
+<p>・ライブラリを更新</p>
+
+<p>```</p>
+
+<h1>ldconfig -v</h1>
+
+<p>```</p>
+
+<p>最後に、apacheを再起動しておく。</p>
+
+<p>```</p>
+
+<h1>service httpd restart</h1>
+
+<p>```</p>
+
+<p>これでOpensslを使うように変更できた。</p>
+
+<p><img src="/images/2016/07/tls02.jpg" alt="" /></p>
+
+<p>この状態で再度冒頭のPHPでアクセスすると、無事、接続することが出来た。</p>
+
+<h1>参考</h1>
+
+<ul>
+<li><a href="http://www.apollo.jp/blog/?p=2382">wordpressの引っ越し | 紅い夕陽</a></li>
+<li><a href="http://blog.wnotes.net/blog/article/php_curl_error">PHPのcurlで&quot;SSL Connection Error.&quot;のエラーがどうしても出る時の対策 | ブログ :: Web notes.log</a></li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[UbuntuでApacheの環境変数を設定する方法]]></title>
@@ -237,112 +453,6 @@ Zend Engine v2.4.0, Copyright (c) 1998-2014 Zend Technologies
 
 <p><a href="http://qiita.com/Chrowa3/items/6c045d952a191a1203b4">Vagrant chef/centos-6.5 に PHP 5.4 を突っ込む &ndash; Qiita</a><br/>
 <a href="http://blog.ybbo.net/2014/01/22/%E3%80%90%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%80%91centos6%E3%81%ABphp5-4%E3%82%92yum%E3%81%A7%E7%B0%A1%E5%8D%98%E3%81%AB%E3%82%A4%E3%83%B3%E3%82%B9%E3%83%88%E3%83%BC%E3%83%AB%E3%81%99%E3%82%8B/">【シンプル】CentOS6にPHP5.4をyumで簡単にインストールする手順田舎に住みたいエンジニアの日記 | 田舎に住みたいエンジニアの日記</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[herokuがcomposer.lock必須になったのでcomposerの入れ方をメモしておく]]></title>
-    <link href="http://kayakuguri.github.io/blog/2015/08/25/composer-lock-require/"/>
-    <updated>2015-08-25T10:38:40+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2015/08/25/composer-lock-require</id>
-    <content type="html"><![CDATA[<p>herokuにcomposerを使用したプロジェクトをデプロイする場合、今まではwarningは出ていたようだけど、composer.lockはなくてもデプロイ出来ていた。<br/>
-それが、2015/8/21にPHPのランタイムがアップデートされ、composer.lockが必須になった、とのこと。<br/>
-<a href="https://devcenter.heroku.com/changelog-items/704">PHP versions 5.5.28, 5.6.12, 7.0.0RC1 available; new composer.lock requirements | Heroku Dev Center</a></p>
-
-<!-- more -->
-
-
-<p>composer.lockがない場合は以下のようなエラーが出る。</p>
-
-<blockquote><p>ERROR: Your &lsquo;composer.json&rsquo; lists dependencies inside &lsquo;require&rsquo;,but no &lsquo;composer.lock&rsquo; was found. Please run &lsquo;composer update&rsquo; to re-generate &lsquo;composer.lock&rsquo; if necessary, and commit it into your repository. For more information, please refer to the docs at <a href="https://devcenter.heroku.com/articles/php-support#activation">https://devcenter.heroku.com/articles/php-support#activation</a></p></blockquote>
-
-<h2>composerのインストール</h2>
-
-<p>環境はmacで、デフォルト等のPHPが入っている前提で。<br/>
-以下のコマンドを適当なディレクトリで叩くだけ。</p>
-
-<p><code>
-$ curl -sS https://getcomposer.org/installer | php
-$ mv composer.phar /usr/local/bin/composer
-</code></p>
-
-<p>ターミナルを再起動して、確認。</p>
-
-<p><code>
-$ composer -v
-Composer version 1.0-dev (f1aa655e6113e0efa979b8b09d7951a762eaa04c) 2015-08-20 11:59:54
-</code></p>
-
-<h3>参考</h3>
-
-<p><a href="http://mawatari.jp/archives/install-composer-in-mac">http://mawatari.jp/archives/install-composer-in-mac</a></p>
-
-<h2>composer install</h2>
-
-<p>この状態で、composer.jsonがあるディレクトリに移動し、<code>$ composer install</code>を叩いてみる。<br/>
-これでインストール出来れば完了。<br/>
-ただし、PCにインストールされているPHPによってはモジュールの関係でエラーが出る場合がある。<br/>
-例）</p>
-
-<blockquote><p>Problem 1<br/>
-  &ndash; The requested PHP extension ext-mcrypt * is missing from your system.</p></blockquote>
-
-<p>この場合は、全部入りのPHPを入れ直すのが早い。</p>
-
-<h2>PHPのインストール</h2>
-
-<p>以下のサイトに全部入りのものがまとまっているようなので、そこからインストール。<br/>
-<a href="http://php-osx.liip.ch/">PHP for OS X as binary package</a></p>
-
-<p>現時点で最新の5.6を入れる。</p>
-
-<pre><code>$ curl -s http://php-osx.liip.ch/install.sh | bash -s 5.6
-</code></pre>
-
-<p>このままだと使用するようにはなってないのでパスを通す。<br/>
-環境によって違うが、デフォルトでは、<code>.bash_profile</code>に記述すればよいよう。</p>
-
-<p><code>~/</code>ディレクトリ以下の<code>.bash_profile</code>をエディタ等で開いて記述。<br/>
-なければ作成する。<br/>
-コマンドで実行する場合は、なければ新規作成としてくれる。<br/>
-例えば、<code>vi</code>で開く場合は以下。<br/>
-<code>sudo</code>をつけてルート権限で実行している。</p>
-
-<pre><code>$ sudo vi ~/.bash_profile
-</code></pre>
-
-<p>以下を記述。</p>
-
-<pre><code>export PATH=/usr/local/php5/bin:$PATH
-</code></pre>
-
-<p>保存して終了。<br/>
-(viの場合は、<code>i</code>で入力モードに、<code>esc</code>で戻って、<code>:x</code>で保存して終了）<br/>
-<a href="http://net-newbie.com/linux/commands/vi.html">ｖｉエディタの使い方</a></p>
-
-<p>ターミナルを再起動してphpのバージョンを確認。</p>
-
-<pre><code>$ php -v
-PHP 5.6.11 (cli) (built: Jul 10 2015 21:46:48)
-</code></pre>
-
-<h2>composer install</h2>
-
-<p>この状態で、<code>$ composer install</code>すれば完了。<br/>
-実行後は実行したディレクトリ内に、<code>composer.lock</code>と<code>vendor/</code>が出来上がる。<br/>
-<code>vendor</code>ディレクトリ以下はgitで共有しないように、<code>.gitignore</code>に追記しておくこと。</p>
-
-<h2>.lockと.jsonの関係</h2>
-
-<p><code>composer.json</code>には、必要なパッケージとインストールするバージョンの指定があれば記述する。<br/>
-その状態で、<code>$ composer install</code>すると、パッケージがインストールされ、インストールされたパッケージのバージョン情報などが記述された、<code>composer.lock</code>ファイルが作成される。<br/>
-この状態で、他環境などで同じく<code>$ composer install</code>すると、<code>composer.lock</code>に書かれたバージョンのパッケージがインストールされ、全く同じ環境が構築される。</p>
-
-<p><code>$ copmoser update</code>をすると、再度<code>composer.json</code>の記述を元にパッケージがインストールされ、<code>composer.lock</code>が更新される。</p>
-
-<h2>参考</h2>
-
-<p><a href="http://qiita.com/nbkn/items/01a11392921119fa0153">MacでPATHを通す &ndash; Qiita</a></p>
 ]]></content>
   </entry>
   

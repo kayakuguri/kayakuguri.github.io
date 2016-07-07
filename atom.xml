@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2016-07-04T16:33:18+09:00</updated>
+  <updated>2016-07-07T17:51:38+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,237 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[PHP]CurlでのSSL接続をOpenSSL方式に変更する]]></title>
+    <link href="http://kayakuguri.github.io/blog/2016/07/07/curl-openssl-tls/"/>
+    <updated>2016-07-07T17:50:07+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2016/07/07/curl-openssl-tls</id>
+    <content type="html"><![CDATA[<p>curlでsslを接続する際に、opensslを利用した接続になっていなかったために接続出来ない事例があったのだが、curlを入れ替えてopensslを利用するようにしたら接続出来たのでそのメモ。</p>
+
+<!-- more -->
+
+
+<h1>前提</h1>
+
+<p>接続をしている環境は以下とする。</p>
+
+<ul>
+<li>CnetOS 5.6</li>
+<li>PHP 5.3</li>
+</ul>
+
+
+<p>この環境で、SalesforceへRestAPIを利用して接続をする。<br/>
+接続する際の認証は以下のクラスを利用している。</p>
+
+<ul>
+<li><a href="https://github.com/nkjm/Force.com-OAuth-Toolkit-for-PHP">nkjm/Force.com-OAuth-Toolkit-for-PHP: A toolkit to enable OAuth in external Web Services developed in php</a></li>
+</ul>
+
+
+<p>自作の <code>/sample/login</code>のエンドポイントへ接続するものとする。<br/>
+接続に利用しているPHP。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;?php
+</span><span class='line'>require_once('oauth.php');
+</span><span class='line'>
+</span><span class='line'>define('CLIENT_ID', 'xxx');
+</span><span class='line'>define('CLIENT_SECRET', 'xxx');
+</span><span class='line'>define('CALLBACK_URL', 'http://localhost/');
+</span><span class='line'>define('LOGIN_URL', 'https://test.salesforce.com');
+</span><span class='line'>define('USERNAME', 'xxx');
+</span><span class='line'>define('PASSWORD', 'xxx');
+</span><span class='line'>
+</span><span class='line'>$oauth = new oauth(CLIENT_ID, CLIENT_SECRET, CALLBACK_URL, LOGIN_URL);
+</span><span class='line'>$oauth-&gt;auth_with_password(USERNAME, PASSWORD, 120);
+</span><span class='line'>$url = "$oauth-&gt;instance_url/services/apexrest/user/login";
+</span><span class='line'>$curl = curl_init($url);
+</span><span class='line'>$POST_DATA = array(
+</span><span class='line'>    'email' =&gt; 'sample',
+</span><span class='line'>    'passwd' =&gt; 'password'
+</span><span class='line'>);
+</span><span class='line'>
+</span><span class='line'>curl_setopt($curl, CURLOPT_POST, TRUE);
+</span><span class='line'>curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($POST_DATA));
+</span><span class='line'>curl_setopt($curl, CURLOPT_HEADER, false);
+</span><span class='line'>curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+</span><span class='line'>curl_setopt($curl, CURLOPT_HTTPHEADER, array('Content-type: application/x-www-form-urlencoded;charset=UTF-8', "Authorization: OAuth " . $oauth-&gt;access_token));
+</span><span class='line'>$output= curl_exec($curl);
+</span><span class='line'>curl_close($curl);
+</span><span class='line'>$response = json_decode($output, true);
+</span><span class='line'>
+</span><span class='line'>echo $output;</span></code></pre></td></tr></table></div></figure>
+
+
+<p>この辺詳しくは以下をどうぞ。
+<a href="http://kayakuguri.github.io/blog/2014/10/27/apex-rest-post/">[Salesforce]apex Rest APIでPOSTでデータを送信する</a></p>
+
+<h1>失敗する</h1>
+
+<p>このまま送信をすると、以下のようなエラーが出て失敗する。<br/>
+ちなみに、ログイン履歴には残っている。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>[
+</span><span class='line'>  {
+</span><span class='line'>      message: "この組織では TLS 1.0 が無効になりました。HTTPS を使用して Salesforce に接続するには、TLS 1.1 以降を使用してください。",
+</span><span class='line'>      errorCode: "UNSUPPORTED_CLIENT"
+</span><span class='line'>  }
+</span><span class='line'>]</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>TLS</h1>
+
+<p>ssl通信をする時の暗号化規格で、TLS1.0は暗号化のレベルが低い、とかで1.1以上が推奨されているよう。<br/>
+それに伴って、Salesforceでは、TLS1.0での接続を無効としている。<br/>
+変更内容など詳しくは公式で。</p>
+
+<ul>
+<li><a href="https://help.salesforce.com/apex/HTViewSolution?id=000221207&amp;language=ja">Salesforce による TLS 1.0 の無効化</a></li>
+</ul>
+
+
+<p>組織の設定から明示的に有効にする事も可能だが、強制的に切り替えが行われるタイミングは以下。</p>
+
+<ul>
+<li>Sandbox 組織 &ndash; 2016 年 6 月 25 日、午前 9:30 (太平洋夏時間) (16:30 UTC)</li>
+<li>本番組織 &ndash; 2017 年 3 月 4 日、午前 9:30 (太平洋標準時) (17:30 UTC)</li>
+</ul>
+
+
+<p>今回は、Sandboxでの設定が適用されたために接続が出来なくなったよう。</p>
+
+<h1>原因</h1>
+
+<p>上記環境で原因を探ってみると、<code>curl</code>でエンドポイントへ投げる際に<code>NSS</code>という方式が使われている事が原因となっている事がわかった。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2016/07/tls01.jpg" alt="" /></p>
+
+<p><a href="https://developer.mozilla.org/ja/docs/NSS_FAQ">NSS FAQ | MDN</a></p>
+
+<p>NSSのバージョンは3.14だが、このバージョンでは一応TLS1.1には対応しているとリリースノートには書かれていたが…。詳細は不明。<br/>
+<a href="https://developer.mozilla.org/en-US/docs/Mozilla/Projects/NSS/NSS_3.14_release_notes">NSS 3.14 release notes &ndash; Mozilla | MDN</a></p>
+
+<h1>対処</h1>
+
+<p>というわけで、これを<code>NSS</code>ではなく、<code>OpenSSL</code>方式で接続するように変更する。<br/>
+といっても、設定変更で済むわけではなく、curlのインストールし直し、となる。</p>
+
+<p>作業内容は以下のサイトをそのまま利用させてもらった。<br/>
+<a href="http://www.apollo.jp/blog/?p=2382">wordpressの引っ越し | 紅い夕陽</a></p>
+
+<h2>作業</h2>
+
+<p>サーバー側での作業となる。<br/>
+今回はvagrant環境で作業をしたので、<code>$ vagrant ssh</code>でsshログインして作業した。<br/>
+また、ルートログインしておく。</p>
+
+<p>・必要なモジュールをインストール</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'># yum install gcc
+</span><span class='line'># yum -y install openssl-devel
+</span><span class='line'># yum -y install wget
+</span><span class='line'># yum -y install lbzip2</span></code></pre></td></tr></table></div></figure>
+
+
+<p>・curlを取得して展開(curlは少し前のバージョン)</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'># wget http://curl.haxx.se/download/curl-7.37.0.tar.bz2
+</span><span class='line'># tar xf curl-7.37.0.tar.bz2
+</span><span class='line'># cd curl-7.37.0
+</span><span class='line'># ./configure --enable-libcurl-option</span></code></pre></td></tr></table></div></figure>
+
+
+<p>・コンパイルしてインストール</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'># make
+</span><span class='line'># make install</span></code></pre></td></tr></table></div></figure>
+
+
+<p>・ライブラリを登録</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'># vi /etc/ld.so.conf.d/curl-x86_64.conf</span></code></pre></td></tr></table></div></figure>
+
+
+<p>内容</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>/usr/local/lib</span></code></pre></td></tr></table></div></figure>
+
+
+<p>・ライブラリを更新</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'># ldconfig -v</span></code></pre></td></tr></table></div></figure>
+
+
+<p>最後に、apacheを再起動しておく。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'># service httpd restart</span></code></pre></td></tr></table></div></figure>
+
+
+<p>これでOpensslを使うように変更できた。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2016/07/tls02.jpg" alt="" /></p>
+
+<p>この状態で再度冒頭のPHPでアクセスすると、無事、接続することが出来た。</p>
+
+<h1>参考</h1>
+
+<ul>
+<li><a href="http://www.apollo.jp/blog/?p=2382">wordpressの引っ越し | 紅い夕陽</a></li>
+<li><a href="http://blog.wnotes.net/blog/article/php_curl_error">PHPのcurlで&quot;SSL Connection Error.&quot;のエラーがどうしても出る時の対策 | ブログ :: Web notes.log</a></li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[CSVデータをMySQLにインポートする]]></title>
@@ -3163,302 +3394,6 @@ atomのパッケージからインストールする。</p>
 <a href="http://umeji.blogspot.jp/2011/09/phpvimrefvim.html">It&rsquo;s better.: phpマニュアルをvim上から見る(ref.vim)</a><br/>
 <a href="http://qiita.com/masa2sei/items/85a2c2cc3721c79a5322">vim-refを使う &ndash; Qiita</a><br/>
 <a href="http://www.karakaram.com/20120726-vim-ref">vim-refを導入する [2012年版] | karakaram-blog</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[vimにNeoBundleとNeoCompleteを入れる]]></title>
-    <link href="http://kayakuguri.github.io/blog/2015/12/24/neobundle-neocomplete/"/>
-    <updated>2015-12-24T15:09:50+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2015/12/24/neobundle-neocomplete</id>
-    <content type="html"><![CDATA[<p>vim環境を整えていくためにNeoCompleteを入れてみる。</p>
-
-<!-- more -->
-
-
-<h2>NeoBundle</h2>
-
-<p>NeoCompleteを入れるために、vimのプラグイン管理ツールである、NeoBundleを入れる。<br/>
-<a href="https://github.com/Shougo/neobundle.vim">Shougo/neobundle.vim</a></p>
-
-<p>インストール方法は上記公式のReadmeに従った。</p>
-
-<p>任意のディレクトリにインストール用ファイルをダウンロードし、実行。</p>
-
-<pre><code>$ curl https://raw.githubusercontent.com/Shougo/neobundle.vim/master/bin/install.sh &gt; install.sh
-$ sh ./install.sh
-$ rm ./install.sh
-</code></pre>
-
-<p>インストール時に表示される以下の設定を、<code>.vimrc</code>に記述。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>"NeoBundle Scripts-----------------------------
-</span><span class='line'>if has('vim_starting')
-</span><span class='line'>  if &compatible
-</span><span class='line'>    set nocompatible               " Be iMproved
-</span><span class='line'>  endif
-</span><span class='line'>
-</span><span class='line'>  " Required:
-</span><span class='line'>  set runtimepath+=~/.vim/bundle/neobundle.vim/
-</span><span class='line'>endif
-</span><span class='line'>
-</span><span class='line'>" Required:
-</span><span class='line'>call neobundle#begin(expand('~/.vim/bundle'))
-</span><span class='line'>
-</span><span class='line'>" Let NeoBundle manage NeoBundle
-</span><span class='line'>" Required:
-</span><span class='line'>NeoBundleFetch 'Shougo/neobundle.vim'
-</span><span class='line'>
-</span><span class='line'>" Add or remove your Bundles here:
-</span><span class='line'>NeoBundle 'Shougo/neosnippet.vim'
-</span><span class='line'>NeoBundle 'Shougo/neosnippet-snippets'
-</span><span class='line'>NeoBundle 'tpope/vim-fugitive'
-</span><span class='line'>NeoBundle 'ctrlpvim/ctrlp.vim'
-</span><span class='line'>NeoBundle 'flazz/vim-colorschemes'
-</span><span class='line'>
-</span><span class='line'>" You can specify revision/branch/tag.
-</span><span class='line'>NeoBundle 'Shougo/vimshell', { 'rev' : '3787e5' }
-</span><span class='line'>
-</span><span class='line'>" Required:
-</span><span class='line'>call neobundle#end()
-</span><span class='line'>
-</span><span class='line'>" Required:
-</span><span class='line'>filetype plugin indent on
-</span><span class='line'>
-</span><span class='line'>" If there are uninstalled bundles found on startup,
-</span><span class='line'>" this will conveniently prompt you to install them.
-</span><span class='line'>NeoBundleCheck
-</span><span class='line'>"End NeoBundle Scripts-------------------------</span></code></pre></td></tr></table></div></figure>
-
-
-<p>vimを起動すると、<code>NeoBundleCheck</code>の記述があるので、インストールできていないプラグインを自動でチェックしてくれて、インストールを促される。<br/>
-そのまま<code>y</code>を入力して、プラグインのインストールを完了させる。</p>
-
-<h3>プラグインのインストール</h3>
-
-<p>プラグインのインストールは、<code>.vimrc</code>内の、<br/>
-<code>call neobundle#begin</code>と、<code>call neobundle#end</code>の間に、<br/>
-<code>NeoBundle xxx/xxx</code>を記述し、vimを起動してやる。</p>
-
-<h2>NeoComplete</h2>
-
-<p>上記の方法に則って、以下を<code>.vimrc</code>に追加。</p>
-
-<pre><code>NeoBundle 'Shougo/neocomplete.vim'
-</code></pre>
-
-<h3>lua</h3>
-
-<p>luaという言語で作成されているため、luaが有効になったvimをインストールする必要がある。<br/>
-luaがインストールされているかどうかは、vimのバージョン確認で確認出来るよう。</p>
-
-<pre><code>$ vim --version | grep lua
-+dialog_con_gui  +lua             +rightleft       +windows
-...
-</code></pre>
-
-<p><code>+lua</code>となっていればインストール済。<br/>
-<code>-lua</code>となっていればインストールされていない。</p>
-
-<p>自分の環境ではインストールされていたが、されていない場合はvimをlua付きでインストールし直す必要があるよう。</p>
-
-<pre><code>$ brew install vim --with-lua
-</code></pre>
-
-<p><a href="https://github.com/Shougo/neocomplete.vim#vim-for-mac-os-x">https://github.com/Shougo/neocomplete.vim#vim-for-mac-os-x</a></p>
-
-<h3>設定</h3>
-
-<p>設定を<code>.vimrc</code>に記述。<br/>
-公式サイトにある設定内容をそのまま使用した。<br/>
-<a href="https://github.com/Shougo/neocomplete.vim">Shougo/neocomplete.vim</a></p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-<span class='line-number'>39</span>
-<span class='line-number'>40</span>
-<span class='line-number'>41</span>
-<span class='line-number'>42</span>
-<span class='line-number'>43</span>
-<span class='line-number'>44</span>
-<span class='line-number'>45</span>
-<span class='line-number'>46</span>
-<span class='line-number'>47</span>
-<span class='line-number'>48</span>
-<span class='line-number'>49</span>
-<span class='line-number'>50</span>
-<span class='line-number'>51</span>
-<span class='line-number'>52</span>
-<span class='line-number'>53</span>
-<span class='line-number'>54</span>
-<span class='line-number'>55</span>
-<span class='line-number'>56</span>
-<span class='line-number'>57</span>
-<span class='line-number'>58</span>
-<span class='line-number'>59</span>
-<span class='line-number'>60</span>
-<span class='line-number'>61</span>
-<span class='line-number'>62</span>
-<span class='line-number'>63</span>
-<span class='line-number'>64</span>
-<span class='line-number'>65</span>
-<span class='line-number'>66</span>
-<span class='line-number'>67</span>
-<span class='line-number'>68</span>
-<span class='line-number'>69</span>
-<span class='line-number'>70</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>" Disable AutoComplPop.
-</span><span class='line'>let g:acp_enableAtStartup = 0
-</span><span class='line'>" Use neocomplete.
-</span><span class='line'>let g:neocomplete#enable_at_startup = 1
-</span><span class='line'>" Use smartcase.
-</span><span class='line'>let g:neocomplete#enable_smart_case = 1
-</span><span class='line'>" Set minimum syntax keyword length.
-</span><span class='line'>let g:neocomplete#sources#syntax#min_keyword_length = 3
-</span><span class='line'>let g:neocomplete#lock_buffer_name_pattern = '\*ku\*'
-</span><span class='line'>
-</span><span class='line'>" Define dictionary.
-</span><span class='line'>let g:neocomplete#sources#dictionary#dictionaries = {
-</span><span class='line'>    \ 'default' : '',
-</span><span class='line'>    \ 'vimshell' : $HOME.'/.vimshell_hist',
-</span><span class='line'>    \ 'scheme' : $HOME.'/.gosh_completions'
-</span><span class='line'>        \ }
-</span><span class='line'>
-</span><span class='line'>" Define keyword.
-</span><span class='line'>if !exists('g:neocomplete#keyword_patterns')
-</span><span class='line'>    let g:neocomplete#keyword_patterns = {}
-</span><span class='line'>endif
-</span><span class='line'>let g:neocomplete#keyword_patterns['default'] = '\h\w*'
-</span><span class='line'>
-</span><span class='line'>" Plugin key-mappings.
-</span><span class='line'>inoremap &lt;expr&gt;&lt;C-g&gt;     neocomplete#undo_completion()
-</span><span class='line'>inoremap &lt;expr&gt;&lt;C-l&gt;     neocomplete#complete_common_string()
-</span><span class='line'>
-</span><span class='line'>" Recommended key-mappings.
-</span><span class='line'>" &lt;CR&gt;: close popup and save indent.
-</span><span class='line'>inoremap &lt;silent&gt; &lt;CR&gt; &lt;C-r&gt;=&lt;SID&gt;my_cr_function()&lt;CR&gt;
-</span><span class='line'>function! s:my_cr_function()
-</span><span class='line'>  return (pumvisible() ? "\&lt;C-y&gt;" : "" ) . "\&lt;CR&gt;"
-</span><span class='line'>  " For no inserting &lt;CR&gt; key.
-</span><span class='line'>  "return pumvisible() ? "\&lt;C-y&gt;" : "\&lt;CR&gt;"
-</span><span class='line'>endfunction
-</span><span class='line'>" &lt;TAB&gt;: completion.
-</span><span class='line'>inoremap &lt;expr&gt;&lt;TAB&gt;  pumvisible() ? "\&lt;C-n&gt;" : "\&lt;TAB&gt;"
-</span><span class='line'>" &lt;C-h&gt;, &lt;BS&gt;: close popup and delete backword char.
-</span><span class='line'>inoremap &lt;expr&gt;&lt;C-h&gt; neocomplete#smart_close_popup()."\&lt;C-h&gt;"
-</span><span class='line'>inoremap &lt;expr&gt;&lt;BS&gt; neocomplete#smart_close_popup()."\&lt;C-h&gt;"
-</span><span class='line'>" Close popup by &lt;Space&gt;.
-</span><span class='line'>"inoremap &lt;expr&gt;&lt;Space&gt; pumvisible() ? "\&lt;C-y&gt;" : "\&lt;Space&gt;"
-</span><span class='line'>
-</span><span class='line'>" AutoComplPop like behavior.
-</span><span class='line'>"let g:neocomplete#enable_auto_select = 1
-</span><span class='line'>
-</span><span class='line'>" Shell like behavior(not recommended).
-</span><span class='line'>"set completeopt+=longest
-</span><span class='line'>"let g:neocomplete#enable_auto_select = 1
-</span><span class='line'>"let g:neocomplete#disable_auto_complete = 1
-</span><span class='line'>"inoremap &lt;expr&gt;&lt;TAB&gt;  pumvisible() ? "\&lt;Down&gt;" : "\&lt;C-x&gt;\&lt;C-u&gt;"
-</span><span class='line'>
-</span><span class='line'>" Enable omni completion.
-</span><span class='line'>autocmd FileType css setlocal omnifunc=csscomplete#CompleteCSS
-</span><span class='line'>autocmd FileType html,markdown setlocal omnifunc=htmlcomplete#CompleteTags
-</span><span class='line'>autocmd FileType javascript setlocal omnifunc=javascriptcomplete#CompleteJS
-</span><span class='line'>autocmd FileType python setlocal omnifunc=pythoncomplete#Complete
-</span><span class='line'>autocmd FileType xml setlocal omnifunc=xmlcomplete#CompleteTags
-</span><span class='line'>
-</span><span class='line'>" Enable heavy omni completion.
-</span><span class='line'>if !exists('g:neocomplete#sources#omni#input_patterns')
-</span><span class='line'>  let g:neocomplete#sources#omni#input_patterns = {}
-</span><span class='line'>endif
-</span><span class='line'>"let g:neocomplete#sources#omni#input_patterns.php = '[^. \t]-&gt;\h\w*\|\h\w*::'
-</span><span class='line'>"let g:neocomplete#sources#omni#input_patterns.c = '[^.[:digit:] *\t]\%(\.\|-&gt;\)'
-</span><span class='line'>"let g:neocomplete#sources#omni#input_patterns.cpp = '[^.[:digit:] *\t]\%(\.\|-&gt;\)\|\h\w*::'
-</span><span class='line'>
-</span><span class='line'>" For perlomni.vim setting.
-</span><span class='line'>" https://github.com/c9s/perlomni.vim
-</span><span class='line'>let g:neocomplete#sources#omni#input_patterns.perl = '\h\w*-&gt;\h\w*\|\h\w*::'</span></code></pre></td></tr></table></div></figure>
-
-
-<p>こんな感じで補完が効くようになる。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2015/12/neocomplete.jpg" alt="" /></p>
-
-<h2>参考</h2>
-
-<p><a href="http://cpp0302.hatenablog.com/entry/2015/04/10/033609">neocomplcacheからneocompleteへの乗り換え &ndash; 自分の速さで</a></p>
 ]]></content>
   </entry>
   
