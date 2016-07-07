@@ -4,7 +4,7 @@
   <title><![CDATA[Category: curl | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/curl/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2016-07-07T17:51:38+09:00</updated>
+  <updated>2016-07-07T17:53:06+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -57,7 +57,7 @@ define(&lsquo;PASSWORD&rsquo;, &lsquo;xxx&rsquo;);</p>
 
 <p>$oauth = new oauth(CLIENT_ID, CLIENT_SECRET, CALLBACK_URL, LOGIN_URL);
 $oauth->auth_with_password(USERNAME, PASSWORD, 120);
-$url = &ldquo;$oauth->instance_url/services/apexrest/user/login&rdquo;;
+$url = &ldquo;$oauth->instance_url/services/apexrest/sample/login&rdquo;;
 $curl = curl_init($url);
 $POST_DATA = array(</p>
 
@@ -102,7 +102,7 @@ $response = json_decode($output, true);</p>
 <h1>TLS</h1>
 
 <p>ssl通信をする時の暗号化規格で、TLS1.0は暗号化のレベルが低い、とかで1.1以上が推奨されているよう。<br/>
-それに伴って、Salesforceでは、TLS1.0での接続を無効としている。<br/>
+それに伴って、Salesforceでは、TLS1.0での接続を無効に切り替えていっている。<br/>
 変更内容など詳しくは公式で。</p>
 
 <ul>

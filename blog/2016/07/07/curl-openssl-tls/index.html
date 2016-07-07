@@ -167,7 +167,7 @@
 </span><span class='line'>
 </span><span class='line'>$oauth = new oauth(CLIENT_ID, CLIENT_SECRET, CALLBACK_URL, LOGIN_URL);
 </span><span class='line'>$oauth-&gt;auth_with_password(USERNAME, PASSWORD, 120);
-</span><span class='line'>$url = "$oauth-&gt;instance_url/services/apexrest/user/login";
+</span><span class='line'>$url = "$oauth-&gt;instance_url/services/apexrest/sample/login";
 </span><span class='line'>$curl = curl_init($url);
 </span><span class='line'>$POST_DATA = array(
 </span><span class='line'>    'email' =&gt; 'sample',
@@ -211,7 +211,7 @@
 <h1>TLS</h1>
 
 <p>ssl通信をする時の暗号化規格で、TLS1.0は暗号化のレベルが低い、とかで1.1以上が推奨されているよう。<br/>
-それに伴って、Salesforceでは、TLS1.0での接続を無効としている。<br/>
+それに伴って、Salesforceでは、TLS1.0での接続を無効に切り替えていっている。<br/>
 変更内容など詳しくは公式で。</p>
 
 <ul>
