@@ -4,7 +4,7 @@
   <title><![CDATA[Category: php | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/php/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2016-07-07T17:53:06+09:00</updated>
+  <updated>2016-07-07T18:00:16+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -79,7 +79,7 @@ $response = json_decode($output, true);</p>
 <p>echo $output;
 ```</p>
 
-<p>この辺詳しくは以下をどうぞ。
+<p>この辺詳しくは以下をどうぞ。<br/>
 <a href="http://kayakuguri.github.io/blog/2014/10/27/apex-rest-post/">[Salesforce]apex Rest APIでPOSTでデータを送信する</a></p>
 
 <h1>失敗する</h1>
@@ -102,6 +102,7 @@ $response = json_decode($output, true);</p>
 <h1>TLS</h1>
 
 <p>ssl通信をする時の暗号化規格で、TLS1.0は暗号化のレベルが低い、とかで1.1以上が推奨されているよう。<br/>
+<a href="http://www.intellilink.co.jp/article/pcidss/18.html">SSL/TLS 1.0 はいつまでに無効化しなければならないか？ | NTTデータ先端技術株式会社</a><br/>
 それに伴って、Salesforceでは、TLS1.0での接続を無効に切り替えていっている。<br/>
 変更内容など詳しくは公式で。</p>
 
@@ -119,6 +120,11 @@ $response = json_decode($output, true);</p>
 
 
 <p>今回は、Sandboxでの設定が適用されたために接続が出来なくなったよう。</p>
+
+<p>ちなみにTLSについて調べていて、現状、SSLと呼んでいるものは全てTLSによる接続になっているらしい。</p>
+
+<blockquote><p>SSLはバージョン1.0と2.0は既に脆弱性で消えていたが、2014(平成26)年10月14日、GoogleのセキュリティチームによりSSL 3.0の深刻な脆弱性「POODLE」が発見されたことでSSLは全バージョンに脆弱性が発覚、これをもってSSLは現役を退いた。<br/>
+<a href="http://www.wdic.org/w/WDIC/TLS">http://www.wdic.org/w/WDIC/TLS</a></p></blockquote>
 
 <h1>原因</h1>
 
@@ -224,6 +230,9 @@ $response = json_decode($output, true);</p>
 <ul>
 <li><a href="http://www.apollo.jp/blog/?p=2382">wordpressの引っ越し | 紅い夕陽</a></li>
 <li><a href="http://blog.wnotes.net/blog/article/php_curl_error">PHPのcurlで&quot;SSL Connection Error.&quot;のエラーがどうしても出る時の対策 | ブログ :: Web notes.log</a></li>
+<li><a href="http://www.wdic.org/w/WDIC/TLS">TLS ‐ 通信用語の基礎知識</a></li>
+<li><a href="http://www.intellilink.co.jp/article/pcidss/18.html">SSL/TLS 1.0 はいつまでに無効化しなければならないか？ | NTTデータ先端技術株式会社</a></li>
+<li><a href="http://tkengo.github.io/blog/2015/12/01/https-details/">理解してるつもりの SSL/TLS でも、もっと理解したら面白かった話 &middot; けんごのお屋敷</a></li>
 </ul>
 
 ]]></content>
