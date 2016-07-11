@@ -4,7 +4,7 @@
   <title><![CDATA[Category: salesforce | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/salesforce/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2016-07-11T18:00:09+09:00</updated>
+  <updated>2016-07-11T18:02:52+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -18,7 +18,12 @@
     <link href="http://kayakuguri.github.io/blog/2016/07/11/vf-inline-edit/"/>
     <updated>2016-07-11T17:56:11+09:00</updated>
     <id>http://kayakuguri.github.io/blog/2016/07/11/vf-inline-edit</id>
-    <content type="html"><![CDATA[<h1>参考</h1>
+    <content type="html"><![CDATA[<p>オブジェクトの詳細で表示される関連リスト部分、要するにそのレコードを参照しているレコード、を一覧表示からインライン編集出来るようにしたかったので、インライン編集の基本的な部分から調べてみた。</p>
+
+<!-- more -->
+
+
+<h1>参考</h1>
 
 <ul>
 <li><a href="https://developer.salesforce.com/docs/atlas.ja-jp.pages.meta/pages/pages_quick_start_inline_editing.htm">インライン編集の有効化 Visualforce開発者ガイド</a></li>
@@ -1257,7 +1262,7 @@ let req = NSMutableURLRequest(URL: URL!)</p>
 
 <p>req.addValue(&ldquo;(self.token_type) (self.access_token)&rdquo;, forHTTPHeaderField: &ldquo;Authorization&rdquo;) //ヘッダ</p>
 
-<p>let user_email = &ldquo;<a href="&#x6d;&#97;&#x69;&#108;&#x74;&#x6f;&#x3a;&#x78;&#120;&#120;&#64;&#x65;&#120;&#97;&#109;&#112;&#x6c;&#101;&#x2e;&#99;&#111;&#109;">&#x78;&#120;&#120;&#64;&#101;&#120;&#97;&#x6d;&#x70;&#x6c;&#x65;&#x2e;&#x63;&#111;&#109;</a>&rdquo;
+<p>let user_email = &ldquo;<a href="&#109;&#x61;&#105;&#x6c;&#116;&#111;&#x3a;&#x78;&#x78;&#120;&#64;&#x65;&#120;&#97;&#x6d;&#x70;&#x6c;&#101;&#x2e;&#x63;&#x6f;&#109;">&#x78;&#120;&#120;&#x40;&#x65;&#x78;&#97;&#109;&#112;&#108;&#x65;&#x2e;&#99;&#111;&#x6d;</a>&rdquo;
 let user_pass = &ldquo;xxx&rdquo;</p>
 
 <p>req.HTTPMethod = &ldquo;POST&rdquo;

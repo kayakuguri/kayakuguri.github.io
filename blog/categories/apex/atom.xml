@@ -4,7 +4,7 @@
   <title><![CDATA[Category: apex | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/apex/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2016-07-11T18:00:09+09:00</updated>
+  <updated>2016-07-11T18:02:52+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -18,7 +18,12 @@
     <link href="http://kayakuguri.github.io/blog/2016/07/11/vf-inline-edit/"/>
     <updated>2016-07-11T17:56:11+09:00</updated>
     <id>http://kayakuguri.github.io/blog/2016/07/11/vf-inline-edit</id>
-    <content type="html"><![CDATA[<h1>参考</h1>
+    <content type="html"><![CDATA[<p>オブジェクトの詳細で表示される関連リスト部分、要するにそのレコードを参照しているレコード、を一覧表示からインライン編集出来るようにしたかったので、インライン編集の基本的な部分から調べてみた。</p>
+
+<!-- more -->
+
+
+<h1>参考</h1>
 
 <ul>
 <li><a href="https://developer.salesforce.com/docs/atlas.ja-jp.pages.meta/pages/pages_quick_start_inline_editing.htm">インライン編集の有効化 Visualforce開発者ガイド</a></li>
