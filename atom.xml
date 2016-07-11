@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2016-07-11T18:04:43+09:00</updated>
+  <updated>2016-07-11T18:08:09+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -122,7 +122,7 @@ formなど各タグ内のIDは別にあってもなくてもよさそう。</p>
 
 <p>以下のように表示される。</p>
 
-<p><img src="http://kayakuguri.github.io/images/2016/07/inline01.jpg" alt="" /></p>
+<p><img src="http://kayakuguri.github.io/images/2016/07/sf_inline01.jpg" alt="" /></p>
 
 <p><code>apex:column</code>で囲まれてた部分が1つの項目になっており、<code>&lt;apex:facet name="header"&gt;</code>タグの内容がそれぞれの項目の見出しとなる。</p>
 
