@@ -4,7 +4,7 @@
   <title><![CDATA[Category: salesforce | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/salesforce/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2016-07-07T18:00:16+09:00</updated>
+  <updated>2016-07-11T18:00:09+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,350 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[Salesforce]関連リストのインライン編集をVFで作成する]]></title>
+    <link href="http://kayakuguri.github.io/blog/2016/07/11/vf-inline-edit/"/>
+    <updated>2016-07-11T17:56:11+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2016/07/11/vf-inline-edit</id>
+    <content type="html"><![CDATA[<h1>参考</h1>
+
+<ul>
+<li><a href="https://developer.salesforce.com/docs/atlas.ja-jp.pages.meta/pages/pages_quick_start_inline_editing.htm">インライン編集の有効化 Visualforce開発者ガイド</a></li>
+</ul>
+
+
+<h1>詳細レコード</h1>
+
+<p>該当のレコードの詳細を表示し、表示している項目をインライン編集出来るようにする。</p>
+
+<p>作成しているVFページのURLにて、IDが指定されている + 指定されている<code>standardController</code>のオブジェクトであれば、Visualforceだけで表示させることが可能。</p>
+
+<blockquote><p><a href="https://Salesforce_instance/apex/myPage?id=001x000xxx3Jsxb">https://Salesforce_instance/apex/myPage?id=001x000xxx3Jsxb</a></p></blockquote>
+
+<p>この場合、IDが<code>001x000xxx3Jsxb</code>の取引先(<code>Account</code>)が表示される。<br/>
+<code>apex:detail</code>タグを使うと、このレコードの詳細がそのまま表示される。<br/>
+その際に、属性<code>inlineEdit</code>を<code>true</code>で指定するとインライン編集が可能となる。</p>
+
+<p>```
+&lt;apex:page standardController=&ldquo;Account&rdquo;></p>
+
+<pre><code>    &lt;apex:detail subject="{!account.Id}" relatedList="false" inlineEdit="true"/&gt; 
+</code></pre>
+
+<p>&lt;/apex:page>
+```</p>
+
+<p>特定のレコードの詳細をそのまま表示したい時とかには便利。</p>
+
+<h1>一覧表示</h1>
+
+<p>詳細ではなく、一覧表示で複数件いっぺんに編集したい場合。
+<code>apex:page</code>の属性で、<code>recordSetVar</code>を指定してやれば、<code>standardController</code>で指定したオブジェクトのリストを表示出来る。</p>
+
+<p><a href="http://qiita.com/tyoshikawa1106/items/4ef3b8e1998609f2c573">standardControllerとrecordSetVar &ndash; Qiita</a></p>
+
+<p>```
+&lt;apex:page standardController=&ldquo;Account&rdquo; recordSetVar=&ldquo;records&rdquo; id=&ldquo;thePage&rdquo;></p>
+
+<pre><code>&lt;apex:form id="theForm"&gt; 
+    &lt;apex:pageBlock id="thePageBlock"&gt; 
+        &lt;apex:pageBlockTable value="{!records}" var="record" id="thePageBlockTable"&gt; 
+            &lt;apex:column &gt;
+                &lt;apex:outputField value="{!record.Name}" id="AccountNameDOM" /&gt; 
+                &lt;apex:facet name="header"&gt;Name&lt;/apex:facet&gt;
+            &lt;/apex:column&gt;
+            &lt;apex:column &gt;
+                &lt;apex:outputField value="{!record.Type}" id="AccountTypeDOM" /&gt; 
+                &lt;apex:facet name="header"&gt;Type&lt;/apex:facet&gt;
+            &lt;/apex:column&gt;
+            &lt;apex:column &gt;
+                &lt;apex:outputField value="{!record.Industry}" 
+                    id="AccountIndustryDOM" /&gt;  
+                    &lt;apex:facet name="header"&gt;Industry&lt;/apex:facet&gt;
+            &lt;/apex:column&gt;
+            &lt;apex:inlineEditSupport event="ondblClick" 
+                    showOnEdit="saveButton,cancelButton" hideOnEdit="editButton" /&gt; 
+        &lt;/apex:pageBlockTable&gt; 
+        &lt;apex:pageBlockButtons &gt; 
+            &lt;apex:commandButton value="Edit" action="{!save}" id="editButton" /&gt;
+            &lt;apex:commandButton value="Save" action="{!save}" id="saveButton" /&gt;
+            &lt;apex:commandButton value="Cancel" action="{!cancel}" id="cancelButton" /&gt;
+        &lt;/apex:pageBlockButtons&gt; 
+    &lt;/apex:pageBlock&gt; 
+&lt;/apex:form&gt;
+</code></pre>
+
+<p>&lt;/apex:page>
+```</p>
+
+<p>コードは公式ドキュメントのママ。<br/>
+formなど各タグ内のIDは別にあってもなくてもよさそう。</p>
+
+<p>以下のように表示される。</p>
+
+<p><img src="/images/2016/07/inline01.jpg" alt="" /></p>
+
+<p><code>apex:column</code>で囲まれてた部分が1つの項目になっており、<code>&lt;apex:facet name="header"&gt;</code>タグの内容がそれぞれの項目の見出しとなる。</p>
+
+<p>このままページを表示してインライン編集後、saveボタンをクリックすると確かに更新はされるがホームへ遷移してしまう。
+(キャンセルをクリックしても同様)</p>
+
+<p>これを解消するために、カスタムコントローラーを割り当ててみた。<br/>
+<code>recordSetVar</code>を使っていると、割り当てたカスタムコントローラ側で取得したレコードリストを使用するために、<code>StandardSetController</code>を使う必要がある、とのこと。</p>
+
+<p><a href="http://tyoshikawa1106.hatenablog.com/entry/2013/09/03/232942">SFDC：recordSetVarとextensions &ndash; tyoshikawa1106のブログ</a></p>
+
+<p>これを、<code>StandardController</code>をコントローラ側で使っていると下記のようなエラーがでる。
+エラーメッセージだけでは非常にわかりにくそうなので注意。</p>
+
+<blockquote><p>common.apex.runtime.bytecode.BytecodeApexObjectType cannot be cast to common.apex.runtime.impl.ApexType</p></blockquote>
+
+<p>で、カスタムコントローラ内で、ボタンを押された際のアクションを作成し、<code>null</code>を返す事でページ遷移をしないようにする。<br/>
+ただし、保存する<code>save</code>ボタンはこれをしてしまうと保存されなくなってしまったので、キャンセルボタンだけにしておいた。</p>
+
+<p>VF</p>
+
+<p><code>
+&lt;apex:page standardController="Account" recordSetVar="records" extensions="VfInlineEditSample" id="thePage"&gt;
+</code></p>
+
+<p>apex (<code>VfInlineEditSample.apxc</code>)</p>
+
+<p>```
+public class VfInlineEditSample {</p>
+
+<pre><code>public VfInlineEditSample(ApexPages.StandardSetController stdController){
+    List&lt;Account&gt; lists = (List&lt;Account&gt;)stdController.getRecords();
+}
+
+public PageReference cancel(){
+    return null;
+}
+</code></pre>
+
+<p>}
+```</p>
+
+<p><a href="http://www.developerforce.com/guides/fr/apex_fr/Content/apex_pages_standardsetcontroller.htm">Classe StandardSetController</a></p>
+
+<h1>関連リスト</h1>
+
+<p>とあるレコードの関連リストを一覧表示からインライン編集したい場合。<br/>
+上記の一覧表示と同じようにすればインライン編集出来るテーブルを作る事は可能。</p>
+
+<p>IDはVFページのパラメータから取得する。</p>
+
+<p>例）<br/>
+<code>VfInlineEditSamplePage.vfp</code></p>
+
+<p>```
+&lt;apex:page standardController=&ldquo;Account&rdquo; extensions=&ldquo;VfInlineEditSample&rdquo; id=&ldquo;thePage&rdquo;></p>
+
+<pre><code>&lt;apex:form id="theForm"&gt; 
+    &lt;apex:pageBlock title="商談" &gt;
+        &lt;apex:pageBlockTable value="{!opp_records}" var="opp"&gt;
+            &lt;apex:column &gt;
+                &lt;apex:outputField value="{!opp.Name}" /&gt; 
+                &lt;apex:facet name="header"&gt;商談名&lt;/apex:facet&gt;
+            &lt;/apex:column&gt;
+            &lt;apex:column &gt;
+                &lt;apex:outputField value="{!opp.Amount}" /&gt; 
+                &lt;apex:facet name="header"&gt;金額&lt;/apex:facet&gt;
+            &lt;/apex:column&gt;
+            &lt;apex:column &gt;
+                &lt;apex:outputField value="{!opp.StageName}" /&gt; 
+                &lt;apex:facet name="header"&gt;フェーズ&lt;/apex:facet&gt;
+            &lt;/apex:column&gt;
+            &lt;apex:column &gt;
+                &lt;apex:outputField value="{!opp.NextStep}" /&gt; 
+                &lt;apex:facet name="header"&gt;次回アクション&lt;/apex:facet&gt;
+            &lt;/apex:column&gt;
+            &lt;apex:inlineEditSupport event="ondblClick" /&gt;
+        &lt;/apex:pageBlockTable&gt; 
+        &lt;apex:pageBlockButtons &gt; 
+            &lt;apex:commandButton value="Save" action="{!save}" /&gt;
+            &lt;apex:commandButton value="Cancel" action="{!cancel}" /&gt;
+        &lt;/apex:pageBlockButtons&gt; 
+    &lt;/apex:pageBlock&gt; 
+&lt;/apex:form&gt;
+</code></pre>
+
+<p>&lt;/apex:page>
+```</p>
+
+<p><code>VfInlineEditSample.apxc</code></p>
+
+<p>```
+public class VfInlineEditSample {</p>
+
+<pre><code>public List&lt;Opportunity&gt; opp_records{get; set;}
+
+public VfInlineEditSample(ApexPages.StandardController stdController){
+    Account acc = (Account)stdController.getRecord();
+    Id aid = acc.id;
+    Account record = [SELECT id, name, (SELECT id,name,StageName,NextStep,Amount FROM Opportunities) FROM Account WHERE id=:aid];
+    opp_records = record.Opportunities;
+}
+
+public PageReference cancel(){
+    return null;
+}
+</code></pre>
+
+<p>}
+```</p>
+
+<p>以下のようになる。</p>
+
+<p><img src="/images/2016/07/sf_inline02.jpg" alt="" /></p>
+
+<p>このままだとSaveをクリックしても保存はされない。<br/>
+なので、cancelと同じようにカスタムコントローラ内でアクションを受け取り、編集した内容はVFへ引き渡している、 <code>opp_records</code>に入っているので、それをupdateすれば更新される。</p>
+
+<p>apexクラスに以下を追加。</p>
+
+<p>```
+public PageReference save(){</p>
+
+<pre><code>update opp_records;
+return null;
+</code></pre>
+
+<p>}
+```</p>
+
+<p>しかしこうすると、編集されたされてないにかかわらず、関連リストに並んでいるオブジェクト(この場合は商談)のレコード全てが更新されてしまう。<br/>
+ガバナ制限は、1万レコードまで大丈夫なので、問題になることは少ないと思うが、最終更新日付が全て更新されてしまうのが都合が悪いかもしれない。</p>
+
+<p><a href="https://developer.salesforce.com/docs/atlas.ja-jp.salesforce_app_limits_cheatsheet.meta/salesforce_app_limits_cheatsheet/salesforce_app_limits_platform_apexgov.htm">Apex ガバナ制限</a></p>
+
+<h2>更新対象を選ぶ</h2>
+
+<p>ワークフローであれば、<code>ISCHANGED</code>を使えば、その項目が変更されたかどうかをチェック出来るが、apexではそのメソッドはない。<br/>
+(機能追加が要望があがってたりする(トリガの機能としてだけど） <a href="https://success.salesforce.com/ideaview?id=087300000007LI2AAM">IsChanged function in Apex</a>)</p>
+
+<p>なので、更新される項目を一つずつ比較して更新があるかどうかを確認する泥臭い方法を取ってみる。<br/>
+(他にいいアイデアがあれば教えて欲しい…）</p>
+
+<p>修正後のapex</p>
+
+<p>```
+public class VfInlineEditSample {</p>
+
+<pre><code>public List&lt;Opportunity&gt; opp_records{get; set;}
+private List&lt;Opportunity&gt; old_records;
+
+public VfInlineEditSample(ApexPages.StandardController stdController){
+    Account acc = (Account)stdController.getRecord();
+    Id aid = acc.id;
+    Account record = [SELECT id, name, (SELECT id,name,StageName,NextStep,Amount FROM Opportunities) FROM Account WHERE id=:aid];
+    opp_records = record.Opportunities;
+    old_records = opp_records.deepClone();
+}
+
+public PageReference cancel(){
+    return null;
+}
+
+public PageReference save(){
+    List&lt;Opportunity&gt; update_lists = new List&lt;Opportunity&gt;();
+    for(Integer i = 0; i&lt; opp_records.size(); i++){
+        if(opp_records[i].name != old_records[i].name){
+            update_lists.add(opp_records[i]);
+            continue;
+        }else if(opp_records[i].StageName != old_records[i].StageName){
+            update_lists.add(opp_records[i]);
+            continue;
+        }else if(opp_records[i].NextStep != old_records[i].NextStep){
+            update_lists.add(opp_records[i]);
+            continue;
+        }else if(opp_records[i].Amount != old_records[i].Amount){
+            update_lists.add(opp_records[i]);
+            continue;
+        }
+    }
+
+    if(update_lists.size() &gt; 0){
+        update update_lists;
+    }
+
+    return null;
+}
+</code></pre>
+
+<p>}
+```</p>
+
+<p>リストをコピーする際に、<code>deepClone</code>を使わないと<code>clone</code>では浅いコピーとなってしまい、参照しているものが同じになってしまうので注意。
+(一方の値を更新するともう一方も同じ値になってしまう）</p>
+
+<h2>汎用的にする</h2>
+
+<p>上記だと、表示する項目を増やす度に比較の条件文を追加しないといけない。<br/>
+なので、全項目から取得出来るものだけを比較するようにしてみた。</p>
+
+<p>以下、関数。</p>
+
+<p>```
+public List<sObject> isChanged(String object_name, List<sObject> new_records, List<sObject> old_records){</p>
+
+<pre><code>sObject obj = (sObject)Type.forName(object_name).newInstance();
+Schema.DescribeSObjectResult descR = obj.getsObjectType().getDescribe();
+Set&lt;String&gt; fields = descR.fields.getMap().keySet();
+Map&lt;String, Schema.SObjectField&gt; fmap = descR.fields.getMap();
+
+List&lt;sObject&gt; update_records = new List&lt;sObject&gt;();
+for(Integer i = 0; i&lt; new_records.size(); i++){
+    for(String field : fields){
+        try{
+            Schema.SObjectField f = fmap.get(field);
+            Schema.DescribeFieldResult fr = f.getDescribe();
+            if(!fr.isUpdateable()) continue; //更新出来ない項目は飛ばす
+            //比較
+            if(new_records[i].get(field) != old_records[i].get(field)){
+                update_records.add(new_records[i]);
+                continue;
+            }
+        }catch(SObjectException e){
+            //取得していない項目
+        }
+    }
+}
+
+return update_records;
+</code></pre>
+
+<p>}
+```</p>
+
+<ul>
+<li><code>getDescribe()</code>で指定したオブジェクトの全項目名を取得出来る</li>
+<li>取得した項目名を使ってオブジェクトから<code>get()</code>で取得。例外が発生したものはselectで取得していない項目、となる</li>
+<li>更新可能かどうかは、<code>Describe</code>で取得出来る項目の情報内を見れば判定可能<br/>
+<code>isUpdateable</code>がtrueなら更新が出来る項目となるので、これがtrueのもののみ比較している</li>
+</ul>
+
+
+<p>使用の際は、第一引数にオブジェクトの参照名、第二引数に更新後のレコードリスト、第三引数に更新前のレコードリストを指定してやる。</p>
+
+<p><code>
+List&lt;Opportunity&gt; update_lists = isChanged('Opportunity', opp_records, old_records);
+</code></p>
+
+<p>これで項目が増えても安心。</p>
+
+<h3>参考</h3>
+
+<ul>
+<li><a href="http://kayakuguri.github.io/blog/2014/04/23/sf-mailtemplate/">[SalesForce]メールテンプレートの項目一覧 &ndash; KayaMemo</a></li>
+<li><a href="http://appirio.co.jp/category/tech-blog/2012/07/force-com-apex%E3%81%AE%E3%80%8Cdescribe%E3%80%8D%E3%81%A7%E3%81%A7%E3%81%8D%E3%82%8B%E3%81%93%E3%81%A8%EF%BC%88%E3%81%9D%E3%81%AE%EF%BC%91%EF%BC%89/">Force.com Apexの「Describe」でできること（その１） &ndash; Appirio Japan</a></li>
+<li><a href="http://appirio.co.jp/category/tech-blog/2012/09/force-com-apex%E3%81%AE%E3%80%8Cdescribe%E3%80%8D%E3%81%A7%E3%81%A7%E3%81%8D%E3%82%8B%E3%81%93%E3%81%A8%EF%BC%88%E3%81%9D%E3%81%AE%EF%BC%92%EF%BC%89/">Force.com Apexの「Describe」でできること（その２） &ndash; Appirio Japan</a></li>
+<li><a href="http://vaindespair.blogspot.jp/2012/04/blog-post_04.html">memo: Force.com&#12288;&#65306;&#12288;Apex でオブジェクト及び項目の情報を取得する</a></li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[PHP]CurlでのSSL接続をOpenSSL方式に変更する]]></title>
@@ -913,7 +1257,7 @@ let req = NSMutableURLRequest(URL: URL!)</p>
 
 <p>req.addValue(&ldquo;(self.token_type) (self.access_token)&rdquo;, forHTTPHeaderField: &ldquo;Authorization&rdquo;) //ヘッダ</p>
 
-<p>let user_email = &ldquo;<a href="&#x6d;&#x61;&#x69;&#x6c;&#x74;&#x6f;&#x3a;&#x78;&#120;&#120;&#64;&#101;&#x78;&#97;&#109;&#112;&#x6c;&#101;&#x2e;&#99;&#x6f;&#x6d;">&#x78;&#x78;&#x78;&#x40;&#101;&#x78;&#97;&#x6d;&#x70;&#108;&#x65;&#46;&#x63;&#111;&#x6d;</a>&rdquo;
+<p>let user_email = &ldquo;<a href="&#x6d;&#97;&#x69;&#108;&#x74;&#x6f;&#x3a;&#x78;&#120;&#120;&#64;&#x65;&#120;&#97;&#109;&#112;&#x6c;&#101;&#x2e;&#99;&#111;&#109;">&#x78;&#120;&#120;&#64;&#101;&#120;&#97;&#x6d;&#x70;&#x6c;&#x65;&#x2e;&#x63;&#111;&#109;</a>&rdquo;
 let user_pass = &ldquo;xxx&rdquo;</p>
 
 <p>req.HTTPMethod = &ldquo;POST&rdquo;
@@ -945,174 +1289,6 @@ task.resume()
 後は必要であれば、認証方式をJWTにしたり出来るといいかもしれない。</p>
 
 <p>もしSFへの接続でいいライブラリなどがあれば教えて下さい。</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[カスタム設定を作成して取得してみる]]></title>
-    <link href="http://kayakuguri.github.io/blog/2016/02/01/custom-setting/"/>
-    <updated>2016-02-01T15:15:19+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2016/02/01/custom-setting</id>
-    <content type="html"><![CDATA[<p>カスタム設定、というカスタムオブジェクトの一種でSOQLいらずでもっと手軽に扱える <code>カスタム設定</code> とうものを知ったので、<br/>
-作り方から使い方を調べてみた。</p>
-
-<!-- more -->
-
-
-<blockquote><p>カスタム設定はカスタムオブジェクトと類似しており、アプリケーション開発者は、カスタムデータセットの作成の他に、組織、プロファイル、または特定のユーザに対しカスタムデータを作成して関連付けることができます。<br/>
-<a href="https://help.salesforce.com/HTViewHelpDoc?id=cs_about.htm&amp;language=ja">https://help.salesforce.com/HTViewHelpDoc?id=cs_about.htm&amp;language=ja</a></p></blockquote>
-
-<p>今回は全体で使用する、環境変数、としてカスタム設定を作成してみた。</p>
-
-<h2>作成</h2>
-
-<p>[開発] → [カスタム設定] にアクセス。<br/>
-まずは新規でカスタム設定、を作る。<br/>
-オブジェクトのようなもの。</p>
-
-<p><img src="/images/2016/01/custom_setting02.jpg" alt="" /></p>
-
-<p>今回は以下のように作成した。</p>
-
-<table>
-<thead>
-<tr>
-<th></th>
-<th align="left"> 項目 </th>
-<th align="left"> 内容 </th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td></td>
-<td align="left"> 表示ラベル </td>
-<td align="left"> 環境変数</td>
-</tr>
-<tr>
-<td></td>
-<td align="left"> オブジェクト名 </td>
-<td align="left"> EnvironmentVars</td>
-</tr>
-<tr>
-<td></td>
-<td align="left"> 設定種別 </td>
-<td align="left"> リスト</td>
-</tr>
-<tr>
-<td></td>
-<td align="left"> 表示 </td>
-<td align="left"> 公開</td>
-</tr>
-<tr>
-<td></td>
-<td align="left"> 説明 </td>
-<td align="left"> </td>
-</tr>
-</tbody>
-</table>
-
-
-<p><img src="/images/2016/01/custom_setting03.jpg" alt="" /></p>
-
-<p>設定種別は、リスト、と、階層、があり、<br/>
-階層、は、ユーザーやプロファイルごとに同じ項目で違う値を設定したり出来るよう。<br/>
-どのユーザーが使用しているかによって変数の値を変更できるようになるので、<br/>
-そういうことを実現したい時に便利っぽい。 <br/>
-今回は全員同じにしたいので、リスト、にしておいた。</p>
-
-<p>また、表示、は、公開・保護、とある。<br/>
-公開、だとSOAP APIでも取得できるようになったり、とオープンな状態？になるよう。<br/>
-特に秘匿する内容でもないので、公開、にしておいた。</p>
-
-<p>次に作成したカスタム設定内にカスタム項目を追加する。<br/>
-作成したカスタム設定から、新規、をクリック。</p>
-
-<p><img src="/images/2016/01/custom_setting04.jpg" alt="" /></p>
-
-<p>通常の項目作成と同じ流れで、型を選択し、内容を埋めていく。<br/>
-今回は以下のように作成した。<br/>
-目的としては、SitesのURLを環境変数として持っておくためのもの。</p>
-
-<table>
-<thead>
-<tr>
-<th></th>
-<th align="left"> 項目 </th>
-<th align="left"> 内容 </th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td></td>
-<td align="left"> 型 </td>
-<td align="left"> テキスト</td>
-</tr>
-<tr>
-<td></td>
-<td align="left"> 項目の表示ラベル </td>
-<td align="left"> Sites</td>
-</tr>
-<tr>
-<td></td>
-<td align="left"> 文字数 </td>
-<td align="left"> 255</td>
-</tr>
-<tr>
-<td></td>
-<td align="left"> 項目名 </td>
-<td align="left"> Sites</td>
-</tr>
-<tr>
-<td></td>
-<td align="left"> 説明、など </td>
-<td align="left"> </td>
-</tr>
-</tbody>
-</table>
-
-
-<p><img src="/images/2016/01/custom_setting05.jpg" alt="" /></p>
-
-<p>ここまででオブジェクトと項目が作成出来たので、実際にデータを入れていく。<br/>
-作成したカスタム設定の<code>Manege</code>をクリック。</p>
-
-<p><img src="/images/2016/01/custom_setting06.jpg" alt="" /></p>
-
-<p>リストが表示されるので、新規、をクリック。</p>
-
-<p><img src="/images/2016/01/custom_setting07.jpg" alt="" /></p>
-
-<p>内容を記入して保存。</p>
-
-<p><img src="/images/2016/01/custom_setting08.jpg" alt="" /></p>
-
-<h2>取得</h2>
-
-<p>作成したデータをApexで取得する。</p>
-
-<p>前述の通り、取得の際にはSOQLを発行する必要がなく、以下のようにメソッドレベルで取得可能。</p>
-
-<p>```
-Map&lt;String, EnvironmentVars<strong>c> settingMap = EnvironmentVars</strong>c.getAll();</p>
-
-<p>for (String key : settingMap.keySet()) {</p>
-
-<pre><code>EnvironmentVars__c env = settingMap.get(key);
-System.debug('**DEBUG** ' key + ' / ' + env.SitesURL__c);
-</code></pre>
-
-<p>}
-```</p>
-
-<h2>まとめ</h2>
-
-<p>SOQLを発行しないので、ガバナ的にも優しく、内容はキャッシュされるので動作も高速。<br/>
-環境変数のように決まった値であれば便利に使えるかもしれない。</p>
-
-<h2>参考</h2>
-
-<p><a href="https://help.salesforce.com/HTViewHelpDoc?id=cs_accessing.htm&amp;language=ja">カスタム設定へのアクセス</a><br/>
-<a href="https://odekakeshimasyo.io/salesforce-apex-customsetting.html">Salesforce Apex カスタム設定 | odekakeshimasyo.io</a></p>
 ]]></content>
   </entry>
   

@@ -6,7 +6,7 @@
 	<title>KayaMemo</title>
 
 	
-	<meta name="description" content=" curlでsslを接続する際に、opensslを利用した接続になっていなかったために接続出来ない事例があったのだが、curlを入れ替えてopensslを利用するようにしたら接続出来たのでそのメモ。 続きを読む Jul 7th, 2016 curl, php, salesforce ">
+	<meta name="description" content="参考 インライン編集の有効化 Visualforce開発者ガイド 詳細レコード 該当のレコードの詳細を表示し、表示している項目をインライン編集出来るようにする。 作成しているVFページのURLにて、IDが指定されている + 指定されているstandardControllerのオブジェクトであれば &hellip;">
 	
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
@@ -85,6 +85,508 @@
 		
 	
 	<div id="content" class="inner">
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2016/07/11/vf-inline-edit/">
+		
+			[Salesforce]関連リストのインライン編集をVFで作成する</a>
+	</h2>
+	<div class="entry-content">
+		<h1>参考</h1>
+
+<ul>
+<li><a href="https://developer.salesforce.com/docs/atlas.ja-jp.pages.meta/pages/pages_quick_start_inline_editing.htm">インライン編集の有効化 Visualforce開発者ガイド</a></li>
+</ul>
+
+
+<h1>詳細レコード</h1>
+
+<p>該当のレコードの詳細を表示し、表示している項目をインライン編集出来るようにする。</p>
+
+<p>作成しているVFページのURLにて、IDが指定されている + 指定されている<code>standardController</code>のオブジェクトであれば、Visualforceだけで表示させることが可能。</p>
+
+<blockquote><p><a href="https://Salesforce_instance/apex/myPage?id=001x000xxx3Jsxb">https://Salesforce_instance/apex/myPage?id=001x000xxx3Jsxb</a></p></blockquote>
+
+<p>この場合、IDが<code>001x000xxx3Jsxb</code>の取引先(<code>Account</code>)が表示される。<br/>
+<code>apex:detail</code>タグを使うと、このレコードの詳細がそのまま表示される。<br/>
+その際に、属性<code>inlineEdit</code>を<code>true</code>で指定するとインライン編集が可能となる。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;apex:page standardController="Account"&gt;
+</span><span class='line'>        &lt;apex:detail subject="{!account.Id}" relatedList="false" inlineEdit="true"/&gt; 
+</span><span class='line'>&lt;/apex:page&gt;</span></code></pre></td></tr></table></div></figure>
+
+
+<p>特定のレコードの詳細をそのまま表示したい時とかには便利。</p>
+
+<h1>一覧表示</h1>
+
+<p>詳細ではなく、一覧表示で複数件いっぺんに編集したい場合。
+<code>apex:page</code>の属性で、<code>recordSetVar</code>を指定してやれば、<code>standardController</code>で指定したオブジェクトのリストを表示出来る。</p>
+
+<p><a href="http://qiita.com/tyoshikawa1106/items/4ef3b8e1998609f2c573">standardControllerとrecordSetVar &ndash; Qiita</a></p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;apex:page standardController="Account" recordSetVar="records" id="thePage"&gt; 
+</span><span class='line'>    &lt;apex:form id="theForm"&gt; 
+</span><span class='line'>        &lt;apex:pageBlock id="thePageBlock"&gt; 
+</span><span class='line'>            &lt;apex:pageBlockTable value="{!records}" var="record" id="thePageBlockTable"&gt; 
+</span><span class='line'>                &lt;apex:column &gt;
+</span><span class='line'>                    &lt;apex:outputField value="{!record.Name}" id="AccountNameDOM" /&gt; 
+</span><span class='line'>                    &lt;apex:facet name="header"&gt;Name&lt;/apex:facet&gt;
+</span><span class='line'>                &lt;/apex:column&gt;
+</span><span class='line'>                &lt;apex:column &gt;
+</span><span class='line'>                    &lt;apex:outputField value="{!record.Type}" id="AccountTypeDOM" /&gt; 
+</span><span class='line'>                    &lt;apex:facet name="header"&gt;Type&lt;/apex:facet&gt;
+</span><span class='line'>                &lt;/apex:column&gt;
+</span><span class='line'>                &lt;apex:column &gt;
+</span><span class='line'>                    &lt;apex:outputField value="{!record.Industry}" 
+</span><span class='line'>                        id="AccountIndustryDOM" /&gt;  
+</span><span class='line'>                        &lt;apex:facet name="header"&gt;Industry&lt;/apex:facet&gt;
+</span><span class='line'>                &lt;/apex:column&gt;
+</span><span class='line'>                &lt;apex:inlineEditSupport event="ondblClick" 
+</span><span class='line'>                        showOnEdit="saveButton,cancelButton" hideOnEdit="editButton" /&gt; 
+</span><span class='line'>            &lt;/apex:pageBlockTable&gt; 
+</span><span class='line'>            &lt;apex:pageBlockButtons &gt; 
+</span><span class='line'>                &lt;apex:commandButton value="Edit" action="{!save}" id="editButton" /&gt;
+</span><span class='line'>                &lt;apex:commandButton value="Save" action="{!save}" id="saveButton" /&gt;
+</span><span class='line'>                &lt;apex:commandButton value="Cancel" action="{!cancel}" id="cancelButton" /&gt;
+</span><span class='line'>            &lt;/apex:pageBlockButtons&gt; 
+</span><span class='line'>        &lt;/apex:pageBlock&gt; 
+</span><span class='line'>    &lt;/apex:form&gt;
+</span><span class='line'>&lt;/apex:page&gt;</span></code></pre></td></tr></table></div></figure>
+
+
+<p>コードは公式ドキュメントのママ。<br/>
+formなど各タグ内のIDは別にあってもなくてもよさそう。</p>
+
+<p>以下のように表示される。</p>
+
+<p><img src="/images/2016/07/inline01.jpg" alt="" /></p>
+
+<p><code>apex:column</code>で囲まれてた部分が1つの項目になっており、<code>&lt;apex:facet name="header"&gt;</code>タグの内容がそれぞれの項目の見出しとなる。</p>
+
+<p>このままページを表示してインライン編集後、saveボタンをクリックすると確かに更新はされるがホームへ遷移してしまう。
+(キャンセルをクリックしても同様)</p>
+
+<p>これを解消するために、カスタムコントローラーを割り当ててみた。<br/>
+<code>recordSetVar</code>を使っていると、割り当てたカスタムコントローラ側で取得したレコードリストを使用するために、<code>StandardSetController</code>を使う必要がある、とのこと。</p>
+
+<p><a href="http://tyoshikawa1106.hatenablog.com/entry/2013/09/03/232942">SFDC：recordSetVarとextensions &ndash; tyoshikawa1106のブログ</a></p>
+
+<p>これを、<code>StandardController</code>をコントローラ側で使っていると下記のようなエラーがでる。
+エラーメッセージだけでは非常にわかりにくそうなので注意。</p>
+
+<blockquote><p>common.apex.runtime.bytecode.BytecodeApexObjectType cannot be cast to common.apex.runtime.impl.ApexType</p></blockquote>
+
+<p>で、カスタムコントローラ内で、ボタンを押された際のアクションを作成し、<code>null</code>を返す事でページ遷移をしないようにする。<br/>
+ただし、保存する<code>save</code>ボタンはこれをしてしまうと保存されなくなってしまったので、キャンセルボタンだけにしておいた。</p>
+
+<p>VF</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;apex:page standardController="Account" recordSetVar="records" extensions="VfInlineEditSample" id="thePage"&gt; </span></code></pre></td></tr></table></div></figure>
+
+
+<p>apex (<code>VfInlineEditSample.apxc</code>)</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>public class VfInlineEditSample {
+</span><span class='line'>    public VfInlineEditSample(ApexPages.StandardSetController stdController){
+</span><span class='line'>        List&lt;Account&gt; lists = (List&lt;Account&gt;)stdController.getRecords();
+</span><span class='line'>    }
+</span><span class='line'>    
+</span><span class='line'>    public PageReference cancel(){
+</span><span class='line'>        return null;
+</span><span class='line'>    }
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<p><a href="http://www.developerforce.com/guides/fr/apex_fr/Content/apex_pages_standardsetcontroller.htm">Classe StandardSetController</a></p>
+
+<h1>関連リスト</h1>
+
+<p>とあるレコードの関連リストを一覧表示からインライン編集したい場合。<br/>
+上記の一覧表示と同じようにすればインライン編集出来るテーブルを作る事は可能。</p>
+
+<p>IDはVFページのパラメータから取得する。</p>
+
+<p>例）<br/>
+<code>VfInlineEditSamplePage.vfp</code></p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;apex:page standardController="Account" extensions="VfInlineEditSample" id="thePage"&gt; 
+</span><span class='line'>    &lt;apex:form id="theForm"&gt; 
+</span><span class='line'>        &lt;apex:pageBlock title="商談" &gt;
+</span><span class='line'>            &lt;apex:pageBlockTable value="{!opp_records}" var="opp"&gt;
+</span><span class='line'>                &lt;apex:column &gt;
+</span><span class='line'>                    &lt;apex:outputField value="{!opp.Name}" /&gt; 
+</span><span class='line'>                    &lt;apex:facet name="header"&gt;商談名&lt;/apex:facet&gt;
+</span><span class='line'>                &lt;/apex:column&gt;
+</span><span class='line'>                &lt;apex:column &gt;
+</span><span class='line'>                    &lt;apex:outputField value="{!opp.Amount}" /&gt; 
+</span><span class='line'>                    &lt;apex:facet name="header"&gt;金額&lt;/apex:facet&gt;
+</span><span class='line'>                &lt;/apex:column&gt;
+</span><span class='line'>                &lt;apex:column &gt;
+</span><span class='line'>                    &lt;apex:outputField value="{!opp.StageName}" /&gt; 
+</span><span class='line'>                    &lt;apex:facet name="header"&gt;フェーズ&lt;/apex:facet&gt;
+</span><span class='line'>                &lt;/apex:column&gt;
+</span><span class='line'>                &lt;apex:column &gt;
+</span><span class='line'>                    &lt;apex:outputField value="{!opp.NextStep}" /&gt; 
+</span><span class='line'>                    &lt;apex:facet name="header"&gt;次回アクション&lt;/apex:facet&gt;
+</span><span class='line'>                &lt;/apex:column&gt;
+</span><span class='line'>                &lt;apex:inlineEditSupport event="ondblClick" /&gt;
+</span><span class='line'>            &lt;/apex:pageBlockTable&gt; 
+</span><span class='line'>            &lt;apex:pageBlockButtons &gt; 
+</span><span class='line'>                &lt;apex:commandButton value="Save" action="{!save}" /&gt;
+</span><span class='line'>                &lt;apex:commandButton value="Cancel" action="{!cancel}" /&gt;
+</span><span class='line'>            &lt;/apex:pageBlockButtons&gt; 
+</span><span class='line'>        &lt;/apex:pageBlock&gt; 
+</span><span class='line'>    &lt;/apex:form&gt;
+</span><span class='line'>&lt;/apex:page&gt;</span></code></pre></td></tr></table></div></figure>
+
+
+<p><code>VfInlineEditSample.apxc</code></p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>public class VfInlineEditSample {
+</span><span class='line'>    
+</span><span class='line'>    public List&lt;Opportunity&gt; opp_records{get; set;}
+</span><span class='line'>    
+</span><span class='line'>    public VfInlineEditSample(ApexPages.StandardController stdController){
+</span><span class='line'>        Account acc = (Account)stdController.getRecord();
+</span><span class='line'>        Id aid = acc.id;
+</span><span class='line'>        Account record = [SELECT id, name, (SELECT id,name,StageName,NextStep,Amount FROM Opportunities) FROM Account WHERE id=:aid];
+</span><span class='line'>        opp_records = record.Opportunities;
+</span><span class='line'>    }
+</span><span class='line'>    
+</span><span class='line'>    public PageReference cancel(){
+</span><span class='line'>        return null;
+</span><span class='line'>    }
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<p>以下のようになる。</p>
+
+<p><img src="/images/2016/07/sf_inline02.jpg" alt="" /></p>
+
+<p>このままだとSaveをクリックしても保存はされない。<br/>
+なので、cancelと同じようにカスタムコントローラ内でアクションを受け取り、編集した内容はVFへ引き渡している、 <code>opp_records</code>に入っているので、それをupdateすれば更新される。</p>
+
+<p>apexクラスに以下を追加。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>public PageReference save(){
+</span><span class='line'>    update opp_records;
+</span><span class='line'>    return null;
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<p>しかしこうすると、編集されたされてないにかかわらず、関連リストに並んでいるオブジェクト(この場合は商談)のレコード全てが更新されてしまう。<br/>
+ガバナ制限は、1万レコードまで大丈夫なので、問題になることは少ないと思うが、最終更新日付が全て更新されてしまうのが都合が悪いかもしれない。</p>
+
+<p><a href="https://developer.salesforce.com/docs/atlas.ja-jp.salesforce_app_limits_cheatsheet.meta/salesforce_app_limits_cheatsheet/salesforce_app_limits_platform_apexgov.htm">Apex ガバナ制限</a></p>
+
+<h2>更新対象を選ぶ</h2>
+
+<p>ワークフローであれば、<code>ISCHANGED</code>を使えば、その項目が変更されたかどうかをチェック出来るが、apexではそのメソッドはない。<br/>
+(機能追加が要望があがってたりする(トリガの機能としてだけど） <a href="https://success.salesforce.com/ideaview?id=087300000007LI2AAM">IsChanged function in Apex</a>)</p>
+
+<p>なので、更新される項目を一つずつ比較して更新があるかどうかを確認する泥臭い方法を取ってみる。<br/>
+(他にいいアイデアがあれば教えて欲しい…）</p>
+
+<p>修正後のapex</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>public class VfInlineEditSample {
+</span><span class='line'>    
+</span><span class='line'>    public List&lt;Opportunity&gt; opp_records{get; set;}
+</span><span class='line'>    private List&lt;Opportunity&gt; old_records;
+</span><span class='line'>    
+</span><span class='line'>    public VfInlineEditSample(ApexPages.StandardController stdController){
+</span><span class='line'>        Account acc = (Account)stdController.getRecord();
+</span><span class='line'>        Id aid = acc.id;
+</span><span class='line'>        Account record = [SELECT id, name, (SELECT id,name,StageName,NextStep,Amount FROM Opportunities) FROM Account WHERE id=:aid];
+</span><span class='line'>        opp_records = record.Opportunities;
+</span><span class='line'>        old_records = opp_records.deepClone();
+</span><span class='line'>    }
+</span><span class='line'>    
+</span><span class='line'>    public PageReference cancel(){
+</span><span class='line'>        return null;
+</span><span class='line'>    }
+</span><span class='line'>    
+</span><span class='line'>    public PageReference save(){
+</span><span class='line'>        List&lt;Opportunity&gt; update_lists = new List&lt;Opportunity&gt;();
+</span><span class='line'>        for(Integer i = 0; i&lt; opp_records.size(); i++){
+</span><span class='line'>            if(opp_records[i].name != old_records[i].name){
+</span><span class='line'>                update_lists.add(opp_records[i]);
+</span><span class='line'>                continue;
+</span><span class='line'>            }else if(opp_records[i].StageName != old_records[i].StageName){
+</span><span class='line'>                update_lists.add(opp_records[i]);
+</span><span class='line'>                continue;
+</span><span class='line'>            }else if(opp_records[i].NextStep != old_records[i].NextStep){
+</span><span class='line'>                update_lists.add(opp_records[i]);
+</span><span class='line'>                continue;
+</span><span class='line'>            }else if(opp_records[i].Amount != old_records[i].Amount){
+</span><span class='line'>                update_lists.add(opp_records[i]);
+</span><span class='line'>                continue;
+</span><span class='line'>            }
+</span><span class='line'>        }
+</span><span class='line'>        
+</span><span class='line'>        if(update_lists.size() &gt; 0){
+</span><span class='line'>            update update_lists;
+</span><span class='line'>        }
+</span><span class='line'>        
+</span><span class='line'>        return null;
+</span><span class='line'>    }
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<p>リストをコピーする際に、<code>deepClone</code>を使わないと<code>clone</code>では浅いコピーとなってしまい、参照しているものが同じになってしまうので注意。
+(一方の値を更新するともう一方も同じ値になってしまう）</p>
+
+<h2>汎用的にする</h2>
+
+<p>上記だと、表示する項目を増やす度に比較の条件文を追加しないといけない。<br/>
+なので、全項目から取得出来るものだけを比較するようにしてみた。</p>
+
+<p>以下、関数。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>public List&lt;sObject&gt; isChanged(String object_name, List&lt;sObject&gt; new_records, List&lt;sObject&gt; old_records){
+</span><span class='line'>    sObject obj = (sObject)Type.forName(object_name).newInstance();
+</span><span class='line'>    Schema.DescribeSObjectResult descR = obj.getsObjectType().getDescribe();
+</span><span class='line'>    Set&lt;String&gt; fields = descR.fields.getMap().keySet();
+</span><span class='line'>    Map&lt;String, Schema.SObjectField&gt; fmap = descR.fields.getMap();
+</span><span class='line'>    
+</span><span class='line'>    List&lt;sObject&gt; update_records = new List&lt;sObject&gt;();
+</span><span class='line'>    for(Integer i = 0; i&lt; new_records.size(); i++){
+</span><span class='line'>        for(String field : fields){
+</span><span class='line'>            try{
+</span><span class='line'>                Schema.SObjectField f = fmap.get(field);
+</span><span class='line'>                Schema.DescribeFieldResult fr = f.getDescribe();
+</span><span class='line'>                if(!fr.isUpdateable()) continue; //更新出来ない項目は飛ばす
+</span><span class='line'>                //比較
+</span><span class='line'>                if(new_records[i].get(field) != old_records[i].get(field)){
+</span><span class='line'>                    update_records.add(new_records[i]);
+</span><span class='line'>                    continue;
+</span><span class='line'>                }
+</span><span class='line'>            }catch(SObjectException e){
+</span><span class='line'>                //取得していない項目
+</span><span class='line'>            }
+</span><span class='line'>        }
+</span><span class='line'>    }
+</span><span class='line'>    
+</span><span class='line'>    return update_records;
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li><code>getDescribe()</code>で指定したオブジェクトの全項目名を取得出来る</li>
+<li>取得した項目名を使ってオブジェクトから<code>get()</code>で取得。例外が発生したものはselectで取得していない項目、となる</li>
+<li>更新可能かどうかは、<code>Describe</code>で取得出来る項目の情報内を見れば判定可能<br/>
+<code>isUpdateable</code>がtrueなら更新が出来る項目となるので、これがtrueのもののみ比較している</li>
+</ul>
+
+
+<p>使用の際は、第一引数にオブジェクトの参照名、第二引数に更新後のレコードリスト、第三引数に更新前のレコードリストを指定してやる。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>List&lt;Opportunity&gt; update_lists = isChanged('Opportunity', opp_records, old_records);</span></code></pre></td></tr></table></div></figure>
+
+
+<p>これで項目が増えても安心。</p>
+
+<h3>参考</h3>
+
+<ul>
+<li><a href="http://kayakuguri.github.io/blog/2014/04/23/sf-mailtemplate/">[SalesForce]メールテンプレートの項目一覧 &ndash; KayaMemo</a></li>
+<li><a href="http://appirio.co.jp/category/tech-blog/2012/07/force-com-apex%E3%81%AE%E3%80%8Cdescribe%E3%80%8D%E3%81%A7%E3%81%A7%E3%81%8D%E3%82%8B%E3%81%93%E3%81%A8%EF%BC%88%E3%81%9D%E3%81%AE%EF%BC%91%EF%BC%89/">Force.com Apexの「Describe」でできること（その１） &ndash; Appirio Japan</a></li>
+<li><a href="http://appirio.co.jp/category/tech-blog/2012/09/force-com-apex%E3%81%AE%E3%80%8Cdescribe%E3%80%8D%E3%81%A7%E3%81%A7%E3%81%8D%E3%82%8B%E3%81%93%E3%81%A8%EF%BC%88%E3%81%9D%E3%81%AE%EF%BC%92%EF%BC%89/">Force.com Apexの「Describe」でできること（その２） &ndash; Appirio Japan</a></li>
+<li><a href="http://vaindespair.blogspot.jp/2012/04/blog-post_04.html">memo: Force.com&#12288;&#65306;&#12288;Apex でオブジェクト及び項目の情報を取得する</a></li>
+</ul>
+
+
+		
+		
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2016-07-11T17:56:11+09:00" pubdate data-updated="true">Jul 11<span>th</span>, 2016</time></div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/apex/'>apex</a>, <a class='category' href='/blog/categories/salesforce/'>salesforce</a>
+
+
+</div>
+	
+</div>
+</article>
 
 
     <article class="post">
@@ -460,48 +962,6 @@
 
 
 	<a class='category' href='/blog/categories/salesforce/'>salesforce</a>, <a class='category' href='/blog/categories/swift/'>swift</a>
-
-
-</div>
-	
-</div>
-</article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2016/05/17/swift-textfield-change-forcus/">
-		
-			[Swift]リターンキーが押されたら次の入力欄へ移動する</a>
-	</h2>
-	<div class="entry-content">
-		<p>入力欄が複数ある画面で、リターンキーをタップして次の入力欄へ移動する処理を調べたのでメモ。</p>
-
-
-		
-		<a href="/blog/2016/05/17/swift-textfield-change-forcus/" class="more-link">続きを読む</a>
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2016-05-17T15:48:08+09:00" pubdate data-updated="true">May 17<span>th</span>, 2016</time></div>
-	<div class="tags">
-
-
-	<a class='category' href='/blog/categories/swift/'>swift</a>
 
 
 </div>
