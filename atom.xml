@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2016-07-11T18:08:09+09:00</updated>
+  <updated>2016-07-12T19:16:26+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,308 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[WP REST API v2にてカスタムエンドポイントを追加するまとめ]]></title>
+    <link href="http://kayakuguri.github.io/blog/2016/07/12/wp-rest-api-custom-endpoint/"/>
+    <updated>2016-07-12T19:15:48+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2016/07/12/wp-rest-api-custom-endpoint</id>
+    <content type="html"><![CDATA[<p>カスタムエンドポイントの作り方全般をまとめてみた。</p>
+
+<!-- more -->
+
+
+<h1>環境など</h1>
+
+<ul>
+<li>PHP 5.6</li>
+<li>WordPress ver.4.5.3
+
+<ul>
+<li>WP REST API ver.2.0-beta13.1</li>
+<li>WP REST API – OAuth 1.0a Server ver.0.2.1</li>
+</ul>
+</li>
+<li>ドメイン : <a href="http://wprest.local">http://wprest.local</a></li>
+</ul>
+
+
+<h1>GET</h1>
+
+<p>まずは基本的な追加方法として<code>GET</code>メソッドのエンドポイントを追加する。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>add_action( 'rest_api_init', 'add_custom_endpoint' );
+</span><span class='line'>function add_custom_endpoint() {
+</span><span class='line'>  register_rest_route( 'custom/v0', '/show', array(
+</span><span class='line'>      'methods' =&gt; 'GET',
+</span><span class='line'>      'callback' =&gt; 'create_item'
+</span><span class='line'>  ) );
+</span><span class='line'>}
+</span><span class='line'>function show_item(){
+</span><span class='line'>  //何かしらの処理
+</span><span class='line'>  $data = ['apple'=&gt;'りんご', 'peach'=&gt;'もも', 'pear'=&gt;'なし'];
+</span><span class='line'>
+</span><span class='line'>  $response = new WP_REST_Response($data);
+</span><span class='line'>  $response-&gt;set_status(200);
+</span><span class='line'>  $domain = (empty($_SERVER["HTTPS"]) ? "http://" : "https://") . $_SERVER["HTTP_HOST"];
+</span><span class='line'>  $response-&gt;header( 'Location', $domain );
+</span><span class='line'>  return $response;
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<p><code>rest_api_init</code>のフックでREST APIが初期化されたタイミングで追加する。<br/>
+呼びだされた<code>add_custom_endpoint</code>関数内でAPIのエンドポイントを追加している。<br/>
+エンドポイントを追加するには、<code>register_rest_route</code>を利用する。</p>
+
+<ul>
+<li>第一引数 : 名前空間</li>
+<li>第二引数 : エンドポイント</li>
+<li>第三引数 : メソッドなどの設定配列</li>
+</ul>
+
+
+<p>第一引数と第二引数を合わせたものがエンドポイントとなる。<br/>
+エンドポイントは(デフォルトでは) <code>/wp-json/</code>がルートとなるのでこの指定はそれ以下の分、となる。</p>
+
+<p>第三引数の<code>callback</code>で指定した関数がAPIアクセス時に呼び出される。<br/>
+返却する内容は実はなんでも構わないが、<code>WP_REST_Response</code>クラスを利用することでヘッダーなどの設定が出来るよう。<br/>
+ここでは、ステータス200、ヘッダーにドメインをロケーションで追加、などしている。</p>
+
+<p>返ってくる内容は以下。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>{
+</span><span class='line'>  "apple": "りんご",
+</span><span class='line'>  "peach": "もも",
+</span><span class='line'>  "pear": "なし"
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>パラメータの追加</h2>
+
+<p>REST APIらしく、URLにIDなどのパラメータを含める事ができる。<br/>
+<code>register_rest_route</code>でエンドポイントを指定する時に以下のようにする。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>register_rest_route( 'custom/v0', '/show/(?P&lt;id&gt;\d+)', array(
+</span><span class='line'>  'methods' =&gt; 'GET',
+</span><span class='line'>  'callback' =&gt; 'show_item_id'
+</span><span class='line'>) );</span></code></pre></td></tr></table></div></figure>
+
+
+<p>受け取る際は、コールバックの関数内で以下のようにする。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>function show_item_id($data){
+</span><span class='line'>  $posts = get_posts( array(
+</span><span class='line'>      'author' =&gt; $data['id'],
+</span><span class='line'>  ) );
+</span><span class='line'>//(後略)</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>メソッドの指定方法</h1>
+
+<p>メソッドの指定方法は<code>GET</code>や<code>POST</code>など文字列での指定も可能だが、<code>WP_REST_Server</code>クラスを指定して複数いっぺんに指定が出来たりもする。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>register_rest_route( 'custom/v0', '/show', array(
+</span><span class='line'>  'methods' =&gt; WP_REST_Server::READABLE,
+</span><span class='line'>  'callback' =&gt; 'show_item'
+</span><span class='line'>) );</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li>READABLE = &lsquo;GET&rsquo;</li>
+<li>CREATABLE = &lsquo;POST&rsquo;</li>
+<li>EDITABLE = &lsquo;POST, PUT, PATCH&rsquo;</li>
+<li>DELETABLE = &lsquo;DELETE&rsquo;</li>
+<li>ALLMETHODS = &lsquo;GET, POST, PUT, PATCH, DELETE&rsquo;</li>
+</ul>
+
+
+<h1>エラーの追加</h1>
+
+<p>指定されたIDの投稿がないなど、エラーを返したい場合は以下のようにする。<br/>
+(404エラーの場合の例）</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>function show_item_id($data){
+</span><span class='line'>  if($data['id'] == 0){
+</span><span class='line'>      return new WP_Error( 'awesome_no_author', 'Invalid author', array( 'status' =&gt; 404 ) );
+</span><span class='line'>  }
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<p><code>/custom/v0/show/0</code>でアクセスすると以下のように返ってくる。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>{
+</span><span class='line'>  code: "awesome_no_author",
+</span><span class='line'>  message: "Invalid author",
+</span><span class='line'>  data: {
+</span><span class='line'>      status: 404
+</span><span class='line'>  }
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>POST</h1>
+
+<p>ポストでの送信、データ取得は以下。ほぼ、GETの時と変わらない。<br/>
+送られたデータはどうやって取得するのかすごく悩んだのだが、単純に<code>$_POST</code>で取得、でよかった。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>add_action( 'rest_api_init', 'add_custom_endpoint' );
+</span><span class='line'>function add_custom_endpoint() {
+</span><span class='line'>  register_rest_route( 'custom/v0', '/create', array(
+</span><span class='line'>      'methods' =&gt; 'POST',
+</span><span class='line'>      'callback' =&gt; 'create_item'
+</span><span class='line'>  ) );
+</span><span class='line'>}
+</span><span class='line'>
+</span><span class='line'>function create_item() {
+</span><span class='line'>  $data = $_POST;
+</span><span class='line'>  $response = new WP_REST_Response( $data );
+</span><span class='line'>  $response-&gt;set_status( 201 );
+</span><span class='line'>  $domain = (empty($_SERVER["HTTPS"]) ? "http://" : "https://") . $_SERVER["HTTP_HOST"];
+</span><span class='line'>  $response-&gt;header( 'Location', $domain );
+</span><span class='line'>
+</span><span class='line'>  return $response;
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<p>送った内容を表示させているだけ、の内容。<br/>
+bodyで、<code>id=2</code>, <code>body=test</code>の２つを送ってみると、返ってくる値は以下。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>{
+</span><span class='line'>  "id": "2",
+</span><span class='line'>  "body": "test"
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>権限</h1>
+
+<p>特にPOSTなどは実行するには認証を必要としたい場合が多いと思う。<br/>
+そういう時には、実行前に権限をチェックする関数を呼び出すものとして、<code>permission_callback</code>が用意されている。<br/>
+<code>register_rest_route</code>の第三引数の中で以下のように指定する。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>register_rest_route( 'custom/v0', '/create', array(
+</span><span class='line'>  'methods' =&gt; 'POST',
+</span><span class='line'>  'permission_callback' =&gt; 'create_permissions_check',
+</span><span class='line'>  'callback' =&gt; 'create_item'
+</span><span class='line'>) );</span></code></pre></td></tr></table></div></figure>
+
+
+<p>この呼びだされた関数で、<code>true</code>を返すと通り、<code>false</code>を返すとエラーとなる。<br/>
+エラーは以下のように返却される。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>{
+</span><span class='line'>  "code": "rest_forbidden",
+</span><span class='line'>  "message": "この操作を行う権限がありません。",
+</span><span class='line'>  "data": {
+</span><span class='line'>    "status": 403
+</span><span class='line'>  }
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<p>この権現の確認は、<code>current_user_can</code>関数で行う。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>function create_permissions_check(){
+</span><span class='line'>  return current_user_can('publish_posts');
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<p>OAuthやアプリケーションパスワードを使った認証部分はこの手前で完了しているため、実際に接続しに来たユーザーの権限をここでチェックしてやるだけで良い。<br/>
+権限は以下を参考に。</p>
+
+<p>参考: <a href="http://elearn.jp/wpman/function/current_user_can.html">current_user_can:WordPress私的マニュアル</a></p>
+
+<h1>参考</h1>
+
+<ul>
+<li><a href="http://ja.wp-api.org/extending/adding/">Adding Custom Endpoints | WP REST API v2 Documentation</a></li>
+<li><a href="http://ginzanomama.hatenablog.com/entry/2016/02/04/212826">WordPress REST API v2にendpointを追加する &ndash; みんなのちからになりたい</a></li>
+<li><a href="https://wpshout.com/using-custom-rest-routes-wordpress-4-4-beyond/">Making Custom REST Routes In WordPress 4.4 and Beyond | WPShout</a></li>
+<li><a href="http://qiita.com/kuck1u/items/c879271aa280da62c573">WordPress 4.4 で追加された REST API の停止やエンドポイントの変更など</a></li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[Salesforce]関連リストのインライン編集をVFで作成する]]></title>
@@ -3685,76 +3987,6 @@ atomのパッケージからインストールする。</p>
 
 <p><a href="https://help.salesforce.com/HTViewHelpDoc?id=cs_accessing.htm&amp;language=ja">カスタム設定へのアクセス</a><br/>
 <a href="https://odekakeshimasyo.io/salesforce-apex-customsetting.html">Salesforce Apex カスタム設定 | odekakeshimasyo.io</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[lumenのテーブル名を既存のものに合わせる]]></title>
-    <link href="http://kayakuguri.github.io/blog/2016/01/05/lumen-eloquent/"/>
-    <updated>2016-01-05T17:37:23+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2016/01/05/lumen-eloquent</id>
-    <content type="html"><![CDATA[<p>lumenやlaravelではモデル名が単数形で、DBのテーブル名はその複数形、が基本の仕様となっている。<br/>
-なので、新規にテーブル名を作成する場合や、テーブル名が複数形であればとくに問題ないのだが、<br/>
-既存のテーブル名を利用する際に単数形となってしまっている時には明示的に指定してやる必要がある。<br/>
-指定は<code>Eloquent</code>を利用してやる。</p>
-
-<!-- more -->
-
-
-<blockquote><p>Eloquentとは、PHPフレームワークのLaravelに最初から含まれているORM（Object-relational mapping:オブジェクト関係マッピング）です。</p></blockquote>
-
-<h2>lumenでの利用</h2>
-
-<p>lumenではデフォルトではEloquentの利用がオフになっている。<br/>
-なので、<code>bootstrap/app.php</code>内のコメントアウトを外して有効にしてやる。</p>
-
-<pre><code>$app-&gt;withEloquent();
-</code></pre>
-
-<h2>モデルの作成</h2>
-
-<p>モデルは、<code>app/</code>以下に作成する。<br/>
-例えば、user、というテーブル名を利用したい場合は、<code>app/User.php</code>を作成してやる。<br/>
-その中で、<code>protected $table</code>の箇所がテーブル名を指定している箇所となるので、ここで単数形のテーブル名を指定してやる。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;?php namespace App;
-</span><span class='line'>use Illuminate\Database\Eloquent\Model;
-</span><span class='line'>class User extends Model {
-</span><span class='line'>    protected $table = ‘user’;
-</span><span class='line'>    protected $fillable = [
-</span><span class='line'>        ‘name’,
-</span><span class='line'>        ‘username’,
-</span><span class='line'>        ‘password’
-</span><span class='line'>    ];
-</span><span class='line'>    protected $hidden = [ ‘password’ ];
-</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>利用</h2>
-
-<p>マイグレーションは作成しなくても動作した。<br/>
-(項目をDBとコードで同期させる時にartisanから利用するよう。lumenでも利用できる）</p>
-
-<p>以下の様な形で取得できた。</p>
-
-<pre><code>DB::table('user')-&gt;get();
-</code></pre>
-
-<h2>参考</h2>
-
-<p><a href="http://laravel4.winroad.jp/2014/03/06/eloquent-orm%E3%81%AE%E5%9F%BA%E6%9C%AC%E7%9A%84%E3%81%AA%E4%BD%BF%E7%94%A8%E6%B3%95/">Eloquent ORMの基本的な使用法 | WinRoadのLaravel4初心者講座</a><br/>
-<a href="https://medium.com/@petehouston/enable-eloquent-orm-in-laravel-lumen-micro-framework-7a4f2fbcaf5d#.pe3a4ibc8">Enable Eloquent ORM in Laravel Lumen micro-framework — Medium</a></p>
 ]]></content>
   </entry>
   
