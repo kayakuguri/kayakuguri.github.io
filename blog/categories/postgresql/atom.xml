@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: postgresql | KayaMemo]]></title>
+  <link href="http://kayakuguri.github.io/blog/categories/postgresql/atom.xml" rel="self"/>
+  <link href="http://kayakuguri.github.io/"/>
+  <updated>2016-07-19T17:12:22+09:00</updated>
+  <id>http://kayakuguri.github.io/</id>
+  <author>
+    <name><![CDATA[萱潜]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Postgresqlのシーケンス番号]]></title>
+    <link href="http://kayakuguri.github.io/blog/2016/07/19/postgresql-seqence/"/>
+    <updated>2016-07-19T17:10:47+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2016/07/19/postgresql-seqence</id>
+    <content type="html"><![CDATA[<p>PostgresqlのDBで、レコードをインサートしようとしたところエラーが出たので原因を調査したメモ。</p>
+
+<!-- more -->
+
+
+<h1>エラー内容</h1>
+
+<p>エラーは以下のような内容。</p>
+
+<blockquote><p>duplicate key value violates unique constraint &ldquo;table_pkey&rdquo;</p></blockquote>
+
+<p><code>table_pkey</code>は、テーブル名+pkeyとなる。<br/>
+文字通り受け取るなら、ユニークでないといけない項目が被ってるよ、というもの。</p>
+
+<p>しかし投げたレコードは特に被っている項目もなく、ユニークな項目もIDだけだった。</p>
+
+<h1>原因</h1>
+
+<p>値をシークエンスに設定したint型の項目は、インサートした順番に自動発番してくれるのだが、その発番する番号はシーケンス番号、として内部的に保持しているよう。
+それが、内容を別DBからコピーなどすると上手く更新されない事があるらしい。たぶん。</p>
+
+<h1>シーケンス番号</h1>
+
+<h2>確認</h2>
+
+<p>現在のシーケンス番号が何番になっているかを確認するためには以下のSQLを発行してやるとよい。</p>
+
+<p><code>
+SELECT last_value FROM シーケンス名
+</code></p>
+
+<p>シーケンス名は、デフォルトでは、<code>テーブル名_項目名_seq</code>となっていると思われる。
+Posticoで確認する場合は、<code>Navigate -&gt; Go to Terminal</code>でターミナルが開くので、そこでSQLを発行して確認する事が出来る。</p>
+
+<p><img src="/images/2016/07/seq_01.jpg" alt="" /></p>
+
+<p><img src="/images/2016/07/seq_02.jpg" alt="" /></p>
+
+<p>今回発行してみると、<code>9</code>が返ってきた。</p>
+
+<p><img src="/images/2016/07/seq_03.jpg" alt="" /></p>
+
+<p>しかし実際のレコードは12まであり、保持されているシーケンス番号の次の番号から発番されるため、<code>10</code>が発番され重複エラーとなっていたよう。</p>
+
+<h2>設定</h2>
+
+<p>なので、このシーケンス番号を設定し直してやる。<br/>
+シーケンス番号を設定するには以下。</p>
+
+<p><code>
+SELECT setval('シーケンス名', 数値);
+</code></p>
+
+<p>シーケンス番号はさきほどと同じ。数値はここでは12を設定してやる。</p>
+
+<p>Posticoで実行すると以下のようになる。</p>
+
+<p><img src="/images/2016/07/seq_05.jpg" alt="" /></p>
+
+<p>これで12にセットされたため、インサートを実行すると13から発番されるので重複エラーが解消された。</p>
+
+<h1>参考</h1>
+
+<ul>
+<li><a href="http://pirlo21.hatenablog.com/entry/2013/11/11/sql_%E9%87%8D%E8%A4%87%E3%82%92%E8%AA%8D%E3%82%81%E3%81%AA%E3%81%84%E3%82%A8%E3%83%A9%E3%83%BC_duplicate_key_value_violates_unique_constraint_">sql 重複を認めないエラー　duplicate key value violates unique constraint  &ndash; エンジニア　北欧日記</a></li>
+<li><a href="http://programp.com/sql/441/">PostgreSQLでシーケンスの現在値を取得する | Program Program</a></li>
+</ul>
+
+]]></content>
+  </entry>
+  
+</feed>

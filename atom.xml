@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2016-07-12T19:23:17+09:00</updated>
+  <updated>2016-07-19T17:12:22+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,82 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Postgresqlのシーケンス番号]]></title>
+    <link href="http://kayakuguri.github.io/blog/2016/07/19/postgresql-seqence/"/>
+    <updated>2016-07-19T17:10:47+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2016/07/19/postgresql-seqence</id>
+    <content type="html"><![CDATA[<p>PostgresqlのDBで、レコードをインサートしようとしたところエラーが出たので原因を調査したメモ。</p>
+
+<!-- more -->
+
+
+<h1>エラー内容</h1>
+
+<p>エラーは以下のような内容。</p>
+
+<blockquote><p>duplicate key value violates unique constraint &ldquo;table_pkey&rdquo;</p></blockquote>
+
+<p><code>table_pkey</code>は、テーブル名+pkeyとなる。<br/>
+文字通り受け取るなら、ユニークでないといけない項目が被ってるよ、というもの。</p>
+
+<p>しかし投げたレコードは特に被っている項目もなく、ユニークな項目もIDだけだった。</p>
+
+<h1>原因</h1>
+
+<p>値をシークエンスに設定したint型の項目は、インサートした順番に自動発番してくれるのだが、その発番する番号はシーケンス番号、として内部的に保持しているよう。
+それが、内容を別DBからコピーなどすると上手く更新されない事があるらしい。たぶん。</p>
+
+<h1>シーケンス番号</h1>
+
+<h2>確認</h2>
+
+<p>現在のシーケンス番号が何番になっているかを確認するためには以下のSQLを発行してやるとよい。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>SELECT last_value FROM シーケンス名</span></code></pre></td></tr></table></div></figure>
+
+
+<p>シーケンス名は、デフォルトでは、<code>テーブル名_項目名_seq</code>となっていると思われる。
+Posticoで確認する場合は、<code>Navigate -&gt; Go to Terminal</code>でターミナルが開くので、そこでSQLを発行して確認する事が出来る。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2016/07/seq_01.jpg" alt="" /></p>
+
+<p><img src="http://kayakuguri.github.io/images/2016/07/seq_02.jpg" alt="" /></p>
+
+<p>今回発行してみると、<code>9</code>が返ってきた。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2016/07/seq_03.jpg" alt="" /></p>
+
+<p>しかし実際のレコードは12まであり、保持されているシーケンス番号の次の番号から発番されるため、<code>10</code>が発番され重複エラーとなっていたよう。</p>
+
+<h2>設定</h2>
+
+<p>なので、このシーケンス番号を設定し直してやる。<br/>
+シーケンス番号を設定するには以下。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>SELECT setval('シーケンス名', 数値); </span></code></pre></td></tr></table></div></figure>
+
+
+<p>シーケンス番号はさきほどと同じ。数値はここでは12を設定してやる。</p>
+
+<p>Posticoで実行すると以下のようになる。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2016/07/seq_05.jpg" alt="" /></p>
+
+<p>これで12にセットされたため、インサートを実行すると13から発番されるので重複エラーが解消された。</p>
+
+<h1>参考</h1>
+
+<ul>
+<li><a href="http://pirlo21.hatenablog.com/entry/2013/11/11/sql_%E9%87%8D%E8%A4%87%E3%82%92%E8%AA%8D%E3%82%81%E3%81%AA%E3%81%84%E3%82%A8%E3%83%A9%E3%83%BC_duplicate_key_value_violates_unique_constraint_">sql 重複を認めないエラー　duplicate key value violates unique constraint  &ndash; エンジニア　北欧日記</a></li>
+<li><a href="http://programp.com/sql/441/">PostgreSQLでシーケンスの現在値を取得する | Program Program</a></li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[WP REST API v2にてカスタムエンドポイントを追加するまとめ]]></title>
@@ -3819,176 +3895,6 @@ atomのパッケージからインストールする。</p>
 
 
 <p>これであるかどうかの判定で判別が出来るので、処理をそれぞれ変える事が出来た。</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[カスタム設定を作成して取得してみる]]></title>
-    <link href="http://kayakuguri.github.io/blog/2016/02/01/custom-setting/"/>
-    <updated>2016-02-01T15:15:19+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2016/02/01/custom-setting</id>
-    <content type="html"><![CDATA[<p>カスタム設定、というカスタムオブジェクトの一種でSOQLいらずでもっと手軽に扱える <code>カスタム設定</code> とうものを知ったので、<br/>
-作り方から使い方を調べてみた。</p>
-
-<!-- more -->
-
-
-<blockquote><p>カスタム設定はカスタムオブジェクトと類似しており、アプリケーション開発者は、カスタムデータセットの作成の他に、組織、プロファイル、または特定のユーザに対しカスタムデータを作成して関連付けることができます。<br/>
-<a href="https://help.salesforce.com/HTViewHelpDoc?id=cs_about.htm&amp;language=ja">https://help.salesforce.com/HTViewHelpDoc?id=cs_about.htm&amp;language=ja</a></p></blockquote>
-
-<p>今回は全体で使用する、環境変数、としてカスタム設定を作成してみた。</p>
-
-<h2>作成</h2>
-
-<p>[開発] → [カスタム設定] にアクセス。<br/>
-まずは新規でカスタム設定、を作る。<br/>
-オブジェクトのようなもの。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2016/01/custom_setting02.jpg" alt="" /></p>
-
-<p>今回は以下のように作成した。</p>
-
-<table>
-<thead>
-<tr>
-<th></th>
-<th align="left"> 項目 </th>
-<th align="left"> 内容 </th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td></td>
-<td align="left"> 表示ラベル </td>
-<td align="left"> 環境変数</td>
-</tr>
-<tr>
-<td></td>
-<td align="left"> オブジェクト名 </td>
-<td align="left"> EnvironmentVars</td>
-</tr>
-<tr>
-<td></td>
-<td align="left"> 設定種別 </td>
-<td align="left"> リスト</td>
-</tr>
-<tr>
-<td></td>
-<td align="left"> 表示 </td>
-<td align="left"> 公開</td>
-</tr>
-<tr>
-<td></td>
-<td align="left"> 説明 </td>
-<td align="left"> </td>
-</tr>
-</tbody>
-</table>
-
-
-<p><img src="http://kayakuguri.github.io/images/2016/01/custom_setting03.jpg" alt="" /></p>
-
-<p>設定種別は、リスト、と、階層、があり、<br/>
-階層、は、ユーザーやプロファイルごとに同じ項目で違う値を設定したり出来るよう。<br/>
-どのユーザーが使用しているかによって変数の値を変更できるようになるので、<br/>
-そういうことを実現したい時に便利っぽい。 <br/>
-今回は全員同じにしたいので、リスト、にしておいた。</p>
-
-<p>また、表示、は、公開・保護、とある。<br/>
-公開、だとSOAP APIでも取得できるようになったり、とオープンな状態？になるよう。<br/>
-特に秘匿する内容でもないので、公開、にしておいた。</p>
-
-<p>次に作成したカスタム設定内にカスタム項目を追加する。<br/>
-作成したカスタム設定から、新規、をクリック。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2016/01/custom_setting04.jpg" alt="" /></p>
-
-<p>通常の項目作成と同じ流れで、型を選択し、内容を埋めていく。<br/>
-今回は以下のように作成した。<br/>
-目的としては、SitesのURLを環境変数として持っておくためのもの。</p>
-
-<table>
-<thead>
-<tr>
-<th></th>
-<th align="left"> 項目 </th>
-<th align="left"> 内容 </th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td></td>
-<td align="left"> 型 </td>
-<td align="left"> テキスト</td>
-</tr>
-<tr>
-<td></td>
-<td align="left"> 項目の表示ラベル </td>
-<td align="left"> Sites</td>
-</tr>
-<tr>
-<td></td>
-<td align="left"> 文字数 </td>
-<td align="left"> 255</td>
-</tr>
-<tr>
-<td></td>
-<td align="left"> 項目名 </td>
-<td align="left"> Sites</td>
-</tr>
-<tr>
-<td></td>
-<td align="left"> 説明、など </td>
-<td align="left"> </td>
-</tr>
-</tbody>
-</table>
-
-
-<p><img src="http://kayakuguri.github.io/images/2016/01/custom_setting05.jpg" alt="" /></p>
-
-<p>ここまででオブジェクトと項目が作成出来たので、実際にデータを入れていく。<br/>
-作成したカスタム設定の<code>Manege</code>をクリック。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2016/01/custom_setting06.jpg" alt="" /></p>
-
-<p>リストが表示されるので、新規、をクリック。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2016/01/custom_setting07.jpg" alt="" /></p>
-
-<p>内容を記入して保存。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2016/01/custom_setting08.jpg" alt="" /></p>
-
-<h2>取得</h2>
-
-<p>作成したデータをApexで取得する。</p>
-
-<p>前述の通り、取得の際にはSOQLを発行する必要がなく、以下のようにメソッドレベルで取得可能。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>Map&lt;String, EnvironmentVars__c&gt; settingMap = EnvironmentVars__c.getAll();
-</span><span class='line'>
-</span><span class='line'>for (String key : settingMap.keySet()) {
-</span><span class='line'>    EnvironmentVars__c env = settingMap.get(key);
-</span><span class='line'>    System.debug('**DEBUG** ' key + ' / ' + env.SitesURL__c);
-</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>まとめ</h2>
-
-<p>SOQLを発行しないので、ガバナ的にも優しく、内容はキャッシュされるので動作も高速。<br/>
-環境変数のように決まった値であれば便利に使えるかもしれない。</p>
-
-<h2>参考</h2>
-
-<p><a href="https://help.salesforce.com/HTViewHelpDoc?id=cs_accessing.htm&amp;language=ja">カスタム設定へのアクセス</a><br/>
-<a href="https://odekakeshimasyo.io/salesforce-apex-customsetting.html">Salesforce Apex カスタム設定 | odekakeshimasyo.io</a></p>
 ]]></content>
   </entry>
   
