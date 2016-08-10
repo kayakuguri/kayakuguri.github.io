@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2016-08-10T11:51:50+09:00</updated>
+  <updated>2016-08-10T11:55:24+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -27,9 +27,10 @@
 
 <p>エラーは下記の内容。</p>
 
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>System.CalloutException: sun.security.validator.ValidatorException: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target</span></code></pre></td></tr></table></div></figure>
-
+<blockquote><p>System.CalloutException: sun.security.validator.ValidatorException:
+PKIX path building failed:
+sun.security.provider.certpath.SunCertPathBuilderException:
+unable to find valid certification path to requested target</p></blockquote>
 
 <p>エラー内容で調べてみると、自己証明書、ではSFからのアクセスが出来ない、という情報があり、その中で紹介されているエラーが上記内容と酷似していることがわかった。</p>
 
