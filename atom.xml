@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2016-07-20T10:55:52+09:00</updated>
+  <updated>2016-08-10T11:50:25+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,57 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[Salesforce] Let’s Encryptの証明書ではSFからのコールアウトを受けられない]]></title>
+    <link href="http://kayakuguri.github.io/blog/2016/08/10/sf-lets-encrypt/"/>
+    <updated>2016-08-10T11:49:42+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2016/08/10/sf-lets-encrypt</id>
+    <content type="html"><![CDATA[<p>Let’s Encryptで取得した証明書を適用させたサイトへコールアウトしたところエラーが発生し接続出来なかったので、調査してみた。</p>
+
+<!-- more -->
+
+
+<h1>エラー内容</h1>
+
+<p>エラーは下記の内容。</p>
+
+<blockquote><p>System.CalloutException: sun.security.validator.ValidatorException: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target</p></blockquote>
+
+<p>エラー内容で調べてみると、自己証明書、ではSFからのアクセスが出来ない、という情報があり、その中で紹介されているエラーが上記内容と酷似していることがわかった。</p>
+
+<p><a href="http://appirio.co.jp/category/tech-blog/2013/05/apex%E3%82%B3%E3%83%BC%E3%83%AB%E3%82%A2%E3%82%A6%E3%83%88%E3%81%AE%E3%83%99%E3%82%B9%E3%83%88%E3%83%97%E3%83%A9%E3%82%AF%E3%83%86%E3%82%A3%E3%82%B9part-2/">Apexコールアウトのベストプラクティス:Part 2 &ndash; Appirio Japan</a></p>
+
+<p>しかし、Let’s Encryptは自己証明書ではない…。</p>
+
+<h1>SFが許可するCA</h1>
+
+<p>引き続き調べてみると、どうやらsalesforceは接続出来る認証局 (CA) をホワイトリスト方式で設定しているよう。</p>
+
+<p><a href="https://help.salesforce.com/HTViewSolution?id=000007225&amp;language=en_US">Salesforce.com SSL certificates Salesforce supports</a></p>
+
+<p>以下が許可されている認証局のリスト。</p>
+
+<p><a href="https://developer.salesforce.com/page/Outbound_Messaging_SSL_CA_Certificates">Outbound Messaging SSL CA Certificates &ndash; developer.force.com</a></p>
+
+<p>このリストには、Let’s Encryptがない。<br/>
+というわけで、SFがLet’s Encrypt認証局が作成した証明書を適用したサイトへの接続は許可していない、ということになり、冒頭のエラーが発生していた、ということになる。</p>
+
+<p>ちなみに、Let’s Encryptの認証局をリストに加えてほしい、という要望は結構前から上がっているよう。</p>
+
+<p><a href="https://success.salesforce.com/ideaView?id=08730000000E28LAAS">Support Let&rsquo;s Encrypt CA Certificate &ndash; Ideas &ndash; Salesforce Success Community</a></p>
+
+<p>対応する気はないのか、まだ手が回ってないだけなのか…。</p>
+
+<h1>参考</h1>
+
+<ul>
+<li><a href="https://jp.globalsign.com/service/knowledge/ca/">認証局 （CA：Certification Authority）とは？ | SSL・電子証明書ならGMOグローバルサイン</a></li>
+<li><a href="http://qiita.com/kawaz/items/f90810b9ea823b6556a8">認証局を立ててぼろもうけしたいんですが＞無理な理由を理解しよう &ndash; Qiita</a></li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Postgresqlのシーケンス番号]]></title>
@@ -3819,82 +3870,6 @@ atomのパッケージからインストールする。</p>
 <h1>リンク</h1>
 
 <p><a href="https://github.com/littlebee/git-time-machine">littlebee/git-time-machine &ndash; Github</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Cakephpのtransitionコンポーネントで送信ボタンを複数配置する]]></title>
-    <link href="http://kayakuguri.github.io/blog/2016/02/29/cakephp-transition-multi-submit/"/>
-    <updated>2016-02-29T18:07:25+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2016/02/29/cakephp-transition-multi-submit</id>
-    <content type="html"><![CDATA[<p>cakephpのtransitionコンポーネント利用時に送信ボタンを複数配置し、どちらが押されたかを判定してみたメモ。</p>
-
-<!-- more -->
-
-
-<h1>ビュー</h1>
-
-<p>以下のように <code>name</code> 属性でわけておく。<br/>
-今回は、完了、と、一時保存、でわけた。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;?php echo $this-&gt;Form-&gt;submit('一時保存', array('name' =&gt; 'temp')); ?&gt;
-</span><span class='line'>&lt;?php echo $this-&gt;Form-&gt;submit('完了', array('name' =&gt; 'comp')); ?&gt;</span></code></pre></td></tr></table></div></figure>
-
-
-<h1>コントローラ</h1>
-
-<p>コントローラので受けた際に、以下のように取得する。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>$all_data = $this-&gt;Transition-&gt;mergedData();
-</span><span class='line'>
-</span><span class='line'>if(isset($all_data["comp"]){
-</span><span class='line'>  //完了が押された時の処理
-</span><span class='line'>  
-</span><span class='line'>}else if(isset($all_data["temp"])){
-</span><span class='line'>  //一時保存が押された時の処理
-</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
-
-
-<p><code>mergedData</code> の中には以下のように格納されている。<br/>
-(<code>var_dump</code> した結果)</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>array(2) {
-</span><span class='line'>  ["hoge_model"]=&gt;
-</span><span class='line'>  array(87) {
-</span><span class='line'>    ["huga"]=&gt;
-</span><span class='line'>    string(0) "test"
-</span><span class='line'>    ["foo"]=&gt;
-</span><span class='line'>    string(0) "bar"
-</span><span class='line'>    ...
-</span><span class='line'>  }
-</span><span class='line'>  ["temp"]=&gt;
-</span><span class='line'>  string(12) "一時保存"
-</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
-
-
-<p>これであるかどうかの判定で判別が出来るので、処理をそれぞれ変える事が出来た。</p>
 ]]></content>
   </entry>
   
