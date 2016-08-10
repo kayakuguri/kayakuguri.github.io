@@ -4,7 +4,7 @@
   <title><![CDATA[Category: ssl | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/ssl/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2016-08-10T11:57:19+09:00</updated>
+  <updated>2016-08-10T15:19:54+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,111 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Vagrant (Ubuntu) 環境でhttps接続する]]></title>
+    <link href="http://kayakuguri.github.io/blog/2016/08/10/vagrant-ubuntu-ssl/"/>
+    <updated>2016-08-10T15:18:45+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2016/08/10/vagrant-ubuntu-ssl</id>
+    <content type="html"><![CDATA[<p>本番がhttpsの開発でローカル環境だけhttpで接続していると色々面倒があるため、ローカルのvagrant環境でもhttps接続出来るように調整してみたメモ。</p>
+
+<!-- more -->
+
+
+<h1>前提</h1>
+
+<p>OSはubuntu。というか、いつものように、vagrantの環境はscotchbox。</p>
+
+<p><a href="https://box.scotch.io/">https://box.scotch.io/</a></p>
+
+<h1>参考</h1>
+
+<p>主に以下を参考にそのまま作業した。ありがとうございます。</p>
+
+<p><a href="http://hidex7777.hatenablog.com/entry/2014/03/18/220943">VagrantでUbuntuサーバ/Apache2のSSL(https) &ndash; orangeProse別館</a></p>
+
+<h1>テスト用の証明書を作成</h1>
+
+<p>まずはモジュールを有効に。</p>
+
+<p><code>
+$ sudo a2enmod ssl
+$ sudo service apache2 reload
+</code></p>
+
+<p>で、テスト用の証明書を作成。</p>
+
+<p><code>
+$ sudo make-ssl-cert generate-default-snakeoil --force-ovarwrite
+$ sudo make-ssl-cert /usr/share/ssl-cert/ssleay.cnf /etc/apache2/apache.pem
+</code></p>
+
+<p>二つ目を実行すると、コンソールの画面全体で設定画面が表示されて証明書の内容を聞かれる。
+ひとつ目はコモンネーム。
+hostsで指定しているURLを指定しておく。</p>
+
+<p><img src="/images/2016/08/vagrant_ssl_01.jpg" alt="" /></p>
+
+<p>二つ目は、 <code>Subject Alternative Names</code> (サブジェクトの別名)。<br/>
+<a href="https://knowledge.geotrust.com/jp/support/knowledge-base/index?vproductcat=G&amp;vdomain=GEOTRUST_JP&amp;page=content&amp;id=SO24206&amp;actp=LIST&amp;viewlocale=ja_JP&amp;locale=ja_JP&amp;redirected=true">「Subject Alternative Names（サブジェクトの別名）」とは何ですか  | GeoTrust<br/>
+</a></p>
+
+<p>今回は特に使用しないので空白のままとしておく。</p>
+
+<p><img src="/images/2016/08/vagrant_ssl_02.jpg" alt="" /></p>
+
+<p>apacheを再起動。</p>
+
+<h1>設定ファイル</h1>
+
+<p>このままだとSSL用の設定ファイルがないようなので、<code>default-ssl.conf</code>というファイルをコピーして使用する。</p>
+
+<p><code>
+$ cd /etc/apache2/sites-available
+$ sudo cp default-ssl.conf ssl.conf
+$ sudo a2ensite ssl
+$ sudo service apache2 reload
+</code></p>
+
+<p>参考サイトでは<code>.conf</code>の拡張子が指定されていなかったのだが、指定されていないとエラーとなってしまう。<br/>
+<a href="http://qiita.com/mzmttks/items/85c69313693cb1df4949">Apache2 on ubuntu で a2ensite すると does not exist と言われるときの対処法 &ndash; Qiita</a></p>
+
+<p>最後はapacheを再起動。</p>
+
+<p>この状態で、httpsでアクセスをすると、プライバシーが保護されていない、というような警告が出るが、無視してアクセスすると無事、接続できた。</p>
+
+<p><img src="/images/2016/08/vagrant_ssl_03.jpg" alt="" /></p>
+
+<h1>ドキュメントルート</h1>
+
+<p>しかしhttpでアクセスしていたファイルにアクセスが出来ない。
+どうやら、httpsで指定されているドキュメントルートが違っているよう。
+先程コピーした、<code>ssl.conf</code>ファイルを見てみる。</p>
+
+<p>すると、以下のようにドキュメントルートが設定されている。</p>
+
+<p><code>
+DocumentRoot /var/www/html
+</code></p>
+
+<p>今回は、<code>public</code>をドキュメントルートとしているので、そちらに変更する。</p>
+
+<p><code>
+DocumentRoot /var/www/public
+</code></p>
+
+<p>例によって、apacheを再起動して接続確認。無事、接続出来た。</p>
+
+<h1>参考</h1>
+
+<ul>
+<li><a href="https://www.k4750.net/2013/10/13/self-signed-cert/">（正しい）オレオレ証明書の作り方 |  K4750.net</a></li>
+<li><a href="http://takuya-1st.hatenablog.jp/entry/20100730/1280474385">超簡単・オレオレ証明書の作り方 &ndash; それマグで！</a></li>
+<li><a href="http://blog.inouetakuya.info/entry/20110605/1307261417">それ etckeeper でできるよ &ndash; /etc 以下を Git で自動的にバージョン管理 &ndash; 彼女からは、おいちゃんと呼ばれています</a></li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[Salesforce] Let’s Encryptの証明書ではSFからのコールアウトを受けられない]]></title>
