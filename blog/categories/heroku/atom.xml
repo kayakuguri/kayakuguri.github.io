@@ -4,7 +4,7 @@
   <title><![CDATA[Category: heroku | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/heroku/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2016-09-01T10:16:54+09:00</updated>
+  <updated>2016-09-01T19:52:23+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,143 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[heroku] confファイルでのリダイレクトを設定する]]></title>
+    <link href="http://kayakuguri.github.io/blog/2016/09/01/heroku-cgi-bin-redirect/"/>
+    <updated>2016-09-01T19:51:39+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2016/09/01/heroku-cgi-bin-redirect</id>
+    <content type="html"><![CDATA[<p>herokuで構築したサイトで、ドキュメントルートにある、 <code>/cgi-bin/</code> 以下にある特定のファイルへのアクセスがあった場合に、別のディレクトリへリダイレクトさせて欲しい、という要件があった。<br/>
+普通に設定しようと思ったらかなり深い話になったので備忘録。</p>
+
+<!-- more -->
+
+
+<p><code>/cgi-bin/hoge/hoge.php</code> を、<br/>
+<code>/abc/hoge/hoge.php</code> へリダイレクトするとする。<br/>
+(cgi-binディレクトリからabcディレクトリへリダイレクト)</p>
+
+<h1>htacessでリダイレクト</h1>
+
+<p>まずは何も考えずに <code>.htaccess</code> を利用してのリダイレクトを設定する。</p>
+
+<p><code>
+RewriteEngine on
+RewriteRule ^cgi-bin/hoge/hoge.php$ /abc/hoge/hoge.php [R=301,L]
+</code></p>
+
+<p>これでアクセスしてみるも、 Not Found の表示。</p>
+
+<p>試しに、<code>/cgi-bin/</code> のディレクトリを作り、その中にファイルを設置してアクセスしてみるも、同じくNot Found。<br/>
+リダイレクト以前に、<code>/cgi-bin/</code> ディレクトリ自体にアクセスが出来ていない。</p>
+
+<h1>cgi-bin</h1>
+
+<p>apacheのデフォルト設定では、 <code>/cgi-bin/</code> ディレクトリは別のディレクトリへエイリアスが貼られている事が多いような記述があった。<br/>
+セキュリティ的にドキュメントルートのcgi-binには直接アクセスさせないようになっているらしい。</p>
+
+<p><a href="http://www.adminweb.jp/apache/cgi/index1.html">CGI用エイリアスの設定(ScriptAlias) &ndash; CGIの利用 &ndash; Apache入門</a></p>
+
+<p>Herokuもこの設定が行われているらしく、PHP環境のherokuのconfファイルを確認すると、以下のような設定が書かれている。</p>
+
+<p><code>
+ScriptAlias /cgi-bin/ "/app/.heroku/php//share/apache2/cgi-bin/"
+</code></p>
+
+<p>そのため、ドキュメントルート以下のcgi-binディレクトリにファイルをおいても、上記ディレクトリには該当のファイルがなく、not foundとなっていたよう。</p>
+
+<p>さらに、htaccessよりも、confファイルの方が早く呼ばれるため、htaccessでのリダイレクトが効く前に上記にエイリアスで飛ばされ、htaccessによるリダイレクトも効かなかった事が原因だった。</p>
+
+<h1>confファイル</h1>
+
+<p>herokuのPHPのビルドパックでは、Procfileにて任意のconfファイルを読みこませる事が出来るよう。
+そこで、そのconfファイルにてリダイレクト設定を書くことで対応する。</p>
+
+<h2>Procfile</h2>
+
+<p>Procfileでの設定内容のオプションなどは、PHPのビルドパックのソース内に書かれている。</p>
+
+<p><a href="https://github.com/heroku/heroku-buildpack-php/blob/master/bin/heroku-php-apache2#L46">https://github.com/heroku/heroku-buildpack-php/blob/master/bin/heroku-php-apache2#L46</a></p>
+
+<p>このヘルプの通り、以下の書式で記述することが可能。</p>
+
+<p><code>
+web: vendor/bin/heroku-php-apache2 [options] [&lt;DOCUMENT_ROOT&gt;]
+</code></p>
+
+<h2>confファイルの読み込み</h2>
+
+<p>任意のconfファイルを読みこませるには、2つのオプションがある。<br/>
+一つは、全く新しいconfファイルを読みこませる方法。これには、小文字のcを使用する。</p>
+
+<p><code>
+-c &lt;httpd.conf&gt;
+</code></p>
+
+<p>これは既存の設定を全て上書きするため、正しく設定出来ていない場合はアプリケーションの起動に失敗するので注意が必要。<br/>
+デフォルトで読み込まれているconfファイルは以下となる。</p>
+
+<p><a href="https://github.com/heroku/heroku-buildpack-php/blob/master/conf/apache2/heroku.conf">https://github.com/heroku/heroku-buildpack-php/blob/master/conf/apache2/heroku.conf</a></p>
+
+<p>これはあまり指定することはないと思われる。</p>
+
+<p>もう一つは、既存のconfファイルに追加するもの。<br/>
+こちらは、大文字のCを使う。</p>
+
+<p><code>
+-C &lt;httpd.inc.conf&gt;
+</code></p>
+
+<p>デフォルトで読み込まれているファイルは以下となる。
+<a href="https://github.com/heroku/heroku-buildpack-php/blob/master/conf/apache2/default_include.conf">https://github.com/heroku/heroku-buildpack-php/blob/master/conf/apache2/default_include.conf</a></p>
+
+<p>このファイルではディレクトリインデックスの設定のみが書かれている状態。
+このように、設定したい内容を記述したファイルを作成し、大文字のCオプションで読み込ませることで既存の設定に追加で反映が出来る。</p>
+
+<h2>Procfileでの設定</h2>
+
+<p>アプリのルートに、 <code>my_app.conf</code> ファイルを作成し読み込ませるとする。<br/>
+また、ドキュメントルートは <code>htdocs</code> で設定したい場合は、以下の様な内容となる。</p>
+
+<p><code>
+web: vendor/bin/heroku-php-apache2 -C ./my_app.conf htdocs
+</code></p>
+
+<p>ファイルのパスは、 <code>/app</code> からの相対パスでの指定となる。<br/>
+これでアプリの起動時に、 <code>my_app.conf</code> ファイルが読み込まれることとなる。</p>
+
+<h2>confファイルでのリダイレクト</h2>
+
+<p>そういうわけで、confファイル内に直接リダイレクトの設定を記述する。<br/>
+１点注意点としては、 <code>htaccess</code>による設定の場合は、相対パスで記述する場合は先頭の <code>/</code> が必要ないのだが、<br/>
+confファイルによる設定の場合は、先頭に <code>/</code> が必要となる。</p>
+
+<p><a href="http://ysklog.net/mod-rewrite/related05.html">【mod_rewrite】「.htaccess」と「httpd.conf」での設定による違い &#8211; mod rewrite</a></p>
+
+<p>よって、以下のように記述する。</p>
+
+<p><code>
+RewriteEngine on
+RewriteRule ^/cgi-bin/hoge/hoge.php$ /abc/hoge/hoge.php [R=301,L]
+</code></p>
+
+<p>これで無事リダイレクトが出来た。</p>
+
+<h2>参考</h2>
+
+<ul>
+<li><a href="http://ysklog.net/mod-rewrite/related02.html">【mod_rewrite】「httpd.conf」での設定方法 &#8211; mod rewrite</a></li>
+<li><a href="https://devcenter.heroku.com/articles/custom-php-settings#apache">Customizing Web Server and Runtime Settings for PHP | Heroku Dev Center</a></li>
+</ul>
+
+
+<h1>まとめ</h1>
+
+<p>cgi-binディレクトリからリダイレクト、というのは実際の要件としてはめったにあることではないけれど、herokuのPHPの設定として、confファイルをカスタマイズしたい要件はあると思う。<br/>
+実際、htaccessでのリダイレクトより、confファイルでのリダイレクトのほうが早いようなので出来るならそっちの方がよかったりするだろうし。<br/>
+herokuは簡単に利用出来る反面、設定が触れずガチガチだと思われガチだけど、結構設定はいじれたりする。</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[heroku] タイムゾーンの設定各種]]></title>
@@ -495,94 +632,6 @@ CSVの出力も出来た。</p>
 <a href="https://github.com/keenlabs/KeenClient-PHP">keenlabs/KeenClient-PHP · GitHub</a><br/>
 <a href="http://onori.github.io/post/laravel-keenio-heroku/">laravel&#43;Keen.io&#43;herokuで簡易解析 &middot;  MAN.IN.BLOG</a><br/>
 <a href="http://factage.com/2014/02/21/growthhack-analytics-by-keen-io/">Keen IOでグロースハックするための分析をする | yujilog</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[herokuでhtaccessを使ってIPアドレスによる制限を設定する]]></title>
-    <link href="http://kayakuguri.github.io/blog/2015/10/05/heroku-htaccess-allow-ip/"/>
-    <updated>2015-10-05T16:25:49+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2015/10/05/heroku-htaccess-allow-ip</id>
-    <content type="html"><![CDATA[<p>herokuにて構築しているapacheアプリにて、特定のIPからしかアクセス出来ないようにするために、<br/>
-htaccessにて制限をかけようとしてたのだけど、どうも上手くいかなくてハマったのでメモ。</p>
-
-<!-- more -->
-
-
-<p>通常だと、以下のようになる。</p>
-
-<p><code>
-order deny,allow
-deny from all
-allow from 124.xx.xxx.xxx
-</code></p>
-
-<p>この場合、制御は、拒否→許可、の順番で、<br/>
-まず全て拒否して、<code>124.xx.xxx.xxx</code>からのアクセスのみ許可、という流れ。</p>
-
-<p>しかし、herokuではこれでは上手くいかなかった。</p>
-
-<p>というのも、herokuではサーバー側で負荷分散するためにロードバランサが使用されている。<br/>
-(dynoが1の場合でも振り分けはされないけれど利用はされているみたい）<br/>
-これによって、実際にアプリに到達するIPアドレスが、アクセス元のIPアドレスからロードバランサを経由したものに変わってしまう。<br/>
-しかもそのIPは都度、変わってしまうよう。</p>
-
-<p>これだとIPアドレスによる制限がかけられないのだけど、それを解決する仕組みとして、<br/>
-<code>X-FORWARDED-FOR</code> という方法があるらしい。<br/>
-<a href="https://ja.wikipedia.org/wiki/X-Forwarded-For">X-Forwarded-For &ndash; Wikipedia</a></p>
-
-<p>それを利用する事で、アクセス元のIPアドレスをロードバランサやプロキシを挟んだとしてもそのままアプリに通知する事が出来るようになるよう。</p>
-
-<p>実際のコードは以下。</p>
-
-<p>```
-SetEnvIf X-Forwarded-For 124.xx.xxx.xxx allowip</p>
-
-<p>order deny,allow
-deny  from all
-allow from env=allowip
-```</p>
-
-<p><code>allowip</code>は変数名なのでなんでもよい。<br/>
-こうやって記述することで、heroku上でも指定のIPアドレスのみ許可してやることが出来た。</p>
-
-<p>指定のIPアドレスのみ拒否する場合も書き方は同じ。</p>
-
-<p>```
-SetEnvIf X-Forwarded-For 124.xx.xxx.xxx denyip</p>
-
-<p>order allow,deny
-allow from all
-deny from env=denyip
-```</p>
-
-<p>複数指定する場合は、変数を複数定義してやるだけで大丈夫だった。</p>
-
-<p>```
-SetEnvIf X-Forwarded-For 124.xx.xxx.xxx allowip1
-SetEnvIf X-Forwarded-For 196.xx.xxx.xxx allowip2</p>
-
-<p>order deny,allow
-deny  from all
-allow from env=allowip1
-allow from env=allowip2
-```</p>
-
-<p>また、これはロードバランサ利用に限った話ではないけれど、IPアドレスの範囲指定をした場合には、<br/>
-CIDR(サイダー)形式での表記で書いてやると実現可能。<br/>
-以下のツールで厳密な範囲指定をしてやることが出来る。</p>
-
-<p><a href="http://ipvx.info/ipv4/twoip2cidr/">２つのIPアドレス範囲を厳密にCIDR化ツール | IPV46</a></p>
-
-<h2>参考</h2>
-
-<p><a href="http://blog.mizoshiri.com/archives/1753">ロードバランサーやプロキシー経由でも.htaccessでのIPアドレスを制限したい場合</a><br/>
-<a href="http://ipvx.info/2015/02/strictly-conv-range-to-cidr/">２つのIPアドレスの範囲をCIDRに厳密に変換するってどういう事？ | IPV46</a></p>
-
-<hr />
-
-<p>ちなみに、herokuアプリから外にアクセスする際のIPアドレスの固定方法は以下を参考に。<br/>
-<a href="http://kayakuguri.github.io/blog/2014/09/26/static-ip-heroku/">[heroku]QuotaGuard Staticを使ってHerokuでのIP固定を試してみる</a></p>
 ]]></content>
   </entry>
   

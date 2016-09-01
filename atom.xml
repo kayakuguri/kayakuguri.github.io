@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2016-09-01T10:16:54+09:00</updated>
+  <updated>2016-09-01T19:52:23+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,145 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[heroku] confファイルでのリダイレクトを設定する]]></title>
+    <link href="http://kayakuguri.github.io/blog/2016/09/01/heroku-cgi-bin-redirect/"/>
+    <updated>2016-09-01T19:51:39+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2016/09/01/heroku-cgi-bin-redirect</id>
+    <content type="html"><![CDATA[<p>herokuで構築したサイトで、ドキュメントルートにある、 <code>/cgi-bin/</code> 以下にある特定のファイルへのアクセスがあった場合に、別のディレクトリへリダイレクトさせて欲しい、という要件があった。<br/>
+普通に設定しようと思ったらかなり深い話になったので備忘録。</p>
+
+<!-- more -->
+
+
+<p><code>/cgi-bin/hoge/hoge.php</code> を、<br/>
+<code>/abc/hoge/hoge.php</code> へリダイレクトするとする。<br/>
+(cgi-binディレクトリからabcディレクトリへリダイレクト)</p>
+
+<h1>htacessでリダイレクト</h1>
+
+<p>まずは何も考えずに <code>.htaccess</code> を利用してのリダイレクトを設定する。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>RewriteEngine on
+</span><span class='line'>RewriteRule ^cgi-bin/hoge/hoge.php$ /abc/hoge/hoge.php [R=301,L]</span></code></pre></td></tr></table></div></figure>
+
+
+<p>これでアクセスしてみるも、 Not Found の表示。</p>
+
+<p>試しに、<code>/cgi-bin/</code> のディレクトリを作り、その中にファイルを設置してアクセスしてみるも、同じくNot Found。<br/>
+リダイレクト以前に、<code>/cgi-bin/</code> ディレクトリ自体にアクセスが出来ていない。</p>
+
+<h1>cgi-bin</h1>
+
+<p>apacheのデフォルト設定では、 <code>/cgi-bin/</code> ディレクトリは別のディレクトリへエイリアスが貼られている事が多いような記述があった。<br/>
+セキュリティ的にドキュメントルートのcgi-binには直接アクセスさせないようになっているらしい。</p>
+
+<p><a href="http://www.adminweb.jp/apache/cgi/index1.html">CGI用エイリアスの設定(ScriptAlias) &ndash; CGIの利用 &ndash; Apache入門</a></p>
+
+<p>Herokuもこの設定が行われているらしく、PHP環境のherokuのconfファイルを確認すると、以下のような設定が書かれている。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>ScriptAlias /cgi-bin/ "/app/.heroku/php//share/apache2/cgi-bin/"</span></code></pre></td></tr></table></div></figure>
+
+
+<p>そのため、ドキュメントルート以下のcgi-binディレクトリにファイルをおいても、上記ディレクトリには該当のファイルがなく、not foundとなっていたよう。</p>
+
+<p>さらに、htaccessよりも、confファイルの方が早く呼ばれるため、htaccessでのリダイレクトが効く前に上記にエイリアスで飛ばされ、htaccessによるリダイレクトも効かなかった事が原因だった。</p>
+
+<h1>confファイル</h1>
+
+<p>herokuのPHPのビルドパックでは、Procfileにて任意のconfファイルを読みこませる事が出来るよう。
+そこで、そのconfファイルにてリダイレクト設定を書くことで対応する。</p>
+
+<h2>Procfile</h2>
+
+<p>Procfileでの設定内容のオプションなどは、PHPのビルドパックのソース内に書かれている。</p>
+
+<p><a href="https://github.com/heroku/heroku-buildpack-php/blob/master/bin/heroku-php-apache2#L46">https://github.com/heroku/heroku-buildpack-php/blob/master/bin/heroku-php-apache2#L46</a></p>
+
+<p>このヘルプの通り、以下の書式で記述することが可能。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>web: vendor/bin/heroku-php-apache2 [options] [&lt;DOCUMENT_ROOT&gt;]</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>confファイルの読み込み</h2>
+
+<p>任意のconfファイルを読みこませるには、2つのオプションがある。<br/>
+一つは、全く新しいconfファイルを読みこませる方法。これには、小文字のcを使用する。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>-c &lt;httpd.conf&gt;</span></code></pre></td></tr></table></div></figure>
+
+
+<p>これは既存の設定を全て上書きするため、正しく設定出来ていない場合はアプリケーションの起動に失敗するので注意が必要。<br/>
+デフォルトで読み込まれているconfファイルは以下となる。</p>
+
+<p><a href="https://github.com/heroku/heroku-buildpack-php/blob/master/conf/apache2/heroku.conf">https://github.com/heroku/heroku-buildpack-php/blob/master/conf/apache2/heroku.conf</a></p>
+
+<p>これはあまり指定することはないと思われる。</p>
+
+<p>もう一つは、既存のconfファイルに追加するもの。<br/>
+こちらは、大文字のCを使う。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>-C &lt;httpd.inc.conf&gt;</span></code></pre></td></tr></table></div></figure>
+
+
+<p>デフォルトで読み込まれているファイルは以下となる。
+<a href="https://github.com/heroku/heroku-buildpack-php/blob/master/conf/apache2/default_include.conf">https://github.com/heroku/heroku-buildpack-php/blob/master/conf/apache2/default_include.conf</a></p>
+
+<p>このファイルではディレクトリインデックスの設定のみが書かれている状態。
+このように、設定したい内容を記述したファイルを作成し、大文字のCオプションで読み込ませることで既存の設定に追加で反映が出来る。</p>
+
+<h2>Procfileでの設定</h2>
+
+<p>アプリのルートに、 <code>my_app.conf</code> ファイルを作成し読み込ませるとする。<br/>
+また、ドキュメントルートは <code>htdocs</code> で設定したい場合は、以下の様な内容となる。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>web: vendor/bin/heroku-php-apache2 -C ./my_app.conf htdocs</span></code></pre></td></tr></table></div></figure>
+
+
+<p>ファイルのパスは、 <code>/app</code> からの相対パスでの指定となる。<br/>
+これでアプリの起動時に、 <code>my_app.conf</code> ファイルが読み込まれることとなる。</p>
+
+<h2>confファイルでのリダイレクト</h2>
+
+<p>そういうわけで、confファイル内に直接リダイレクトの設定を記述する。<br/>
+１点注意点としては、 <code>htaccess</code>による設定の場合は、相対パスで記述する場合は先頭の <code>/</code> が必要ないのだが、<br/>
+confファイルによる設定の場合は、先頭に <code>/</code> が必要となる。</p>
+
+<p><a href="http://ysklog.net/mod-rewrite/related05.html">【mod_rewrite】「.htaccess」と「httpd.conf」での設定による違い &#8211; mod rewrite</a></p>
+
+<p>よって、以下のように記述する。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>RewriteEngine on
+</span><span class='line'>RewriteRule ^/cgi-bin/hoge/hoge.php$ /abc/hoge/hoge.php [R=301,L]</span></code></pre></td></tr></table></div></figure>
+
+
+<p>これで無事リダイレクトが出来た。</p>
+
+<h2>参考</h2>
+
+<ul>
+<li><a href="http://ysklog.net/mod-rewrite/related02.html">【mod_rewrite】「httpd.conf」での設定方法 &#8211; mod rewrite</a></li>
+<li><a href="https://devcenter.heroku.com/articles/custom-php-settings#apache">Customizing Web Server and Runtime Settings for PHP | Heroku Dev Center</a></li>
+</ul>
+
+
+<h1>まとめ</h1>
+
+<p>cgi-binディレクトリからリダイレクト、というのは実際の要件としてはめったにあることではないけれど、herokuのPHPの設定として、confファイルをカスタマイズしたい要件はあると思う。<br/>
+実際、htaccessでのリダイレクトより、confファイルでのリダイレクトのほうが早いようなので出来るならそっちの方がよかったりするだろうし。<br/>
+herokuは簡単に利用出来る反面、設定が触れずガチガチだと思われガチだけど、結構設定はいじれたりする。</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[heroku] タイムゾーンの設定各種]]></title>
@@ -3882,57 +4021,6 @@ apexの作り方は割愛。エンドポイントはapex内で以下のように
 <li><a href="http://makimoto.hatenablog.com/entry/show-rbenv-version-on-zsh-prompt">zsh で rbenv の Ruby のバージョンをプロンプトに表示させる &ndash; Stats of the Rivers</a></li>
 </ul>
 
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[UbuntuでApacheの環境変数を設定する方法]]></title>
-    <link href="http://kayakuguri.github.io/blog/2016/04/22/ubuntu-env/"/>
-    <updated>2016-04-22T16:21:16+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2016/04/22/ubuntu-env</id>
-    <content type="html"><![CDATA[<p><a href="http://kayakuguri.github.io/blog/2015/05/26/vagrant-env/">以前に書いた環境変数の設定方法</a>は、centOS用だったので(後で知った）、ubuntuでの方法も書いておく。<br/>
-といってもパスのメモだけど。</p>
-
-<!-- more -->
-
-
-<p>Ubuntuでの設定が必要になった理由としては、いつも愛用している<a href="https://box.scotch.io/">Scotchbox</a>がUbuntuのディストリビューションだったため。</p>
-
-<h1>設定ファイルのパス</h1>
-
-<p>以下。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>/etc/apache2/envvars</span></code></pre></td></tr></table></div></figure>
-
-
-<p>このファイルの末尾などに、以下のように追記する。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>export HOGE=xxx</span></code></pre></td></tr></table></div></figure>
-
-
-<h1>apatch再起動</h1>
-
-<p><code>service</code>で再起動。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>$ sudo service apache2 restart</span></code></pre></td></tr></table></div></figure>
-
-
-<p>以上で設定完了。</p>
-
-<h1>取得</h1>
-
-<p>取得は通常通り、<code>getenv</code>で可能。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>getenv('HOGE');</span></code></pre></td></tr></table></div></figure>
-
-
-<h1>参考</h1>
-
-<p><a href="http://www.yamamo10.jp/yamamoto/comp/home_server/ubuntu_server/apache/index.php">自宅サーバー(ubuntu server Apache)</a></p>
 ]]></content>
   </entry>
   
