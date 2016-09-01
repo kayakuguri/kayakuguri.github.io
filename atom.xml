@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2016-08-10T15:19:54+09:00</updated>
+  <updated>2016-09-01T10:16:54+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,105 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[heroku] タイムゾーンの設定各種]]></title>
+    <link href="http://kayakuguri.github.io/blog/2016/09/01/heroku-timezone/"/>
+    <updated>2016-09-01T10:02:04+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2016/09/01/heroku-timezone</id>
+    <content type="html"><![CDATA[<p>heroku環境でタイムゾーンの設定が色々あったのでまとめ。</p>
+
+<!-- more -->
+
+
+<h1>サーバー時間</h1>
+
+<p>まずは、herokuのサーバー時間のタイムゾーン設定。<br/>
+これは簡単で、環境変数に入れてやるだけ。</p>
+
+<blockquote><p>TZ : Asia/Tokyo</p></blockquote>
+
+<p>コマンドで入れる場合は以下。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$ heroku config:add TZ=Asia/Tokyo -a APP_NAME</span></code></pre></td></tr></table></div></figure>
+
+
+<p>きちんと反映されているかどうかは下記コマンドから参照可能。<br/>
+意図した時間が返ってきてればOK。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$ heroku run date -a APP_NAME
+</span><span class='line'>Running date on ⬢ APP_NAME... up, run.1198
+</span><span class='line'>Thu Sep  1 10:06:57 JST 2016</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>参考</h2>
+
+<ul>
+<li><a href="http://blog.skktmlab.info/blog/2015_03_02_2">Herokuでホスティングしているブログのタイムゾーンを設定する</a></li>
+</ul>
+
+
+<h1>PHP</h1>
+
+<p>PHPの設定でタイムゾーンを指定する場合。<br/>
+通常は、 <code>php.ini</code> で設定するが、herokuの場合は、 <code>.user.ini</code> ファイルを使う。</p>
+
+<p>ドキュメントルート直下に <code>.user.ini</code> ファイルを設置。<br/>
+中に以下を記述。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>date.timezone = "Asia/Tokyo"</span></code></pre></td></tr></table></div></figure>
+
+
+<p>この設定ではその他にはアップロードの最大容量なんかを指定する場合が多い。<br/>
+参考 : <a href="http://kayakuguri.github.io/blog/2014/02/18/change-max-filesize/">[PHP][heroku]upload_max_filesizeを変更する &ndash; KayaMemo</a></p>
+
+<h2>参考</h2>
+
+<ul>
+<li><a href="http://qiita.com/hiro_y/items/bc631a27c9701f81a4f9#runtime-settings">HerokuでPHPを使うときに気を付けるところ &ndash; Qiita</a></li>
+<li><a href="https://devcenter.heroku.com/articles/custom-php-settings#php-runtime-settings-ini-settings">Customizing Web Server and Runtime Settings for PHP | Heroku Dev Center</a></li>
+</ul>
+
+
+<h1>WordPress</h1>
+
+<p>最後はherokuと直接は関係ないけれど、wordpressのタイムゾーン。<br/>
+WordPressのタイムゾーンはデフォルトで標準時になるようにしてある、とのこと。<br/>
+しかしこれは設定で変更するものではなく、取得する際に調整するもののよう。</p>
+
+<p>一番簡易なものとしては、 <code>date</code> 関数で取得していた箇所をWordPress関数である、 <code>date_i18n</code> を利用して取得するようにする、というもの。<br/>
+これだけで、日本時間で取得できるようになる。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>date_i18n('Y-m-d H:i:s');</span></code></pre></td></tr></table></div></figure>
+
+
+<p>その他では、 <code>datetime</code> クラスを使用してタイムゾーンを指定する方法もあり。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$now = new DateTime('', new DateTimeZone('Asia/Tokyo'));
+</span><span class='line'>$now-&gt;format('Y-m-d H:i:s');</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>参考</h2>
+
+<ul>
+<li><a href="http://qiita.com/yousan/items/a385f794a9bb433aecbb">WordPressで現在時刻を利用すると9時間ずれてしまう問題 &ndash; Qiita</a></li>
+</ul>
+
+
+<h1>まとめ</h1>
+
+<p>WordPressはともかく、herokuとPHPのタイムゾーン設定はherokuでPHPを使うのなら、デフォルトで設定しておいた方が後々間違いがなさそう。<br/>
+環境構築の際にまず設定しておくとよさげ。</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Vagrant (Ubuntu) 環境でhttps接続する]]></title>
@@ -3834,107 +3933,6 @@ apexの作り方は割愛。エンドポイントはapex内で以下のように
 <h1>参考</h1>
 
 <p><a href="http://www.yamamo10.jp/yamamoto/comp/home_server/ubuntu_server/apache/index.php">自宅サーバー(ubuntu server Apache)</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Nodeでnode_modulesにパスを通す]]></title>
-    <link href="http://kayakuguri.github.io/blog/2016/04/11/node-express-server/"/>
-    <updated>2016-04-11T18:07:45+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2016/04/11/node-express-server</id>
-    <content type="html"><![CDATA[<p>nodeのexpressサーバを起動しようとしてexpressモジュールがない、と言われた。<br/>
-モジュールは入れているはずなのでパスが通ってない、ということだったのだが、モジュールのパスをどこに通したらいいのか、のメモ。</p>
-
-<!-- more -->
-
-
-<h1>expressのインストール</h1>
-
-<p>順を追って、まずはexpressのインストール。<br/>
-グローバルに入れた。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>$ npm install -g express</span></code></pre></td></tr></table></div></figure>
-
-
-<p>参考にさせてもらったページでは、以下のようにパスを通す、とあったのだけれどそれではダメだった。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'># node_modules
-</span><span class='line'>export NODE_PATH=/usr/local/lib/node_modules</span></code></pre></td></tr></table></div></figure>
-
-
-<p>動作させてみたコードは以下。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>app = require('express')();
-</span><span class='line'>
-</span><span class='line'>app.get('/', function(req, res){
-</span><span class='line'>        res.send('hello world');
-</span><span class='line'>    });
-</span><span class='line'>
-</span><span class='line'>app.listen(3000);</span></code></pre></td></tr></table></div></figure>
-
-
-<p>エラー内容は以下の様な感じ。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>module.js:338
-</span><span class='line'>    throw err;
-</span><span class='line'>          ^
-</span><span class='line'>Error: Cannot find module 'express'
-</span><span class='line'>...</span></code></pre></td></tr></table></div></figure>
-
-
-<h1>足りないモジュールのインストール</h1>
-
-<p>expressのモジュールが足らない、と言われている。<br/>
-調べると、足りてないモジュールを一気にインストールするコマンドがある、とのことでそれも実行してみたが、expressはもちろん入っているので効果なし。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>$ npm install -g npm-install-missing</span></code></pre></td></tr></table></div></figure>
-
-
-<h1>モジュールのパスを調べて通す</h1>
-
-<p>色々調べると、以下のコマンドでモジュールの場所を表示させることが可能だった。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>$ npm root -g
-</span><span class='line'>/Users/{USER_NAME}/.nodebrew/node/v0.12.7/lib/node_modules</span></code></pre></td></tr></table></div></figure>
-
-
-<p>実際に<code>li</code>してみると、<code>express</code>なども入っているようだったので、そこにパスを改めて通す。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'># node_modules
-</span><span class='line'>export NODE_PATH="/Users/{USER_NAME}/.nodebrew/node/v0.12.7/lib/node_modules"</span></code></pre></td></tr></table></div></figure>
-
-
-<p>設定ファイルを読み込み直すかターミナルを再起動。<br/>
-再び上記のコードからサーバを起動させてみたところ、無事、 <code>http://localhost:3000</code>にアクセス出来た。</p>
-
-<h1>参考</h1>
-
-<ul>
-<li><a href="http://qiita.com/pakiln/items/826a9199697576e2e24a">expressパッケージとコマンドのインストール &ndash; Qiita</a></li>
-<li><a href="http://qiita.com/KENJU/items/5b2fda95be4685a750e1">【Node.js】足りないモジュールをたったの一行でインストールするコマンド &ndash; Qiita</a></li>
-<li><a href="http://qiita.com/joe-re/items/12987cdeee506dea3889">グローバルにインストールしたnode moduleがnot foundになる時の対処 &ndash; Qiita</a></li>
-</ul>
-
 ]]></content>
   </entry>
   

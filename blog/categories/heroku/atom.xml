@@ -4,7 +4,7 @@
   <title><![CDATA[Category: heroku | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/heroku/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2016-08-10T15:19:54+09:00</updated>
+  <updated>2016-09-01T10:16:54+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,102 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[heroku] タイムゾーンの設定各種]]></title>
+    <link href="http://kayakuguri.github.io/blog/2016/09/01/heroku-timezone/"/>
+    <updated>2016-09-01T10:02:04+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2016/09/01/heroku-timezone</id>
+    <content type="html"><![CDATA[<p>heroku環境でタイムゾーンの設定が色々あったのでまとめ。</p>
+
+<!-- more -->
+
+
+<h1>サーバー時間</h1>
+
+<p>まずは、herokuのサーバー時間のタイムゾーン設定。<br/>
+これは簡単で、環境変数に入れてやるだけ。</p>
+
+<blockquote><p>TZ : Asia/Tokyo</p></blockquote>
+
+<p>コマンドで入れる場合は以下。</p>
+
+<p><code>
+$ heroku config:add TZ=Asia/Tokyo -a APP_NAME
+</code></p>
+
+<p>きちんと反映されているかどうかは下記コマンドから参照可能。<br/>
+意図した時間が返ってきてればOK。</p>
+
+<p><code>
+$ heroku run date -a APP_NAME
+Running date on ⬢ APP_NAME... up, run.1198
+Thu Sep  1 10:06:57 JST 2016
+</code></p>
+
+<h2>参考</h2>
+
+<ul>
+<li><a href="http://blog.skktmlab.info/blog/2015_03_02_2">Herokuでホスティングしているブログのタイムゾーンを設定する</a></li>
+</ul>
+
+
+<h1>PHP</h1>
+
+<p>PHPの設定でタイムゾーンを指定する場合。<br/>
+通常は、 <code>php.ini</code> で設定するが、herokuの場合は、 <code>.user.ini</code> ファイルを使う。</p>
+
+<p>ドキュメントルート直下に <code>.user.ini</code> ファイルを設置。<br/>
+中に以下を記述。</p>
+
+<p><code>
+date.timezone = "Asia/Tokyo"
+</code></p>
+
+<p>この設定ではその他にはアップロードの最大容量なんかを指定する場合が多い。<br/>
+参考 : <a href="http://kayakuguri.github.io/blog/2014/02/18/change-max-filesize/">[PHP][heroku]upload_max_filesizeを変更する &ndash; KayaMemo</a></p>
+
+<h2>参考</h2>
+
+<ul>
+<li><a href="http://qiita.com/hiro_y/items/bc631a27c9701f81a4f9#runtime-settings">HerokuでPHPを使うときに気を付けるところ &ndash; Qiita</a></li>
+<li><a href="https://devcenter.heroku.com/articles/custom-php-settings#php-runtime-settings-ini-settings">Customizing Web Server and Runtime Settings for PHP | Heroku Dev Center</a></li>
+</ul>
+
+
+<h1>WordPress</h1>
+
+<p>最後はherokuと直接は関係ないけれど、wordpressのタイムゾーン。<br/>
+WordPressのタイムゾーンはデフォルトで標準時になるようにしてある、とのこと。<br/>
+しかしこれは設定で変更するものではなく、取得する際に調整するもののよう。</p>
+
+<p>一番簡易なものとしては、 <code>date</code> 関数で取得していた箇所をWordPress関数である、 <code>date_i18n</code> を利用して取得するようにする、というもの。<br/>
+これだけで、日本時間で取得できるようになる。</p>
+
+<p><code>
+date_i18n('Y-m-d H:i:s');
+</code></p>
+
+<p>その他では、 <code>datetime</code> クラスを使用してタイムゾーンを指定する方法もあり。</p>
+
+<p><code>
+$now = new DateTime('', new DateTimeZone('Asia/Tokyo'));
+$now-&gt;format('Y-m-d H:i:s');
+</code></p>
+
+<h2>参考</h2>
+
+<ul>
+<li><a href="http://qiita.com/yousan/items/a385f794a9bb433aecbb">WordPressで現在時刻を利用すると9時間ずれてしまう問題 &ndash; Qiita</a></li>
+</ul>
+
+
+<h1>まとめ</h1>
+
+<p>WordPressはともかく、herokuとPHPのタイムゾーン設定はherokuでPHPを使うのなら、デフォルトで設定しておいた方が後々間違いがなさそう。<br/>
+環境構築の際にまず設定しておくとよさげ。</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[Heroku] アドオンを共有機能を使って管理する]]></title>
@@ -487,120 +583,6 @@ CIDR(サイダー)形式での表記で書いてやると実現可能。<br/>
 
 <p>ちなみに、herokuアプリから外にアクセスする際のIPアドレスの固定方法は以下を参考に。<br/>
 <a href="http://kayakuguri.github.io/blog/2014/09/26/static-ip-heroku/">[heroku]QuotaGuard Staticを使ってHerokuでのIP固定を試してみる</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[jQuery File Uploadを利用した大容量ファイルのアップロードをChunked uploadで実現する]]></title>
-    <link href="http://kayakuguri.github.io/blog/2015/10/01/jquery-chunked-upload/"/>
-    <updated>2015-10-01T17:57:05+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2015/10/01/jquery-chunked-upload</id>
-    <content type="html"><![CDATA[<p>大容量のファイルをアップする際に、通常の<code>input type=file</code>で送ろうとすると<br/>
-herokuだとタイムアウトになったりして上手くいかなかった。<br/>
-なので、jQueryのファイルアップロードプラグインにある、<code>chunk upload</code>を利用してアップした。</p>
-
-<!-- more -->
-
-
-<p>・Github<br/>
-<a href="https://github.com/blueimp/jQuery-File-Upload">blueimp/jQuery-File-Upload</a></p>
-
-<p>公式のjQuery File Uploadのデモは以下。<br/>
-<a href="https://blueimp.github.io/jQuery-File-Upload/">https://blueimp.github.io/jQuery-File-Upload/</a></p>
-
-<p>セットアップの流れは以下を参考に。<br/>
-<a href="https://github.com/blueimp/jQuery-File-Upload/wiki/Setup">https://github.com/blueimp/jQuery-File-Upload/wiki/Setup</a></p>
-
-<h2>通常のアップロード</h2>
-
-<p>以下から最新バージョンをダウンロード。<br/>
-<a href="https://github.com/blueimp/jQuery-File-Upload/releases">https://github.com/blueimp/jQuery-File-Upload/releases</a></p>
-
-<p>解凍して、PHPが動作する環境のドキュメントルートにアップロード。<br/>
-そのままアクセスすると動作する。</p>
-
-<p>アップしたファイルは、<br/>
-<code>/server/php/files/</code>以下にアップされる。</p>
-
-<h2>Chunk File</h2>
-
-<p>このライブラリによるアップロードの容量制限はありますか？という質問には、一応、4GBです、とのこと。<br/>
-これはブラウザの制限のよう。<br/>
-ただし、Chunked file upload、という方法を使って、とのこと。</p>
-
-<p><a href="https://github.com/blueimp/jQuery-File-Upload/wiki/Frequently-Asked-Questions#what-is-the-maximum-file-size-limitation">requently Asked Questions · blueimp/jQuery-File-Upload Wiki · GitHub</a></p>
-
-<p>この<code>Chunked file upload</code>という方法は、大きいサイズのファイルを指定したサイズに分割して少しづつアップロードし、アップロード後に合体させる方法、とのこと。<br/>
-(特にこのライブラリ特有の話ではないよう。)</p>
-
-<p><a href="https://github.com/blueimp/jQuery-File-Upload/wiki/Chunked-file-uploads">Chunked file uploads · blueimp/jQuery-File-Upload Wiki · GitHub</a></p>
-
-<p>使い方はいたって簡単で、通常の<code>fileupload</code>のオプションに、<code>maxChunkSize</code>の指定を追加するだけ。</p>
-
-<p>例）通常</p>
-
-<pre><code>$('#fileupload').fileupload({
-    url: url,
-    dataType: 'json'
-});
-</code></pre>
-
-<p>Chunked upload</p>
-
-<pre><code>$('#fileupload').fileupload({
-    maxChunkSize: 20000000,
-    url: url,
-    dataType: 'json'
-});
-</code></pre>
-
-<h2>Callback Option</h2>
-
-<p>以下で一覧を参照可能。<br/>
-<a href="https://github.com/blueimp/jQuery-File-Upload/wiki/Options#callback-options">Options · blueimp/jQuery-File-Upload Wiki · GitHub</a></p>
-
-<p>Chunked Upload関連では以下のオプションがあった。</p>
-
-<ul>
-<li>fileuploadchunksend</li>
-<li>fileuploadchunkdone</li>
-<li>fileuploadchunkfail</li>
-<li>fileuploadchunkalways</li>
-</ul>
-
-
-<p>それぞれ分割したファイルがアップロードされる度に呼び出されるので、結構な回数呼ばれる。</p>
-
-<h2>ソース</h2>
-
-<p>一式全部上げておく。<br/>
-アップロードやエラーの処理については以下を参考にさせてもらいました。<br/>
-<a href="http://qiita.com/mpyw/items/62e6e415f86eb30a5ff4">JavaScript(jQuery)からPHPのAPIを利用する &ndash; Qiita</a></p>
-
-<p>ファイル構造は以下のようになっている。<br/>
-htmlファイル以外はダウンロードしてきたまんま。</p>
-
-<pre><code>public(ドキュメントルート)
-└─file_upload
-  ├─cors/
-  ├─css/
-  ├─img/
-  ├─js/
-  ├─server/
-  │   ├─php/
-  │   └─files/
-  └─chunked_upload.html
-</code></pre>
-
-<script src="https://gist.github.com/anonymous/2e523356346040f6758a.js"></script>
-
-
-<h2>まとめ</h2>
-
-<p>herokuではgit管理でアップしたもの以外はデプロイなどでの再起動時に消えてしまいます。<br/>
-なので、これでアップしてもそのまま残っているわけではないのでご注意ください。<br/>
-じゃあどうするかというと、一旦アップして、ここからどこかに転送する、とかそういうもののために作成した次第です。<br/>
-とはいえ、heroku以外でもchunked uploadを使えば、一時停止やリジュームなど、通信が切れても続きから再開したりとかが出来るようなので、普通のサーバー用途でも便利そう。</p>
 ]]></content>
   </entry>
   

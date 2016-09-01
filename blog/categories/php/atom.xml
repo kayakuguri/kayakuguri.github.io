@@ -4,7 +4,7 @@
   <title><![CDATA[Category: php | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/php/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2016-08-10T15:19:54+09:00</updated>
+  <updated>2016-09-01T10:16:54+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,102 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[heroku] タイムゾーンの設定各種]]></title>
+    <link href="http://kayakuguri.github.io/blog/2016/09/01/heroku-timezone/"/>
+    <updated>2016-09-01T10:02:04+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2016/09/01/heroku-timezone</id>
+    <content type="html"><![CDATA[<p>heroku環境でタイムゾーンの設定が色々あったのでまとめ。</p>
+
+<!-- more -->
+
+
+<h1>サーバー時間</h1>
+
+<p>まずは、herokuのサーバー時間のタイムゾーン設定。<br/>
+これは簡単で、環境変数に入れてやるだけ。</p>
+
+<blockquote><p>TZ : Asia/Tokyo</p></blockquote>
+
+<p>コマンドで入れる場合は以下。</p>
+
+<p><code>
+$ heroku config:add TZ=Asia/Tokyo -a APP_NAME
+</code></p>
+
+<p>きちんと反映されているかどうかは下記コマンドから参照可能。<br/>
+意図した時間が返ってきてればOK。</p>
+
+<p><code>
+$ heroku run date -a APP_NAME
+Running date on ⬢ APP_NAME... up, run.1198
+Thu Sep  1 10:06:57 JST 2016
+</code></p>
+
+<h2>参考</h2>
+
+<ul>
+<li><a href="http://blog.skktmlab.info/blog/2015_03_02_2">Herokuでホスティングしているブログのタイムゾーンを設定する</a></li>
+</ul>
+
+
+<h1>PHP</h1>
+
+<p>PHPの設定でタイムゾーンを指定する場合。<br/>
+通常は、 <code>php.ini</code> で設定するが、herokuの場合は、 <code>.user.ini</code> ファイルを使う。</p>
+
+<p>ドキュメントルート直下に <code>.user.ini</code> ファイルを設置。<br/>
+中に以下を記述。</p>
+
+<p><code>
+date.timezone = "Asia/Tokyo"
+</code></p>
+
+<p>この設定ではその他にはアップロードの最大容量なんかを指定する場合が多い。<br/>
+参考 : <a href="http://kayakuguri.github.io/blog/2014/02/18/change-max-filesize/">[PHP][heroku]upload_max_filesizeを変更する &ndash; KayaMemo</a></p>
+
+<h2>参考</h2>
+
+<ul>
+<li><a href="http://qiita.com/hiro_y/items/bc631a27c9701f81a4f9#runtime-settings">HerokuでPHPを使うときに気を付けるところ &ndash; Qiita</a></li>
+<li><a href="https://devcenter.heroku.com/articles/custom-php-settings#php-runtime-settings-ini-settings">Customizing Web Server and Runtime Settings for PHP | Heroku Dev Center</a></li>
+</ul>
+
+
+<h1>WordPress</h1>
+
+<p>最後はherokuと直接は関係ないけれど、wordpressのタイムゾーン。<br/>
+WordPressのタイムゾーンはデフォルトで標準時になるようにしてある、とのこと。<br/>
+しかしこれは設定で変更するものではなく、取得する際に調整するもののよう。</p>
+
+<p>一番簡易なものとしては、 <code>date</code> 関数で取得していた箇所をWordPress関数である、 <code>date_i18n</code> を利用して取得するようにする、というもの。<br/>
+これだけで、日本時間で取得できるようになる。</p>
+
+<p><code>
+date_i18n('Y-m-d H:i:s');
+</code></p>
+
+<p>その他では、 <code>datetime</code> クラスを使用してタイムゾーンを指定する方法もあり。</p>
+
+<p><code>
+$now = new DateTime('', new DateTimeZone('Asia/Tokyo'));
+$now-&gt;format('Y-m-d H:i:s');
+</code></p>
+
+<h2>参考</h2>
+
+<ul>
+<li><a href="http://qiita.com/yousan/items/a385f794a9bb433aecbb">WordPressで現在時刻を利用すると9時間ずれてしまう問題 &ndash; Qiita</a></li>
+</ul>
+
+
+<h1>まとめ</h1>
+
+<p>WordPressはともかく、herokuとPHPのタイムゾーン設定はherokuでPHPを使うのなら、デフォルトで設定しておいた方が後々間違いがなさそう。<br/>
+環境構築の際にまず設定しておくとよさげ。</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[PHP]CurlでのSSL接続をOpenSSL方式に変更する]]></title>
@@ -414,54 +510,6 @@ protected $hidden = [ ‘password’ ];
 
 <p><a href="http://laravel4.winroad.jp/2014/03/06/eloquent-orm%E3%81%AE%E5%9F%BA%E6%9C%AC%E7%9A%84%E3%81%AA%E4%BD%BF%E7%94%A8%E6%B3%95/">Eloquent ORMの基本的な使用法 | WinRoadのLaravel4初心者講座</a><br/>
 <a href="https://medium.com/@petehouston/enable-eloquent-orm-in-laravel-lumen-micro-framework-7a4f2fbcaf5d#.pe3a4ibc8">Enable Eloquent ORM in Laravel Lumen micro-framework — Medium</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[CentOS6.5にPHP5.4を入れる]]></title>
-    <link href="http://kayakuguri.github.io/blog/2015/11/26/centos65-php54/"/>
-    <updated>2015-11-26T17:50:35+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2015/11/26/centos65-php54</id>
-    <content type="html"><![CDATA[<p>CentOS6.5の標準のPHPは5.3。<br/>
-5.4環境が欲しかったので作ってみたメモ。</p>
-
-<!-- more -->
-
-
-<p>PHPは入ってない状態から始める。</p>
-
-<pre><code>$ php -v
--bash: php: command not found
-</code></pre>
-
-<h2>rpmでレポジトリを追加</h2>
-
-<p>あまり意味はわかってないですが、epelとremiレポジトリを追加。<br/>
-<code>vagrant</code>にSSHで入ってからの作業。</p>
-
-<p><code>
-$ sudo rpm -Uvh http://dl.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm
-$ sudo rpm -Uvh http://dl.iuscommunity.org/pub/ius/stable/Redhat/6/x86_64/ius-release-1.0-11.ius.el6.noarch.rpm
-$ sudo rpm -Uvh http://rpms.famillecollet.com/enterprise/remi-release-6.rpm
-</code></p>
-
-<h2>PHPをインストール</h2>
-
-<pre><code>$ sudo yum install php --enablerepo=remi
-</code></pre>
-
-<h2>確認</h2>
-
-<pre><code>$ php -v
-PHP 5.4.45 (cli) (built: Sep 30 2015 15:56:06) 
-Copyright (c) 1997-2014 The PHP Group
-Zend Engine v2.4.0, Copyright (c) 1998-2014 Zend Technologies
-</code></pre>
-
-<h2>参考</h2>
-
-<p><a href="http://qiita.com/Chrowa3/items/6c045d952a191a1203b4">Vagrant chef/centos-6.5 に PHP 5.4 を突っ込む &ndash; Qiita</a><br/>
-<a href="http://blog.ybbo.net/2014/01/22/%E3%80%90%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%80%91centos6%E3%81%ABphp5-4%E3%82%92yum%E3%81%A7%E7%B0%A1%E5%8D%98%E3%81%AB%E3%82%A4%E3%83%B3%E3%82%B9%E3%83%88%E3%83%BC%E3%83%AB%E3%81%99%E3%82%8B/">【シンプル】CentOS6にPHP5.4をyumで簡単にインストールする手順田舎に住みたいエンジニアの日記 | 田舎に住みたいエンジニアの日記</a></p>
 ]]></content>
   </entry>
   

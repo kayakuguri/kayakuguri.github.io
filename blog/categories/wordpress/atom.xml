@@ -4,7 +4,7 @@
   <title><![CDATA[Category: wordpress | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/wordpress/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2016-08-10T15:19:54+09:00</updated>
+  <updated>2016-09-01T10:16:54+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,102 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[heroku] タイムゾーンの設定各種]]></title>
+    <link href="http://kayakuguri.github.io/blog/2016/09/01/heroku-timezone/"/>
+    <updated>2016-09-01T10:02:04+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2016/09/01/heroku-timezone</id>
+    <content type="html"><![CDATA[<p>heroku環境でタイムゾーンの設定が色々あったのでまとめ。</p>
+
+<!-- more -->
+
+
+<h1>サーバー時間</h1>
+
+<p>まずは、herokuのサーバー時間のタイムゾーン設定。<br/>
+これは簡単で、環境変数に入れてやるだけ。</p>
+
+<blockquote><p>TZ : Asia/Tokyo</p></blockquote>
+
+<p>コマンドで入れる場合は以下。</p>
+
+<p><code>
+$ heroku config:add TZ=Asia/Tokyo -a APP_NAME
+</code></p>
+
+<p>きちんと反映されているかどうかは下記コマンドから参照可能。<br/>
+意図した時間が返ってきてればOK。</p>
+
+<p><code>
+$ heroku run date -a APP_NAME
+Running date on ⬢ APP_NAME... up, run.1198
+Thu Sep  1 10:06:57 JST 2016
+</code></p>
+
+<h2>参考</h2>
+
+<ul>
+<li><a href="http://blog.skktmlab.info/blog/2015_03_02_2">Herokuでホスティングしているブログのタイムゾーンを設定する</a></li>
+</ul>
+
+
+<h1>PHP</h1>
+
+<p>PHPの設定でタイムゾーンを指定する場合。<br/>
+通常は、 <code>php.ini</code> で設定するが、herokuの場合は、 <code>.user.ini</code> ファイルを使う。</p>
+
+<p>ドキュメントルート直下に <code>.user.ini</code> ファイルを設置。<br/>
+中に以下を記述。</p>
+
+<p><code>
+date.timezone = "Asia/Tokyo"
+</code></p>
+
+<p>この設定ではその他にはアップロードの最大容量なんかを指定する場合が多い。<br/>
+参考 : <a href="http://kayakuguri.github.io/blog/2014/02/18/change-max-filesize/">[PHP][heroku]upload_max_filesizeを変更する &ndash; KayaMemo</a></p>
+
+<h2>参考</h2>
+
+<ul>
+<li><a href="http://qiita.com/hiro_y/items/bc631a27c9701f81a4f9#runtime-settings">HerokuでPHPを使うときに気を付けるところ &ndash; Qiita</a></li>
+<li><a href="https://devcenter.heroku.com/articles/custom-php-settings#php-runtime-settings-ini-settings">Customizing Web Server and Runtime Settings for PHP | Heroku Dev Center</a></li>
+</ul>
+
+
+<h1>WordPress</h1>
+
+<p>最後はherokuと直接は関係ないけれど、wordpressのタイムゾーン。<br/>
+WordPressのタイムゾーンはデフォルトで標準時になるようにしてある、とのこと。<br/>
+しかしこれは設定で変更するものではなく、取得する際に調整するもののよう。</p>
+
+<p>一番簡易なものとしては、 <code>date</code> 関数で取得していた箇所をWordPress関数である、 <code>date_i18n</code> を利用して取得するようにする、というもの。<br/>
+これだけで、日本時間で取得できるようになる。</p>
+
+<p><code>
+date_i18n('Y-m-d H:i:s');
+</code></p>
+
+<p>その他では、 <code>datetime</code> クラスを使用してタイムゾーンを指定する方法もあり。</p>
+
+<p><code>
+$now = new DateTime('', new DateTimeZone('Asia/Tokyo'));
+$now-&gt;format('Y-m-d H:i:s');
+</code></p>
+
+<h2>参考</h2>
+
+<ul>
+<li><a href="http://qiita.com/yousan/items/a385f794a9bb433aecbb">WordPressで現在時刻を利用すると9時間ずれてしまう問題 &ndash; Qiita</a></li>
+</ul>
+
+
+<h1>まとめ</h1>
+
+<p>WordPressはともかく、herokuとPHPのタイムゾーン設定はherokuでPHPを使うのなら、デフォルトで設定しておいた方が後々間違いがなさそう。<br/>
+環境構築の際にまず設定しておくとよさげ。</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[WP REST API v2にてカスタムエンドポイントを追加するまとめ]]></title>
@@ -931,120 +1027,6 @@ define(&lsquo;DB_PASSWORD&rsquo;, &lsquo;&rsquo;);
 
 <p><a href="https://docs.c9.io/docs/setting-up-mysql">Setting Up MySQL · Cloud9</a><br/>
 <a href="http://qiita.com/hishigataBOZE/items/bdd6009d3bfc1c7d313b">[WordPress + MySQL] DBからサイトURLを変更 &ndash; Qiita</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[WordPress] 別のユーザーグループが投稿した記事を編集出来ないようにする]]></title>
-    <link href="http://kayakuguri.github.io/blog/2015/11/12/wordpress-usergroup-edit/"/>
-    <updated>2015-11-12T15:49:20+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2015/11/12/wordpress-usergroup-edit</id>
-    <content type="html"><![CDATA[<p>ユーザーグループを作成し、別のユーザーグループが作成した記事を別のユーザーグループが編集出来ないように設定してみた。</p>
-
-<!-- more -->
-
-
-<h2>カスタムユーザー権限の作成</h2>
-
-<p>User Role Editorのプラグインを使用する。<br/>
-<a href="https://ja.wordpress.org/plugins/user-role-editor/">https://ja.wordpress.org/plugins/user-role-editor/</a></p>
-
-<p>インストール、有効化するとユーザーのメニュー内に、User Role Editorの項目が追加される。</p>
-
-<p><img src="/images/2015/11/user_group01.jpg" alt="" /></p>
-
-<p>右側メニュー内の<code>Add Role</code>をクリックし、新しく権限を追加する。<br/>
-Role name(ID)は英数字で設定しておく。<br/>
-Display Role Nameはわかりやすいように日本語でも大丈夫。<br/>
-Make copy of で、コピー元の権限があれば選択する。<br/>
-今回は投稿者の権限を利用する事にする。</p>
-
-<p><img src="/images/2015/11/user_group02.jpg" alt="" /></p>
-
-<p>もう一つ、white(白組)という権限も作成しておく。</p>
-
-<h2>ユーザーグループの設定</h2>
-
-<p>User Access Managerのプラグインを使用する。<br/>
-<a href="https://ja.wordpress.org/plugins/user-access-manager/">https://ja.wordpress.org/plugins/user-access-manager/</a></p>
-
-<p>インストール、有効化するとユーザーのメニュー内に、UAMというメニューが追加される。</p>
-
-<p><img src="/images/2015/11/user_group03.jpg" alt="" /></p>
-
-<p>メニューをクリックするとグループが一つもない状態であれば、Add user groupが表示される状態となる。<br/>
-なので、ここでユーザーグループを作成する。</p>
-
-<p><code>User group name</code> はグループ名だが、日本語でも問題なかった。<br/>
-<code>User group description</code> はグループの説明。<br/>
-<code>IP range</code> はこのグループに属するユーザーのアクセスIPを制限する際に使用する。<br/>
-<code>Read access</code> は、このグループが投稿した記事をだれが閲覧できるか、を設定する。<br/>
-<code>All</code> にすれば誰でも閲覧可能。<br/>
-<code>only group users</code> にすればこのユーザーグループのユーザーしか閲覧が出来ない。<br/>
-今回は閲覧は全員可能としたかったので、allにした。<br/>
-<code>Write access</code> は、この投稿した記事をだれが編集できるか、を設定する。<br/>
-内容はReadと同じ。<br/>
-今回は正にここが肝で、作成したユーザーグループ以外のユーザーには編集させないので、 <code>only group users</code> とした。<br/>
-<code>Role affiliation</code>は、このユーザーグループに属する権限の設定。<br/>
-ここを設定するとユーザーを作成する際に選んだ権限に属するユーザーグループは必ず選ばれるようになる。<br/>
-要するに、権限を選べば自動でユーザーグループも指定されるので、設定しておいた方が楽。<br/>
-ユーザーグループに入れるユーザーを個別に選びたい場合は外しておけばいいと思う。</p>
-
-<p><img src="/images/2015/11/user_group04.jpg" alt="" /></p>
-
-<p>同じく白組も登録しておく。</p>
-
-<p><img src="/images/2015/11/user_group05.jpg" alt="" /></p>
-
-<h2>ユーザーの追加</h2>
-
-<p>ユーザーを追加する。<br/>
-今回の環境が色々カスタマイズしているため未確認だけど、どうやら新規登録の際にはユーザーグループを選択する項目はなさそう。<br/>
-とはいえ、権限を選べばグループも設定されるようになっているので問題はなし。<br/>
-(権限ロールで、作成した「白組」の権限を選択するのを忘れないように）</p>
-
-<p><img src="/images/2015/11/user_group06.jpg" alt="" /></p>
-
-<p>同様に赤組ユーザーも追加する。<br/>
-以下のように、権限ロールを設定しただけで、ユーザーグループも設定されていることがわかる。</p>
-
-<p><img src="/images/2015/11/user_group07.jpg" alt="" /></p>
-
-<h2>記事の投稿</h2>
-
-<p>記事を投稿する。<br/>
-この時にその記事を編集可能なユーザーグループを選択するのだけど、<br/>
-ユーザーグループに所属しているユーザーで記事を作成しようとするとユーザーグループ選択の項目が表示されない。<br/>
-なので、User Access Managerの設定画面で以下の項目を <code>Yes</code> に変更する。</p>
-
-<blockquote><p>UAM &ndash;> Setting &ndash;> Authors settings &ndash;> Authors can add content to their own groups</p></blockquote>
-
-<p><img src="/images/2015/11/user_group08.jpg" alt="" /></p>
-
-<p>右側の列に以下のようなボックスが表示される。<br/>
-記事作成の際に、チェックを入れるのを忘れないようにする。<br/>
-(忘れてしまうとだれでも編集可能な記事となってしまう）</p>
-
-<p><img src="/images/2015/11/user_group09.jpg" alt="" /></p>
-
-<p>管理者権限でログインして一覧を見ると以下のような状況だが、</p>
-
-<p><img src="/images/2015/11/user_group10.jpg" alt="" /></p>
-
-<p>例えば白組のユーザーでログインして見ると以下のように白組に設定した記事のみが表示される。</p>
-
-<p><img src="/images/2015/11/user_group11.jpg" alt="" /></p>
-
-<h2>まとめ</h2>
-
-<p>これで目的は達成出来た。<br/>
-記事投稿する際にグループを選択しないといけない、など少し運用がめんどうになりそうな気配はあるが、<br/>
-カスタムでここを触るのは現状不可能そうなので、プラグインでの対応しかなさそう。</p>
-
-<h2>参考</h2>
-
-<p><a href="http://ameblo.jp/signum21/entry-11468274679.html">WordPress会員制サイト構築 その7 User Access Manager｜オレオレWebサービス指南書！ 自分のチカラでサーバー世界を自由に創造するから面白い</a><br/>
-<a href="http://ameblo.jp/ifl-nagatsuma-noriyuki/entry-11093035839.html">【WordPress】ユーザーごとに投稿ページ・固定ページの閲覧権限を設定する｜長妻紀之のブログ</a></p>
 ]]></content>
   </entry>
   
