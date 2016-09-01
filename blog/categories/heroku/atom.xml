@@ -4,7 +4,7 @@
   <title><![CDATA[Category: heroku | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/heroku/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2016-09-01T19:52:23+09:00</updated>
+  <updated>2016-09-01T19:57:42+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -132,7 +132,16 @@ RewriteEngine on
 RewriteRule ^/cgi-bin/hoge/hoge.php$ /abc/hoge/hoge.php [R=301,L]
 </code></p>
 
-<p>これで無事リダイレクトが出来た。</p>
+<p>ちなみに、デフォルトで読み込まれているファイルに記述されている、ディレクトリインデックスの設定を記述せずに読み込ませると、その設定が消えてしまい、<code>/</code> でアクセスした場合には、 <code>index.html</code> が最初に呼び出されるようになってしまう。<br/>
+よって、ディレクトリインデックスの設定も合わせて書いておくと挙動が変わらずに設定できる。
+一応、全文は以下。</p>
+
+<p>```
+DirectoryIndex index.php index.html index.htm</p>
+
+<p>RewriteEngine on
+RewriteRule ^/cgi-bin/hoge/hoge.php$ /abc/hoge/hoge.php [R=301,L]
+```</p>
 
 <h2>参考</h2>
 
