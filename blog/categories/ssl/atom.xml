@@ -4,7 +4,7 @@
   <title><![CDATA[Category: ssl | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/ssl/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2016-09-01T19:57:42+09:00</updated>
+  <updated>2016-09-07T10:38:43+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,57 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[herokuにComodoで取得したSSL証明書を反映させる]]></title>
+    <link href="http://kayakuguri.github.io/blog/2016/09/07/heroku-comodo-ssl/"/>
+    <updated>2016-09-07T10:27:28+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2016/09/07/heroku-comodo-ssl</id>
+    <content type="html"><![CDATA[<p>ちょっとつなげ方とかが特殊だったのでメモ。</p>
+
+<!-- more -->
+
+
+<p><a href="https://comodo.jp/">トップページ | COMODO JAPAN  | SSL 証明書</a></p>
+
+<p>通常の流れであれば、取得した証明書の末尾に、対応している中間CA証明書をくっつけて、秘密鍵と共にアップすればOK。<br/>
+<a href="http://kayakuguri.github.io/blog/2014/09/30/heroku-ssl-subdomain/">[heroku]herokuでのSSL設定とカスタムサブドメインの適用方法 &ndash; KayaMemo</a></p>
+
+<p>しかし、Comodoという発行会社で取得したSSLの場合は以下のような内容で4つのファイルが送られてくる。</p>
+
+<ul>
+<li>AddTrustExternalCARoot.crt (ルート証明書)</li>
+<li>COMODORSAAddTrustCA.crt    (中間証明書 その1)</li>
+<li>COMODORSADomainValidationSecureServerCA.crt (中間証明書 その2)</li>
+<li>STAR_example_com.crt   (サーバ証明書)</li>
+</ul>
+
+
+<p>アップする際にはこれらを全てつなげたファイルが必要になるよう。<br/>
+そしてそのつなげ方にも順番があるようで、下から順番に末尾に追加していく形。<br/>
+コマンドは以下となる。</p>
+
+<p><code>
+$ cat STAR_example_com.crt COMODORSADomainValidationSecureServerCA.crt COMODORSAAddTrustCA.crt AddTrustExternalCARoot.crt &gt; STAR_example_com-bundle.pem
+</code></p>
+
+<p>これで全てつなげたファイル、 <code>STAR_example_com-bundle.pem</code> が出来上がる。<br/>
+あとは、秘密鍵と共にアップするだけ。<br/>
+(秘密鍵は、 <code>server.key</code> とする）</p>
+
+<p><code>
+$ heroku certs:add STAR_example_com-bundle.pem server.key -a YOUR_APP
+</code></p>
+
+<h2>参考</h2>
+
+<ul>
+<li><a href="http://stackoverflow.com/questions/26100642/heroku-comodo-ssl-and-it-not-working">Heroku Comodo SSL and it not working? &ndash; Stack Overflow</a></li>
+<li><a href="http://qiita.com/white_aspara25/items/d9a1f99e8abdee0b5450">ELB の ComodoSSL 証明書を更新 &ndash; Qiita</a></li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Vagrant (Ubuntu) 環境でhttps接続する]]></title>
