@@ -4,7 +4,7 @@
   <title><![CDATA[Category: htaccess | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/htaccess/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2016-09-07T10:38:43+09:00</updated>
+  <updated>2016-09-13T18:08:23+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,116 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[サブディレクトリに]]></title>
+    <link href="http://kayakuguri.github.io/blog/2016/09/13/htpasswd-subdir/"/>
+    <updated>2016-09-13T17:58:10+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2016/09/13/htpasswd-subdir</id>
+    <content type="html"><![CDATA[<p>サイト全体にベーシック認証をかけ、特定のサブディレクトリにのみ、違うベーシック認証をかけたかったのだが、ちょっと苦労したのでメモ。</p>
+
+<!-- more -->
+
+
+<h1>状況</h1>
+
+<p>まず、状況。<br/>
+ドキュメントルートは、<code>/app/public/</code>とする。<br/>
+(htpasswdは適切な階層にそれぞれおかれているとする）</p>
+
+<h3>全体のベーシック認証</h3>
+
+<p>全体のベーシック認証は以下のようにかけていた。<br/>
+<code>/app/public/.htaccess</code></p>
+
+<p>```
+<If "%{HTTP_HOST} != 'dev.example.com'"></p>
+
+<pre><code>AuthUserFile /app/.htpasswd
+AuthType Basic
+AuthName "Restricted Access"
+Require valid-user
+</code></pre>
+
+<p></If>
+```</p>
+
+<p>開発環境でのみベーシック認証をかけたかったため、<code>&lt;If&gt;</code>ディレクティブにてホスト名で切り分けている。</p>
+
+<h3>サブディレクトリのベーシック認証</h3>
+
+<p>サブディレクトリのベーシック認証の設定は以下。<br/>
+<code>/app/public/subdir/.htaccess</code></p>
+
+<p><code>
+AuthUserFile /app/public/subdir/.htpasswd
+AuthType Basic
+AuthName "Restricted Access"
+Require valid-user
+</code></p>
+
+<h2>結果</h2>
+
+<p>サブディレクトリにアクセスすると、全体用のベーシック認証がかかった状態となってしまった。</p>
+
+<h1>Ifディレクティブ</h1>
+
+<p>色々試したり調べたりした結果、設定内容自体に間違いがあるわけではなく、実行順の問題ということがわかった。<br/>
+全体のベーシック認証にて、Ifディレクティブを使用しているため特殊となっていた。</p>
+
+<p>このIfディレクティブはapache2.4から使用可能になった機能となっている。<br/>
+<a href="https://httpd.apache.org/docs/2.4/ja/mod/core.html#if">https://httpd.apache.org/docs/2.4/ja/mod/core.html#if</a></p>
+
+<p>ドキュメントを読むと、以下のように書かれている。</p>
+
+<blockquote><p><code>&lt;If&gt;</code> は <code>&lt;Files&gt;</code> と同じ処理順と用法になっています。</p></blockquote>
+
+<p><code>&lt;Files&gt;</code>のドキュメントを参照してみると、以下の実行順となっていることが記載されていた。<br/>
+<a href="https://httpd.apache.org/docs/2.4/ja/sections.html">https://httpd.apache.org/docs/2.4/ja/sections.html</a></p>
+
+<ol>
+<li><code>&lt;Directory&gt;</code> (正規表現無し) と <code>.htaccess</code> を同時に (<code>.htaccess</code> が許可されていれば、それが <Directory> を上書きします)</li>
+<li><code>&lt;DirectoryMatch&gt;</code> (と <code>&lt;Directory ~&gt;</code></li>
+<li><code>&lt;Files&gt;</code> と <code>&lt;FilesMatch&gt;</code> を同時に</li>
+<li><code>&lt;Location&gt;</code> と <code>&lt;LocationMatch&gt;</code> を同時に</li>
+</ol>
+
+
+<p>ということで、<code>&lt;If&gt;</code>は3番目の実行順、となる。</p>
+
+<p>よって、最初の設定での実行順を書き出してみると以下になっている事がわかる。</p>
+
+<ol>
+<li>全体の<code>.htaccess</code> → ベーシックの設定なし</li>
+<li>サブディレクトリの <code>.htaccess</code> → ベーシック認証あり</li>
+<li>全体の <code>.htaccess</code> 内の <code>&lt;If&gt;</code>ディレクティブ内 → ベーシック認証あり、上書き</li>
+</ol>
+
+
+<p>このように最後に<code>&lt;If&gt;</code>ディレクティブが実行されているため、ベーシック認証が全体のものに上書きされていたということがわかった。</p>
+
+<h1>対応</h1>
+
+<p>全体のベーシック認証で、<code>&lt;if&gt;</code>ディレクティブを外すことは出来ないので、サブディレクトリのベーシック認証の設定でも、<code>&lt;If&gt;</code>ディレクティブを(無理矢理)使うことで解決させた。</p>
+
+<p>サブディレクトリのベーシック認証の設定は以下のようにした。</p>
+
+<p>```
+<If true></p>
+
+<pre><code>AuthUserFile /app/public/subdir/.htpasswd
+AuthType Basic
+AuthName "Restricted Access"
+Require valid-user
+</code></pre>
+
+<p></If>
+```</p>
+
+<p>プログラムとしては無駄なIfなのであまり綺麗な方法ではないかもしれないが…。<br/>
+とりあえず、これで意図した動作をさせることが出来た。</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[htaccessを使ったリダイレクトを学ぶ]]></title>

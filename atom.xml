@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2016-09-07T10:38:43+09:00</updated>
+  <updated>2016-09-13T18:08:23+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,123 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[サブディレクトリに]]></title>
+    <link href="http://kayakuguri.github.io/blog/2016/09/13/htpasswd-subdir/"/>
+    <updated>2016-09-13T17:58:10+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2016/09/13/htpasswd-subdir</id>
+    <content type="html"><![CDATA[<p>サイト全体にベーシック認証をかけ、特定のサブディレクトリにのみ、違うベーシック認証をかけたかったのだが、ちょっと苦労したのでメモ。</p>
+
+<!-- more -->
+
+
+<h1>状況</h1>
+
+<p>まず、状況。<br/>
+ドキュメントルートは、<code>/app/public/</code>とする。<br/>
+(htpasswdは適切な階層にそれぞれおかれているとする）</p>
+
+<h3>全体のベーシック認証</h3>
+
+<p>全体のベーシック認証は以下のようにかけていた。<br/>
+<code>/app/public/.htaccess</code></p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;If "%{HTTP_HOST} != 'dev.example.com'"&gt;
+</span><span class='line'>  AuthUserFile /app/.htpasswd
+</span><span class='line'>  AuthType Basic
+</span><span class='line'>  AuthName "Restricted Access"
+</span><span class='line'>  Require valid-user
+</span><span class='line'>&lt;/If&gt;</span></code></pre></td></tr></table></div></figure>
+
+
+<p>開発環境でのみベーシック認証をかけたかったため、<code>&lt;If&gt;</code>ディレクティブにてホスト名で切り分けている。</p>
+
+<h3>サブディレクトリのベーシック認証</h3>
+
+<p>サブディレクトリのベーシック認証の設定は以下。<br/>
+<code>/app/public/subdir/.htaccess</code></p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>AuthUserFile /app/public/subdir/.htpasswd
+</span><span class='line'>AuthType Basic
+</span><span class='line'>AuthName "Restricted Access"
+</span><span class='line'>Require valid-user</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>結果</h2>
+
+<p>サブディレクトリにアクセスすると、全体用のベーシック認証がかかった状態となってしまった。</p>
+
+<h1>Ifディレクティブ</h1>
+
+<p>色々試したり調べたりした結果、設定内容自体に間違いがあるわけではなく、実行順の問題ということがわかった。<br/>
+全体のベーシック認証にて、Ifディレクティブを使用しているため特殊となっていた。</p>
+
+<p>このIfディレクティブはapache2.4から使用可能になった機能となっている。<br/>
+<a href="https://httpd.apache.org/docs/2.4/ja/mod/core.html#if">https://httpd.apache.org/docs/2.4/ja/mod/core.html#if</a></p>
+
+<p>ドキュメントを読むと、以下のように書かれている。</p>
+
+<blockquote><p><code>&lt;If&gt;</code> は <code>&lt;Files&gt;</code> と同じ処理順と用法になっています。</p></blockquote>
+
+<p><code>&lt;Files&gt;</code>のドキュメントを参照してみると、以下の実行順となっていることが記載されていた。<br/>
+<a href="https://httpd.apache.org/docs/2.4/ja/sections.html">https://httpd.apache.org/docs/2.4/ja/sections.html</a></p>
+
+<ol>
+<li><code>&lt;Directory&gt;</code> (正規表現無し) と <code>.htaccess</code> を同時に (<code>.htaccess</code> が許可されていれば、それが <Directory> を上書きします)</li>
+<li><code>&lt;DirectoryMatch&gt;</code> (と <code>&lt;Directory ~&gt;</code></li>
+<li><code>&lt;Files&gt;</code> と <code>&lt;FilesMatch&gt;</code> を同時に</li>
+<li><code>&lt;Location&gt;</code> と <code>&lt;LocationMatch&gt;</code> を同時に</li>
+</ol>
+
+
+<p>ということで、<code>&lt;If&gt;</code>は3番目の実行順、となる。</p>
+
+<p>よって、最初の設定での実行順を書き出してみると以下になっている事がわかる。</p>
+
+<ol>
+<li>全体の<code>.htaccess</code> → ベーシックの設定なし</li>
+<li>サブディレクトリの <code>.htaccess</code> → ベーシック認証あり</li>
+<li>全体の <code>.htaccess</code> 内の <code>&lt;If&gt;</code>ディレクティブ内 → ベーシック認証あり、上書き</li>
+</ol>
+
+
+<p>このように最後に<code>&lt;If&gt;</code>ディレクティブが実行されているため、ベーシック認証が全体のものに上書きされていたということがわかった。</p>
+
+<h1>対応</h1>
+
+<p>全体のベーシック認証で、<code>&lt;if&gt;</code>ディレクティブを外すことは出来ないので、サブディレクトリのベーシック認証の設定でも、<code>&lt;If&gt;</code>ディレクティブを(無理矢理)使うことで解決させた。</p>
+
+<p>サブディレクトリのベーシック認証の設定は以下のようにした。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;If true&gt;
+</span><span class='line'>  AuthUserFile /app/public/subdir/.htpasswd
+</span><span class='line'>  AuthType Basic
+</span><span class='line'>  AuthName "Restricted Access"
+</span><span class='line'>  Require valid-user
+</span><span class='line'>&lt;/If&gt;</span></code></pre></td></tr></table></div></figure>
+
+
+<p>プログラムとしては無駄なIfなのであまり綺麗な方法ではないかもしれないが…。<br/>
+とりあえず、これで意図した動作をさせることが出来た。</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[herokuにComodoで取得したSSL証明書を反映させる]]></title>
@@ -3692,207 +3809,6 @@ apexの作り方は割愛。エンドポイントはapex内で以下のように
 <li><a href="http://blog.flect.co.jp/labo/2015/01/addon-a943.html">Addon のアプリ間共有 &ndash; フレクトのHeroku Lab</a></li>
 </ul>
 
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[salesforce] エラーが出てもエラーレコード以外は更新させる]]></title>
-    <link href="http://kayakuguri.github.io/blog/2016/05/13/database-upsert/"/>
-    <updated>2016-05-13T17:26:24+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2016/05/13/database-upsert</id>
-    <content type="html"><![CDATA[<p>salesforceでインサート・アップデートする場合、ガバナ制限の関係から都度DMLを発行せずにある程度まとめてやる事が多い。<br/>
-その際に、一件でもエラーが出てしまうと他もまきこまれてロールバックされてしまうので、エラー以外は更新させる方法。</p>
-
-<!-- more -->
-
-
-<h1>通常の方法</h1>
-
-<p>通常の方法、というか、簡易な方法としては、以下のようにインサートする。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>List&lt;Lead&gt; lists = new List&lt;Lead&gt;();
-</span><span class='line'>for(xx){
-</span><span class='line'>  //Leadを作ってaddする処理
-</span><span class='line'>}
-</span><span class='line'>insert lists;</span></code></pre></td></tr></table></div></figure>
-
-
-<p><code>for</code>文の中で<code>insert</code>せずに、リストにまとめておいて外で一回だけ<code>insert</code>する。<br/>
-これで、DMLは一回だけ発行したことになるので、節約が可能。<br/>
-ループの中ではSOQL、DMLはしない。これがapexの鉄則。</p>
-
-<p>しかしこれだと例えば全部で200件インサートする予定があって、そのうち150件目に不備がありエラーが出た場合、
-そこで処理がストップし、それまでにインサートした149件もすべてロールバックされインサート自体がなかったことになる。
-要件によってはこの方がいい場合もあるが、エラーが出たレコード以外は全てインサートしたい場合もある。</p>
-
-<h1>Database Class</h1>
-
-<p>そんな時は、<code>Database</code>クラスを使う。<br/>
-使い方は、<code>Database.insert()</code>とするだけ。</p>
-
-<p>このメソッドの第1引数に、インサートするオブジェクトのリストを、
-第２引数に、エラー時の挙動を入れる。</p>
-
-<ul>
-<li>trueの場合はエラー時には全てロールバック(上記の単純な<code>insert</code>と同じ)(デフォルト)</li>
-<li>falseの場合はエラーレコード以外はインサートする</li>
-</ul>
-
-
-<p>上記の例を書き換えると、以下のようになる。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>List&lt;Lead&gt; lists = new List&lt;Lead&gt;();
-</span><span class='line'>for(xx){
-</span><span class='line'>  //Leadを作ってaddする処理
-</span><span class='line'>}
-</span><span class='line'>Database.insert(lists, false);</span></code></pre></td></tr></table></div></figure>
-
-
-<p>これでエラーのレコード以外はインサートさせる事が出来た。<br/>
-<code>updata</code>、<code>upsert</code>、<code>delete</code> についても同じ。</p>
-
-<p><a href="https://developer.salesforce.com/docs/atlas.ja-jp.200.0.apexcode.meta/apexcode/apex_methods_system_database.htm">Database クラス</a></p>
-
-<h1>Upsert</h1>
-
-<p>upsertも上記と方法は同じだが、upsertでは外部IDの指定が可能になるが、その方法が少し簡易バージョンとは違った。</p>
-
-<p>例えば、<code>Lead</code>オブジェクトの、カスタム項目、<code>UserID__c</code>を外部IDとして指定する場合。<br/>
-簡易バージョンの場合は以下のようになる。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>List&lt;Lead&gt; lists = new List&lt;Lead&gt;();
-</span><span class='line'>//処理中略
-</span><span class='line'>upsert lists UserID__c;</span></code></pre></td></tr></table></div></figure>
-
-
-<p>上記、<code>Database</code>を使ったパターンだと、ドキュメントには以下のように書かれている。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>upsert(recordToUpsert, externalIdField, allOrNone)</span></code></pre></td></tr></table></div></figure>
-
-
-<p>この第二引数の<code>externalIdField</code>が外部IDの指定箇所になるが、型は、<code>Schema.SObjectField</code>となっていて、
-そのまま <code>Database.upsert(lists, UserID__c, false)</code>とやるとエラーが出る。</p>
-
-<p>なので以下のようにして指定したい項目の<code>Schema.SObjectField</code>を取得して指定してやる必要がある。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>List&lt;Lead&gt; lists = new List&lt;Lead&gt;();
-</span><span class='line'>//処理中略
-</span><span class='line'>Schema.DescribeFieldResult F = Lead. UserID__c.getDescribe();
-</span><span class='line'>Schema.sObjectField T = F.getSObjectField();
-</span><span class='line'>Database.upsert(lists, T, false);</span></code></pre></td></tr></table></div></figure>
-
-
-<p>これで外部IDを指定したアップサートが可能となる。</p>
-
-<p><a href="https://developer.salesforce.com/docs/atlas.ja-jp.200.0.apexcode.meta/apexcode/apex_class_Schema_SObjectField.htm">SObjectField クラス</a></p>
-
-<h1>エラーハンドリング</h1>
-
-<p>さて、DMLでエラーが発生した場合、その内容を取得するには、<code>try..catch</code>で例外を拾っていた。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>try{
-</span><span class='line'>  insert lists;
-</span><span class='line'>}catch(DmlException e){
-</span><span class='line'>  System.debug(e.getMessage());
-</span><span class='line'>  System.debug(e.getStackTraceString());
-</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
-
-
-<p></p>
-
-<p><a href="https://developer.salesforce.com/docs/atlas.ja-jp.200.0.apexcode.meta/apexcode/apex_classes_exception_methods.htm">Exception クラスおよび組み込み例外</a></p>
-
-<p>しかし、<code>Database</code>を使ってinsertなどをした場合は別の方法で取得する。<br/>
-というか、エラーだけでなく、結果を一件ずつ取得することが出来るため、それらからエラー分を取得する、という形になる。</p>
-
-<p><code>SaveResult</code>クラスを使用する。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>List&lt;Database.SaveResult&gt; res_lists = Database.insert(lists, false);</span></code></pre></td></tr></table></div></figure>
-
-
-<p>取得した結果から、成功、失敗を取得し、内容を取得したりする。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>List&lt;Database.SaveResult&gt; res_lists = Database.insert(lists, false);
-</span><span class='line'>for (Database.SaveResult res : res_lists) {
-</span><span class='line'>  if(res.isSuccess()){
-</span><span class='line'>      //成功時
-</span><span class='line'>  }else{
-</span><span class='line'>      //失敗時
-</span><span class='line'>      for(Database.Error err : res.getErrors()) {
-</span><span class='line'>          System.debug(err.getStatusCode());
-</span><span class='line'>          System.debug(err.getMessage());
-</span><span class='line'>      }
-</span><span class='line'>  }
-</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
-
-
-<p>例えば出力内容は以下のような感じ。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>DEBUG|REQUIRED_FIELD_MISSING
-</span><span class='line'>値を入力してください: [LastName]</span></code></pre></td></tr></table></div></figure>
-
-
-<p>この <code>SaveResult</code> は、インサート時の結果を取得するためのクラスで、
-インサート、アップサート、アップサート、デリート、それぞれのクラスが別々に用意されている。</p>
-
-<ul>
-<li>insert &ndash; SaveResult</li>
-<li>update &ndash; UndeleteResult</li>
-<li>upsert &ndash; UpsertResult</li>
-<li>delete &ndash; DeleteResult</li>
-</ul>
-
-
-<p>詳しくは、Apex 開発者ガイド、を参照。<br/>
-(直接のリンクがなぜか貼れなかった）</p>
-
-<p><a href="https://developer.salesforce.com/docs/atlas.ja-jp.apexcode.meta/apexcode/apex_namespace_Database.htm">Apex開発者ガイド &ndash; リファレンス &ndash; Database名前空間</a></p>
-
-<h1>まとめ</h1>
-
-<p>以上で一通り想定していた動作をさせることができた。<br/>
-エラー時に他をロールバックするかどうかとかは、結構忘れがちになるけれど、結構難しい問題。<br/>
-仕様策定時にきちんと考慮していきたい。</p>
 ]]></content>
   </entry>
   
