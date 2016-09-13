@@ -4,7 +4,7 @@
   <title><![CDATA[Category: htaccess | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/htaccess/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2016-09-13T18:08:23+09:00</updated>
+  <updated>2016-09-13T18:10:36+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -14,7 +14,7 @@
 
   
   <entry>
-    <title type="html"><![CDATA[サブディレクトリに]]></title>
+    <title type="html"><![CDATA[サブディレクトリに別のベーシック認証をかける]]></title>
     <link href="http://kayakuguri.github.io/blog/2016/09/13/htpasswd-subdir/"/>
     <updated>2016-09-13T17:58:10+09:00</updated>
     <id>http://kayakuguri.github.io/blog/2016/09/13/htpasswd-subdir</id>
