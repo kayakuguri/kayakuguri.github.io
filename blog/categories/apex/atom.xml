@@ -4,7 +4,7 @@
   <title><![CDATA[Category: apex | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/apex/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2016-09-13T18:10:36+09:00</updated>
+  <updated>2016-10-17T18:49:02+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,153 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Chatter in Apxを利用してコメントをメンション付きで投稿する]]></title>
+    <link href="http://kayakuguri.github.io/blog/2016/10/17/coonect-api-post-comment/"/>
+    <updated>2016-10-17T18:37:58+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2016/10/17/coonect-api-post-comment</id>
+    <content type="html"><![CDATA[<p>タイトル通り。<br/>
+ChatterのコメントをApex経由で<code>@</code>メンション付きで投稿する。</p>
+
+<!-- more -->
+
+
+<p>Chatterコメントは、<code>FeedComment</code>というオブジェクト名で作成されているので、
+このオブジェクトにレコードをインサートすればコメントは作成出来る。
+しかしその場合はコメントにそのまま<code>@ユーザ名</code>とつけてもメンションとして認識されない。<br/>
+そのため、メンションをapex経由でつけるには、Chatter in Apex、<code>ConnectAip</code>を使用する。</p>
+
+<h1>コメントの投稿</h1>
+
+<p>Chatter in Apexのドキュメントは以下。(英語)<br/>
+<a href="https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/connectAPI_overview.htm">Chatter in Apex</a></p>
+
+<p>この中で、コメントの投稿には、<code>postCommentToFeedElement</code>メソッドを使う。<br/>
+以下のサンプルがほぼそのまま。<br/>
+<a href="https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/connectapi_examples_post_comment_feed_element_2.htm">Post a Comment with a Mention</a></p>
+
+<p>以下、順番に組み立ててみる。</p>
+
+<h2>postCommentToFeedElement</h2>
+
+<p><code>postCommentToFeedElement</code>の引数は以下となっている。</p>
+
+<ul>
+<li><ol>
+<li><code>communityId</code><br/>
+投稿するユーザーのコミュニティのID。<code>null</code>可。</li>
+</ol>
+</li>
+<li><ol>
+<li><code>feedElementId</code><br/>
+親となる投稿(<code>FeedItem</code>)のSFID</li>
+</ol>
+</li>
+<li><ol>
+<li><code>comment</code><br/>
+投稿するコメントの情報</li>
+</ol>
+</li>
+<li><ol>
+<li><code>feedElementFileUpload</code><br/>
+投稿するファイルのバイナリ情報</li>
+</ol>
+</li>
+</ul>
+
+
+<h2>feedElementId</h2>
+
+<p>第二引数の<code>feedElementId</code>はそのままIDを入れればよい。
+<code>
+Id feedId = '0D5O000000QjmdlKAB';
+</code></p>
+
+<h2>comment</h2>
+
+<p><code>ConnectApi.CommentInput</code>型。<br/>
+<a href="https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_connectapi_input_comment.htm#apex_connectapi_input_comment">ConnectApi.CommentInput Class</a></p>
+
+<p><code>body</code>メソッドに本文などの情報を入力する</p>
+
+<h3>body</h3>
+
+<p><code>ConnectApi.MessageBodyInput</code>型<br/>
+<a href="https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_connectapi_input_msgBody.htm">ConnectApi.MessageBodyInput Class</a></p>
+
+<p>メソッドは、<code>mesageSegments</code>のみ。</p>
+
+<h3>mesageSegments</h3>
+
+<p><code>List&lt;ConnectApi.MessageSegmentInput&gt;</code>型<br/>
+<code>ConnectApi.MessageSegmentInput</code>クラスは、入力したい内容の型のクラスが継承している。<br/>
+テキストの入力内容は、<code>ConnectApi.TextSegmentInput</code>クラスを使用する。<br/>
+メンションの場合は、<code>ConnectApi.MentionSegmentInput</code>クラス、となっている。</p>
+
+<p><a href="https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_connectapi_input_messageSegmentInput.htm">ConnectApi.MessageSegmentInput Class</a></p>
+
+<h3>ConnectApi.TextSegmentInput</h3>
+
+<p><code>text</code>メソッドのみ。ここに投稿する本文を入れる。<br/>
+<a href="https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_connectapi_input_TxtMsgSeg.htm">ConnectApi.TextSegmentInput Class</a></p>
+
+<h3>ConnectApi.MentionSegmentInput</h3>
+
+<p><code>id</code>メソッドにメンションを送りたいユーザーのIDを入力する。
+もしくは、APIバージョン38以降なら、<code>username</code>メソッドでユーザー名も利用出来るよう。<br/>
+<a href="https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_connectapi_input_mentionMsgSeg.htm">ConnectApi.MentionSegmentInput Class</a></p>
+
+<h3>コード</h3>
+
+<p>一通りのコード全文は以下。<br/>
+引数で、入力内容、親の投稿ID、メンションをつけるユーザのIDを渡すようにしている。</p>
+
+<p>```
+/<em>*
+ * コメントを投稿する
+ *
+ * @param body String 本文
+ * @param feedId Id 親の投稿ID
+ * @param userId Id メンションを付ける
+ * @return ConnectApi.Comment コメントクラス
+ </em>/
+public static void doPostComment(String body, Id feedId, Id userId){
+  //子の投稿を作る
+  ConnectApi.CommentInput commentInput = new ConnectApi.CommentInput();
+  ConnectApi.MessageBodyInput messageBodyInput = new ConnectApi.MessageBodyInput();
+  messageBodyInput.messageSegments = new List&lt;ConnectApi.MessageSegmentInput>();</p>
+
+<p>  //本文を作る
+  ConnectApi.TextSegmentInput textSegmentInput = new ConnectApi.TextSegmentInput();
+  textSegmentInput.text = body;
+  messageBodyInput.messageSegments.add(textSegmentInput);
+  //メンションを作る
+  ConnectApi.MentionSegmentInput mentionSegmentInput = new ConnectApi.MentionSegmentInput();
+  mentionSegmentInput.id = userId;
+  messageBodyInput.messageSegments.add(mentionSegmentInput);</p>
+
+<p>  //投稿として追加
+  commentInput.body = messageBodyInput;</p>
+
+<p>  //コメントを投稿
+  ConnectApi.Comment comment = ConnectApi.ChatterFeeds.postCommentToFeedElement(null, feedId, commentInput, null);
+  return comment;
+}
+```</p>
+
+<p>返却される<code>ConnectApi.Comment</code>クラスは以下。<br/>
+<a href="https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_connectapi_output_comment.htm">ConnectApi.Comment Class</a></p>
+
+<h2>参考</h2>
+
+<ul>
+<li><a href="https://help.salesforce.com/apex/HTViewSolution?id=000199689&amp;language=ja">Apexからの@メンションについて</a></li>
+<li><a href="http://qiita.com/tyoshikawa1106/items/c68f8fbcd657a1a89ef2">Connect APIとTest Class &ndash; Qiita</a></li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[Salesforce]関連リストのインライン編集をVFで作成する]]></title>
@@ -843,60 +990,6 @@ for(JSON2Apex.Data val : obj.data){</p>
 
 <p><a href="http://salesforce.stackexchange.com/questions/5427/json-deserialize-array-of-objects">apex &ndash; JSON.deserialize Array of Objects &ndash; Salesforce Stack Exchange</a><br/>
 <a href="https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_class_System_JsonParser.htm">JSONParser Class | Force.com Apex Code Developer&#x27;s Guide | Salesforce Developers</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[apex]バッチ実行時にカウントデータを引き継ぐ]]></title>
-    <link href="http://kayakuguri.github.io/blog/2015/08/05/apex-batch-data/"/>
-    <updated>2015-08-05T11:26:58+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2015/08/05/apex-batch-data</id>
-    <content type="html"><![CDATA[<p>apexでバッチを走らせる場合は、デフォルトでの200件ごとに処理を走らせる場合が多いけれれど、<br/>
-その時に処理の中でカウントアップしたデータを次の処理に引き継ぎたかった。</p>
-
-<!-- more -->
-
-
-<p>結論から言うと、 <code>Database.Stateful</code> を使うと、データの内容を保持した状態でバッチが走らせられた。</p>
-
-<p>具体的には以下。</p>
-
-<p>```
-public with sharing class Hogehoge_Batch implements Database.Batchable<sObject>, Database.Stateful{</p>
-
-<pre><code>private Integer count {get; set;}
-
-public Hogehoge_Batch(Boolean isLastBatch){
-    this.count = 0;
-}
-
-public Database.QueryLocator start(Database.BatchableContext BC){
-    String query = 'select id from Lead';
-     return Database.getQueryLocator(query);
-}
-
-public void execute(Database.BatchableContext BC, List&lt;Lead&gt; scope){
-    for(Lead user : scope){ 
-        user.count__c = this.count;
-        this.count++;
-    }
-    update scope;
-}
-
-public void finish(Database.BatchableContext BC){
-}
-</code></pre>
-
-<p>}
-```</p>
-
-<p>クラス定義の1行目の最後にくっついてる。<br/>
-これがないと<code>count</code>は毎回リセットされてしまう。</p>
-
-<h2>参考</h2>
-
-<p><a href="http://tyoshikawa1106.hatenablog.com/entry/2015/02/15/182505">SFDC：【大量データ処理】Apex Batchで一括更新処理を確認してみました &ndash; tyoshikawa1106のブログ</a><br/>
-<a href="http://salesforceapexcodecorner.blogspot.jp/2011/08/state-management-in-batch-apex-in.html">State Management In Batch Apex in Salesforce</a></p>
 ]]></content>
   </entry>
   

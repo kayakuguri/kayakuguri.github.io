@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2016-09-13T18:10:36+09:00</updated>
+  <updated>2016-10-17T18:49:02+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,183 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Chatter in Apxを利用してコメントをメンション付きで投稿する]]></title>
+    <link href="http://kayakuguri.github.io/blog/2016/10/17/coonect-api-post-comment/"/>
+    <updated>2016-10-17T18:37:58+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2016/10/17/coonect-api-post-comment</id>
+    <content type="html"><![CDATA[<p>タイトル通り。<br/>
+ChatterのコメントをApex経由で<code>@</code>メンション付きで投稿する。</p>
+
+<!-- more -->
+
+
+<p>Chatterコメントは、<code>FeedComment</code>というオブジェクト名で作成されているので、
+このオブジェクトにレコードをインサートすればコメントは作成出来る。
+しかしその場合はコメントにそのまま<code>@ユーザ名</code>とつけてもメンションとして認識されない。<br/>
+そのため、メンションをapex経由でつけるには、Chatter in Apex、<code>ConnectAip</code>を使用する。</p>
+
+<h1>コメントの投稿</h1>
+
+<p>Chatter in Apexのドキュメントは以下。(英語)<br/>
+<a href="https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/connectAPI_overview.htm">Chatter in Apex</a></p>
+
+<p>この中で、コメントの投稿には、<code>postCommentToFeedElement</code>メソッドを使う。<br/>
+以下のサンプルがほぼそのまま。<br/>
+<a href="https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/connectapi_examples_post_comment_feed_element_2.htm">Post a Comment with a Mention</a></p>
+
+<p>以下、順番に組み立ててみる。</p>
+
+<h2>postCommentToFeedElement</h2>
+
+<p><code>postCommentToFeedElement</code>の引数は以下となっている。</p>
+
+<ul>
+<li><ol>
+<li><code>communityId</code><br/>
+投稿するユーザーのコミュニティのID。<code>null</code>可。</li>
+</ol>
+</li>
+<li><ol>
+<li><code>feedElementId</code><br/>
+親となる投稿(<code>FeedItem</code>)のSFID</li>
+</ol>
+</li>
+<li><ol>
+<li><code>comment</code><br/>
+投稿するコメントの情報</li>
+</ol>
+</li>
+<li><ol>
+<li><code>feedElementFileUpload</code><br/>
+投稿するファイルのバイナリ情報</li>
+</ol>
+</li>
+</ul>
+
+
+<h2>feedElementId</h2>
+
+<p>第二引数の<code>feedElementId</code>はそのままIDを入れればよい。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>Id feedId = '0D5O000000QjmdlKAB';</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>comment</h2>
+
+<p><code>ConnectApi.CommentInput</code>型。<br/>
+<a href="https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_connectapi_input_comment.htm#apex_connectapi_input_comment">ConnectApi.CommentInput Class</a></p>
+
+<p><code>body</code>メソッドに本文などの情報を入力する</p>
+
+<h3>body</h3>
+
+<p><code>ConnectApi.MessageBodyInput</code>型<br/>
+<a href="https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_connectapi_input_msgBody.htm">ConnectApi.MessageBodyInput Class</a></p>
+
+<p>メソッドは、<code>mesageSegments</code>のみ。</p>
+
+<h3>mesageSegments</h3>
+
+<p><code>List&lt;ConnectApi.MessageSegmentInput&gt;</code>型<br/>
+<code>ConnectApi.MessageSegmentInput</code>クラスは、入力したい内容の型のクラスが継承している。<br/>
+テキストの入力内容は、<code>ConnectApi.TextSegmentInput</code>クラスを使用する。<br/>
+メンションの場合は、<code>ConnectApi.MentionSegmentInput</code>クラス、となっている。</p>
+
+<p><a href="https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_connectapi_input_messageSegmentInput.htm">ConnectApi.MessageSegmentInput Class</a></p>
+
+<h3>ConnectApi.TextSegmentInput</h3>
+
+<p><code>text</code>メソッドのみ。ここに投稿する本文を入れる。<br/>
+<a href="https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_connectapi_input_TxtMsgSeg.htm">ConnectApi.TextSegmentInput Class</a></p>
+
+<h3>ConnectApi.MentionSegmentInput</h3>
+
+<p><code>id</code>メソッドにメンションを送りたいユーザーのIDを入力する。
+もしくは、APIバージョン38以降なら、<code>username</code>メソッドでユーザー名も利用出来るよう。<br/>
+<a href="https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_connectapi_input_mentionMsgSeg.htm">ConnectApi.MentionSegmentInput Class</a></p>
+
+<h3>コード</h3>
+
+<p>一通りのコード全文は以下。<br/>
+引数で、入力内容、親の投稿ID、メンションをつけるユーザのIDを渡すようにしている。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>/**
+</span><span class='line'> * コメントを投稿する
+</span><span class='line'> * 
+</span><span class='line'> * @param body String 本文
+</span><span class='line'> * @param feedId Id 親の投稿ID
+</span><span class='line'> * @param userId Id メンションを付ける
+</span><span class='line'> * @return ConnectApi.Comment コメントクラス
+</span><span class='line'> */
+</span><span class='line'>public static void doPostComment(String body, Id feedId, Id userId){
+</span><span class='line'>  //子の投稿を作る
+</span><span class='line'>  ConnectApi.CommentInput commentInput = new ConnectApi.CommentInput();
+</span><span class='line'>  ConnectApi.MessageBodyInput messageBodyInput = new ConnectApi.MessageBodyInput();
+</span><span class='line'>  messageBodyInput.messageSegments = new List&lt;ConnectApi.MessageSegmentInput&gt;();
+</span><span class='line'>  
+</span><span class='line'>  //本文を作る
+</span><span class='line'>  ConnectApi.TextSegmentInput textSegmentInput = new ConnectApi.TextSegmentInput();
+</span><span class='line'>  textSegmentInput.text = body;
+</span><span class='line'>  messageBodyInput.messageSegments.add(textSegmentInput);
+</span><span class='line'>  //メンションを作る
+</span><span class='line'>  ConnectApi.MentionSegmentInput mentionSegmentInput = new ConnectApi.MentionSegmentInput();
+</span><span class='line'>  mentionSegmentInput.id = userId;
+</span><span class='line'>  messageBodyInput.messageSegments.add(mentionSegmentInput);
+</span><span class='line'>
+</span><span class='line'>  //投稿として追加
+</span><span class='line'>  commentInput.body = messageBodyInput;
+</span><span class='line'>  
+</span><span class='line'>  //コメントを投稿
+</span><span class='line'>  ConnectApi.Comment comment = ConnectApi.ChatterFeeds.postCommentToFeedElement(null, feedId, commentInput, null);
+</span><span class='line'>  return comment;
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<p>返却される<code>ConnectApi.Comment</code>クラスは以下。<br/>
+<a href="https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_connectapi_output_comment.htm">ConnectApi.Comment Class</a></p>
+
+<h2>参考</h2>
+
+<ul>
+<li><a href="https://help.salesforce.com/apex/HTViewSolution?id=000199689&amp;language=ja">Apexからの@メンションについて</a></li>
+<li><a href="http://qiita.com/tyoshikawa1106/items/c68f8fbcd657a1a89ef2">Connect APIとTest Class &ndash; Qiita</a></li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[サブディレクトリに別のベーシック認証をかける]]></title>
@@ -3613,200 +3790,6 @@ apexの作り方は割愛。エンドポイントはapex内で以下のように
 
 <ul>
 <li><a href="http://anthrgrnwrld.hatenablog.com/entry/2015/06/26/204031">テキストフィールドにテキスト入力後、Returnでキーボードを隠す方法 [Swift1.2][UITextField] &ndash; MILLEN BOX</a></li>
-</ul>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[Heroku] アドオンを共有機能を使って管理する]]></title>
-    <link href="http://kayakuguri.github.io/blog/2016/05/16/heroku-addon-attach/"/>
-    <updated>2016-05-16T16:51:59+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2016/05/16/heroku-addon-attach</id>
-    <content type="html"><![CDATA[<p>herokuでPostgreSQLやRedisなどを他のアプリでも共有したい場合、環境変数をコピペして使っていたのだけれど、
-それだとちょっとマズイ場合もあるらしく、attacheing add-on を使ってみた。</p>
-
-<!-- more -->
-
-
-<h1>共有する理由</h1>
-
-<p>環境変数にパスワードなどをコピペするよりも確実、という理由もあるが、一番大きなところとしては、
-メンテナンスなどでアドオンのDB名やユーザー名などの情報が変わってしまうことがあるよう。<br/>
-その時に、直接入れているアプリの方では自動的に環境変数も書き換わるため支障はないが、
-コピペで設定している他のアプリが合った場合には参照が出来なくなってしまう。
-その時に共有設定していれば、設定しているアプリの環境変数も自動で書き換わるためメンテナンスの手間がなくなる。
-なによりも突然アクセスできなくなる事がなくなる、というわけ。</p>
-
-<p>コピペなんていう不確定な方法よりもherokuの公式機能に乗った方が確実に安全。</p>
-
-<h1>アドオンの追加</h1>
-
-<p>例えば今回は、<code>dog</code>、というアプリにheroku postgresを入れてみる。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>$ heroku addons:create heroku-postgresql:hobby-dev -a dog
-</span><span class='line'>Creating postgresql-opaque-93277... done, (free)
-</span><span class='line'>Adding postgresql-opaque-93277 to dog... done
-</span><span class='line'>Setting DATABASE_URL and restarting dog... done, v10
-</span><span class='line'>Database has been created and is available</span></code></pre></td></tr></table></div></figure>
-
-
-<p><a href="https://devcenter.heroku.com/articles/heroku-postgresql">https://devcenter.heroku.com/articles/heroku-postgresql</a></p>
-
-<p>DBの設定内容は、環境変数の<code>DATABASE_URL</code>に保存されている。</p>
-
-<h1>アドオンの共有</h1>
-
-<p>作ったアドオンを別のアプリでも利用してみる。<br/>
-その際にアドオンの名前が必要になる。<br/>
-上記作成時に名前が返ってきており、<code>postgresql-opaque-93277</code>が今回の名前になる。<br/>
-後から確認するには、アプリの一覧を見ればわかる。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>$ heroku addons -a dog
-</span><span class='line'>
-</span><span class='line'>Add-on                                       Plan       Price
-</span><span class='line'>───────────────────────────────────────────  ─────────  ─────
-</span><span class='line'>heroku-postgresql (postgresql-opaque-93277)  hobby-dev  free
-</span><span class='line'> └─ as DATABASE</span></code></pre></td></tr></table></div></figure>
-
-
-<p>名前がわかったところで、この名前を利用して他のアプリと共有させる。<br/>
-例えば今回は<code>cat</code> というアプリに共有させたとする。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>$ heroku addons:attach -a cat postgresql-opaque-93277
-</span><span class='line'>Attaching postgresql-opaque-93277 to cat... done
-</span><span class='line'>Setting DATABASE vars and restarting cat... done, v17</span></code></pre></td></tr></table></div></figure>
-
-
-<p>ここでアドオンの名前を指定する。<br/>
-アドオン一覧で確認すると<code>dog</code>アプリから共有されていることがわかる。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>$ heroku addons -a cat
-</span><span class='line'>
-</span><span class='line'>Add-on                                       Plan       Price
-</span><span class='line'>───────────────────────────────────────────  ─────────  ────────────────────
-</span><span class='line'>heroku-postgresql (postgresql-opaque-93277)  hobby-dev  (billed to dog app)
-</span><span class='line'> ├─ as DATABASE
-</span><span class='line'> └─ as DATABASE on dog app</span></code></pre></td></tr></table></div></figure>
-
-
-<p>DBの設定内容は、環境変数の<code>DATABASE_URL</code>に保存されている。</p>
-
-<p>heorkuのダッシュボード上では以下のように共有されている事がわかるようになっている。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2016/05/attach01.jpg" alt="" /></p>
-
-<h1>アドオンの削除</h1>
-
-<h2>共有の解除</h2>
-
-<p>共有の解除は、<code>detach</code>を使う。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>$ heroku addons:detach -a cat postgresql-opaque-93277
-</span><span class='line'>Removing DATABASE attachment to postgresql-opaque-93277 from cat... done
-</span><span class='line'>Unsetting DATABASE vars and restarting cat... done, v18</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>削除</h2>
-
-<p>削除には、<code>destroy</code>を使う。<br/>
-共有をしている場合は、先に共有設定を全て解除しておく必要がある。<br/>
-途中、確認のためにアプリ名の入力を求められるので入力する。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>$ heroku addons:destroy postgresql-opaque-93277
-</span><span class='line'>
-</span><span class='line'> !    WARNING: Destructive Action
-</span><span class='line'> !    This command will affect the app: dog
-</span><span class='line'> !    To proceed, type "dog" or re-run this command with --confirm dog
-</span><span class='line'>
-</span><span class='line'>&gt; dog
-</span><span class='line'>Destroying postgresql-opaque-93277 on dog... done, (free)
-</span><span class='line'>Removing vars for DATABASE from dog and restarting... done, v13</span></code></pre></td></tr></table></div></figure>
-
-
-<h1>アドオン名の指定</h1>
-
-<p>ここまでで一通りのアドオンの設定方法は終わりだけど、それぞれのアドオンを追加、共有する時に名前を変更できる。</p>
-
-<h2>追加時</h2>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>$ heroku addons:create heroku-postgresql:hobby-dev -a dog --name dog-database --as DOG_DATABASE
-</span><span class='line'>Creating dog-database... done, (free)
-</span><span class='line'>Adding dog-database to dog... done
-</span><span class='line'>Setting DOG_DATABASE_URL and restarting dog... done, v16
-</span><span class='line'>Database has been created and is available</span></code></pre></td></tr></table></div></figure>
-
-
-<p><code>--name</code>は、アドオンの名前を指定している。<br/>
-<code>--as</code>は環境変数に追加する名前を指定している。<br/>
-<code>as</code>で指定する名前は、アルファベットの大文字で、使用できる記号も決まっている。(<code>-</code>ハイフンは使用できない)</p>
-
-<p>この場合、DBの設定内容は、環境変数の<code>DOG_DATABASE_URL</code>に保存されている。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>$ heroku config -a dog
-</span><span class='line'>=== dog Config Vars
-</span><span class='line'>DOG_DATABASE_URL: postgres://yo....</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>共有時</h2>
-
-<p>共有時にはアドオンの名前は設定出来ない(元を参照するので)が、<code>as</code>の指定は可能。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>$ heroku addons:attach -a cat dog-database --as CAT_DATABASE
-</span><span class='line'>Attaching dog-database as CAT_DATABASE to cat... done
-</span><span class='line'>Setting CAT_DATABASE vars and restarting cat... done, v19</span></code></pre></td></tr></table></div></figure>
-
-
-<h1>参考</h1>
-
-<ul>
-<li><a href="https://devcenter.heroku.com/articles/heroku-postgresql">Heroku Postgres | Heroku Dev Center</a></li>
-<li><a href="https://devcenter.heroku.com/articles/managing-add-ons">Managing Add-ons | Heroku Dev Center</a></li>
-<li><a href="http://blog.flect.co.jp/labo/2015/01/addon-a943.html">Addon のアプリ間共有 &ndash; フレクトのHeroku Lab</a></li>
 </ul>
 
 ]]></content>
