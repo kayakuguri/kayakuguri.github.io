@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2016-10-17T18:50:53+09:00</updated>
+  <updated>2016-10-17T18:51:44+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -56,15 +56,7 @@ ChatterのコメントをApex経由で<code>@</code>メンション付きで投�
 </ol>
 
 
-<h2>feedElementId</h2>
-
-<p>第二引数の<code>feedElementId</code>はそのままIDを入れればよい。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>Id feedId = '0D5O000000QjmdlKAB';</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>comment</h2>
+<h2>(第二引数)comment</h2>
 
 <p><code>ConnectApi.CommentInput</code>型。<br/>
 <a href="https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_connectapi_input_comment.htm#apex_connectapi_input_comment">ConnectApi.CommentInput Class</a></p>
