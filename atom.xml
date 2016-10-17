@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2016-10-17T18:49:02+09:00</updated>
+  <updated>2016-10-17T18:50:53+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -44,28 +44,16 @@ ChatterのコメントをApex経由で<code>@</code>メンション付きで投�
 
 <p><code>postCommentToFeedElement</code>の引数は以下となっている。</p>
 
-<ul>
-<li><ol>
+<ol>
 <li><code>communityId</code><br/>
 投稿するユーザーのコミュニティのID。<code>null</code>可。</li>
-</ol>
-</li>
-<li><ol>
 <li><code>feedElementId</code><br/>
 親となる投稿(<code>FeedItem</code>)のSFID</li>
-</ol>
-</li>
-<li><ol>
 <li><code>comment</code><br/>
 投稿するコメントの情報</li>
-</ol>
-</li>
-<li><ol>
 <li><code>feedElementFileUpload</code><br/>
 投稿するファイルのバイナリ情報</li>
 </ol>
-</li>
-</ul>
 
 
 <h2>feedElementId</h2>
