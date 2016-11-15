@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2016-10-17T18:51:44+09:00</updated>
+  <updated>2016-11-15T18:51:22+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,483 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[ScotchboxでWordPressのローカル環境をサクッと構築する]]></title>
+    <link href="http://kayakuguri.github.io/blog/2016/11/15/scotchbox-wordpress/"/>
+    <updated>2016-11-15T18:50:13+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2016/11/15/scotchbox-wordpress</id>
+    <content type="html"><![CDATA[<p><a href="https://github.com/flurinduerst/WPDistillery">WPDisillery</a>というScotch BoxのWordPress用キットを利用して簡単にローカルにWordPress環境を作る。</p>
+
+<!-- more -->
+
+
+<p>手順は以下のままで試してみた。</p>
+
+<p><a href="https://box.scotch.io/">https://box.scotch.io/</a>
+[Installing WordPress]</p>
+
+<h1>Setup</h1>
+
+<p><code>WPDistillery</code>のリポジトリをクローンする。
+実質、必要なものは、<code>config.yml</code>と<code>setup.sh</code>の2ファイルだけなので、それを引き上げて他は削除する。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$ git clone git@github.com:flurinduerst/WPDistillery.git
+</span><span class='line'>$ mv WPDistillery/config.yml config.yml
+</span><span class='line'>$ mv WPDistillery/setup.sh setup.sh
+</span><span class='line'>$ rm -rf WPDistillery</span></code></pre></td></tr></table></div></figure>
+
+
+<p><code>Scotch Box</code>をクローンする。
+必要なものは<code>Vagrantfile</code>と<code>public</code>フォルダなので引き上げて、その他は削除する。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$ git clone https://github.com/scotch-io/scotch-box.git
+</span><span class='line'>$ mv scotch-box/public public
+</span><span class='line'>$ mv scotch-box/Vagrantfile Vagrantfile
+</span><span class='line'>$ rm -rf scotch-box</span></code></pre></td></tr></table></div></figure>
+
+
+<p>この時点で以下のような構造になっているはず。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>Vagrantfile
+</span><span class='line'>config.yml
+</span><span class='line'>public/
+</span><span class='line'>setup.sh</span></code></pre></td></tr></table></div></figure>
+
+
+<p>ここまでをワンライナーで実行するコマンド。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>git clone https://github.com/scotch-io/scotch-box.git && mv scotch-box/public public && mv scotch-box/Vagrantfile Vagrantfile && rm -rf scotch-box && git clone --depth 1 https://github.com/flurinduerst/WPDistillery.git && mv WPDistillery/config.yml config.yml && mv WPDistillery/setup.sh setup.sh && rm -rf WPDistillery</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>Config.yml</h1>
+
+<p>WordPressの設定のために、<code>Config.yml</code>を編集する。</p>
+
+<p>デフォルトでは以下のような内容になっている。
+<a href="https://github.com/flurinduerst/WPDistillery/blob/master/config.yml">https://github.com/flurinduerst/WPDistillery/blob/master/config.yml</a></p>
+
+<h2>言語とタイムゾーン</h2>
+
+<p>デフォルトではアメリカになっているので日本に変更する。
+localeは日本版の場合は、<code>ja</code>となる。(<code>ja_JP</code>ではない)</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'># language/timezone
+</span><span class='line'>wplocale: ja
+</span><span class='line'>timezone: "Asia/Tokyo"</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>ユーザ</h2>
+
+<p>初期ユーザの設定。(ローカルだし)そのままでも構わない。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'># admin user settings
+</span><span class='line'>admin:
+</span><span class='line'>  user: admin
+</span><span class='line'>  password: admin
+</span><span class='line'>  email: mail@domain.tld
+</span><span class='line'>  first_name: ""
+</span><span class='line'>  last_name: ""</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>サイトの設定</h2>
+
+<p>サイトのタイトルや説明、パーマリンクの設定など、ブログ全般の設定関係。
+<strong>urlだけ、ホスト名で指定したURLを記入する</strong>。
+その他はそのままで問題なし。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>wpsettings:
+</span><span class='line'>  url: scotchbox
+</span><span class='line'>  title: Example Title
+</span><span class='line'>  description: Example Description
+</span><span class='line'>  permalink_structure: "/%postname%/"
+</span><span class='line'>  thumbnail_width: 150
+</span><span class='line'>  thumbnail_height: 150
+</span><span class='line'>  medium_width: 300
+</span><span class='line'>  medium_height: 300
+</span><span class='line'>  large_width: 1024
+</span><span class='line'>  large_height: 1024
+</span><span class='line'>  # use page as frontpage
+</span><span class='line'>  page_on_front: true
+</span><span class='line'>    frontpage_name: Example Front Page
+</span><span class='line'>  # automatic conversion of smilies
+</span><span class='line'>  convert_smilies: false</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>テーマ</h2>
+
+<p>デフォルトでは、<code>WPSeed</code>というテーマが指定されている。
+<a href="https://github.com/flurinduerst/WPSeed/">flurinduerst/WPSeed: WordPress starter Theme + sage Workflow</a></p>
+
+<p>これはテーマ作成の元になるようなものを集めた、テーマのフレームワーク？みたいなもののよう。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'># theme to install, choose new name in 'rename' or leave empty
+</span><span class='line'>theme:
+</span><span class='line'>  name: WPSeed
+</span><span class='line'>  rename: ""
+</span><span class='line'>  url: "https://github.com/flurinduerst/WPSeed/archive/master.zip"
+</span><span class='line'>  # add branch (e.g. master) or leave empty ("") if theme is not downloaded from a git repository
+</span><span class='line'>  source_branch: master</span></code></pre></td></tr></table></div></figure>
+
+
+<p>デフォルトのプラグイン、Twenthsixteenはそのまま入っていた。</p>
+
+<h2>プラグイン</h2>
+
+<p>有効化するものと有効化しないで入れておくものをそれぞれ選択出来る。</p>
+
+<p>インストールして有効化するものは以下。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'># plugins to install & activate
+</span><span class='line'>plugins_active:
+</span><span class='line'>  - disable-comments
+</span><span class='line'>  - duplicate-post
+</span><span class='line'>  - enable-media-replace
+</span><span class='line'>  - favicon-by-realfavicongenerator
+</span><span class='line'>  - regenerate-thumbnails
+</span><span class='line'>  - simple-page-ordering
+</span><span class='line'>  - user-switching
+</span><span class='line'>  - google-sitemap-generator</span></code></pre></td></tr></table></div></figure>
+
+
+<p>インストールだけするものは以下。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'># plugins to install
+</span><span class='line'>plugins_inactive:
+</span><span class='line'>  #development
+</span><span class='line'>  - custom-post-type-ui
+</span><span class='line'>  - search-and-replace
+</span><span class='line'>  - capability-manager-enhanced
+</span><span class='line'>  #administration
+</span><span class='line'>  - adminimize
+</span><span class='line'>  - admin-menu-editor
+</span><span class='line'>  - admin-menu-reorder
+</span><span class='line'>  - wordpress-seo
+</span><span class='line'>  #security/backup
+</span><span class='line'>  - wp-security-audit-log
+</span><span class='line'>  - backwpup</span></code></pre></td></tr></table></div></figure>
+
+
+<p>好きなものを追加したい場合はここに正式な名前でリストに追加すればよさそう。
+( <code>https://ja.wordpress.org/plugins/</code> の後ろに付くもの)</p>
+
+<p>とりあえず、長くなるけどデフォルトで入っているものを調べてみる。</p>
+
+<h3>有効化されるもの</h3>
+
+<table>
+<thead>
+<tr>
+<th></th>
+<th align="left"> 名前 </th>
+<th align="left"> 説明 </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td></td>
+<td align="left"> <a href="https://ja.wordpress.org/plugins/disable-comments/">disable-comments</a> </td>
+<td align="left"> コメント停止用  |</td>
+</tr>
+<tr>
+<td></td>
+<td align="left"> <a href="https://ja.wordpress.org/plugins/duplicate-post/">duplicate-post</a> </td>
+<td align="left"> 記事を複製する |</td>
+</tr>
+<tr>
+<td></td>
+<td align="left"> <a href="https://ja.wordpress.org/plugins/enable-media-replace/">enable-media-replace</a> </td>
+<td align="left"> アップされている画像の置換 |</td>
+</tr>
+<tr>
+<td></td>
+<td align="left"> <a href="https://ja.wordpress.org/plugins/favicon-by-realfavicongenerator/">favicon-by-realfavicongenerator</a> </td>
+<td align="left"> ファビコン設定用 |</td>
+</tr>
+<tr>
+<td></td>
+<td align="left"> <a href="https://ja.wordpress.org/plugins/regenerate-thumbnails/">regenerate-thumbnails</a> </td>
+<td align="left"> アップロード済みの画像のサムネイルを一括再生成 |</td>
+</tr>
+<tr>
+<td></td>
+<td align="left"> <a href="https://ja.wordpress.org/plugins/simple-page-ordering/">simple-page-ordering</a> </td>
+<td align="left"> ページ・カスタム投稿タイプの並び順を入れ替える |</td>
+</tr>
+<tr>
+<td></td>
+<td align="left"> <a href="https://ja.wordpress.org/plugins/user-switching/">user-switching</a> </td>
+<td align="left"> ユーザー切り替え |</td>
+</tr>
+<tr>
+<td></td>
+<td align="left"> <a href="https://ja.wordpress.org/plugins/google-sitemap-generator/">google-sitemap-generator</a> </td>
+<td align="left"> sitemapを自動で作成 |</td>
+</tr>
+</tbody>
+</table>
+
+
+<h3>インストールのみ</h3>
+
+<table>
+<thead>
+<tr>
+<th></th>
+<th align="left"> 名前 </th>
+<th align="left"> 説明 </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td></td>
+<td align="left"> <a href="https://ja.wordpress.org/plugins/custom-post-type-ui/">custom-post-type-ui</a> </td>
+<td align="left"> カスタム投稿タイプを作成 |</td>
+</tr>
+<tr>
+<td></td>
+<td align="left"> <a href="https://ja.wordpress.org/plugins/search-and-replace/">search-and-replace</a> </td>
+<td align="left"> DB内のデータを検索・置換する |</td>
+</tr>
+<tr>
+<td></td>
+<td align="left"> <a href="https://ja.wordpress.org/plugins/capability-manager-enhanced/">capability-manager-enhanced</a> </td>
+<td align="left"> ユーザ権限の管理 |</td>
+</tr>
+<tr>
+<td></td>
+<td align="left"> <a href="https://ja.wordpress.org/plugins/adminimize/">adminimize</a> </td>
+<td align="left">  ユーザ権限の管理 |</td>
+</tr>
+<tr>
+<td></td>
+<td align="left"> <a href="https://ja.wordpress.org/plugins/admin-menu-editor/">admin-menu-editor</a> </td>
+<td align="left"> 管理画面メニューのカスタマイズ |</td>
+</tr>
+<tr>
+<td></td>
+<td align="left"> <a href="https://ja.wordpress.org/plugins/admin-menu-reorder/">admin-menu-reorder</a> </td>
+<td align="left"> 管理画面メニューの並び替え |</td>
+</tr>
+<tr>
+<td></td>
+<td align="left"> <a href="https://ja.wordpress.org/plugins/wordpress-seo/">wordpress-seo</a> </td>
+<td align="left"> SEO管理 |</td>
+</tr>
+<tr>
+<td></td>
+<td align="left"> <a href="https://ja.wordpress.org/plugins/wp-security-audit-log/">wp-security-audit-log</a> </td>
+<td align="left"> 作業ログ管理 |</td>
+</tr>
+<tr>
+<td></td>
+<td align="left"> <a href="https://ja.wordpress.org/plugins/backwpup/">backwpup</a> </td>
+<td align="left"> バックアップ |</td>
+</tr>
+</tbody>
+</table>
+
+
+<p>一部、重複していたり、更新が止まってたりするものもあるので、実際本番アップする際には精査した方がよさそう。</p>
+
+<h3>設定をスキップする設定</h3>
+
+<p>最後の <code># WPDISTILLERY SETUP</code> のセクションは、自動セットアップをするかどうかの設定。デフォルトでは全てオン(<code>true</code>)になっている。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>setup:
+</span><span class='line'>  wp: true
+</span><span class='line'>  settings: true
+</span><span class='line'>  theme: true
+</span><span class='line'>  plugins: true
+</span><span class='line'>  cleanup: true
+</span><span class='line'>    comment: true
+</span><span class='line'>    posts: true
+</span><span class='line'>    files: true
+</span><span class='line'>    themes: true</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>ホスト</h1>
+
+<p><code>Vagrantfile</code>にてホストの設定をする。
+デフォルトでは以下のように、<code>192.168.33.10</code>のIPで、<code>scotchbox</code>というホスト名になっている。
+これを必要ならば、任意のものに変更する。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>config.vm.network "private_network", ip: "192.168.33.10"
+</span><span class='line'>config.vm.hostname = "scotchbox"</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>Vagrantを起動</h1>
+
+<p>ここまでで設定が完了したので、Vagrantを起動する。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$ vagrant up</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>設定を実行</h1>
+
+<p>Vagrantが起動したら、WordPressの自動設定を起動するためにVagrantにsshで入る。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$ vagrant ssh</span></code></pre></td></tr></table></div></figure>
+
+
+<p>自動設定の前に、<code>WP CLI</code>を最新版に更新し、その後、<code>setup.sh</code>のシェルスクリプトを起動する。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$ sudo wp cli update --allow-root
+</span><span class='line'>You have version 0.20.3. Would you like to update to 0.25.0? [y/n] y
+</span><span class='line'>Downloading from https://github.com/wp-cli/wp-cli/releases/download/v0.25.0/wp-cli-0.25.0.phar...
+</span><span class='line'>New version works. Proceeding to replace.
+</span><span class='line'>Success: Updated WP-CLI to 0.25.0
+</span><span class='line'>
+</span><span class='line'>$ cd ../../var/www/ && bash setup.sh
+</span><span class='line'>========== WPDISTILLERY START ==========
+</span><span class='line'>...
+</span><span class='line'>Do you want to continue anyway? (y/n) y
+</span><span class='line'>...
+</span><span class='line'>...
+</span><span class='line'>========== WPDISTILLERY FINISHED ==========</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>アクセス</h1>
+
+<p>設定したホスト名かIPでアクセスすると、トップページが表示される。
+<code>/wp-login.php</code>でログイン画面が開き、設定したユーザでログインが出来る。
+これで無事、起動出来た。</p>
+
+<h1>簡易インストール</h1>
+
+<p>デフォルトのままだとプラグインやテーマが入ってかなり時間がかかるので、さくっと起動するために、ほとんどの設定をオフにしてインストールしてみる。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>setup:
+</span><span class='line'>  wp: true
+</span><span class='line'>  settings: false
+</span><span class='line'>  theme: false
+</span><span class='line'>  plugins: false
+</span><span class='line'>  cleanup: false
+</span><span class='line'>    comment: false
+</span><span class='line'>    posts: false
+</span><span class='line'>    files: false
+</span><span class='line'>    themes: false</span></code></pre></td></tr></table></div></figure>
+
+
+<p>これだと、サイトの名前やユーザの設定以外はデフォルトのまま起動できた。
+デフォルトのフルの状態のものよりかなり早いのでこちらの方がよいかもしれない。</p>
+
+<h1>参考</h1>
+
+<ul>
+<li><a href="https://box.scotch.io/">Scotch Box ♥ A Vagrant LAMP Stack That Just Works</a></li>
+<li><a href="https://github.com/flurinduerst/WPDistillery#setup">flurinduerst/WPDistillery: WordPress Setup runner for Scotch Box</a></li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Chatter in Apxを利用してコメントをメンション付きで投稿する]]></title>
@@ -3678,100 +4155,6 @@ apexの作り方は割愛。エンドポイントはapex内で以下のように
 後は必要であれば、認証方式をJWTにしたり出来るといいかもしれない。</p>
 
 <p>もしSFへの接続でいいライブラリなどがあれば教えて下さい。</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[swift]リターンキーが押されたら次の入力欄へ移動する]]></title>
-    <link href="http://kayakuguri.github.io/blog/2016/05/17/swift-textfield-change-forcus/"/>
-    <updated>2016-05-17T15:48:08+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2016/05/17/swift-textfield-change-forcus</id>
-    <content type="html"><![CDATA[<p>入力欄が複数ある画面で、リターンキーをタップして次の入力欄へ移動する処理を調べたのでメモ。</p>
-
-<!-- more -->
-
-
-<h1>入力欄の設定</h1>
-
-<p>以下のように、入力欄が２つあり、メールアドレスの入力欄でリターンキーをタップすると、次のパスワード入力欄にフォーカスが移動するようにする。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2016/05/login01.jpg" alt="" /></p>
-
-<p>設定したい入力欄(ログインIDの入力欄)を選択し、inspecotrから<code>tag</code>を設定する。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2016/05/login02.jpg" alt="" /></p>
-
-<p>フォーカスさせる順番に、1,2,3と設定する。</p>
-
-<h1>Delgate</h1>
-
-<p>リターンキーが押されたイベントを検知するために、クラスに<code>UITextFieldDelegate</code>を追加する。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>class ViewController: UIViewController, UITextFieldDelegate {
-</span><span class='line'>  ...</span></code></pre></td></tr></table></div></figure>
-
-
-<p>ロード時のコード内で判定するテキストフィールドの<code>delegate</code>を自身に設定する。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>override func viewDidLoad() {
-</span><span class='line'>  super.viewDidLoad()
-</span><span class='line'>  login_txt.delegate = self
-</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
-
-
-<p>ここまで設定すると、リターンキーが押された時に、<code>textFieldShouldReturn</code>の関数が自動で実行されるようになる。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>func textFieldShouldReturn(textField: UITextField) -&gt; Bool {
-</span><span class='line'>  //リターンキーが押された時に実行される
-</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
-
-
-<h1>フォーカスの移動</h1>
-
-<p>これは以下の記事を使わせてもらった。<br/>
-<a href="http://qiita.com/mm36/items/848e93d590ef5c41e43f">ios アプリのテキスト入力で次のテキストボックスにサクッと移動する方法</a></p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>func textFieldShouldReturn(textField: UITextField) -&gt; Bool {
-</span><span class='line'>    // 今フォーカスが当たっているテキストボックスからフォーカスを外す
-</span><span class='line'>    textField.resignFirstResponder()
-</span><span class='line'>    // 次のTag番号を持っているテキストボックスがあれば、フォーカスする
-</span><span class='line'>    let nextTag = textField.tag + 1
-</span><span class='line'>    if let nextTextField = self.view.viewWithTag(nextTag) {
-</span><span class='line'>        nextTextField.becomeFirstResponder()
-</span><span class='line'>    }
-</span><span class='line'>    return true
-</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
-
-
-<h1>完成</h1>
-
-<p>これでリターンキーが押された時に指定した入力欄にフォーカスが移動出来るように設定出来た。</p>
-
-<h1>参考</h1>
-
-<ul>
-<li><a href="http://anthrgrnwrld.hatenablog.com/entry/2015/06/26/204031">テキストフィールドにテキスト入力後、Returnでキーボードを隠す方法 [Swift1.2][UITextField] &ndash; MILLEN BOX</a></li>
-</ul>
-
 ]]></content>
   </entry>
   

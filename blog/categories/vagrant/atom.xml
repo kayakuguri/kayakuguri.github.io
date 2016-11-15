@@ -4,7 +4,7 @@
   <title><![CDATA[Category: vagrant | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/vagrant/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2016-10-17T18:51:44+09:00</updated>
+  <updated>2016-11-15T18:51:22+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,410 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[ScotchboxでWordPressのローカル環境をサクッと構築する]]></title>
+    <link href="http://kayakuguri.github.io/blog/2016/11/15/scotchbox-wordpress/"/>
+    <updated>2016-11-15T18:50:13+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2016/11/15/scotchbox-wordpress</id>
+    <content type="html"><![CDATA[<p><a href="https://github.com/flurinduerst/WPDistillery">WPDisillery</a>というScotch BoxのWordPress用キットを利用して簡単にローカルにWordPress環境を作る。</p>
+
+<!-- more -->
+
+
+<p>手順は以下のままで試してみた。</p>
+
+<p><a href="https://box.scotch.io/">https://box.scotch.io/</a>
+[Installing WordPress]</p>
+
+<h1>Setup</h1>
+
+<p><code>WPDistillery</code>のリポジトリをクローンする。
+実質、必要なものは、<code>config.yml</code>と<code>setup.sh</code>の2ファイルだけなので、それを引き上げて他は削除する。</p>
+
+<p><code>
+$ git clone git@github.com:flurinduerst/WPDistillery.git
+$ mv WPDistillery/config.yml config.yml
+$ mv WPDistillery/setup.sh setup.sh
+$ rm -rf WPDistillery
+</code></p>
+
+<p><code>Scotch Box</code>をクローンする。
+必要なものは<code>Vagrantfile</code>と<code>public</code>フォルダなので引き上げて、その他は削除する。</p>
+
+<p><code>
+$ git clone https://github.com/scotch-io/scotch-box.git
+$ mv scotch-box/public public
+$ mv scotch-box/Vagrantfile Vagrantfile
+$ rm -rf scotch-box
+</code></p>
+
+<p>この時点で以下のような構造になっているはず。</p>
+
+<p><code>
+Vagrantfile
+config.yml
+public/
+setup.sh
+</code></p>
+
+<p>ここまでをワンライナーで実行するコマンド。</p>
+
+<p><code>
+git clone https://github.com/scotch-io/scotch-box.git &amp;&amp; mv scotch-box/public public &amp;&amp; mv scotch-box/Vagrantfile Vagrantfile &amp;&amp; rm -rf scotch-box &amp;&amp; git clone --depth 1 https://github.com/flurinduerst/WPDistillery.git &amp;&amp; mv WPDistillery/config.yml config.yml &amp;&amp; mv WPDistillery/setup.sh setup.sh &amp;&amp; rm -rf WPDistillery
+</code></p>
+
+<h1>Config.yml</h1>
+
+<p>WordPressの設定のために、<code>Config.yml</code>を編集する。</p>
+
+<p>デフォルトでは以下のような内容になっている。
+<a href="https://github.com/flurinduerst/WPDistillery/blob/master/config.yml">https://github.com/flurinduerst/WPDistillery/blob/master/config.yml</a></p>
+
+<h2>言語とタイムゾーン</h2>
+
+<p>デフォルトではアメリカになっているので日本に変更する。
+localeは日本版の場合は、<code>ja</code>となる。(<code>ja_JP</code>ではない)</p>
+
+<p>```</p>
+
+<h1>language/timezone</h1>
+
+<p>wplocale: ja
+timezone: &ldquo;Asia/Tokyo&rdquo;
+```</p>
+
+<h2>ユーザ</h2>
+
+<p>初期ユーザの設定。(ローカルだし)そのままでも構わない。
+```</p>
+
+<h1>admin user settings</h1>
+
+<p>admin:
+  user: admin
+  password: admin
+  email: <a href="&#x6d;&#97;&#105;&#108;&#x74;&#x6f;&#x3a;&#x6d;&#97;&#105;&#108;&#x40;&#x64;&#x6f;&#x6d;&#97;&#x69;&#x6e;&#x2e;&#x74;&#108;&#100;">&#x6d;&#x61;&#x69;&#x6c;&#x40;&#100;&#111;&#x6d;&#97;&#x69;&#x6e;&#46;&#x74;&#108;&#100;</a>
+  first_name: &ldquo;&rdquo;
+  last_name: &ldquo;&rdquo;
+```</p>
+
+<h2>サイトの設定</h2>
+
+<p>サイトのタイトルや説明、パーマリンクの設定など、ブログ全般の設定関係。
+<strong>urlだけ、ホスト名で指定したURLを記入する</strong>。
+その他はそのままで問題なし。</p>
+
+<p>```
+wpsettings:
+  url: scotchbox
+  title: Example Title
+  description: Example Description
+  permalink_structure: &ldquo;/%postname%/&rdquo;
+  thumbnail_width: 150
+  thumbnail_height: 150
+  medium_width: 300
+  medium_height: 300
+  large_width: 1024
+  large_height: 1024
+  # use page as frontpage
+  page_on_front: true</p>
+
+<pre><code>frontpage_name: Example Front Page
+</code></pre>
+
+<p>  # automatic conversion of smilies
+  convert_smilies: false
+```</p>
+
+<h2>テーマ</h2>
+
+<p>デフォルトでは、<code>WPSeed</code>というテーマが指定されている。
+<a href="https://github.com/flurinduerst/WPSeed/">flurinduerst/WPSeed: WordPress starter Theme + sage Workflow</a></p>
+
+<p>これはテーマ作成の元になるようなものを集めた、テーマのフレームワーク？みたいなもののよう。</p>
+
+<p>```</p>
+
+<h1>theme to install, choose new name in &lsquo;rename&rsquo; or leave empty</h1>
+
+<p>theme:
+  name: WPSeed
+  rename: &ldquo;&rdquo;
+  url: &ldquo;<a href="https://github.com/flurinduerst/WPSeed/archive/master.zip">https://github.com/flurinduerst/WPSeed/archive/master.zip</a>&rdquo;
+  # add branch (e.g. master) or leave empty (&ldquo;&rdquo;) if theme is not downloaded from a git repository
+  source_branch: master
+```</p>
+
+<p>デフォルトのプラグイン、Twenthsixteenはそのまま入っていた。</p>
+
+<h2>プラグイン</h2>
+
+<p>有効化するものと有効化しないで入れておくものをそれぞれ選択出来る。</p>
+
+<p>インストールして有効化するものは以下。</p>
+
+<p>```</p>
+
+<h1>plugins to install &amp; activate</h1>
+
+<p>plugins_active:
+  &ndash; disable-comments
+  &ndash; duplicate-post
+  &ndash; enable-media-replace
+  &ndash; favicon-by-realfavicongenerator
+  &ndash; regenerate-thumbnails
+  &ndash; simple-page-ordering
+  &ndash; user-switching
+  &ndash; google-sitemap-generator
+```</p>
+
+<p>インストールだけするものは以下。</p>
+
+<p>```</p>
+
+<h1>plugins to install</h1>
+
+<p>plugins_inactive:
+  #development
+  &ndash; custom-post-type-ui
+  &ndash; search-and-replace
+  &ndash; capability-manager-enhanced
+  #administration
+  &ndash; adminimize
+  &ndash; admin-menu-editor
+  &ndash; admin-menu-reorder
+  &ndash; wordpress-seo
+  #security/backup
+  &ndash; wp-security-audit-log
+  &ndash; backwpup
+```</p>
+
+<p>好きなものを追加したい場合はここに正式な名前でリストに追加すればよさそう。
+( <code>https://ja.wordpress.org/plugins/</code> の後ろに付くもの)</p>
+
+<p>とりあえず、長くなるけどデフォルトで入っているものを調べてみる。</p>
+
+<h3>有効化されるもの</h3>
+
+<table>
+<thead>
+<tr>
+<th></th>
+<th align="left"> 名前 </th>
+<th align="left"> 説明 </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td></td>
+<td align="left"> <a href="https://ja.wordpress.org/plugins/disable-comments/">disable-comments</a> </td>
+<td align="left"> コメント停止用  |</td>
+</tr>
+<tr>
+<td></td>
+<td align="left"> <a href="https://ja.wordpress.org/plugins/duplicate-post/">duplicate-post</a> </td>
+<td align="left"> 記事を複製する |</td>
+</tr>
+<tr>
+<td></td>
+<td align="left"> <a href="https://ja.wordpress.org/plugins/enable-media-replace/">enable-media-replace</a> </td>
+<td align="left"> アップされている画像の置換 |</td>
+</tr>
+<tr>
+<td></td>
+<td align="left"> <a href="https://ja.wordpress.org/plugins/favicon-by-realfavicongenerator/">favicon-by-realfavicongenerator</a> </td>
+<td align="left"> ファビコン設定用 |</td>
+</tr>
+<tr>
+<td></td>
+<td align="left"> <a href="https://ja.wordpress.org/plugins/regenerate-thumbnails/">regenerate-thumbnails</a> </td>
+<td align="left"> アップロード済みの画像のサムネイルを一括再生成 |</td>
+</tr>
+<tr>
+<td></td>
+<td align="left"> <a href="https://ja.wordpress.org/plugins/simple-page-ordering/">simple-page-ordering</a> </td>
+<td align="left"> ページ・カスタム投稿タイプの並び順を入れ替える |</td>
+</tr>
+<tr>
+<td></td>
+<td align="left"> <a href="https://ja.wordpress.org/plugins/user-switching/">user-switching</a> </td>
+<td align="left"> ユーザー切り替え |</td>
+</tr>
+<tr>
+<td></td>
+<td align="left"> <a href="https://ja.wordpress.org/plugins/google-sitemap-generator/">google-sitemap-generator</a> </td>
+<td align="left"> sitemapを自動で作成 |</td>
+</tr>
+</tbody>
+</table>
+
+
+<h3>インストールのみ</h3>
+
+<table>
+<thead>
+<tr>
+<th></th>
+<th align="left"> 名前 </th>
+<th align="left"> 説明 </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td></td>
+<td align="left"> <a href="https://ja.wordpress.org/plugins/custom-post-type-ui/">custom-post-type-ui</a> </td>
+<td align="left"> カスタム投稿タイプを作成 |</td>
+</tr>
+<tr>
+<td></td>
+<td align="left"> <a href="https://ja.wordpress.org/plugins/search-and-replace/">search-and-replace</a> </td>
+<td align="left"> DB内のデータを検索・置換する |</td>
+</tr>
+<tr>
+<td></td>
+<td align="left"> <a href="https://ja.wordpress.org/plugins/capability-manager-enhanced/">capability-manager-enhanced</a> </td>
+<td align="left"> ユーザ権限の管理 |</td>
+</tr>
+<tr>
+<td></td>
+<td align="left"> <a href="https://ja.wordpress.org/plugins/adminimize/">adminimize</a> </td>
+<td align="left">  ユーザ権限の管理 |</td>
+</tr>
+<tr>
+<td></td>
+<td align="left"> <a href="https://ja.wordpress.org/plugins/admin-menu-editor/">admin-menu-editor</a> </td>
+<td align="left"> 管理画面メニューのカスタマイズ |</td>
+</tr>
+<tr>
+<td></td>
+<td align="left"> <a href="https://ja.wordpress.org/plugins/admin-menu-reorder/">admin-menu-reorder</a> </td>
+<td align="left"> 管理画面メニューの並び替え |</td>
+</tr>
+<tr>
+<td></td>
+<td align="left"> <a href="https://ja.wordpress.org/plugins/wordpress-seo/">wordpress-seo</a> </td>
+<td align="left"> SEO管理 |</td>
+</tr>
+<tr>
+<td></td>
+<td align="left"> <a href="https://ja.wordpress.org/plugins/wp-security-audit-log/">wp-security-audit-log</a> </td>
+<td align="left"> 作業ログ管理 |</td>
+</tr>
+<tr>
+<td></td>
+<td align="left"> <a href="https://ja.wordpress.org/plugins/backwpup/">backwpup</a> </td>
+<td align="left"> バックアップ |</td>
+</tr>
+</tbody>
+</table>
+
+
+<p>一部、重複していたり、更新が止まってたりするものもあるので、実際本番アップする際には精査した方がよさそう。</p>
+
+<h3>設定をスキップする設定</h3>
+
+<p>最後の <code># WPDISTILLERY SETUP</code> のセクションは、自動セットアップをするかどうかの設定。デフォルトでは全てオン(<code>true</code>)になっている。</p>
+
+<p>```
+setup:
+  wp: true
+  settings: true
+  theme: true
+  plugins: true
+  cleanup: true</p>
+
+<pre><code>comment: true
+posts: true
+files: true
+themes: true
+</code></pre>
+
+<p>```</p>
+
+<h1>ホスト</h1>
+
+<p><code>Vagrantfile</code>にてホストの設定をする。
+デフォルトでは以下のように、<code>192.168.33.10</code>のIPで、<code>scotchbox</code>というホスト名になっている。
+これを必要ならば、任意のものに変更する。</p>
+
+<p><code>
+config.vm.network "private_network", ip: "192.168.33.10"
+config.vm.hostname = "scotchbox"
+</code></p>
+
+<h1>Vagrantを起動</h1>
+
+<p>ここまでで設定が完了したので、Vagrantを起動する。</p>
+
+<p><code>
+$ vagrant up
+</code></p>
+
+<h1>設定を実行</h1>
+
+<p>Vagrantが起動したら、WordPressの自動設定を起動するためにVagrantにsshで入る。</p>
+
+<p><code>
+$ vagrant ssh
+</code></p>
+
+<p>自動設定の前に、<code>WP CLI</code>を最新版に更新し、その後、<code>setup.sh</code>のシェルスクリプトを起動する。</p>
+
+<p>```
+$ sudo wp cli update &mdash;allow-root
+You have version 0.20.3. Would you like to update to 0.25.0? [y/n] y
+Downloading from <a href="https://github.com/wp-cli/wp-cli/releases/download/v0.25.0/wp-cli-0.25.0.phar...">https://github.com/wp-cli/wp-cli/releases/download/v0.25.0/wp-cli-0.25.0.phar...</a>
+New version works. Proceeding to replace.
+Success: Updated WP-CLI to 0.25.0</p>
+
+<p>$ cd ../../var/www/ &amp;&amp; bash setup.sh
+========== WPDISTILLERY START ==========
+&hellip;
+Do you want to continue anyway? (y/n) y
+&hellip;
+&hellip;
+========== WPDISTILLERY FINISHED ==========
+```</p>
+
+<h1>アクセス</h1>
+
+<p>設定したホスト名かIPでアクセスすると、トップページが表示される。
+<code>/wp-login.php</code>でログイン画面が開き、設定したユーザでログインが出来る。
+これで無事、起動出来た。</p>
+
+<h1>簡易インストール</h1>
+
+<p>デフォルトのままだとプラグインやテーマが入ってかなり時間がかかるので、さくっと起動するために、ほとんどの設定をオフにしてインストールしてみる。</p>
+
+<p>```
+setup:
+  wp: true
+  settings: false
+  theme: false
+  plugins: false
+  cleanup: false</p>
+
+<pre><code>comment: false
+posts: false
+files: false
+themes: false
+</code></pre>
+
+<p>```</p>
+
+<p>これだと、サイトの名前やユーザの設定以外はデフォルトのまま起動できた。
+デフォルトのフルの状態のものよりかなり早いのでこちらの方がよいかもしれない。</p>
+
+<h1>参考</h1>
+
+<ul>
+<li><a href="https://box.scotch.io/">Scotch Box ♥ A Vagrant LAMP Stack That Just Works</a></li>
+<li><a href="https://github.com/flurinduerst/WPDistillery#setup">flurinduerst/WPDistillery: WordPress Setup runner for Scotch Box</a></li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Vagrant (Ubuntu) 環境でhttps接続する]]></title>
@@ -440,56 +844,6 @@ DBの設定内容は、Scotchboxの場合。<br/>
 <p><a href="https://laravel10.wordpress.com/2015/02/21/%E3%83%87%E3%83%BC%E3%82%BF%E3%83%99%E3%83%BC%E3%82%B9%E3%81%AE%E7%92%B0%E5%A2%83%E8%A8%AD%E5%AE%9A/">初めてのLaravel 5.1 : (6) データベースの環境設定 | ララ帳</a><br/>
 <a href="http://laravel.io/forum/02-11-2014-artisan-error-on-migrate-using-vagrant">aravel.io &ndash; The Laravel Community Portal</a><br/>
 <a href="https://snakeycode.wordpress.com/2015/01/02/vagrant-postgresql-and-pgadmin/">Vagrant, PostgreSQL and pgAdmin | Snakey Code</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Vagrantを1.7.2にアップデートしたら起動しなくなったメモ]]></title>
-    <link href="http://kayakuguri.github.io/blog/2015/07/01/update-vagrant/"/>
-    <updated>2015-07-01T18:55:48+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2015/07/01/update-vagrant</id>
-    <content type="html"><![CDATA[<p>Vagrantを1.3くらいから1.7.2にアップデートしたら起動しなくなった。<br/>
-解決方法をメモ。</p>
-
-<!-- more -->
-
-
-<h2>対処方法</h2>
-
-<p>以下のファイルを書き換えた。</p>
-
-<p><code>~/.vagrant.d/setup_version</code><br/>
-元は、<code>1.5</code>という文字列が入っていたが、それを、<br/>
-<code>1.1</code>という文字に変更した。<br/>
-追記ではなく、変更。</p>
-
-<h2>実行</h2>
-
-<p>で、任意のディレクトリで<code>vagrant up</code>すると以下の文言が。</p>
-
-<blockquote><p>Vagrant is upgrading some internal state for the latest version.
-Please do not quit Vagrant at this time. While upgrading, Vagrant
-will need to copy all your boxes, so it will use a considerable
-amount of disk space. After it is done upgrading, the temporary disk
-space will be freed.</p>
-
-<p>Press ctrl-c now to exit if you want to remove some boxes or free
-up some disk space.</p>
-
-<p>Press the Enter or Return key to continue.</p></blockquote>
-
-<p>そのまま<code>Enter</code>キー叩く。<br/>
-しばらく待つと何やら表示されるが、無事、起動。</p>
-
-<pre><code>$ vagrant up
-default                   running (virtualbox)
-</code></pre>
-
-<p>そもそもvagrantのアップデートやインストールがパッケージってのがめんどくさい。。</p>
-
-<h2>参考</h2>
-
-<p><a href="http://qiita.com/hgsk/items/520b4160804d7299eb34">Vagrant1.5.1へのアップグレード後にvagrant upに失敗する場合の直し方 &ndash; Qiita</a></p>
 ]]></content>
   </entry>
   
