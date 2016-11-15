@@ -112,7 +112,7 @@
 
 <h1>Setup</h1>
 
-<p><code>WPDistillery</code>のリポジトリをクローンする。
+<p><code>WPDistillery</code>のリポジトリをクローンする。<br/>
 実質、必要なものは、<code>config.yml</code>と<code>setup.sh</code>の2ファイルだけなので、それを引き上げて他は削除する。</p>
 
 <figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
@@ -125,7 +125,7 @@
 </span><span class='line'>$ rm -rf WPDistillery</span></code></pre></td></tr></table></div></figure>
 
 
-<p><code>Scotch Box</code>をクローンする。
+<p><code>Scotch Box</code>をクローンする。<br/>
 必要なものは<code>Vagrantfile</code>と<code>public</code>フォルダなので引き上げて、その他は削除する。</p>
 
 <figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
@@ -160,12 +160,12 @@
 
 <p>WordPressの設定のために、<code>Config.yml</code>を編集する。</p>
 
-<p>デフォルトでは以下のような内容になっている。
+<p>デフォルトでは以下のような内容になっている。<br/>
 <a href="https://github.com/flurinduerst/WPDistillery/blob/master/config.yml">https://github.com/flurinduerst/WPDistillery/blob/master/config.yml</a></p>
 
 <h2>言語とタイムゾーン</h2>
 
-<p>デフォルトではアメリカになっているので日本に変更する。
+<p>デフォルトではアメリカになっているので日本に変更する。<br/>
 localeは日本版の場合は、<code>ja</code>となる。(<code>ja_JP</code>ではない)</p>
 
 <figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
@@ -198,8 +198,8 @@ localeは日本版の場合は、<code>ja</code>となる。(<code>ja_JP</code>�
 
 <h2>サイトの設定</h2>
 
-<p>サイトのタイトルや説明、パーマリンクの設定など、ブログ全般の設定関係。
-<strong>urlだけ、ホスト名で指定したURLを記入する</strong>。
+<p>サイトのタイトルや説明、パーマリンクの設定など、ブログ全般の設定関係。<br/>
+<strong>urlだけ、ホスト名で指定したURLを記入する</strong>。<br/>
 その他はそのままで問題なし。</p>
 
 <figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
@@ -238,7 +238,7 @@ localeは日本版の場合は、<code>ja</code>となる。(<code>ja_JP</code>�
 
 <h2>テーマ</h2>
 
-<p>デフォルトでは、<code>WPSeed</code>というテーマが指定されている。
+<p>デフォルトでは、<code>WPSeed</code>というテーマが指定されている。<br/>
 <a href="https://github.com/flurinduerst/WPSeed/">flurinduerst/WPSeed: WordPress starter Theme + sage Workflow</a></p>
 
 <p>これはテーマ作成の元になるようなものを集めた、テーマのフレームワーク？みたいなもののよう。</p>
@@ -321,124 +321,38 @@ localeは日本版の場合は、<code>ja</code>となる。(<code>ja_JP</code>�
 </span><span class='line'>  - backwpup</span></code></pre></td></tr></table></div></figure>
 
 
-<p>好きなものを追加したい場合はここに正式な名前でリストに追加すればよさそう。
+<p>好きなものを追加したい場合はここに正式な名前でリストに追加すればよさそう。<br/>
 ( <code>https://ja.wordpress.org/plugins/</code> の後ろに付くもの)</p>
 
 <p>とりあえず、長くなるけどデフォルトで入っているものを調べてみる。</p>
 
 <h3>有効化されるもの</h3>
 
-<table>
-<thead>
-<tr>
-<th></th>
-<th align="left"> 名前 </th>
-<th align="left"> 説明 </th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td></td>
-<td align="left"> <a href="https://ja.wordpress.org/plugins/disable-comments/">disable-comments</a> </td>
-<td align="left"> コメント停止用  |</td>
-</tr>
-<tr>
-<td></td>
-<td align="left"> <a href="https://ja.wordpress.org/plugins/duplicate-post/">duplicate-post</a> </td>
-<td align="left"> 記事を複製する |</td>
-</tr>
-<tr>
-<td></td>
-<td align="left"> <a href="https://ja.wordpress.org/plugins/enable-media-replace/">enable-media-replace</a> </td>
-<td align="left"> アップされている画像の置換 |</td>
-</tr>
-<tr>
-<td></td>
-<td align="left"> <a href="https://ja.wordpress.org/plugins/favicon-by-realfavicongenerator/">favicon-by-realfavicongenerator</a> </td>
-<td align="left"> ファビコン設定用 |</td>
-</tr>
-<tr>
-<td></td>
-<td align="left"> <a href="https://ja.wordpress.org/plugins/regenerate-thumbnails/">regenerate-thumbnails</a> </td>
-<td align="left"> アップロード済みの画像のサムネイルを一括再生成 |</td>
-</tr>
-<tr>
-<td></td>
-<td align="left"> <a href="https://ja.wordpress.org/plugins/simple-page-ordering/">simple-page-ordering</a> </td>
-<td align="left"> ページ・カスタム投稿タイプの並び順を入れ替える |</td>
-</tr>
-<tr>
-<td></td>
-<td align="left"> <a href="https://ja.wordpress.org/plugins/user-switching/">user-switching</a> </td>
-<td align="left"> ユーザー切り替え |</td>
-</tr>
-<tr>
-<td></td>
-<td align="left"> <a href="https://ja.wordpress.org/plugins/google-sitemap-generator/">google-sitemap-generator</a> </td>
-<td align="left"> sitemapを自動で作成 |</td>
-</tr>
-</tbody>
-</table>
+<ul>
+<li><a href="https://ja.wordpress.org/plugins/disable-comments/">disable-comments</a> &ndash; コメント停止用</li>
+<li><a href="https://ja.wordpress.org/plugins/duplicate-post/">duplicate-post</a> &ndash; 記事を複製する</li>
+<li><a href="https://ja.wordpress.org/plugins/enable-media-replace/">enable-media-replace</a> &ndash; アップされている画像の置換</li>
+<li><a href="https://ja.wordpress.org/plugins/favicon-by-realfavicongenerator/">favicon-by-realfavicongenerator</a> &ndash; ファビコン設定用</li>
+<li><a href="https://ja.wordpress.org/plugins/regenerate-thumbnails/">regenerate-thumbnails</a> &ndash; アップロード済みの画像のサムネイルを一括再生成</li>
+<li><a href="https://ja.wordpress.org/plugins/simple-page-ordering/">simple-page-ordering</a> &ndash; ページ・カスタム投稿タイプの並び順を入れ替える</li>
+<li><a href="https://ja.wordpress.org/plugins/user-switching/">user-switching</a> &ndash; ユーザー切り替え</li>
+<li><a href="https://ja.wordpress.org/plugins/google-sitemap-generator/">google-sitemap-generator</a> &ndash; sitemapを自動で作成</li>
+</ul>
 
 
 <h3>インストールのみ</h3>
 
-<table>
-<thead>
-<tr>
-<th></th>
-<th align="left"> 名前 </th>
-<th align="left"> 説明 </th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td></td>
-<td align="left"> <a href="https://ja.wordpress.org/plugins/custom-post-type-ui/">custom-post-type-ui</a> </td>
-<td align="left"> カスタム投稿タイプを作成 |</td>
-</tr>
-<tr>
-<td></td>
-<td align="left"> <a href="https://ja.wordpress.org/plugins/search-and-replace/">search-and-replace</a> </td>
-<td align="left"> DB内のデータを検索・置換する |</td>
-</tr>
-<tr>
-<td></td>
-<td align="left"> <a href="https://ja.wordpress.org/plugins/capability-manager-enhanced/">capability-manager-enhanced</a> </td>
-<td align="left"> ユーザ権限の管理 |</td>
-</tr>
-<tr>
-<td></td>
-<td align="left"> <a href="https://ja.wordpress.org/plugins/adminimize/">adminimize</a> </td>
-<td align="left">  ユーザ権限の管理 |</td>
-</tr>
-<tr>
-<td></td>
-<td align="left"> <a href="https://ja.wordpress.org/plugins/admin-menu-editor/">admin-menu-editor</a> </td>
-<td align="left"> 管理画面メニューのカスタマイズ |</td>
-</tr>
-<tr>
-<td></td>
-<td align="left"> <a href="https://ja.wordpress.org/plugins/admin-menu-reorder/">admin-menu-reorder</a> </td>
-<td align="left"> 管理画面メニューの並び替え |</td>
-</tr>
-<tr>
-<td></td>
-<td align="left"> <a href="https://ja.wordpress.org/plugins/wordpress-seo/">wordpress-seo</a> </td>
-<td align="left"> SEO管理 |</td>
-</tr>
-<tr>
-<td></td>
-<td align="left"> <a href="https://ja.wordpress.org/plugins/wp-security-audit-log/">wp-security-audit-log</a> </td>
-<td align="left"> 作業ログ管理 |</td>
-</tr>
-<tr>
-<td></td>
-<td align="left"> <a href="https://ja.wordpress.org/plugins/backwpup/">backwpup</a> </td>
-<td align="left"> バックアップ |</td>
-</tr>
-</tbody>
-</table>
+<ul>
+<li><a href="https://ja.wordpress.org/plugins/custom-post-type-ui/">custom-post-type-ui</a> &ndash; カスタム投稿タイプを作成</li>
+<li><a href="https://ja.wordpress.org/plugins/search-and-replace/">search-and-replace</a> &ndash; DB内のデータを検索・置換する</li>
+<li><a href="https://ja.wordpress.org/plugins/capability-manager-enhanced/">capability-manager-enhanced</a> &ndash; ユーザ権限の管理</li>
+<li><a href="https://ja.wordpress.org/plugins/adminimize/">adminimize</a> &ndash; ユーザ権限の管理</li>
+<li><a href="https://ja.wordpress.org/plugins/admin-menu-editor/">admin-menu-editor</a> &ndash; 管理画面メニューのカスタマイズ</li>
+<li><a href="https://ja.wordpress.org/plugins/admin-menu-reorder/">admin-menu-reorder</a> &ndash; 管理画面メニューの並び替え</li>
+<li><a href="https://ja.wordpress.org/plugins/wordpress-seo/">wordpress-seo</a> &ndash; SEO管理</li>
+<li><a href="https://ja.wordpress.org/plugins/wp-security-audit-log/">wp-security-audit-log</a> &ndash; 作業ログ管理</li>
+<li><a href="https://ja.wordpress.org/plugins/backwpup/">backwpup</a> &ndash; バックアップ</li>
+</ul>
 
 
 <p>一部、重複していたり、更新が止まってたりするものもあるので、実際本番アップする際には精査した方がよさそう。</p>
@@ -471,8 +385,8 @@ localeは日本版の場合は、<code>ja</code>となる。(<code>ja_JP</code>�
 
 <h1>ホスト</h1>
 
-<p><code>Vagrantfile</code>にてホストの設定をする。
-デフォルトでは以下のように、<code>192.168.33.10</code>のIPで、<code>scotchbox</code>というホスト名になっている。
+<p><code>Vagrantfile</code>にてホストの設定をする。<br/>
+デフォルトでは以下のように、<code>192.168.33.10</code>のIPで、<code>scotchbox</code>というホスト名になっている。<br/>
 これを必要ならば、任意のものに変更する。</p>
 
 <figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
@@ -529,7 +443,7 @@ localeは日本版の場合は、<code>ja</code>となる。(<code>ja_JP</code>�
 
 <h1>アクセス</h1>
 
-<p>設定したホスト名かIPでアクセスすると、トップページが表示される。
+<p>設定したホスト名かIPでアクセスすると、トップページが表示される。<br/>
 <code>/wp-login.php</code>でログイン画面が開き、設定したユーザでログインが出来る。
 これで無事、起動出来た。</p>
 
@@ -559,7 +473,7 @@ localeは日本版の場合は、<code>ja</code>となる。(<code>ja_JP</code>�
 </span><span class='line'>    themes: false</span></code></pre></td></tr></table></div></figure>
 
 
-<p>これだと、サイトの名前やユーザの設定以外はデフォルトのまま起動できた。
+<p>これだと、サイトの名前やユーザの設定以外はデフォルトのまま起動できた。<br/>
 デフォルトのフルの状態のものよりかなり早いのでこちらの方がよいかもしれない。</p>
 
 <h1>参考</h1>
