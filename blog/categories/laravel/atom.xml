@@ -4,7 +4,7 @@
   <title><![CDATA[Category: laravel | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/laravel/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2016-11-15T18:57:43+09:00</updated>
+  <updated>2016-11-17T14:04:03+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,166 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[SalesforceのREST API接続用のLaravelパッケージを使ってみる]]></title>
+    <link href="http://kayakuguri.github.io/blog/2016/11/17/forrest-sfapi-laravel/"/>
+    <updated>2016-11-17T14:00:34+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2016/11/17/forrest-sfapi-laravel</id>
+    <content type="html"><![CDATA[<p>Salesforce接続用のLaravel5パッケージ、<code>omniphx/forrest</code>を使ってみた。</p>
+
+<!-- more -->
+
+
+<h1>セットアップ</h1>
+
+<p>Composerに追加。</p>
+
+<p><code>
+$ composer require "omniphx/forrest":"2.*"
+</code></p>
+
+<p><code>config/app.php</code>に以下を追加</p>
+
+<p>```php
+&lsquo;providers&rsquo; => [
+  // &hellip;
+  Omniphx\Forrest\Providers\Laravel\ForrestServiceProvider::class,
+  // &hellip;
+],</p>
+
+<p>&hellip;</p>
+
+<p>&lsquo;aliases&rsquo; => [
+  // &hellip;</p>
+
+<pre><code>'Forrest' =&gt; Omniphx\Forrest\Providers\Laravel\Facades\Forrest::class
+</code></pre>
+
+<p>  // &hellip;
+],
+```
+以下で設定ファイルを生成させる。</p>
+
+<p><code>
+$ php artisan vendor:publish
+</code></p>
+
+<h1>設定ファイル</h1>
+
+<p>SFへの接続方法は２つから選択可能。</p>
+
+<ul>
+<li>Web Server authentication flow &ndash; 個別のSFアカウントでのログイン</li>
+<li>Username-Password authentication flow &ndash; 接続用のアカウントを使用したログイン</li>
+</ul>
+
+
+<p>通常は、Username-Password authentication を利用する事が多い。</p>
+
+<p><code>config/forrest.php</code>で以下を書き換え。</p>
+
+<p><code>
+//11行目
+'authentication' =&gt; 'WebServer',
+↓↓
+'authentication' =&gt; 'UserPassword',
+</code></p>
+
+<p>あとは、<code>.env</code>ファイルでユーザ名やパスワード、アプリのキーなどを設定する。</p>
+
+<p><code>
+CONSUMER_KEY=xxx
+CONSUMER_SECRET=xxx
+LOGIN_URL=https://login.salesforce.com/
+USERNAME=xxx
+PASSWORD=xxx
+</code></p>
+
+<p><code>LOGIN_URL</code>を <code>https://test.salesforce.com/</code>としておくと常にsandboxへの接続となる。</p>
+
+<h1>利用</h1>
+
+<h2>ログイン</h2>
+
+<p>以下でログイン。</p>
+
+<p><code>
+use Omniphx\Forrest\Providers\Laravel\Facades\Forrest;
+...
+Forrest::authenticate();
+</code></p>
+
+<p>(PHPStormの補完が効かない…）</p>
+
+<h2>クエリの発行</h2>
+
+<p><code>
+Forrest::query('SELECT Id FROM Account');
+</code></p>
+
+<h2>レコードの作成など</h2>
+
+<p>```
+$body = [&lsquo;Name&rsquo; => &lsquo;New Account&rsquo;];
+Forrest::sobjects(&lsquo;Account&rsquo;,[</p>
+
+<pre><code>'method' =&gt; 'post',
+'body'   =&gt; $body]);
+</code></pre>
+
+<p>```</p>
+
+<p><code>sobjects</code>で第一引数にオブジェクトを指定し、第二引数に送信する内容を指定する。<br/>
+送信内容は配列でキーを指定してやればよい。<br/>
+<code>method</code>はそれぞれ以下。</p>
+
+<ul>
+<li>post &ndash; 作成</li>
+<li>put &ndash; 更新</li>
+<li>patch &ndash; アップサート</li>
+<li>delete &ndash; 削除</li>
+</ul>
+
+
+<p>削除の場合は以下のようにREST形式でSFIDを指定してやる。</p>
+
+<p><code>
+Forrest::sobjects('Account/001i000000xxx', ['method' =&gt; 'delete']);
+</code></p>
+
+<h2>トークンの操作</h2>
+
+<ul>
+<li>リフレッシュ &ndash; <code>refresh()</code></li>
+<li>廃止 &ndash; <code>revoke()</code></li>
+</ul>
+
+
+<h2>カスタムエンドポイント</h2>
+
+<p>以下の様のして送信する。</p>
+
+<p>```
+Forrest::custom(&lsquo;/myEndpoint&rsquo;, [</p>
+
+<pre><code>'method' =&gt; 'post',
+'body' =&gt; ['foo' =&gt; 'bar'],
+'parameters' =&gt; ['flim' =&gt; 'flam']]);
+</code></pre>
+
+<p>```</p>
+
+<p>その他は、GitHubのReadme参照。</p>
+
+<h1>参考</h1>
+
+<ul>
+<li><a href="https://github.com/omniphx/forrest">omniphx/forrest: Salesforce.com REST API Client for Laravel 5</a></li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Laravel HomesteadのPostgreSQLにPosticoから接続する]]></title>
