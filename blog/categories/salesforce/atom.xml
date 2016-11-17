@@ -4,7 +4,7 @@
   <title><![CDATA[Category: salesforce | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/salesforce/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2016-11-17T14:04:03+09:00</updated>
+  <updated>2016-11-17T14:06:53+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -33,7 +33,7 @@ $ composer require "omniphx/forrest":"2.*"
 
 <p><code>config/app.php</code>に以下を追加</p>
 
-<p>```php
+<p>```
 &lsquo;providers&rsquo; => [
   // &hellip;
   Omniphx\Forrest\Providers\Laravel\ForrestServiceProvider::class,
