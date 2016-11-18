@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2016-11-17T14:06:53+09:00</updated>
+  <updated>2016-11-18T17:51:04+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,333 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[Laravel]フォームのバリデーションをRequestクラスに分離する]]></title>
+    <link href="http://kayakuguri.github.io/blog/2016/11/18/larave-request/"/>
+    <updated>2016-11-18T17:46:52+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2016/11/18/larave-request</id>
+    <content type="html"><![CDATA[<p>LaraveのバリデーションチェックをRequestクラスの別ファイルにまとめる方法。<br/>
+すでに各所で解説が書かれているだろうけれど、自分なりに把握出来たのでメモ。</p>
+
+<!-- more -->
+
+
+<h1>作成</h1>
+
+<h2>生成</h2>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$ php artisan make:request HogeRequest</span></code></pre></td></tr></table></div></figure>
+
+
+<p>これで、<code>app/Http/Requests/</code>以下に生成される。</p>
+
+<p>デフォルトで生成される内容は以下。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;?php
+</span><span class='line'>
+</span><span class='line'>namespace App\Http\Requests;
+</span><span class='line'>
+</span><span class='line'>use App\Http\Requests\Request;
+</span><span class='line'>
+</span><span class='line'>class HogeRequest extends Request
+</span><span class='line'>{
+</span><span class='line'>    /**
+</span><span class='line'>     * Determine if the user is authorized to make this request.
+</span><span class='line'>     *
+</span><span class='line'>     * @return bool
+</span><span class='line'>     */
+</span><span class='line'>    public function authorize()
+</span><span class='line'>    {
+</span><span class='line'>        return false;
+</span><span class='line'>    }
+</span><span class='line'>
+</span><span class='line'>    /**
+</span><span class='line'>     * Get the validation rules that apply to the request.
+</span><span class='line'>     *
+</span><span class='line'>     * @return array
+</span><span class='line'>     */
+</span><span class='line'>    public function rules()
+</span><span class='line'>    {
+</span><span class='line'>        return [
+</span><span class='line'>            //
+</span><span class='line'>        ];
+</span><span class='line'>    }
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>認証</h2>
+
+<p>一つ目のメソッド、<code>authorize</code>はデフォルトでは<code>false</code>となっている。<br/>
+これは、このフォームを送信出来るユーザの認証を判定する箇所で、デフォルトの<code>false</code>だと全てのユーザが弾かれてしまう。<br/>
+なのでこれは<code>true</code>に変更する。</p>
+
+<h2>バリデーションルール</h2>
+
+<p>肝心のバリデーションルールは、<code>rules()</code>メソッド内の戻り値として書く。<br/>
+配列にコントローラーに書いていた時と同じように書く。</p>
+
+<p>例）</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>public function rules()
+</span><span class='line'>{
+</span><span class='line'>    return [
+</span><span class='line'>        'LastName' =&gt; 'required',
+</span><span class='line'>        'FirstName' =&gt; 'required',
+</span><span class='line'>        'Email' =&gt; 'required|email',
+</span><span class='line'>    ];
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>項目の名前 (日本語化)</h2>
+
+<p>バリデーションルールに引っかかった際に返されるエラーメッセージはデフォルトでは英語になっている。<br/>
+これを日本語にするには、言語ファイルを用意してやるとよい。<br/>
+<code>resouces/lang/ja/</code>以下に、<code>validation.php</code>を置いてやる。<br/>
+以下が、デフォルトの英語ファイルを日本語訳してくれているもの。<br/>
+<a href="https://gist.github.com/syokunin/b37725686b5baf09255b">https://gist.github.com/syokunin/b37725686b5baf09255b</a></p>
+
+<p>しかしこのままだと、項目名についてはnameで指定したもののママになってしまう。<br/>
+これをカスタムで日本語化するには、さきほど追加した、<code>validation.php</code>の<code>attributes</code>で指定してやる。</p>
+
+<p>例）</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>'attributes' =&gt; [
+</span><span class='line'>    'title' =&gt; 'タイトル',
+</span><span class='line'>    'body' =&gt; '本文',
+</span><span class='line'>    'published_at' =&gt; '公開日',
+</span><span class='line'>],</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li><a href="https://laravel10.wordpress.com/2015/03/11/%E5%88%9D%E3%82%81%E3%81%A6%E3%81%AElaravel-5-19-%E3%82%A8%E3%83%A9%E3%83%BC%E3%83%A1%E3%83%83%E3%82%BB%E3%83%BC%E3%82%B8%E3%81%AE%E6%97%A5%E6%9C%AC%E8%AA%9E%E5%8C%96/">初めてのLaravel 5.1 : (19) エラーメッセージの日本語化 &#8211; ララ帳</a></li>
+</ul>
+
+
+<p>ここでの設定は全体での適用となるので、一括指定出来る反面、切り分けが出来ない。<br/>
+これを各フォーム個別の設定としてやるために、先ほどの、Requestクラスに追加してやることが可能。</p>
+
+<p>例）</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>public function attributes()
+</span><span class='line'>{
+</span><span class='line'>    return [
+</span><span class='line'>        'name'    =&gt; 'お名前',
+</span><span class='line'>        'email'   =&gt; 'メールアドレス',
+</span><span class='line'>        'subject' =&gt; '件名',
+</span><span class='line'>        'content' =&gt; '内容',
+</span><span class='line'>    ];
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li><a href="http://qiita.com/ponko2/items/fd7ac38b964e10f16f52#%E3%81%8A%E5%95%8F%E3%81%84%E5%90%88%E3%82%8F%E3%81%9B%E7%94%BB%E9%9D%A2%E3%81%AErequest">Laravel 5で確認画面付き問い合わせフォームを作る &ndash; Qiita</a></li>
+</ul>
+
+
+<h2>戻り先</h2>
+
+<p>デフォルトの状態では、バリデーションエラーがあった場合は一つ前のページへ自動的に遷移する。<br/>
+入力 → 確認 という遷移なら、確認に遷移してきた時点でエラーが出ると、一つ前の入力ページへ飛ぶ。</p>
+
+<p>しかし、確認画面を挟むようなフォームの場合、確認画面から完了画面の際にもバリデーションチェックが必要となる。<br/>
+これがデフォルトのままだと、<br/>
+確認 → 完了 という遷移となり、エラーが出ると一つ前の確認画面に戻ってしまう。<br/>
+ここでは入力画面に戻って欲しい。</p>
+
+<p>その場合、Requestクラスで戻り先を指定してやる事が出来る。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>protected $redirect = 'hoge_input';</span></code></pre></td></tr></table></div></figure>
+
+
+<p>変数名で指定の仕方を変えてやることが可能。</p>
+
+<ul>
+<li><code>redirect</code> &ndash; URIでの指定</li>
+<li><code>redirectRoute</code> &ndash; 名前付きルートの名前での指定</li>
+<li><code>redirectAction</code> &ndash; コントローラーのアクションでの指定</li>
+</ul>
+
+
+<p>[参考]</p>
+
+<ul>
+<li><a href="http://n2utech.hatenablog.jp/entry/2015/11/13/154754">【メモ】 Laravel 5.1 において FormRequest でエラーが発生した際の戻し先を変更する &ndash; n2utech</a></li>
+<li><a href="https://github.com/laravel/framework/blob/5.1/src/Illuminate/Foundation/Http/FormRequest.php#L34-L53">framework/FormRequest.php at 5.1 · laravel/framework · GitHub</a></li>
+</ul>
+
+
+<h1>完成</h1>
+
+<p>最終的に以下のような形とした。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;?php
+</span><span class='line'>
+</span><span class='line'>namespace App\Http\Requests;
+</span><span class='line'>
+</span><span class='line'>use App\Http\Requests\Request;
+</span><span class='line'>
+</span><span class='line'>class HogeRequest extends Request
+</span><span class='line'>{
+</span><span class='line'>
+</span><span class='line'>    /**
+</span><span class='line'>     * 戻り先
+</span><span class='line'>     *
+</span><span class='line'>     * @var string
+</span><span class='line'>     */
+</span><span class='line'>    protected $redirect = 'hoge_input';
+</span><span class='line'>
+</span><span class='line'>    /**
+</span><span class='line'>     * Determine if the user is authorized to make this request.
+</span><span class='line'>     *
+</span><span class='line'>     * @return bool
+</span><span class='line'>     */
+</span><span class='line'>    public function authorize()
+</span><span class='line'>    {
+</span><span class='line'>        return true;
+</span><span class='line'>    }
+</span><span class='line'>
+</span><span class='line'>    /**
+</span><span class='line'>     * バリデーションルール
+</span><span class='line'>     *
+</span><span class='line'>     * @return array
+</span><span class='line'>     */
+</span><span class='line'>    public function rules()
+</span><span class='line'>    {
+</span><span class='line'>        return [
+</span><span class='line'>            'LastName' =&gt; 'required',
+</span><span class='line'>            'FirstName' =&gt; 'required',
+</span><span class='line'>            'Email' =&gt; 'required|email',
+</span><span class='line'>        ];
+</span><span class='line'>    }
+</span><span class='line'>
+</span><span class='line'>    /**
+</span><span class='line'>     * エラー時に表示する項目名
+</span><span class='line'>     *
+</span><span class='line'>     * @return array
+</span><span class='line'>     */
+</span><span class='line'>    public function attributes()
+</span><span class='line'>    {
+</span><span class='line'>        return [
+</span><span class='line'>            'LastName' =&gt; '姓',
+</span><span class='line'>            'FirstName' =&gt; '名',
+</span><span class='line'>            'Email' =&gt; 'メールアドレス',
+</span><span class='line'>        ];
+</span><span class='line'>    }
+</span><span class='line'>
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[SalesforceのREST API接続用のLaravelパッケージを使ってみる]]></title>
@@ -3517,257 +3844,6 @@ OAuth 1.0a での認証をするためには、アクセストークンやシグ
 <ul>
 <li><a href="http://grandbig.github.io/blog/2015/05/10/storyboard-navigationbar/">StoryboardでNavigationBarを表示する &ndash; Takahiro Octopress Blog</a></li>
 <li><a href="http://blog.77jp.net/iphone%E9%96%8B%E7%99%BA-uiviewcontroller-%E3%83%A9%E3%82%A4%E3%83%95%E3%82%B5%E3%82%A4%E3%82%AF%E3%83%AB-viewdidload-viewwillappear-viewdidappear-viewwilldisappear-viewdiddisappear-ios-%E9%80%86">【iOS】UIViewController ライフサイクル viewDidLoad viewWillAppear viewDidAppear viewWillDisappear viewDidDisappear | iOS &amp; Android &amp; Linux Labs</a></li>
-</ul>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[swift]alamofireとswiftyjsonを使ってAPIからデータを取得する]]></title>
-    <link href="http://kayakuguri.github.io/blog/2016/05/26/alamofire-swiftyjson/"/>
-    <updated>2016-05-26T18:39:28+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2016/05/26/alamofire-swiftyjson</id>
-    <content type="html"><![CDATA[<p><a href="http://kayakuguri.github.io/blog/2016/05/23/swift-sf-restapi/">一つ前の投稿</a>でSalesforceへ接続出来たが、HTTP通信の部分とJSONへのパース部分はライブラリを使うのがデファクトスタンダードになりつつある、という情報を仕入れたので試してみる。</p>
-
-<!-- more -->
-
-
-<h1>インストール</h1>
-
-<p>インストールするライブラリは以下の２つ。</p>
-
-<ul>
-<li>Alamofire</li>
-<li>SwiftyJSON</li>
-</ul>
-
-
-<p><code>Alamofire-SwiftyJSON</code>というライブラリも同時に使用している紹介記事が多かったのだが、インストールしてみると以下の様な警告が出た。</p>
-
-<blockquote><p>Alamofire-SwiftyJSON has been deprecated in favor of AlamofireSwiftyJSON</p></blockquote>
-
-<p>気になって調べてみると、以下の様なページが。</p>
-
-<ul>
-<li><a href="https://github.com/pdutourgeerling/Alamofire-SwiftyJSON-Podspec">pdutourgeerling/Alamofire-SwiftyJSON-Podspec: Updated Podspec for Alamofire-SwiftyJSON</a></li>
-</ul>
-
-
-<p>機械翻訳にかけてみると、どうやらAlamofire-SwiftyJSONはAlamofireの古いバージョンである、1.3を使うようになっており、1.3はSwift2に対応していいない。なので、Alamofireの新しいバージョンをインストールするためには直接Githubのリポジトリを指定してやる必要がある、とのことのよう。</p>
-
-<p>今回は特に使わなくても大丈夫だったのでインストールはしないでおいた。</p>
-
-<p><code>Podfile</code>には以下を追加。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>pod 'Alamofire'
-</span><span class='line'>pod 'SwiftyJSON'</span></code></pre></td></tr></table></div></figure>
-
-
-<p><code>$ pod update</code>でインストールした。</p>
-
-<h1>利用</h1>
-
-<p>前回のアクセストークン取得の際のコードは以下。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>let URL = NSURL(string: SF_LOGIN_URL + "/services/oauth2/token")
-</span><span class='line'>let req = NSMutableURLRequest(URL: URL!)
-</span><span class='line'>req.HTTPMethod = "POST"
-</span><span class='line'>let paramString = "grant_type=password&client_id=" + SF_CLIENT_ID + "&client_secret=" + SF_CLIENT_SECRET + "&username=" + SF_USERNAME + "&password=" + SF_PASSWORD
-</span><span class='line'>req.HTTPBody = paramString.dataUsingEncoding(NSUTF8StringEncoding)
-</span><span class='line'>
-</span><span class='line'>let configuration = NSURLSessionConfiguration.defaultSessionConfiguration()
-</span><span class='line'>let session = NSURLSession(configuration: configuration, delegate: nil, delegateQueue: NSOperationQueue.mainQueue())
-</span><span class='line'>
-</span><span class='line'>let task = session.dataTaskWithRequest(req, completionHandler: {
-</span><span class='line'>    (let data, let response, let error) -&gt; Void in
-</span><span class='line'>    do{
-</span><span class='line'>        let json = try NSJSONSerialization.JSONObjectWithData(data!, options: NSJSONReadingOptions.AllowFragments) as! NSDictionary
-</span><span class='line'>        print(json)
-</span><span class='line'>    }catch{
-</span><span class='line'>        print("error")
-</span><span class='line'>    }
-</span><span class='line'>})
-</span><span class='line'>task.resume()</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>import</h2>
-
-<p>ライブラリを読み込むために、ファイルの冒頭に<code>import</code>を追加しておくこと。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>import Alamofire
-</span><span class='line'>import SwiftyJSON</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>HTTP通信</h2>
-
-<p>通信は、<code>responseJSON</code>を使う。<br/>
-少し前にAlamofireの仕様変更があったらしく、エラーハンドリングの方法が変わったよう。</p>
-
-<ul>
-<li>参考 &ndash; <a href="http://ja.stackoverflow.com/questions/16844/alamofire-3-0%E3%82%92%E4%BD%BF%E7%94%A8%E3%81%97%E3%81%A6json%E3%83%87%E3%83%BC%E3%82%BF%E3%82%92%E5%8F%96%E5%BE%97%E3%81%99%E3%82%8B%E6%96%B9%E6%B3%95">Alamofire 3.0を使用してJSONデータを取得する方法</a></li>
-</ul>
-
-
-<p>通信部分と結果だけ記述するとこんな感じ。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>Alamofire.request(.POST, URL!, parameters: parameters)
-</span><span class='line'>    .responseJSON { response in
-</span><span class='line'>          print(response.result)
-</span><span class='line'>          //SUCCESS or FAILURE
-</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
-
-
-<p>エラーハンドリング用に分岐させるとこうなる。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>Alamofire.request(.POST, URL!, parameters: parameters)
-</span><span class='line'>    .responseJSON { response in
-</span><span class='line'>        switch response.result {
-</span><span class='line'>        case .Success(let value):
-</span><span class='line'>            print("value: \(value)")
-</span><span class='line'>        case .Failure(let error):
-</span><span class='line'>            print(error)
-</span><span class='line'>        }
-</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
-
-
-<p>返ってくるエラーは<code>ErrorType</code>の型になっており、前回の記事と同じ取扱で大丈夫だった。</p>
-
-<h2>JSONへパース</h2>
-
-<p>取得した値をJSONへパースするには、以下だけでいける。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>let json = JSON(data)</span></code></pre></td></tr></table></div></figure>
-
-
-<p>また、文字列への変換もプロパティで用意されている。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>let str:String = json["token"].string</span></code></pre></td></tr></table></div></figure>
-
-
-<p>実に簡単。</p>
-
-<h1>完成</h1>
-
-<p>アクセストークンを取得する部分だけ書き換えたものコードは以下のようになる。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>let URL = SF_LOGIN_URL + "/services/oauth2/token"
-</span><span class='line'>let parameters = [
-</span><span class='line'>    "grant_type":"password",
-</span><span class='line'>    "client_id":SF_CLIENT_ID,
-</span><span class='line'>    "client_secret":SF_CLIENT_SECRET,
-</span><span class='line'>    "username":SF_USERNAME,
-</span><span class='line'>    "password":SF_PASSWORD
-</span><span class='line'>]
-</span><span class='line'>
-</span><span class='line'>Alamofire.request(.POST, URL, parameters: parameters)
-</span><span class='line'>    .responseJSON { response in
-</span><span class='line'>        switch response.result {
-</span><span class='line'>        case .Success(let value):
-</span><span class='line'>            let json = JSON(value)
-</span><span class='line'>            print(json)            
-</span><span class='line'>            
-</span><span class='line'>            //let access_token = json["access_token"].string
-</span><span class='line'>            //let instance_url = json["instance_url"].string
-</span><span class='line'>            //let token_type = json["token_type"].string
-</span><span class='line'>            
-</span><span class='line'>        case .Failure(let error):
-</span><span class='line'>          print("error")
-</span><span class='line'>        }
-</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>ヘッダ</h2>
-
-<p>ちなみにヘッダの指定は以下のようにしてアクセストークンを送れた。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>let headers = [
-</span><span class='line'>    "Authorization": "\(self.token_type) \(self.access_token)"
-</span><span class='line'>]
-</span><span class='line'>Alamofire.request(.POST, URL, parameters: parameters, headers: headers)
-</span><span class='line'>  .responseJSON { response in
-</span><span class='line'>      (略)</span></code></pre></td></tr></table></div></figure>
-
-
-<h1>まとめ</h1>
-
-<p>コードはそこまで劇的に減るわけではないが、すっきりした。<br/>
-なによりパラメータの指定や、JSONの取り扱いがかなり見やすく簡単になったと思う。<br/>
-特に理由がなければライブラリを使えば良い気がする。</p>
-
-<h1>参考</h1>
-
-<ul>
-<li><a href="http://cocoadocs.org/docsets/Alamofire/3.4.0/">Alamofire Reference</a></li>
-<li><a href="http://qiita.com/yutat93/items/1b6dfe34fa8537cf3329">AlamofireとSwiftyJSONでAPIを叩くチュートリアル &ndash; Qiita</a></li>
 </ul>
 
 ]]></content>
