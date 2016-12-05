@@ -4,7 +4,7 @@
   <title><![CDATA[Category: php | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/php/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2016-11-18T17:53:58+09:00</updated>
+  <updated>2016-12-05T17:11:42+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,81 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[ScotchboxでのPHPエラーの出力場所]]></title>
+    <link href="http://kayakuguri.github.io/blog/2016/12/05/ubuntu-error-log/"/>
+    <updated>2016-12-05T17:02:15+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2016/12/05/ubuntu-error-log</id>
+    <content type="html"><![CDATA[<p>自分用メモ。<br/>
+<a href="https://box.scotch.io/">Scotchbox</a>のVagrant環境で、PHPの標準エラー出力がどこに吐かれるかをいつも調べるのでメモ。</p>
+
+<!-- more -->
+
+
+<h1>環境</h1>
+
+<p>環境は以下。</p>
+
+<ul>
+<li>Scotchbox 2.5</li>
+<li>Ubuntu 14.04 LTS</li>
+<li>PHP 5.6</li>
+</ul>
+
+
+<p>純粋なUbuntuでも同じ場所にログが出力されるのかは調査していないので、あくまでもScotchbox環境、とする</p>
+
+<h1>結果</h1>
+
+<p>結論から書くと、以下のパスに保存されていた。</p>
+
+<p><code>
+/var/log/apache2/error.log
+</code></p>
+
+<p>というわけで、<code>tail</code>する場合は以下。</p>
+
+<p>```</p>
+
+<h1>tail -f /var/log/apache2/error.log</h1>
+
+<p>```</p>
+
+<h1>設定内容</h1>
+
+<p>出力するパスは、以下のファイルで設定されている。<br/>
+<code>/etc/apache2/sites-available/000-default.conf</code></p>
+
+<p>内容</p>
+
+<p>```
+<VirtualHost *:80></p>
+
+<pre><code>...
+ErrorLog ${APACHE_LOG_DIR}/error.log
+...
+</code></pre>
+
+<p></VirtualHost><br/>
+```</p>
+
+<p><code>APACHE_LOG_DIR</code>という環境変数で設定されていることがわかる。<br/>
+では、この環境変数はどこで設定しているかというと、以下のファイル。</p>
+
+<p><code>/etc/apache2/envvars</code></p>
+
+<p><code>
+...
+export APACHE_LOG_DIR=/var/log/apache2$SUFFIX
+...
+</code></p>
+
+<p>というわけで、冒頭のディレクトリに保存されていた。<br/>
+もし変更したい場合は上記<code>envvars</code>にて変更すればよさそう。<br/>
+(パーミッションの設定を与えてやる必要はあると思う。)</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[heroku] タイムゾーンの設定各種]]></title>
@@ -447,69 +522,6 @@ string(0) "bar"
 ```</p>
 
 <p>これであるかどうかの判定で判別が出来るので、処理をそれぞれ変える事が出来た。</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[lumenのテーブル名を既存のものに合わせる]]></title>
-    <link href="http://kayakuguri.github.io/blog/2016/01/05/lumen-eloquent/"/>
-    <updated>2016-01-05T17:37:23+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2016/01/05/lumen-eloquent</id>
-    <content type="html"><![CDATA[<p>lumenやlaravelではモデル名が単数形で、DBのテーブル名はその複数形、が基本の仕様となっている。<br/>
-なので、新規にテーブル名を作成する場合や、テーブル名が複数形であればとくに問題ないのだが、<br/>
-既存のテーブル名を利用する際に単数形となってしまっている時には明示的に指定してやる必要がある。<br/>
-指定は<code>Eloquent</code>を利用してやる。</p>
-
-<!-- more -->
-
-
-<blockquote><p>Eloquentとは、PHPフレームワークのLaravelに最初から含まれているORM（Object-relational mapping:オブジェクト関係マッピング）です。</p></blockquote>
-
-<h2>lumenでの利用</h2>
-
-<p>lumenではデフォルトではEloquentの利用がオフになっている。<br/>
-なので、<code>bootstrap/app.php</code>内のコメントアウトを外して有効にしてやる。</p>
-
-<pre><code>$app-&gt;withEloquent();
-</code></pre>
-
-<h2>モデルの作成</h2>
-
-<p>モデルは、<code>app/</code>以下に作成する。<br/>
-例えば、user、というテーブル名を利用したい場合は、<code>app/User.php</code>を作成してやる。<br/>
-その中で、<code>protected $table</code>の箇所がテーブル名を指定している箇所となるので、ここで単数形のテーブル名を指定してやる。</p>
-
-<p>```
-&lt;?php namespace App;
-use Illuminate\Database\Eloquent\Model;
-class User extends Model {</p>
-
-<pre><code>protected $table = ‘user’;
-protected $fillable = [
-    ‘name’,
-    ‘username’,
-    ‘password’
-];
-protected $hidden = [ ‘password’ ];
-</code></pre>
-
-<p>}
-```</p>
-
-<h2>利用</h2>
-
-<p>マイグレーションは作成しなくても動作した。<br/>
-(項目をDBとコードで同期させる時にartisanから利用するよう。lumenでも利用できる）</p>
-
-<p>以下の様な形で取得できた。</p>
-
-<pre><code>DB::table('user')-&gt;get();
-</code></pre>
-
-<h2>参考</h2>
-
-<p><a href="http://laravel4.winroad.jp/2014/03/06/eloquent-orm%E3%81%AE%E5%9F%BA%E6%9C%AC%E7%9A%84%E3%81%AA%E4%BD%BF%E7%94%A8%E6%B3%95/">Eloquent ORMの基本的な使用法 | WinRoadのLaravel4初心者講座</a><br/>
-<a href="https://medium.com/@petehouston/enable-eloquent-orm-in-laravel-lumen-micro-framework-7a4f2fbcaf5d#.pe3a4ibc8">Enable Eloquent ORM in Laravel Lumen micro-framework — Medium</a></p>
 ]]></content>
   </entry>
   

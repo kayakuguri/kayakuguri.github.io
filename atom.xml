@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2016-11-18T17:53:58+09:00</updated>
+  <updated>2016-12-05T17:11:42+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,82 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[ScotchboxでのPHPエラーの出力場所]]></title>
+    <link href="http://kayakuguri.github.io/blog/2016/12/05/ubuntu-error-log/"/>
+    <updated>2016-12-05T17:02:15+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2016/12/05/ubuntu-error-log</id>
+    <content type="html"><![CDATA[<p>自分用メモ。<br/>
+<a href="https://box.scotch.io/">Scotchbox</a>のVagrant環境で、PHPの標準エラー出力がどこに吐かれるかをいつも調べるのでメモ。</p>
+
+<!-- more -->
+
+
+<h1>環境</h1>
+
+<p>環境は以下。</p>
+
+<ul>
+<li>Scotchbox 2.5</li>
+<li>Ubuntu 14.04 LTS</li>
+<li>PHP 5.6</li>
+</ul>
+
+
+<p>純粋なUbuntuでも同じ場所にログが出力されるのかは調査していないので、あくまでもScotchbox環境、とする</p>
+
+<h1>結果</h1>
+
+<p>結論から書くと、以下のパスに保存されていた。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>/var/log/apache2/error.log</span></code></pre></td></tr></table></div></figure>
+
+
+<p>というわけで、<code>tail</code>する場合は以下。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'># tail -f /var/log/apache2/error.log</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>設定内容</h1>
+
+<p>出力するパスは、以下のファイルで設定されている。<br/>
+<code>/etc/apache2/sites-available/000-default.conf</code></p>
+
+<p>内容</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;VirtualHost *:80&gt;
+</span><span class='line'>  ...
+</span><span class='line'>  ErrorLog ${APACHE_LOG_DIR}/error.log
+</span><span class='line'>  ...
+</span><span class='line'>&lt;/VirtualHost&gt;  </span></code></pre></td></tr></table></div></figure>
+
+
+<p><code>APACHE_LOG_DIR</code>という環境変数で設定されていることがわかる。<br/>
+では、この環境変数はどこで設定しているかというと、以下のファイル。</p>
+
+<p><code>/etc/apache2/envvars</code></p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>...
+</span><span class='line'>export APACHE_LOG_DIR=/var/log/apache2$SUFFIX
+</span><span class='line'>...</span></code></pre></td></tr></table></div></figure>
+
+
+<p>というわけで、冒頭のディレクトリに保存されていた。<br/>
+もし変更したい場合は上記<code>envvars</code>にて変更すればよさそう。<br/>
+(パーミッションの設定を与えてやる必要はあると思う。)</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[Laravel]フォームのバリデーションをRequestクラスに分離する]]></title>
@@ -3789,61 +3865,6 @@ OAuth 1.0a での認証をするためには、アクセストークンやシグ
 <ul>
 <li><a href="https://laravel.com/docs/5.1/homestead">Laravel Homestead</a></li>
 <li><a href="http://qiita.com/megane42/items/1d8ae7444d8c1b10bbd7">Vagrant で作った VM にやってはいけない2つのこと &ndash; Qiita</a></li>
-</ul>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[StroyBoardのNavigationBarのタイトルを変更する方法あれこれ]]></title>
-    <link href="http://kayakuguri.github.io/blog/2016/06/03/navigation-title-change/"/>
-    <updated>2016-06-03T12:05:14+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2016/06/03/navigation-title-change</id>
-    <content type="html"><![CDATA[<p>ナビゲーションバー上のタイトルの変更方法をメモ。</p>
-
-<!-- more -->
-
-
-<h1>前提</h1>
-
-<p>作りの前提としては以下。</p>
-
-<ul>
-<li>Xcode7.3</li>
-<li>Swift2.2</li>
-<li>StoryBoard上でViewを配置し、メニューから<code>Navigation Controller</code>を配置</li>
-<li>ページ間は、セグエ、で接続</li>
-</ul>
-
-
-<h1>次ページがある場合</h1>
-
-<p>次ページがある場合は、ナビゲーションバーの部分をダブルクリックして変更すればそれが反映される。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2016/06/change_ttl01.jpg" alt="" /></p>
-
-<h1>最後のページの場合</h1>
-
-<p>次ページがなく、そのページが遷移先の行き止まりの場合は、そのViewのタイトルをプロパティから設定することで変更が可能。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2016/06/change_ttl02.jpg" alt="" /></p>
-
-<h1>コードから変更</h1>
-
-<p>コードからViewのタイトルを変更すれば動的にも変更可能。
-これは遷移先あるなしには関係なし。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>self.title = "hoge"</span></code></pre></td></tr></table></div></figure>
-
-
-<p>このタイトルの設定を、<code>viewWillAppear</code>に入れておけばページを表示するたびにタイトルを変更することが可能。</p>
-
-<h1>参考</h1>
-
-<ul>
-<li><a href="http://grandbig.github.io/blog/2015/05/10/storyboard-navigationbar/">StoryboardでNavigationBarを表示する &ndash; Takahiro Octopress Blog</a></li>
-<li><a href="http://blog.77jp.net/iphone%E9%96%8B%E7%99%BA-uiviewcontroller-%E3%83%A9%E3%82%A4%E3%83%95%E3%82%B5%E3%82%A4%E3%82%AF%E3%83%AB-viewdidload-viewwillappear-viewdidappear-viewwilldisappear-viewdiddisappear-ios-%E9%80%86">【iOS】UIViewController ライフサイクル viewDidLoad viewWillAppear viewDidAppear viewWillDisappear viewDidDisappear | iOS &amp; Android &amp; Linux Labs</a></li>
 </ul>
 
 ]]></content>
