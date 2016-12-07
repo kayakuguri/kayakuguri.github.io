@@ -4,7 +4,7 @@
   <title><![CDATA[Category: salesforce | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/salesforce/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2016-12-07T16:27:50+09:00</updated>
+  <updated>2016-12-07T16:30:46+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -42,7 +42,7 @@
 </ul>
 
 
-<p><img src="sf_api_postman_01.jpg" alt="" /></p>
+<p><img src="/images/2016/12/sf_api_postman_01.jpg" alt="" /></p>
 
 <p>正しくログイン出来ると以下のようにJSONが返ってくる。</p>
 
@@ -74,7 +74,7 @@ URLのドメイン部分を先程取得した、 <code>instance_url</code> を�
 </ul>
 
 
-<p><img src="sf_api_postman_02.jpg" alt="" /></p>
+<p><img src="/images/2016/12/sf_api_postman_02.jpg" alt="" /></p>
 
 <p>カスタムRestAPIの場合は以下のURLになる。<br/>
 <code>hoge/hoge</code>が<code>@RestResource(urlMapping='/hoge/hoge')</code>で指定したURLとなる。</p>
