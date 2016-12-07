@@ -4,7 +4,7 @@
   <title><![CDATA[Category: salesforce | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/salesforce/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2016-12-05T17:11:42+09:00</updated>
+  <updated>2016-12-07T16:27:50+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,83 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[PostmanでSalesforce REST APIに接続]]></title>
+    <link href="http://kayakuguri.github.io/blog/2016/12/07/sf-rest-api-postman/"/>
+    <updated>2016-12-07T16:27:12+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2016/12/07/sf-rest-api-postman</id>
+    <content type="html"><![CDATA[<p>以前まではRestAPIの接続確認には、<a href="https://apigee.com/providers">Apigee</a>を使用していたのだけれど、TLS1.0無効化の問題の影響からsandboxでは接続できなくなってしまった。<br/>
+なので、代替としてちょっとめんどうだけれど、Postmanで接続してみた。</p>
+
+<!-- more -->
+
+
+<h1>アクセストークンの取得</h1>
+
+<p>ドメインは、sandboxの場合は、 <code>test.salesforce.com</code> 、本番は、 <code>login.salesforce.com</code> となる。<br/>
+今回はsandboxで試す。</p>
+
+<p>Postmanにて、以下の内容で送信。</p>
+
+<blockquote><p>POST : <a href="https://test.salesforce.com/services/oauth2/token">https://test.salesforce.com/services/oauth2/token</a></p></blockquote>
+
+<ul>
+<li><code>grant_type</code> : <code>password</code></li>
+<li><code>client_id</code> : 接続アプリケーションのコンシューマ鍵</li>
+<li><code>client_secret</code> : 接続アプリケーションのコンシューマの秘密</li>
+<li><code>username</code> : 使用するアカウントのユーザ名</li>
+<li><code>password</code> : パスワード。必要な場合は、パスワード+セキュリティトークン</li>
+</ul>
+
+
+<p><img src="sf_api_postman_01.jpg" alt="" /></p>
+
+<p>正しくログイン出来ると以下のようにJSONが返ってくる。</p>
+
+<p><code>
+{
+  "access_token": "xxx",
+  "instance_url": "https://xxxx.salesforce.com",
+  "id": "https://test.salesforce.com/id/xxxx/xxxx",
+  "token_type": "Bearer",
+  "issued_at": "xxx",
+  "signature": "xxx"
+}
+</code></p>
+
+<p><code>access_token</code>と<code>instance_url</code>だけ必要。</p>
+
+<h1>APIに接続</h1>
+
+<p>例として、オブジェクトの一覧を取得してみる。<br/>
+URLのドメイン部分を先程取得した、 <code>instance_url</code> を使用する。</p>
+
+<blockquote><p>GET : <a href="https://xxx.salesforce.com/services/data/v24.0/sobjects">https://xxx.salesforce.com/services/data/v24.0/sobjects</a></p></blockquote>
+
+<p>ヘッダーに以下を追加。<br/>
+<code>ACCESS_TOKEN</code>には先程取得した、<code>access_token</code>を使用する。</p>
+
+<ul>
+<li><code>Authorization</code> : <code>Bearer ACCESS_TOKEN</code></li>
+</ul>
+
+
+<p><img src="sf_api_postman_02.jpg" alt="" /></p>
+
+<p>カスタムRestAPIの場合は以下のURLになる。<br/>
+<code>hoge/hoge</code>が<code>@RestResource(urlMapping='/hoge/hoge')</code>で指定したURLとなる。</p>
+
+<blockquote><p><a href="https://xxx.salesforce.com/services/apexrest/hoge/hoge">https://xxx.salesforce.com/services/apexrest/hoge/hoge</a></p></blockquote>
+
+<h1>参考</h1>
+
+<ul>
+<li><a href="http://sfdcbeginner.com/how-to-test-salesforce-rest-api.html">HOW TO TEST SALESFORCE REST API</a></li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[SalesforceのREST API接続用のLaravelパッケージを使ってみる]]></title>
@@ -798,117 +875,6 @@ $response = json_decode($output, true);</p>
 <li><a href="http://tkengo.github.io/blog/2015/12/01/https-details/">理解してるつもりの SSL/TLS でも、もっと理解したら面白かった話 &middot; けんごのお屋敷</a></li>
 </ul>
 
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[SalesforceからWP REST APIへOAuth認証を利用して投稿する]]></title>
-    <link href="http://kayakuguri.github.io/blog/2016/06/30/sf-callout-wp-rest-api-oauth1/"/>
-    <updated>2016-06-30T17:36:44+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2016/06/30/sf-callout-wp-rest-api-oauth1</id>
-    <content type="html"><![CDATA[<p>salesforceからWP REST APIのエンドポイントへコールアウトして投稿する。<br/>
-投稿の際には、OAuth認証を利用する。</p>
-
-<!-- more -->
-
-
-<h1>前提</h1>
-
-<p>WordPress側にで、OAuth 1.0a Serverを導入してアプリケーションを作成しておく。<br/>
-また、そのアプリケーションを使用して、アクセストークンまで取得しているものとする。</p>
-
-<p>通常は承認のフローなどはユーザー側が行うため、アクセストークンまでもった状態からスタートすることはないと思うが、今回は最後の投稿部分だけに絞って試してみた。</p>
-
-<p>WP REST APIでアクセストークンを取得するには、前回書いたこの記事を参考にどうぞ。<br/>
-<a href="http://kayakuguri.github.io/blog/2016/06/30/wp-rest-oauth/">WordPress REST APIにOAuth1.0aで認証して投稿する &ndash; KayaMemo</a></p>
-
-<h1>リモートサイトの登録</h1>
-
-<p>コールアウトする先のドメインを事前に許可しておいてやる必要がある。<br/>
-<code>設定 -&gt; セキュリティのコントロール -&gt; リモートサイトの設定</code> から、<code>新規リモートサイト</code>をクリック。</p>
-
-<ul>
-<li>リモートサイト名 : 適当な名前</li>
-<li>リモートさサイトのURL : 接続先ドメイン</li>
-<li>プロトコルセキュリティの無効化 : HTTPでも接続を許可するか</li>
-<li>説明 : 適当な説明</li>
-<li>有効 : オンに</li>
-</ul>
-
-
-<p>通常では当然だが、HTTPSでの通信が推奨されている。
-しかし、リスクを承知、もしくはテストでの接続の場合など、HTTPでも接続させる場合はこの項目にチェックをつけると許可する事が可能。
-今回はテストってことでオンにした。</p>
-
-<p><img src="/images/2016/06/sf_wprest01.jpg" alt="" /></p>
-
-<p>ちなみに、このリモートサイトへの登録をせずにコールアウトしようとすると、以下のようなエラーが出力される。</p>
-
-<blockquote><p>Unauthorized endpoint, please check Setup->Security->Remote site settings. endpoint =xxx</p></blockquote>
-
-<h1>OAuth1.0a認証</h1>
-
-<p>今回は、WP REST API + OAuth 1.0a Server　の設定で投稿するため、OAuth1.0aでの認証になる。<br/>
-OAuth 1.0a での認証をするためには、アクセストークンやシグネチャなどの情報をヘッダーに付与してやる必要がある。<br/>
-参考: <a href="https://syncer.jp/how-to-make-signature-of-oauth-1">OAuth1.0の署名(Signature)を作成する方法</a></p>
-
-<p>これらの処理をするためのクラスがあったのでこちらを参考にさせてもらった。</p>
-
-<p><a href="https://gist.github.com/surjikal/7539745">Apex 2-legged OAuth 1.0</a></p>
-
-<p>ただし、このままでは足りない情報があったため、アクセストークンなどを送信するように修正させてもらったものが以下となる。</p>
-
-<p><a href="https://gist.github.com/k-usk/894760237c73e47ed4c7333c30ce0b91">k-usk/OAuth.cls</a></p>
-
-<h1>コールアウトを実装</h1>
-
-<p>上記のクラスを利用して実際にコールアウトしてやる。</p>
-
-<p>```
-public class PostWPCallout {</p>
-
-<pre><code>@Future(callout=true)
-public static void wpCalloutOAuth(){
-    String WP_URL = 'http://example.com';
-    String client_key = 'IdZQC4OG1Ppi';
-    String client_secret = 'S14spr4ny50fN4mjlEfvoBl4d9dWmIyqobp60DvWAD6b0j5g';
-    String oauth_token = '1IRo5QV2itt7BSeVA9m14yMQ';
-    String oauth_token_secret = 'MPDAnRor5Ajxr7z1N7JF2EOr7vCZqqJE48iYjgolQ1cD0Jm9';
-
-    //リクエストを作成
-    HttpRequest req = new HttpRequest();
-    req.setMethod('POST');
-    req.setEndpoint(WP_URL + '/wp-json/wp/v2/posts'); //新規投稿
-    req.setHeader('Content-Type','application/json');
-    Map&lt;String,String&gt; mapEmp = new Map&lt;String,String&gt;();
-    mapEmp.put('title','タイトル');
-    mapEmp.put('content', '本文');
-    String jsonString = JSON.serialize(mapEmp);
-    req.setBody(jsonString);
-
-    //クラスを利用して、OAuth用のヘッダを作る
-    req = OAuth.signRequest(req, client_key, client_secret, oauth_token, oauth_token_secret);
-
-    //コールアウト
-    Http http = new Http();
-    try{
-        HttpResponse res = http.send(req);
-
-        System.debug(Logginglevel.INFO, '*** BODY : ' + res.getBody());
-        System.debug(Logginglevel.INFO, '*** STATUS : ' + res.getStatus());
-        System.debug(Logginglevel.INFO, '*** STATUS_CODE : ' + res.getStatusCode());
-    }catch(System.CalloutException e){
-        System.debug(Logginglevel.INFO,'*** ERROR_MESSAGE : ' + e.getMessage());
-        System.debug(Logginglevel.INFO,'*** ERROR_LINE_NUMBER : ' + e.getLineNumber());
-    }
-}
-</code></pre>
-
-<p>}
-```</p>
-
-<p>コールアウトしたレスポンスがJSONで返ってくるので、投稿した記事IDを取得したい場合はここから取得したりも出来る。<br/>
-(JSONでの取得はややこしいので、パースすることになるが）</p>
 ]]></content>
   </entry>
   

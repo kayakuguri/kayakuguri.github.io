@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2016-12-05T17:11:42+09:00</updated>
+  <updated>2016-12-07T16:27:50+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,90 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[PostmanでSalesforce REST APIに接続]]></title>
+    <link href="http://kayakuguri.github.io/blog/2016/12/07/sf-rest-api-postman/"/>
+    <updated>2016-12-07T16:27:12+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2016/12/07/sf-rest-api-postman</id>
+    <content type="html"><![CDATA[<p>以前まではRestAPIの接続確認には、<a href="https://apigee.com/providers">Apigee</a>を使用していたのだけれど、TLS1.0無効化の問題の影響からsandboxでは接続できなくなってしまった。<br/>
+なので、代替としてちょっとめんどうだけれど、Postmanで接続してみた。</p>
+
+<!-- more -->
+
+
+<h1>アクセストークンの取得</h1>
+
+<p>ドメインは、sandboxの場合は、 <code>test.salesforce.com</code> 、本番は、 <code>login.salesforce.com</code> となる。<br/>
+今回はsandboxで試す。</p>
+
+<p>Postmanにて、以下の内容で送信。</p>
+
+<blockquote><p>POST : <a href="https://test.salesforce.com/services/oauth2/token">https://test.salesforce.com/services/oauth2/token</a></p></blockquote>
+
+<ul>
+<li><code>grant_type</code> : <code>password</code></li>
+<li><code>client_id</code> : 接続アプリケーションのコンシューマ鍵</li>
+<li><code>client_secret</code> : 接続アプリケーションのコンシューマの秘密</li>
+<li><code>username</code> : 使用するアカウントのユーザ名</li>
+<li><code>password</code> : パスワード。必要な場合は、パスワード+セキュリティトークン</li>
+</ul>
+
+
+<p><img src="sf_api_postman_01.jpg" alt="" /></p>
+
+<p>正しくログイン出来ると以下のようにJSONが返ってくる。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>{
+</span><span class='line'>  "access_token": "xxx",
+</span><span class='line'>  "instance_url": "https://xxxx.salesforce.com",
+</span><span class='line'>  "id": "https://test.salesforce.com/id/xxxx/xxxx",
+</span><span class='line'>  "token_type": "Bearer",
+</span><span class='line'>  "issued_at": "xxx",
+</span><span class='line'>  "signature": "xxx"
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<p><code>access_token</code>と<code>instance_url</code>だけ必要。</p>
+
+<h1>APIに接続</h1>
+
+<p>例として、オブジェクトの一覧を取得してみる。<br/>
+URLのドメイン部分を先程取得した、 <code>instance_url</code> を使用する。</p>
+
+<blockquote><p>GET : <a href="https://xxx.salesforce.com/services/data/v24.0/sobjects">https://xxx.salesforce.com/services/data/v24.0/sobjects</a></p></blockquote>
+
+<p>ヘッダーに以下を追加。<br/>
+<code>ACCESS_TOKEN</code>には先程取得した、<code>access_token</code>を使用する。</p>
+
+<ul>
+<li><code>Authorization</code> : <code>Bearer ACCESS_TOKEN</code></li>
+</ul>
+
+
+<p><img src="sf_api_postman_02.jpg" alt="" /></p>
+
+<p>カスタムRestAPIの場合は以下のURLになる。<br/>
+<code>hoge/hoge</code>が<code>@RestResource(urlMapping='/hoge/hoge')</code>で指定したURLとなる。</p>
+
+<blockquote><p><a href="https://xxx.salesforce.com/services/apexrest/hoge/hoge">https://xxx.salesforce.com/services/apexrest/hoge/hoge</a></p></blockquote>
+
+<h1>参考</h1>
+
+<ul>
+<li><a href="http://sfdcbeginner.com/how-to-test-salesforce-rest-api.html">HOW TO TEST SALESFORCE REST API</a></li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[ScotchboxでのPHPエラーの出力場所]]></title>
@@ -3692,179 +3776,6 @@ OAuth 1.0a での認証をするためには、アクセストークンやシグ
 <ul>
 <li><a href="https://www.softel.co.jp/blogs/tech/archives/4057">【php】PEARをインストールする（Composerで）   at softelメモ</a></li>
 <li><a href="http://qiita.com/dozo/items/d892cc964bb28d7a95fc">composer:repositoriesでPEARパッケージをインストール &ndash; Qiita</a></li>
-</ul>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Laravel HomesteadのPostgreSQLにPosticoから接続する]]></title>
-    <link href="http://kayakuguri.github.io/blog/2016/06/09/homestead-postgres-via-homestead/"/>
-    <updated>2016-06-09T14:56:23+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2016/06/09/homestead-postgres-via-homestead</id>
-    <content type="html"><![CDATA[<p>まとまって情報がなかったのでメモ。</p>
-
-<!-- more -->
-
-
-<h1>SSH</h1>
-
-<p>ssh接続する際のユーザー名・パスワードは、デフォルトでは、<code>vagrant/vagrant</code>のよう。
-ユーザー名はホスト名とは別で、vagrantを立ち上げた状態で以下のコマンドで確認出来た。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>$ vagrant ssh-config
-</span><span class='line'>Host default
-</span><span class='line'>  HostName 127.0.0.1
-</span><span class='line'>  User vagrant
-</span><span class='line'>  Port 2222
-</span><span class='line'>  UserKnownHostsFile /dev/null
-</span><span class='line'>  StrictHostKeyChecking no
-</span><span class='line'>  PasswordAuthentication no
-</span><span class='line'>  IdentityFile /Users/USER_NAME/Vagrant/app_folder/.vagrant/machines/default/virtualbox/private_key
-</span><span class='line'>  IdentitiesOnly yes
-</span><span class='line'>  LogLevel FATAL
-</span><span class='line'>  ForwardAgent yes</span></code></pre></td></tr></table></div></figure>
-
-
-<p>この中の、<code>User vagrant</code>という部分。</p>
-
-<p>SSH Hostは、<code>Homestead.yaml</code>で指定したip。
-デフォルトは、<code>192.168.10.10</code>だと思う。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>ip: "192.168.10.10"</span></code></pre></td></tr></table></div></figure>
-
-
-<h1>Postgres</h1>
-
-<p>Postgresはデフォルトでは以下の設定になっている。</p>
-
-<table>
-<thead>
-<tr>
-<th></th>
-<th align="left"> 項目 </th>
-<th align="left"> 内容 </th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td></td>
-<td align="left">ホスト名 </td>
-<td align="left"> localhost </td>
-</tr>
-<tr>
-<td></td>
-<td align="left"> DB名 </td>
-<td align="left"> homestead </td>
-</tr>
-<tr>
-<td></td>
-<td align="left"> ユーザー名 </td>
-<td align="left"> homestead </td>
-</tr>
-<tr>
-<td></td>
-<td align="left"> パスワード </td>
-<td align="left"> secret </td>
-</tr>
-</tbody>
-</table>
-
-
-<h1>Postico</h1>
-
-<p>Posticoから接続する際には、Optionsから、<code>Connect via SSH</code>を選択してSSH接続設定をしておく。</p>
-
-<table>
-<thead>
-<tr>
-<th></th>
-<th align="left"> 項目 </th>
-<th align="left"> 内容 </th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td></td>
-<td align="left"> Nickname </td>
-<td align="left"> (なんでも) </td>
-</tr>
-<tr>
-<td></td>
-<td align="left"> Host </td>
-<td align="left"> localhost (デフォルト) </td>
-</tr>
-<tr>
-<td></td>
-<td align="left"> Port </td>
-<td align="left"> 5432 (デフォルト) </td>
-</tr>
-<tr>
-<td></td>
-<td align="left"> User </td>
-<td align="left"> homestead </td>
-</tr>
-<tr>
-<td></td>
-<td align="left"> Password </td>
-<td align="left"> secret </td>
-</tr>
-<tr>
-<td></td>
-<td align="left"> Database </td>
-<td align="left"> homestead </td>
-</tr>
-<tr>
-<td></td>
-<td align="left"> SSH Host </td>
-<td align="left"> 192.168.10.10 </td>
-</tr>
-<tr>
-<td></td>
-<td align="left"> Port </td>
-<td align="left"> 22 (デフォルト) </td>
-</tr>
-<tr>
-<td></td>
-<td align="left"> User </td>
-<td align="left"> vagrant </td>
-</tr>
-<tr>
-<td></td>
-<td align="left"> Password </td>
-<td align="left"> vagrant </td>
-</tr>
-<tr>
-<td></td>
-<td align="left"> Private Key </td>
-<td align="left"> なし </td>
-</tr>
-</tbody>
-</table>
-
-
-<p><img src="http://kayakuguri.github.io/images/2016/06/postico_homestead.jpg" alt="" /></p>
-
-<p>これで接続出来た。</p>
-
-<h1>参考</h1>
-
-<ul>
-<li><a href="https://laravel.com/docs/5.1/homestead">Laravel Homestead</a></li>
-<li><a href="http://qiita.com/megane42/items/1d8ae7444d8c1b10bbd7">Vagrant で作った VM にやってはいけない2つのこと &ndash; Qiita</a></li>
 </ul>
 
 ]]></content>
