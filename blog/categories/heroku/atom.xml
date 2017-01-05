@@ -4,7 +4,7 @@
   <title><![CDATA[Category: heroku | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/heroku/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2017-01-05T18:25:25+09:00</updated>
+  <updated>2017-01-05T18:26:28+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,134 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Herokuで独自ドメインを指定する際に使用するターゲット名]]></title>
+    <link href="http://kayakuguri.github.io/blog/2017/01/05/heroku-custom-domain/"/>
+    <updated>2017-01-05T18:17:32+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2017/01/05/heroku-custom-domain</id>
+    <content type="html"><![CDATA[<p>Herokuで独自ドメインを指定するには、CNAMEでHeroku側のドメインを指定して設定してやる必要がある。</p>
+
+<!-- more -->
+
+
+<ul>
+<li><a href="http://kayakuguri.github.io/blog/2014/09/30/heroku-ssl-subdomain/">[heroku]herokuでのSSL設定とカスタムサブドメインの適用方法</a></li>
+</ul>
+
+
+<h1>少し前までのターゲット</h1>
+
+<p>少し前まで（具体的には<a href="https://blog.heroku.com/announcing_heroku_free_ssl_beta_and_flexible_dyno_hours">SSLの設定がHerokuの標準機能に組み込まれる</a>まで）は、以下のような設定内容で設定していた。<br/>
+（アプリ名を <code>appname</code> とし、設定するサブドメインは、<code>www.appname.com</code> とする)</p>
+
+<table>
+<thead>
+<tr>
+<th></th>
+<th align="left"> 種類 (Record) </th>
+<th align="left"> 名前 (Name) </th>
+<th align="left"> 内容 (Target) </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td></td>
+<td align="left"> CNAME </td>
+<td align="left"> <code>www</code> </td>
+<td align="left"> <code>appname.herokuapp.com</code></td>
+</tr>
+</tbody>
+</table>
+
+
+<h1>Heroku Free SSL導入後のターゲット</h1>
+
+<h2>注意</h2>
+
+<p>ここでの説明はあくまでも独自<strong>サブドメイン</strong>の設定方法となる。<br/>
+ルートドメインをHerokuのアプリで使用したい場合は、別途PointDNSアドオンや、AWSのRoot53などのサービスを使用する必要があるが、ここでは割愛する（どれがデファクトスタンダードかまだ決まりきってない印象）。<br/>
+なので、CNAMEでの設定となり、Aレコードでの設定ではないので注意。<br/>
+(herokuは固定IPではないので、通常はAレコードは使用出来ない）</p>
+
+<h2>前提</h2>
+
+<p>今まで、Herokuに独自のSSL証明書を適用させるためには <a href="https://elements.heroku.com/addons/ssl">Heroku SSLのアドオン</a> が必要だったのだが、<br/>
+<strong>FreeDyno以外の有料アプリに限り</strong>デフォルトでSSLの設定が出来るようになった。<br/>
+しかもブラウザ上からドラッグアンドドロップでファイルをアップ出来るようになったため無料かつ便利になった。</p>
+
+<p>(無料Dynoでの利用の場合はアドオンの追加が必要になるのだが、一番安い<code>hobby dyno</code>は月$7/1dyno、で、SSLアドオン 月$20、なので、有料dynoにした方が安いため、アドオンで設定するメリットはほぼないと思われる）</p>
+
+<h2>ターゲットの変更</h2>
+
+<p>そのタイミングで、CNAMEとして設定するターゲット名も変更になった。<br/>
+今までは、 <code>hokkaido-1212.herokussl.com</code> など、都道府県が入ったようなランダムな名前だったのだが、新しく、 <code>www.appname.com.herokudns.com</code> というような名前となった。<br/>
+以下のようになるよう。</p>
+
+<p><code>
+{設定するサブドメイン}.herokudns.com
+</code></p>
+
+<h2>ターゲット名</h2>
+
+<p>よって、CNAMEでの設定も内容の部分が変更となる。<br/>
+このターゲット名だが、<strong>SSLを使用の有無、無料・有料Dynoに関わらず</strong>、一律で <code>herokudns.com</code> の指定となる。</p>
+
+<p>Herokuの設定画面から設定した場合は以下のような感じで表示がされるので、<code>DNA Target</code>の部分を使用すればよい。</p>
+
+<p><img src="/images/2017/01/custom_domain01.jpg" alt="" /></p>
+
+<p>コマンドで確認した場合は以下のような感じになる。</p>
+
+<p>```
+$ heroku domains -a appname
+=== appname Heroku Domain
+appname.herokuapp.com</p>
+
+<p>=== appname Custom Domains
+Domain Name      DNS Target
+───────────────  ─────────────────────────────
+www.appname.com  www.appname.com.herokudns.com
+```</p>
+
+<h2>CNAMEの設定</h2>
+
+<p>よって、設定内容は以下のようになる。</p>
+
+<table>
+<thead>
+<tr>
+<th></th>
+<th align="left"> 種類 (Record) </th>
+<th align="left"> 名前 (Name) </th>
+<th align="left"> 内容 (Target) </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td></td>
+<td align="left"> CNAME </td>
+<td align="left"> <code>www</code> </td>
+<td align="left"> <code>www.appname.com.herokudns.com</code></td>
+</tr>
+</tbody>
+</table>
+
+
+<h1>参考</h1>
+
+<ul>
+<li><a href="https://devcenter.heroku.com/articles/custom-domains">Custom Domain Names for Apps | Heroku Dev Center</a></li>
+<li><a href="http://www.ucom.ne.jp/enterprise/dnsmanual/p4_4_1_4.html">DNS設定ツールマニュアルWEB</a>
+
+<ul>
+<li>CNAME設定がどんなものなのかのイメージに</li>
+</ul>
+</li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[herokuにComodoで取得したSSL証明書を反映させる]]></title>
@@ -462,105 +590,6 @@ Setting CAT_DATABASE vars and restarting cat... done, v19
 <li><a href="http://blog.flect.co.jp/labo/2015/01/addon-a943.html">Addon のアプリ間共有 &ndash; フレクトのHeroku Lab</a></li>
 </ul>
 
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[heroku アドオン] Filepickerを試してみた]]></title>
-    <link href="http://kayakuguri.github.io/blog/2015/10/08/filepicker/"/>
-    <updated>2015-10-08T10:44:27+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2015/10/08/filepicker</id>
-    <content type="html"><![CDATA[<p>ファイルストレージサービスである、Filepickerを試してみた。</p>
-
-<!-- more -->
-
-
-<p><img src="/images/2015/10/filepicker01.jpg" alt="" /></p>
-
-<p><a href="https://www.filepicker.com/">Easy, Powerful File Uploads | Filepicker</a><br/>
-<a href="https://addons.heroku.com/filepicker">Filepicker | Add-ons | Heroku</a></p>
-
-<p>売りとしては、簡単に様々なクラウドサービスと連携出来る事、らしい。<br/>
-サポートされているサービスは以下のよう。</p>
-
-<ul>
-<li>Alfresco</li>
-<li>Amazon Cloud Drive</li>
-<li>Box</li>
-<li>Cloudapp</li>
-<li>Dropbox</li>
-<li>Evernote</li>
-<li>Facebook</li>
-<li>Flickr</li>
-<li>Github</li>
-<li>Google Drive</li>
-<li>Instagram</li>
-<li>One Drive</li>
-<li>Picasa</li>
-</ul>
-
-
-<h2>インストール</h2>
-
-<p>herokuにインストール。</p>
-
-<pre><code>$ heroku addons:create filepicker
-</code></pre>
-
-<p>フリープランの場合は、1ファイル20MBの、月500ファイルまで利用可能。<br/>
-herokuのプラントは少し違うけれど、値段は以下。</p>
-
-<p><img src="/images/2015/10/filepicker02.jpg" alt="" /></p>
-
-<h2>導入</h2>
-
-<p>インストール後、herokuのダッシュボードからfilepickerのアドオンをクリックして、filepickerのダッシュボードに遷移すると、使い方の説明が色々出てきて最後に貼り付けるべきコードが表示される。<br/>
-後から表示させる場合は、アプリケーションを選んだ後、DachbordのGet Startedをクリックすると表示出来る。</p>
-
-<p><img src="/images/2015/10/filepicker03.jpg" alt="" /></p>
-
-<p>ここで表示されるFor Engineersのコードを貼り付けるだけ。</p>
-
-<p><img src="/images/2015/10/filepicker04.jpg" alt="" /></p>
-
-<pre><code>&lt;script type="text/javascript" src="http://kayakuguri.github.io//api.filepicker.io/v2/filepicker.js"&gt;&lt;/script&gt;
-&lt;input type="filepicker" data-fp-apikey="xxx" onchange="alert(event.fpfile.url)"&gt;
-</code></pre>
-
-<p>これを貼り付けたHTMLをアップすれば完了。以上。<br/>
-アップしてアクセスすると以下の画面となる。</p>
-
-<p><img src="/images/2015/10/filepicker05.jpg" alt="" /></p>
-
-<p>ボタンをクリックするとダイアログが表示される。</p>
-
-<p><img src="/images/2015/10/filepicker06.jpg" alt="" /></p>
-
-<p>アップロードすると、URLがアラートで表示。</p>
-
-<p><img src="/images/2015/10/filepicker07.jpg" alt="" /></p>
-
-<p>FilepickerのAssets、にて確認が出来る。</p>
-
-<p><img src="/images/2015/10/filepicker08.jpg" alt="" /></p>
-
-<p>たった２行追加するだけで完成。本当に簡単すぎてやることがない。</p>
-
-<p>フリープランでは1ファイル20Mの制限があるように書かれていたのだけど、<br/>
-試しに200Mくらいのファイルを上げてみても問題なくアップ出来た。<br/>
-アップ時に制限をかけているわけではなく、そのまま利用していると注意やプラン変更の指示がくる仕様なのかもしれない。</p>
-
-<p>とにかく、herokuからでも何の問題もなく大きいファイルをアップロード出来た。<br/>
-(クライアントから直接アップしているので、サーバーの環境は関係ない）</p>
-
-<h2>参考</h2>
-
-<p>様々な環境に組み込めるようにプラグインが用意されている。<br/>
-<a href="https://www.filepicker.com/documentation/integrations/libraries">Integration Libraries | Filepicker</a></p>
-
-<p>様々なツールを利用出来るようにしたりするカスタマイズなんかも詳しく説明されてる。<br/>
-ドキュメントも豊富っぽい。<br/>
-<a href="https://www.filepicker.com/documentation/">Documentation | Filepicker</a></p>
 ]]></content>
   </entry>
   
