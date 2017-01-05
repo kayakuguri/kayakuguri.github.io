@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2017-01-05T18:19:04+09:00</updated>
+  <updated>2017-01-05T18:20:48+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -19,6 +19,9 @@
     <updated>2017-01-05T18:17:32+09:00</updated>
     <id>http://kayakuguri.github.io/blog/2017/01/05/heroku-custom-domain</id>
     <content type="html"><![CDATA[<p>Herokuで独自ドメインを指定するには、CNAMEでHeroku側のドメインを指定して設定してやる必要がある。</p>
+
+<!-- more -->
+
 
 <ul>
 <li><a href="http://kayakuguri.github.io/blog/2014/09/30/heroku-ssl-subdomain/">[heroku]herokuでのSSL設定とカスタムサブドメインの適用方法</a></li>
