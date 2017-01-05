@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2016-12-07T16:30:46+09:00</updated>
+  <updated>2017-01-05T18:19:04+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,138 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Herokuで独自ドメインを指定する際に使用するターゲット名]]></title>
+    <link href="http://kayakuguri.github.io/blog/2017/01/05/heroku-custom-domain/"/>
+    <updated>2017-01-05T18:17:32+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2017/01/05/heroku-custom-domain</id>
+    <content type="html"><![CDATA[<p>Herokuで独自ドメインを指定するには、CNAMEでHeroku側のドメインを指定して設定してやる必要がある。</p>
+
+<ul>
+<li><a href="http://kayakuguri.github.io/blog/2014/09/30/heroku-ssl-subdomain/">[heroku]herokuでのSSL設定とカスタムサブドメインの適用方法</a></li>
+</ul>
+
+
+<h1>少し前までのターゲット</h1>
+
+<p>少し前まで（具体的には<a href="https://blog.heroku.com/announcing_heroku_free_ssl_beta_and_flexible_dyno_hours">SSLの設定がHerokuの標準機能に組み込まれる</a>まで）は、以下のような設定内容で設定していた。<br/>
+（アプリ名を <code>appname</code> とし、設定するサブドメインは、<code>www.appname.com</code> とする)</p>
+
+<table>
+<thead>
+<tr>
+<th></th>
+<th align="left"> 種類 (Record) </th>
+<th align="left"> 名前 (Name) </th>
+<th align="left"> 内容 (Target) </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td></td>
+<td align="left"> CNAME </td>
+<td align="left"> <code>www</code> </td>
+<td align="left"> <code>appname.herokuapp.com</code>|</td>
+</tr>
+</tbody>
+</table>
+
+
+<h1>Heroku Free SSL導入後のターゲット</h1>
+
+<h2>注意</h2>
+
+<p>ここでの説明はあくまでも独自<strong>サブドメイン</strong>の設定方法となる。<br/>
+ルートドメインをHerokuのアプリで使用したい場合は、別途PointDNSアドオンや、AWSのRoot53などのサービスを使用する必要があるが、ここでは割愛する（どれがデファクトスタンダードかまだ決まりきってない印象）。<br/>
+なので、CNAMEでの設定となり、Aレコードでの設定ではないので注意。<br/>
+(herokuは固定IPではないので、通常はAレコードは使用出来ない）</p>
+
+<h2>前提</h2>
+
+<p>今まで、Herokuに独自のSSL証明書を適用させるためには <a href="https://elements.heroku.com/addons/ssl">Heroku SSLのアドオン</a> が必要だったのだが、<br/>
+<strong>FreeDyno以外の有料アプリに限り</strong>デフォルトでSSLの設定が出来るようになった。<br/>
+しかもブラウザ上からドラッグアンドドロップでファイルをアップ出来るようになったため無料かつ便利になった。</p>
+
+<p>(無料での利用の場合はアドオンの追加が必要になるのだが、hobby dynoは月$7/1dyno、で、SSLアドオン $20/month、なので、有料dynoにした方が安いため、アドオンを追加するメリットはほぼないと思われる）</p>
+
+<h2>ターゲットの変更</h2>
+
+<p>そのタイミングで、CNAMEとして設定するターゲット名も変更になった。<br/>
+今までは、 <code>hokkaido-1212.herokussl.com</code> など、都道府県が入ったようなランダムな名前だったのだが、新しく、 <code>www.APPNAME.com.herokudns.com</code> というような名前となった。<br/>
+以下のようになるよう。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>{設定するサブドメイン}.herokudns.com</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>ターゲット名</h2>
+
+<p>よって、CNAMEでの設定も内容の部分が変更となる。<br/>
+このターゲット名だが、<strong>SSLを使用の有無、無料・有料Dynoに関わらず</strong>、一律で <code>herokudns.com</code> の指定となる。</p>
+
+<p>Herokuの設定画面から設定した場合は以下のような感じで表示がされるので、<code>DNA Target</code>の部分を使用すればよい。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2017/01/custom_domain01.jpg" alt="" /></p>
+
+<p>コマンドで確認した場合は以下のような感じになる。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$ heroku domains -a appname
+</span><span class='line'>=== appname Heroku Domain
+</span><span class='line'>appname.herokuapp.com
+</span><span class='line'>
+</span><span class='line'>=== appname Custom Domains
+</span><span class='line'>Domain Name      DNS Target
+</span><span class='line'>───────────────  ─────────────────────────────
+</span><span class='line'>www.appname.com  www.appname.com.herokudns.com</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>CNAMEの設定</h2>
+
+<p>よって、設定内容は以下のようになる。</p>
+
+<table>
+<thead>
+<tr>
+<th></th>
+<th align="left"> 種類 (Record) </th>
+<th align="left"> 名前 (Name) </th>
+<th align="left"> 内容 (Target) </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td></td>
+<td align="left"> CNAME </td>
+<td align="left"> <code>www</code> </td>
+<td align="left"> <code>www.appname.com.herokudns.com</code>|</td>
+</tr>
+</tbody>
+</table>
+
+
+<h1>参考</h1>
+
+<ul>
+<li><a href="https://devcenter.heroku.com/articles/custom-domains">Custom Domain Names for Apps | Heroku Dev Center</a></li>
+<li><a href="http://www.ucom.ne.jp/enterprise/dnsmanual/p4_4_1_4.html">DNS設定ツールマニュアルWEB</a>
+
+<ul>
+<li>CNAME設定がどんなものなのかのイメージに</li>
+</ul>
+</li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[PostmanでSalesforce REST APIに接続]]></title>
@@ -3666,118 +3798,6 @@ OAuth 1.0a での認証をするためには、アクセストークンやシグ
 
 <p>これでこのファイルへアクセスすると、無事、新規投稿が行われる。
 以上。</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Composerを使ってPEARのライブラリをインストールする]]></title>
-    <link href="http://kayakuguri.github.io/blog/2016/06/23/pear-composer-install/"/>
-    <updated>2016-06-23T12:43:47+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2016/06/23/pear-composer-install</id>
-    <content type="html"><![CDATA[<p>PEARのライブラリをComposer経由でインストールする方法。メモ。</p>
-
-<!-- more -->
-
-
-<p><code>PEAR::Log</code>をインストールする方法を例にする。</p>
-
-<h1>Pearのリポジトリから取得する</h1>
-
-<p><code>composer.json</code>に以下のように記述し、取得する。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>{
-</span><span class='line'>  "repositories": [
-</span><span class='line'>    {
-</span><span class='line'>        "type": "pear",
-</span><span class='line'>        "url": "http://pear.php.net"
-</span><span class='line'>    }
-</span><span class='line'>  ],
-</span><span class='line'>  "require": {
-</span><span class='line'>    "pear-pear.php.net/PEAR": "*@stable",
-</span><span class='line'>    "pear-pear.php.net/Log": "*@stable"
-</span><span class='line'>  }
-</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
-
-
-<p>このまま <code>$ composer install</code>すると以下の様なWarningが出てインストールエラーとなる。</p>
-
-<blockquote><p>PEAR repository from <a href="http://pear.php.net">http://pear.php.net</a> could not be loaded. Your configuration does not allow connections to <a href="http://pear.php.net/channel.xml.">http://pear.php.net/channel.xml.</a> See <a href="https://getcomposer.org/doc/06-config.md#secure-http">https://getcomposer.org/doc/06-config.md#secure-http</a> for details.</p></blockquote>
-
-<h1>セキュアじゃないURLからも取得</h1>
-
-<p>これは、取得先のURLが<code>http</code>になっているため。
-デフォルトではセキュアなURL、<code>https</code>からしか取得をしない設定になっているよう。</p>
-
-<p>そのため、これを解除して、<code>http</code>からも取得出来るようにしてやる。</p>
-
-<p><a href="https://getcomposer.org/doc/06-config.md#secure-http">https://getcomposer.org/doc/06-config.md#secure-http</a></p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>"config": {
-</span><span class='line'>  "secure-http": false
-</span><span class='line'>},</span></code></pre></td></tr></table></div></figure>
-
-
-<h1>Composer.json</h1>
-
-<p>というわけで全文は以下。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>{
-</span><span class='line'>  "config": {
-</span><span class='line'>    "secure-http": false
-</span><span class='line'>  },
-</span><span class='line'>  "repositories": [
-</span><span class='line'>    {
-</span><span class='line'>        "type": "pear",
-</span><span class='line'>        "url": "http://pear.php.net"
-</span><span class='line'>    }
-</span><span class='line'>  ],
-</span><span class='line'>  "require": {
-</span><span class='line'>    "pear-pear.php.net/PEAR": "*@stable",
-</span><span class='line'>    "pear-pear.php.net/Log": "*@stable"
-</span><span class='line'>  }
-</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
-
-
-<p>これで無事、インストール出来た。
-使用の際はComposerのライブラリと同じく、<code>vendor/autoload.php</code>を読み込んで使う。</p>
-
-<h1>参考</h1>
-
-<ul>
-<li><a href="https://www.softel.co.jp/blogs/tech/archives/4057">【php】PEARをインストールする（Composerで）   at softelメモ</a></li>
-<li><a href="http://qiita.com/dozo/items/d892cc964bb28d7a95fc">composer:repositoriesでPEARパッケージをインストール &ndash; Qiita</a></li>
-</ul>
-
 ]]></content>
   </entry>
   

@@ -1,0 +1,337 @@
+
+<!DOCTYPE HTML>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Herokuで独自ドメインを指定する際に使用するターゲット名 - KayaMemo</title>
+
+	
+	<meta name="description" content="<!-- google_ad_client = "ca-pub-0887267957680144"; /* kayakuguri top */ google_ad_slot = "1210228675"; google_ad_width = 468; google_ad_height = 60 &hellip;">
+	
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+	<link href="/atom.xml" rel="alternate" title="KayaMemo" type="application/atom+xml">
+	<link rel="canonical" href="">
+	<link href="/favicon.png" rel="shortcut icon">
+	<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+	<script async="true" src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+	
+<meta property="og:title" content="Herokuで独自ドメインを指定する際に使用するターゲット名 - KayaMemo" />
+<meta property="og:type" content="article" />
+<meta property="og:description" content="<!-- google_ad_client = "ca-pub-0887267957680144"; /* kayakuguri top */ google_ad_slot = "1210228675"; google_ad_width = 468; google_ad_height = 60 &hellip;" />
+
+<meta property="og:url" content="" />
+<meta property="og:image" content="http://kayakuguri.github.io/images/about_me.jpg" />
+<meta property="og:author" content="kayakuguri" />
+<meta property="og:site_name" content="KayaMemo" />
+<meta property="og:locale" content="ja_JP" />
+<meta property="fb:app_id" content="509051419202319" />
+</head>
+
+
+<body>
+	<header id="header" class="inner"><h1><a href="/">KayaMemo</a></h1>
+<nav id="main-nav"><ul class="main">
+	<li><a href="/">Blog</a></li>
+	<li><a href="/blog/archives">Archives</a></li>
+</ul>
+</nav>
+<nav id="mobile-nav">
+	<div class="alignleft menu">
+		<a class="button">Menu</a>
+		<div class="container"><ul class="main">
+	<li><a href="/">Blog</a></li>
+	<li><a href="/blog/archives">Archives</a></li>
+</ul>
+</div>
+	</div>
+	<div class="alignright search">
+		<a class="button"></a>
+		<div class="container">
+			<form action="http://google.com/search" method="get">
+				<input type="text" name="q" results="0">
+				<input type="hidden" name="q" value="site:kayakuguri.github.io">
+			</form>
+		</div>
+	</div>
+</nav>
+<nav id="sub-nav" class="alignright">
+	<div class="social">
+		
+		
+		
+		<a class="twitter" href="http://twitter.com/usk" title="Twitter">Twitter</a>
+		
+		
+    
+		
+		
+		
+		
+		
+		<a class="rss" href="/atom.xml" title="RSS">RSS</a>
+		
+    
+	</div>
+	<form class="search" action="http://google.com/search" method="get">
+		<input class="alignright" type="text" name="q" results="0">
+		<input type="hidden" name="q" value="site:kayakuguri.github.io">
+	</form>
+</nav>
+
+</header>
+	
+		
+	
+	<div id="content" class="inner"><article class="post">
+	<h2 class="title">Herokuで独自ドメインを指定する際に使用するターゲット名</h2>
+	<div class="entry-content">
+        <div class="adArea">
+    <script type="text/javascript"><!--
+    google_ad_client = "ca-pub-0887267957680144";
+    /* kayakuguri top */
+    google_ad_slot = "1210228675";
+    google_ad_width = 468;
+    google_ad_height = 60;
+    //-->
+    </script>
+    <script type="text/javascript"
+            src="//pagead2.googlesyndication.com/pagead/show_ads.js">
+    </script>
+</div>
+        <p>Herokuで独自ドメインを指定するには、CNAMEでHeroku側のドメインを指定して設定してやる必要がある。</p>
+
+<ul>
+<li><a href="http://kayakuguri.github.io/blog/2014/09/30/heroku-ssl-subdomain/">[heroku]herokuでのSSL設定とカスタムサブドメインの適用方法</a></li>
+</ul>
+
+
+<h1>少し前までのターゲット</h1>
+
+<p>少し前まで（具体的には<a href="https://blog.heroku.com/announcing_heroku_free_ssl_beta_and_flexible_dyno_hours">SSLの設定がHerokuの標準機能に組み込まれる</a>まで）は、以下のような設定内容で設定していた。<br/>
+（アプリ名を <code>appname</code> とし、設定するサブドメインは、<code>www.appname.com</code> とする)</p>
+
+<table>
+<thead>
+<tr>
+<th></th>
+<th align="left"> 種類 (Record) </th>
+<th align="left"> 名前 (Name) </th>
+<th align="left"> 内容 (Target) </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td></td>
+<td align="left"> CNAME </td>
+<td align="left"> <code>www</code> </td>
+<td align="left"> <code>appname.herokuapp.com</code>|</td>
+</tr>
+</tbody>
+</table>
+
+
+<h1>Heroku Free SSL導入後のターゲット</h1>
+
+<h2>注意</h2>
+
+<p>ここでの説明はあくまでも独自<strong>サブドメイン</strong>の設定方法となる。<br/>
+ルートドメインをHerokuのアプリで使用したい場合は、別途PointDNSアドオンや、AWSのRoot53などのサービスを使用する必要があるが、ここでは割愛する（どれがデファクトスタンダードかまだ決まりきってない印象）。<br/>
+なので、CNAMEでの設定となり、Aレコードでの設定ではないので注意。<br/>
+(herokuは固定IPではないので、通常はAレコードは使用出来ない）</p>
+
+<h2>前提</h2>
+
+<p>今まで、Herokuに独自のSSL証明書を適用させるためには <a href="https://elements.heroku.com/addons/ssl">Heroku SSLのアドオン</a> が必要だったのだが、<br/>
+<strong>FreeDyno以外の有料アプリに限り</strong>デフォルトでSSLの設定が出来るようになった。<br/>
+しかもブラウザ上からドラッグアンドドロップでファイルをアップ出来るようになったため無料かつ便利になった。</p>
+
+<p>(無料での利用の場合はアドオンの追加が必要になるのだが、hobby dynoは月$7/1dyno、で、SSLアドオン $20/month、なので、有料dynoにした方が安いため、アドオンを追加するメリットはほぼないと思われる）</p>
+
+<h2>ターゲットの変更</h2>
+
+<p>そのタイミングで、CNAMEとして設定するターゲット名も変更になった。<br/>
+今までは、 <code>hokkaido-1212.herokussl.com</code> など、都道府県が入ったようなランダムな名前だったのだが、新しく、 <code>www.APPNAME.com.herokudns.com</code> というような名前となった。<br/>
+以下のようになるよう。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>{設定するサブドメイン}.herokudns.com</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>ターゲット名</h2>
+
+<p>よって、CNAMEでの設定も内容の部分が変更となる。<br/>
+このターゲット名だが、<strong>SSLを使用の有無、無料・有料Dynoに関わらず</strong>、一律で <code>herokudns.com</code> の指定となる。</p>
+
+<p>Herokuの設定画面から設定した場合は以下のような感じで表示がされるので、<code>DNA Target</code>の部分を使用すればよい。</p>
+
+<p><img src="/images/2017/01/custom_domain01.jpg" alt="" /></p>
+
+<p>コマンドで確認した場合は以下のような感じになる。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$ heroku domains -a appname
+</span><span class='line'>=== appname Heroku Domain
+</span><span class='line'>appname.herokuapp.com
+</span><span class='line'>
+</span><span class='line'>=== appname Custom Domains
+</span><span class='line'>Domain Name      DNS Target
+</span><span class='line'>───────────────  ─────────────────────────────
+</span><span class='line'>www.appname.com  www.appname.com.herokudns.com</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>CNAMEの設定</h2>
+
+<p>よって、設定内容は以下のようになる。</p>
+
+<table>
+<thead>
+<tr>
+<th></th>
+<th align="left"> 種類 (Record) </th>
+<th align="left"> 名前 (Name) </th>
+<th align="left"> 内容 (Target) </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td></td>
+<td align="left"> CNAME </td>
+<td align="left"> <code>www</code> </td>
+<td align="left"> <code>www.appname.com.herokudns.com</code>|</td>
+</tr>
+</tbody>
+</table>
+
+
+<h1>参考</h1>
+
+<ul>
+<li><a href="https://devcenter.heroku.com/articles/custom-domains">Custom Domain Names for Apps | Heroku Dev Center</a></li>
+<li><a href="http://www.ucom.ne.jp/enterprise/dnsmanual/p4_4_1_4.html">DNS設定ツールマニュアルWEB</a>
+
+<ul>
+<li>CNAME設定がどんなものなのかのイメージに</li>
+</ul>
+</li>
+</ul>
+
+
+    </div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2017-01-05T18:17:32+09:00" pubdate data-updated="true">Jan 5<span>th</span>, 2017</time></div>
+	<div class="tags">
+
+</div>
+	
+</div>
+</article>
+
+	<div class="share">
+	<div class="addthis_toolbox addthis_default_style ">
+		
+        <div id="fb-root"></div>
+<script>(function(d, s, id) {
+    var js, fjs = d.getElementsByTagName(s)[0];
+    if (d.getElementById(id)) return;
+    js = d.createElement(s); js.id = id;
+    js.src = "//connect.facebook.net/ja_JP/all.js#xfbml=1&appId=509051419202319";
+    fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+        <div class="fb-like" data-href="http://kayakuguri.github.io/blog/2017/01/05/heroku-custom-domain/" data-layout="button_count" data-action="like" data-show-faces="true" data-share="false"></div>
+		
+		
+        &nbsp;&nbsp;<a href="https://twitter.com/share" class="twitter-share-button" data-via="kayakuguri123" data-lang="ja" data-count="none">ツイート</a>
+<script>
+  !function(d,s,id){
+      var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';
+      if(!d.getElementById(id)){
+          js=d.createElement(s);
+          js.id=id;js.src=p+'://platform.twitter.com/widgets.js';
+          fjs.parentNode.insertBefore(js,fjs);
+      }
+  }(document, 'script', 'twitter-wjs');
+</script>
+		
+		
+		<a class="addthis_button_google_plusone" g:plusone:size="medium"></a>
+		
+		
+        
+        <a href="http://b.hatena.ne.jp/entry/http://kayakuguri.github.io/blog/2017/01/05/heroku-custom-domain/" class="hatena-bookmark-button" data-hatena-bookmark-title="Herokuで独自ドメインを指定する際に使用するターゲット名 - KayaMemo" data-hatena-bookmark-layout="standard-noballoon" data-hatena-bookmark-lang="ja" title="このエントリーをはてなブックマークに追加">
+<img src="http://b.st-hatena.com/images/entry-button/button-only@2x.png" alt="このエントリーをはてなブックマークに追加" width="20" height="20" style="border: none;" /></a>
+<script type="text/javascript" src="http://b.st-hatena.com/js/bookmark_button.js" charset="utf-8" async="async"></script>
+        
+	</div>
+	
+</div>
+
+
+<div class="share">
+    <script type="text/javascript"><!--
+    google_ad_client = "ca-pub-0887267957680144";
+    /* kayakuguri git */
+    google_ad_slot = "2041160274";
+    google_ad_width = 336;
+    google_ad_height = 280;
+    //-->
+    </script>
+    <script type="text/javascript"
+            src="//pagead2.googlesyndication.com/pagead/show_ads.js">
+    </script>
+</div>
+</div>
+	<footer id="footer" class="inner">Copyright &copy; 2017
+
+    萱潜
+
+</footer>
+	<script src="/javascripts/slash.js"></script>
+<script src="/javascripts/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+	$('.fancybox').fancybox();
+})(jQuery);
+</script> <!-- Delete or comment this line to disable Fancybox -->
+
+
+
+
+	<script type="text/javascript">
+		var _gaq = _gaq || [];
+		_gaq.push(['_setAccount', 'UA-3730932-4']);
+		_gaq.push(['_trackPageview']);
+
+		(function() {
+			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+		})();
+	</script>
+
+
+
+</body>
+</html>
