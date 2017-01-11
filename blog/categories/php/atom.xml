@@ -4,7 +4,7 @@
   <title><![CDATA[Category: php | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/php/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2017-01-05T18:26:28+09:00</updated>
+  <updated>2017-01-11T18:27:28+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,47 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[Scotchbox]Ubuntuの環境でのphp.ini]]></title>
+    <link href="http://kayakuguri.github.io/blog/2017/01/11/scotchbox-phpini/"/>
+    <updated>2017-01-11T18:21:48+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2017/01/11/scotchbox-phpini</id>
+    <content type="html"><![CDATA[<p>ちょっとしたメモ。<br/>
+ScotchboxのデフォルトUbuntu環境での<code>php.ini</code>の場所にハマったので、そのメモ。</p>
+
+<!-- more -->
+
+
+<h2>正解</h2>
+
+<p>結論から書くと、以下のファイルでの設定が有効となっていた。</p>
+
+<p><code>
+/etc/php5/apache2/php.ini
+</code></p>
+
+<h2>間違い</h2>
+
+<p>実は以下にも<code>php.ini</code>があるのだが、これの内容を変更しても反映されなかった。</p>
+
+<p><code>
+/etc/php5/cli/php.ini  //反映されない
+</code></p>
+
+<hr />
+
+<p>そもそも何を設定したかというと、<br/>
+他のUbuntu環境を知らないので、Scotchbox特有かどうかはわからないけれど、デフォルトではスーパーグローバル変数の環境変数ではる、<code>$_ENV</code> が有効となっていないため、それを有効とすべく、<code>php.ini</code>の設定を触る必要があった。</p>
+
+<ul>
+<li><a href="http://kayakuguri.github.io/blog/2015/05/26/vagrant-env/">Vagrant環境での環境変数の設定方法</a></li>
+</ul>
+
+
+<p>以上、メモ。</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[ScotchboxでのPHPエラーの出力場所]]></title>
@@ -457,71 +498,6 @@ getenv('HOGE');
 <h1>参考</h1>
 
 <p><a href="http://www.yamamo10.jp/yamamoto/comp/home_server/ubuntu_server/apache/index.php">自宅サーバー(ubuntu server Apache)</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Cakephpのtransitionコンポーネントで送信ボタンを複数配置する]]></title>
-    <link href="http://kayakuguri.github.io/blog/2016/02/29/cakephp-transition-multi-submit/"/>
-    <updated>2016-02-29T18:07:25+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2016/02/29/cakephp-transition-multi-submit</id>
-    <content type="html"><![CDATA[<p>cakephpのtransitionコンポーネント利用時に送信ボタンを複数配置し、どちらが押されたかを判定してみたメモ。</p>
-
-<!-- more -->
-
-
-<h1>ビュー</h1>
-
-<p>以下のように <code>name</code> 属性でわけておく。<br/>
-今回は、完了、と、一時保存、でわけた。</p>
-
-<p><code>
-&lt;?php echo $this-&gt;Form-&gt;submit('一時保存', array('name' =&gt; 'temp')); ?&gt;
-&lt;?php echo $this-&gt;Form-&gt;submit('完了', array('name' =&gt; 'comp')); ?&gt;
-</code></p>
-
-<h1>コントローラ</h1>
-
-<p>コントローラので受けた際に、以下のように取得する。</p>
-
-<p>```
-$all_data = $this->Transition->mergedData();</p>
-
-<p>if(isset($all_data[&ldquo;comp&rdquo;]){</p>
-
-<pre><code>//完了が押された時の処理
-</code></pre>
-
-<p>}else if(isset($all_data[&ldquo;temp&rdquo;])){</p>
-
-<pre><code>//一時保存が押された時の処理
-</code></pre>
-
-<p>}
-```</p>
-
-<p><code>mergedData</code> の中には以下のように格納されている。<br/>
-(<code>var_dump</code> した結果)</p>
-
-<p>```
-array(2) {
-  [&ldquo;hoge_model&rdquo;]=>
-  array(87) {</p>
-
-<pre><code>["huga"]=&gt;
-string(0) "test"
-["foo"]=&gt;
-string(0) "bar"
-...
-</code></pre>
-
-<p>  }
-  [&ldquo;temp&rdquo;]=>
-  string(12) &ldquo;一時保存&rdquo;
-}
-```</p>
-
-<p>これであるかどうかの判定で判別が出来るので、処理をそれぞれ変える事が出来た。</p>
 ]]></content>
   </entry>
   

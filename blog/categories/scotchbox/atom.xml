@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: scotchbox | KayaMemo]]></title>
+  <link href="http://kayakuguri.github.io/blog/categories/scotchbox/atom.xml" rel="self"/>
+  <link href="http://kayakuguri.github.io/"/>
+  <updated>2017-01-11T18:27:28+09:00</updated>
+  <id>http://kayakuguri.github.io/</id>
+  <author>
+    <name><![CDATA[萱潜]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[[Scotchbox]Ubuntuの環境でのphp.ini]]></title>
+    <link href="http://kayakuguri.github.io/blog/2017/01/11/scotchbox-phpini/"/>
+    <updated>2017-01-11T18:21:48+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2017/01/11/scotchbox-phpini</id>
+    <content type="html"><![CDATA[<p>ちょっとしたメモ。<br/>
+ScotchboxのデフォルトUbuntu環境での<code>php.ini</code>の場所にハマったので、そのメモ。</p>
+
+<!-- more -->
+
+
+<h2>正解</h2>
+
+<p>結論から書くと、以下のファイルでの設定が有効となっていた。</p>
+
+<p><code>
+/etc/php5/apache2/php.ini
+</code></p>
+
+<h2>間違い</h2>
+
+<p>実は以下にも<code>php.ini</code>があるのだが、これの内容を変更しても反映されなかった。</p>
+
+<p><code>
+/etc/php5/cli/php.ini  //反映されない
+</code></p>
+
+<hr />
+
+<p>そもそも何を設定したかというと、<br/>
+他のUbuntu環境を知らないので、Scotchbox特有かどうかはわからないけれど、デフォルトではスーパーグローバル変数の環境変数ではる、<code>$_ENV</code> が有効となっていないため、それを有効とすべく、<code>php.ini</code>の設定を触る必要があった。</p>
+
+<ul>
+<li><a href="http://kayakuguri.github.io/blog/2015/05/26/vagrant-env/">Vagrant環境での環境変数の設定方法</a></li>
+</ul>
+
+
+<p>以上、メモ。</p>
+]]></content>
+  </entry>
+  
+</feed>
