@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2017-01-11T18:27:28+09:00</updated>
+  <updated>2017-01-26T18:41:18+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,83 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[Apex]エスケープ文字を置換する]]></title>
+    <link href="http://kayakuguri.github.io/blog/2017/01/26/apex-replase-escape/"/>
+    <updated>2017-01-26T18:25:10+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2017/01/26/apex-replase-escape</id>
+    <content type="html"><![CDATA[<p>apexにて取得した文字列から、エスケープ文字である、 <code>\</code> を取り除きたかったので、置換してみた。</p>
+
+<!-- more -->
+
+
+<h1>replaceAll</h1>
+
+<p><code>replaceAll</code>を使用すれば全置換が出来るのだが、以下のように指定してしまうと <code>'</code> をエスケープしていることになるのでプログラムが破綻してエラーになっていまう。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>hoge.replaceAll('\', '');</span></code></pre></td></tr></table></div></figure>
+
+
+<blockquote><p>エラー : line breaks not allowed in string literals</p></blockquote>
+
+<p>なので、エスケープ文字をエスケープしてやればいいのでは、と思ったが、これだとエラーが出てしまった。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>hoge.replaceAll('\\', '');</span></code></pre></td></tr></table></div></figure>
+
+
+<blockquote><p>エラー : System.StringException: Invalid regex: Unexpected internal error near index 1 \ ^</p></blockquote>
+
+<p>正規表現が間違ってますよ、というような感じ？</p>
+
+<p>なので、正規表現として指定してやればいけた。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>hoge.replaceAll('\\$', '');</span></code></pre></td></tr></table></div></figure>
+
+
+<p>以上。<br/>
+以下、蛇足。</p>
+
+<h1>なぜ必要になったか</h1>
+
+<p>以前書いた、<a href="http://kayakuguri.github.io/blog/2016/11/17/forrest-sfapi-laravel/">LaravelのSF接続用パッケージのforrest</a>を利用してデータの送信を行っていたのだが、<br/>
+通常の配列のパラメータを送るのは問題なく出来ていたのだが、カスタムエンドポイントにJSONのデータをbodyに入れて送信するとapex側でパースエラーが出てしまった。<br/>
+JSONデータは以前書いた方法でパースしている。<br/>
+<a href="http://kayakuguri.github.io/blog/2015/12/08/json-apex-parse/">ApexでJSONをパースする</a></p>
+
+<p>その内容が、上記のエスケープ文字がJSONデータに混ざり込んでいたため、だった。<br/>
+なら、JSONデータからエスケープ文字を取り除いてやればよいのでは、と思い調べると、以下のようにJSONをエンコードするとエスケープされない事がわかった。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>json_encode($hoge, JSON_UNESCAPED_SLASHES);</span></code></pre></td></tr></table></div></figure>
+
+
+<p>第二引数に<code>JSON_UNESCAPED_SLASHES</code>を指定してやるだけでよい。<br/>
+しかし、これを行ってもエスケープ文字が消えない。これはもしかして、ライブラリ側でエスケープをしているのでは、と思いコードを確認するとやはり以下の箇所で<code>body</code>に指定された値に<code>json_encode</code>をかけており、ここでは第二引数には何も指定されていなかった。</p>
+
+<p><a href="https://github.com/omniphx/forrest/blob/master/src/Omniphx/Forrest/Client.php#L775">https://github.com/omniphx/forrest/blob/master/src/Omniphx/Forrest/Client.php#L775</a></p>
+
+<p>ならば、設定ファイルでフォーマットの形式を指定する箇所があったので、そこで<code>none</code>を指定してやった。</p>
+
+<p><a href="https://github.com/omniphx/forrest/blob/master/src/config/config.php#L50">https://github.com/omniphx/forrest/blob/master/src/config/config.php#L50</a></p>
+
+<p>しかし上記の<code>json_encode</code>している箇所をよくみるとわかるのだが、フォーマットが指定されていない場合は、<code>body</code>を<a href="https://github.com/omniphx/forrest/blob/master/src/Omniphx/Forrest/Client.php#L772">空にして送る</a>ようになってしまっていた。</p>
+
+<p>これは、必ずエスケープするという方針によるものなのか、単なる実装し忘れなのかわからないが、パッケージの中身を触るわけにもいかず<br/>
+(オーバーラップして自分で実装し直すのも面倒なので）<br/>
+apex側で置換してやったほうがよさそう、ということで本エントリー内容を試すこととなった、という顛末。</p>
+
+<h2>参考</h2>
+
+<ul>
+<li><a href="http://blog.higty.xyz/archives/530/">php json_encode で&#8221;/&ldquo;のエスケープ</a></li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[Scotchbox]Ubuntuの環境でのphp.ini]]></title>
@@ -3163,150 +3240,6 @@ formなど各タグ内のIDは別にあってもなくてもよさそう。</p>
 <li><a href="http://oshiete.goo.ne.jp/qa/1030943.html">CSVファイルのインポートについて &ndash; MySQL 解決済 | 教えて！goo</a></li>
 </ul>
 
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[SalesforceからWP REST APIへOAuth認証を利用して投稿する]]></title>
-    <link href="http://kayakuguri.github.io/blog/2016/06/30/sf-callout-wp-rest-api-oauth1/"/>
-    <updated>2016-06-30T17:36:44+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2016/06/30/sf-callout-wp-rest-api-oauth1</id>
-    <content type="html"><![CDATA[<p>salesforceからWP REST APIのエンドポイントへコールアウトして投稿する。<br/>
-投稿の際には、OAuth認証を利用する。</p>
-
-<!-- more -->
-
-
-<h1>前提</h1>
-
-<p>WordPress側にで、OAuth 1.0a Serverを導入してアプリケーションを作成しておく。<br/>
-また、そのアプリケーションを使用して、アクセストークンまで取得しているものとする。</p>
-
-<p>通常は承認のフローなどはユーザー側が行うため、アクセストークンまでもった状態からスタートすることはないと思うが、今回は最後の投稿部分だけに絞って試してみた。</p>
-
-<p>WP REST APIでアクセストークンを取得するには、前回書いたこの記事を参考にどうぞ。<br/>
-<a href="http://kayakuguri.github.io/blog/2016/06/30/wp-rest-oauth/">WordPress REST APIにOAuth1.0aで認証して投稿する &ndash; KayaMemo</a></p>
-
-<h1>リモートサイトの登録</h1>
-
-<p>コールアウトする先のドメインを事前に許可しておいてやる必要がある。<br/>
-<code>設定 -&gt; セキュリティのコントロール -&gt; リモートサイトの設定</code> から、<code>新規リモートサイト</code>をクリック。</p>
-
-<ul>
-<li>リモートサイト名 : 適当な名前</li>
-<li>リモートさサイトのURL : 接続先ドメイン</li>
-<li>プロトコルセキュリティの無効化 : HTTPでも接続を許可するか</li>
-<li>説明 : 適当な説明</li>
-<li>有効 : オンに</li>
-</ul>
-
-
-<p>通常では当然だが、HTTPSでの通信が推奨されている。
-しかし、リスクを承知、もしくはテストでの接続の場合など、HTTPでも接続させる場合はこの項目にチェックをつけると許可する事が可能。
-今回はテストってことでオンにした。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2016/06/sf_wprest01.jpg" alt="" /></p>
-
-<p>ちなみに、このリモートサイトへの登録をせずにコールアウトしようとすると、以下のようなエラーが出力される。</p>
-
-<blockquote><p>Unauthorized endpoint, please check Setup->Security->Remote site settings. endpoint =xxx</p></blockquote>
-
-<h1>OAuth1.0a認証</h1>
-
-<p>今回は、WP REST API + OAuth 1.0a Server　の設定で投稿するため、OAuth1.0aでの認証になる。<br/>
-OAuth 1.0a での認証をするためには、アクセストークンやシグネチャなどの情報をヘッダーに付与してやる必要がある。<br/>
-参考: <a href="https://syncer.jp/how-to-make-signature-of-oauth-1">OAuth1.0の署名(Signature)を作成する方法</a></p>
-
-<p>これらの処理をするためのクラスがあったのでこちらを参考にさせてもらった。</p>
-
-<p><a href="https://gist.github.com/surjikal/7539745">Apex 2-legged OAuth 1.0</a></p>
-
-<p>ただし、このままでは足りない情報があったため、アクセストークンなどを送信するように修正させてもらったものが以下となる。</p>
-
-<p><a href="https://gist.github.com/k-usk/894760237c73e47ed4c7333c30ce0b91">k-usk/OAuth.cls</a></p>
-
-<h1>コールアウトを実装</h1>
-
-<p>上記のクラスを利用して実際にコールアウトしてやる。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>public class PostWPCallout {
-</span><span class='line'>    @Future(callout=true)
-</span><span class='line'>    public static void wpCalloutOAuth(){
-</span><span class='line'>      String WP_URL = 'http://example.com';
-</span><span class='line'>        String client_key = 'IdZQC4OG1Ppi';
-</span><span class='line'>        String client_secret = 'S14spr4ny50fN4mjlEfvoBl4d9dWmIyqobp60DvWAD6b0j5g';
-</span><span class='line'>        String oauth_token = '1IRo5QV2itt7BSeVA9m14yMQ';
-</span><span class='line'>        String oauth_token_secret = 'MPDAnRor5Ajxr7z1N7JF2EOr7vCZqqJE48iYjgolQ1cD0Jm9';
-</span><span class='line'>        
-</span><span class='line'>        //リクエストを作成
-</span><span class='line'>        HttpRequest req = new HttpRequest();
-</span><span class='line'>        req.setMethod('POST');
-</span><span class='line'>        req.setEndpoint(WP_URL + '/wp-json/wp/v2/posts'); //新規投稿
-</span><span class='line'>        req.setHeader('Content-Type','application/json');
-</span><span class='line'>        Map&lt;String,String&gt; mapEmp = new Map&lt;String,String&gt;();
-</span><span class='line'>        mapEmp.put('title','タイトル');
-</span><span class='line'>        mapEmp.put('content', '本文');
-</span><span class='line'>        String jsonString = JSON.serialize(mapEmp);
-</span><span class='line'>        req.setBody(jsonString);
-</span><span class='line'>        
-</span><span class='line'>        //クラスを利用して、OAuth用のヘッダを作る
-</span><span class='line'>        req = OAuth.signRequest(req, client_key, client_secret, oauth_token, oauth_token_secret);
-</span><span class='line'>
-</span><span class='line'>        //コールアウト
-</span><span class='line'>        Http http = new Http();
-</span><span class='line'>        try{
-</span><span class='line'>            HttpResponse res = http.send(req);
-</span><span class='line'>            
-</span><span class='line'>            System.debug(Logginglevel.INFO, '*** BODY : ' + res.getBody());
-</span><span class='line'>            System.debug(Logginglevel.INFO, '*** STATUS : ' + res.getStatus());
-</span><span class='line'>            System.debug(Logginglevel.INFO, '*** STATUS_CODE : ' + res.getStatusCode());
-</span><span class='line'>        }catch(System.CalloutException e){
-</span><span class='line'>            System.debug(Logginglevel.INFO,'*** ERROR_MESSAGE : ' + e.getMessage());
-</span><span class='line'>            System.debug(Logginglevel.INFO,'*** ERROR_LINE_NUMBER : ' + e.getLineNumber());
-</span><span class='line'>        }
-</span><span class='line'>    }
-</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
-
-
-<p>コールアウトしたレスポンスがJSONで返ってくるので、投稿した記事IDを取得したい場合はここから取得したりも出来る。<br/>
-(JSONでの取得はややこしいので、パースすることになるが）</p>
 ]]></content>
   </entry>
   
