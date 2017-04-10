@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2017-04-10T11:47:46+09:00</updated>
+  <updated>2017-04-10T11:51:16+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -18,16 +18,19 @@
     <link href="http://kayakuguri.github.io/blog/2017/04/10/change-debug-log-level/"/>
     <updated>2017-04-10T11:45:42+09:00</updated>
     <id>http://kayakuguri.github.io/blog/2017/04/10/change-debug-log-level</id>
-    <content type="html"><![CDATA[<p>開発者コンソールを開いていると、ログインしているユーザーのデバッグログを直接参照する事が出来る。</p>
+    <content type="html"><![CDATA[<p>開発者コンソールを開いていると、ログインしているユーザーのデバッグログを直接参照する事が出来る。
+このログは、ログレベルがデフォルトの設定になっているが、色んなログが大量に出てしまう。</p>
+
+<!-- more -->
+
+
+<p><code>Debug Only</code>にチェックをつければ自分で出力したログだけを表示してくれたり、<code>Filter</code>機能があるのでみたいログだけに絞って表示させることは比較的容易に出来る。<br/>
+しかし、そもそもログの内容が多すぎて、出力出来る最大サイズを越えてしまうことがたまにある。<br/>
+そんな時は余計なログは出力させないようにデバッグレベルを調整してやる必要がある。</p>
 
 <p><img src="http://kayakuguri.github.io/images/2017/04/debug_log_level_01.jpg" alt="" /></p>
 
 <p>(匿名実行のログを表示させたところ）</p>
-
-<p>このログは、ログレベルがデフォルトの設定になっているが、色んなログが大量に出てしまう。<br/>
-<code>Debug Only</code>にチェックをつければ自分で出力したログだけを表示してくれたり、<code>Filter</code>機能があるのでみたいログだけに絞って表示させることは比較的容易に出来る。<br/>
-しかし、そもそもログの内容が多すぎて、出力出来る最大サイズを越えてしまうことがたまにある。<br/>
-そんな時は余計なログは出力させないようにデバッグレベルを調整してやる必要がある。</p>
 
 <p>開発者コンソールじゃなくて、SFの設定からデバッグログを設定してやる場合はデバッグレベル名を必須で選択するので、レベルの調整が可能なことはわかっていたが、開発者コンソールでもこのデバッグレベルを変更出来た。</p>
 
