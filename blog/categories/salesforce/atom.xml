@@ -4,7 +4,7 @@
   <title><![CDATA[Category: salesforce | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/salesforce/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2017-01-26T18:41:18+09:00</updated>
+  <updated>2017-04-10T11:47:46+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,67 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[開発者コンソールで表示させるデバッグログのレベルを変更する]]></title>
+    <link href="http://kayakuguri.github.io/blog/2017/04/10/change-debug-log-level/"/>
+    <updated>2017-04-10T11:45:42+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2017/04/10/change-debug-log-level</id>
+    <content type="html"><![CDATA[<p>開発者コンソールを開いていると、ログインしているユーザーのデバッグログを直接参照する事が出来る。</p>
+
+<p><img src="/images/2017/04/debug_log_level_01.jpg" alt="" /></p>
+
+<p>(匿名実行のログを表示させたところ）</p>
+
+<p>このログは、ログレベルがデフォルトの設定になっているが、色んなログが大量に出てしまう。<br/>
+<code>Debug Only</code>にチェックをつければ自分で出力したログだけを表示してくれたり、<code>Filter</code>機能があるのでみたいログだけに絞って表示させることは比較的容易に出来る。<br/>
+しかし、そもそもログの内容が多すぎて、出力出来る最大サイズを越えてしまうことがたまにある。<br/>
+そんな時は余計なログは出力させないようにデバッグレベルを調整してやる必要がある。</p>
+
+<p>開発者コンソールじゃなくて、SFの設定からデバッグログを設定してやる場合はデバッグレベル名を必須で選択するので、レベルの調整が可能なことはわかっていたが、開発者コンソールでもこのデバッグレベルを変更出来た。</p>
+
+<h1>デバッグレベル</h1>
+
+<p>まず、予めデバッグレベルを作成しておく。<br/>
+<code>設定 -&gt; ログ -&gt; デバッグレベル</code> にアクセス。</p>
+
+<p>新規、から作成。</p>
+
+<p>名前は適当に設定し、レベルは欲しい情報に絞ったりして調整する。<br/>
+例えば、Apexで<code>System.debug()</code>で出力したものは、Apexコードで、レベルを <code>デバッグ</code> にしておけば出力される。<br/>
+(それ以外のカテゴリはなし、で問題ない）</p>
+
+<p><img src="/images/2017/04/debug_log_level_02.jpg" alt="" /></p>
+
+<h1>ログレベルの変更</h1>
+
+<p>開発者コンソールのメニューから、 <code>Debug -&gt; Change Log Levels</code> を選択。<br/>
+<img src="/images/2017/04/debug_log_level_03.jpg" alt="" /></p>
+
+<p>ログレベルの選択画面がモーダルで表示される。<br/>
+一番上の、<code>General Trace Settings for You</code>が、開発者コンソールで表示されるログのレベルの設定となる。<br/>
+現状は、デフォルトのレベルが設定されているはずなので、一番右の項目にある、 <code>Add/Change</code> をクリック。</p>
+
+<p><img src="/images/2017/04/debug_log_level_04.jpg" alt="" /></p>
+
+<p>デフォルトのレベルと、先ほど設定したレベルが表示されるので、設定したレベルを選択し、<code>Done</code>をクリック。</p>
+
+<p><img src="/images/2017/04/debug_log_level_05.jpg" alt="" /></p>
+
+<p>実は、予めレベルをSF側から作成しなくても、ここで、<code>Add</code>して作成する事も可能。<br/>
+さらに、各カテゴリのレベルもここから変更する事も出来る。</p>
+
+<p>これで設定は完了。先ほどの匿名実行と同じ内容でログを出力してみると、大幅に内容が減っているのが確認出来る。</p>
+
+<p><img src="/images/2017/04/debug_log_level_07.jpg" alt="" /></p>
+
+<p>また、実はSF側のデバッグログのページを確認すると、開発者コンソールを起動させた時点で設定したデバッグレベル・ログイン中のユーザーの状態で、デバッグログが自動的にセットされている。</p>
+
+<p><img src="/images/2017/04/debug_log_level_06.jpg" alt="" /></p>
+
+<p>以上。</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[PostmanでSalesforce REST APIに接続]]></title>
@@ -648,231 +709,6 @@ List&lt;Opportunity&gt; update_lists = isChanged('Opportunity', opp_records, old
 <li><a href="http://appirio.co.jp/category/tech-blog/2012/07/force-com-apex%E3%81%AE%E3%80%8Cdescribe%E3%80%8D%E3%81%A7%E3%81%A7%E3%81%8D%E3%82%8B%E3%81%93%E3%81%A8%EF%BC%88%E3%81%9D%E3%81%AE%EF%BC%91%EF%BC%89/">Force.com Apexの「Describe」でできること（その１） &ndash; Appirio Japan</a></li>
 <li><a href="http://appirio.co.jp/category/tech-blog/2012/09/force-com-apex%E3%81%AE%E3%80%8Cdescribe%E3%80%8D%E3%81%A7%E3%81%A7%E3%81%8D%E3%82%8B%E3%81%93%E3%81%A8%EF%BC%88%E3%81%9D%E3%81%AE%EF%BC%92%EF%BC%89/">Force.com Apexの「Describe」でできること（その２） &ndash; Appirio Japan</a></li>
 <li><a href="http://vaindespair.blogspot.jp/2012/04/blog-post_04.html">memo: Force.com&#12288;&#65306;&#12288;Apex でオブジェクト及び項目の情報を取得する</a></li>
-</ul>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[PHP]CurlでのSSL接続をOpenSSL方式に変更する]]></title>
-    <link href="http://kayakuguri.github.io/blog/2016/07/07/curl-openssl-tls/"/>
-    <updated>2016-07-07T17:50:07+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2016/07/07/curl-openssl-tls</id>
-    <content type="html"><![CDATA[<p>curlでsslを接続する際に、opensslを利用した接続になっていなかったために接続出来ない事例があったのだが、curlを入れ替えてopensslを利用するようにしたら接続出来たのでそのメモ。</p>
-
-<!-- more -->
-
-
-<h1>前提</h1>
-
-<p>接続をしている環境は以下とする。</p>
-
-<ul>
-<li>CnetOS 5.6</li>
-<li>PHP 5.3</li>
-</ul>
-
-
-<p>この環境で、SalesforceへRestAPIを利用して接続をする。<br/>
-接続する際の認証は以下のクラスを利用している。</p>
-
-<ul>
-<li><a href="https://github.com/nkjm/Force.com-OAuth-Toolkit-for-PHP">nkjm/Force.com-OAuth-Toolkit-for-PHP: A toolkit to enable OAuth in external Web Services developed in php</a></li>
-</ul>
-
-
-<p>自作の <code>/sample/login</code>のエンドポイントへ接続するものとする。<br/>
-接続に利用しているPHP。</p>
-
-<p>```
-&lt;?php
-require_once(&lsquo;oauth.php&rsquo;);</p>
-
-<p>define(&lsquo;CLIENT_ID&rsquo;, &lsquo;xxx&rsquo;);
-define(&lsquo;CLIENT_SECRET&rsquo;, &lsquo;xxx&rsquo;);
-define(&lsquo;CALLBACK_URL&rsquo;, &lsquo;<a href="http://localhost/">http://localhost/</a>&rsquo;);
-define(&lsquo;LOGIN_URL&rsquo;, &lsquo;<a href="https://test.salesforce.com">https://test.salesforce.com</a>&rsquo;);
-define(&lsquo;USERNAME&rsquo;, &lsquo;xxx&rsquo;);
-define(&lsquo;PASSWORD&rsquo;, &lsquo;xxx&rsquo;);</p>
-
-<p>$oauth = new oauth(CLIENT_ID, CLIENT_SECRET, CALLBACK_URL, LOGIN_URL);
-$oauth->auth_with_password(USERNAME, PASSWORD, 120);
-$url = &ldquo;$oauth->instance_url/services/apexrest/sample/login&rdquo;;
-$curl = curl_init($url);
-$POST_DATA = array(</p>
-
-<pre><code>'email' =&gt; 'sample',
-'passwd' =&gt; 'password'
-</code></pre>
-
-<p>);</p>
-
-<p>curl_setopt($curl, CURLOPT_POST, TRUE);
-curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($POST_DATA));
-curl_setopt($curl, CURLOPT_HEADER, false);
-curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-curl_setopt($curl, CURLOPT_HTTPHEADER, array(&lsquo;Content-type: application/x-www-form-urlencoded;charset=UTF-8&rsquo;, &ldquo;Authorization: OAuth &rdquo; . $oauth->access_token));
-$output= curl_exec($curl);
-curl_close($curl);
-$response = json_decode($output, true);</p>
-
-<p>echo $output;
-```</p>
-
-<p>この辺詳しくは以下をどうぞ。<br/>
-<a href="http://kayakuguri.github.io/blog/2014/10/27/apex-rest-post/">[Salesforce]apex Rest APIでPOSTでデータを送信する</a></p>
-
-<h1>失敗する</h1>
-
-<p>このまま送信をすると、以下のようなエラーが出て失敗する。<br/>
-ちなみに、ログイン履歴には残っている。</p>
-
-<p>```
-[</p>
-
-<pre><code>{
-    message: "この組織では TLS 1.0 が無効になりました。HTTPS を使用して Salesforce に接続するには、TLS 1.1 以降を使用してください。",
-    errorCode: "UNSUPPORTED_CLIENT"
-}
-</code></pre>
-
-<p>]
-```</p>
-
-<h1>TLS</h1>
-
-<p>ssl通信をする時の暗号化規格で、TLS1.0は暗号化のレベルが低い、とかで1.1以上が推奨されているよう。<br/>
-<a href="http://www.intellilink.co.jp/article/pcidss/18.html">SSL/TLS 1.0 はいつまでに無効化しなければならないか？ | NTTデータ先端技術株式会社</a><br/>
-それに伴って、Salesforceでは、TLS1.0での接続を無効に切り替えていっている。<br/>
-変更内容など詳しくは公式で。</p>
-
-<ul>
-<li><a href="https://help.salesforce.com/apex/HTViewSolution?id=000221207&amp;language=ja">Salesforce による TLS 1.0 の無効化</a></li>
-</ul>
-
-
-<p>組織の設定から明示的に有効にする事も可能だが、強制的に切り替えが行われるタイミングは以下。</p>
-
-<ul>
-<li>Sandbox 組織 &ndash; 2016 年 6 月 25 日、午前 9:30 (太平洋夏時間) (16:30 UTC)</li>
-<li>本番組織 &ndash; 2017 年 3 月 4 日、午前 9:30 (太平洋標準時) (17:30 UTC)</li>
-</ul>
-
-
-<p>今回は、Sandboxでの設定が適用されたために接続が出来なくなったよう。</p>
-
-<p>ちなみにTLSについて調べていて、現状、SSLと呼んでいるものは全てTLSによる接続になっているらしい。</p>
-
-<blockquote><p>SSLはバージョン1.0と2.0は既に脆弱性で消えていたが、2014(平成26)年10月14日、GoogleのセキュリティチームによりSSL 3.0の深刻な脆弱性「POODLE」が発見されたことでSSLは全バージョンに脆弱性が発覚、これをもってSSLは現役を退いた。<br/>
-<a href="http://www.wdic.org/w/WDIC/TLS">http://www.wdic.org/w/WDIC/TLS</a></p></blockquote>
-
-<h1>原因</h1>
-
-<p>上記環境で原因を探ってみると、<code>curl</code>でエンドポイントへ投げる際に<code>NSS</code>という方式が使われている事が原因となっている事がわかった。</p>
-
-<p><img src="/images/2016/07/tls01.jpg" alt="" /></p>
-
-<p><a href="https://developer.mozilla.org/ja/docs/NSS_FAQ">NSS FAQ | MDN</a></p>
-
-<p>NSSのバージョンは3.14だが、このバージョンでは一応TLS1.1には対応しているとリリースノートには書かれていたが…。詳細は不明。<br/>
-<a href="https://developer.mozilla.org/en-US/docs/Mozilla/Projects/NSS/NSS_3.14_release_notes">NSS 3.14 release notes &ndash; Mozilla | MDN</a></p>
-
-<h1>対処</h1>
-
-<p>というわけで、これを<code>NSS</code>ではなく、<code>OpenSSL</code>方式で接続するように変更する。<br/>
-といっても、設定変更で済むわけではなく、curlのインストールし直し、となる。</p>
-
-<p>作業内容は以下のサイトをそのまま利用させてもらった。<br/>
-<a href="http://www.apollo.jp/blog/?p=2382">wordpressの引っ越し | 紅い夕陽</a></p>
-
-<h2>作業</h2>
-
-<p>サーバー側での作業となる。<br/>
-今回はvagrant環境で作業をしたので、<code>$ vagrant ssh</code>でsshログインして作業した。<br/>
-また、ルートログインしておく。</p>
-
-<p>・必要なモジュールをインストール</p>
-
-<p>```</p>
-
-<h1>yum install gcc</h1>
-
-<h1>yum -y install openssl-devel</h1>
-
-<h1>yum -y install wget</h1>
-
-<h1>yum -y install lbzip2</h1>
-
-<p>```</p>
-
-<p>・curlを取得して展開(curlは少し前のバージョン)</p>
-
-<p>```</p>
-
-<h1>wget <a href="http://curl.haxx.se/download/curl-7.37.0.tar.bz2">http://curl.haxx.se/download/curl-7.37.0.tar.bz2</a></h1>
-
-<h1>tar xf curl-7.37.0.tar.bz2</h1>
-
-<h1>cd curl-7.37.0</h1>
-
-<h1>./configure &mdash;enable-libcurl-option</h1>
-
-<p>```</p>
-
-<p>・コンパイルしてインストール</p>
-
-<p>```</p>
-
-<h1>make</h1>
-
-<h1>make install</h1>
-
-<p>```</p>
-
-<p>・ライブラリを登録</p>
-
-<p>```</p>
-
-<h1>vi /etc/ld.so.conf.d/curl-x86_64.conf</h1>
-
-<p>```</p>
-
-<p>内容</p>
-
-<p><code>
-/usr/local/lib
-</code></p>
-
-<p>・ライブラリを更新</p>
-
-<p>```</p>
-
-<h1>ldconfig -v</h1>
-
-<p>```</p>
-
-<p>最後に、apacheを再起動しておく。</p>
-
-<p>```</p>
-
-<h1>service httpd restart</h1>
-
-<p>```</p>
-
-<p>これでOpensslを使うように変更できた。</p>
-
-<p><img src="/images/2016/07/tls02.jpg" alt="" /></p>
-
-<p>この状態で再度冒頭のPHPでアクセスすると、無事、接続することが出来た。</p>
-
-<h1>参考</h1>
-
-<ul>
-<li><a href="http://www.apollo.jp/blog/?p=2382">wordpressの引っ越し | 紅い夕陽</a></li>
-<li><a href="http://blog.wnotes.net/blog/article/php_curl_error">PHPのcurlで&quot;SSL Connection Error.&quot;のエラーがどうしても出る時の対策 | ブログ :: Web notes.log</a></li>
-<li><a href="http://www.wdic.org/w/WDIC/TLS">TLS ‐ 通信用語の基礎知識</a></li>
-<li><a href="http://www.intellilink.co.jp/article/pcidss/18.html">SSL/TLS 1.0 はいつまでに無効化しなければならないか？ | NTTデータ先端技術株式会社</a></li>
-<li><a href="http://tkengo.github.io/blog/2015/12/01/https-details/">理解してるつもりの SSL/TLS でも、もっと理解したら面白かった話 &middot; けんごのお屋敷</a></li>
 </ul>
 
 ]]></content>
