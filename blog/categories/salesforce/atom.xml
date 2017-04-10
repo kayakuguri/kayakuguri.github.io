@@ -4,7 +4,7 @@
   <title><![CDATA[Category: salesforce | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/salesforce/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2017-04-10T12:32:09+09:00</updated>
+  <updated>2017-04-10T12:35:22+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -78,6 +78,8 @@ public with sharing class SaveCSVSample {</p>
 ```</p>
 
 <p>アップされたCSVは、改行コード <code>\r\n</code> 、文字コードは、<code>UTF-8</code>となった。</p>
+
+<p>これでS3側にCSVファイルを作成出来るので、あとはレコードをSOQLで取得し、Bodyをカンマ区切りで作成してやればよいだけ。</p>
 
 <h2>環境情報</h2>
 
