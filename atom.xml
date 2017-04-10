@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2017-04-10T11:51:16+09:00</updated>
+  <updated>2017-04-10T12:32:09+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,128 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[salesforce] レコードのデータを取得し、CSVにしてS3にアップロードする]]></title>
+    <link href="http://kayakuguri.github.io/blog/2017/04/10/put-s3-csv-file/"/>
+    <updated>2017-04-10T12:31:25+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2017/04/10/put-s3-csv-file</id>
+    <content type="html"><![CDATA[<p>AWSで利用する事を想定し、レコードの内容をCSVファイルにしてS3にアップロードしてみたメモ。</p>
+
+<!-- more -->
+
+
+<p>SF内にCSVを生成して、そのファイルをS3にアップロード、すればいいかと思っていたが、直接CSVの内容をBodyに入れて送ってしまうことで、直接CSVファイルをS3に送信してしまう事が出来た。</p>
+
+<h1>参考コード</h1>
+
+<p>参考、というか、以下のコードをそのまま利用させてもらった。</p>
+
+<ul>
+<li><a href="https://github.com/darshanfarswan/haymarketCode/blob/6207a11fc072fed6dd4463b1ca4ebbbe991a232f/src/classes/S3Storage.cls">haymarketCode/src/classes/S3Storage.cls</a></li>
+</ul>
+
+
+<h1>CSV送信</h1>
+
+<p>上記サンプルはテキストファイルになるので、CSVを保存するように変更。<br/>
+具体的には、Bodyの内容をカンマ区切りにし、ファイルの拡張子を<code>csv</code>にし、Content-Typeを<code>text/csv</code>にする、だけ。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>public with sharing class SaveCSVSample {
+</span><span class='line'>  public SaveCSVSample() {
+</span><span class='line'>      String csv_body = 'テスト1,テスト2,テスト3\r\nサンプル1,サンプル2,サンプル3';
+</span><span class='line'>
+</span><span class='line'>      String fileName = 'test.csv';
+</span><span class='line'>
+</span><span class='line'>      String accessId = 'xxx';
+</span><span class='line'>      String secretKey = 'xxx';
+</span><span class='line'>      String bucketName = 'user';
+</span><span class='line'>      String S3_Domain = 's3-ap-northeast-1.amazonaws.com';
+</span><span class='line'>
+</span><span class='line'>      String dateString = Datetime.now().formatGmt('EEE, dd MMM yyyy HH:mm:ss Z');
+</span><span class='line'>      String stringToSign = 'PUT\n\ntext/csv\n' + dateString +'\n/' + bucketName + '/' + fileName;
+</span><span class='line'>      Blob mac = Crypto.generateMac('hmacSHA1',  Blob.valueOf(stringToSign), Blob.valueOf(secretKey));
+</span><span class='line'>      String signature = EncodingUtil.base64Encode(mac);
+</span><span class='line'>
+</span><span class='line'>      HttpRequest req = new HttpRequest();
+</span><span class='line'>      req.setEndPoint('https://' + bucketName + '.' + S3_Domain + '/' + fileName);
+</span><span class='line'>      req.setHeader('Content-Type', 'text/csv');
+</span><span class='line'>      req.setHeader('Content-Length', String.valueOf(csv_body.length()));
+</span><span class='line'>      req.setHeader('Host', bucketName + '.' + S3_Domain);
+</span><span class='line'>      req.setHeader('Date', dateString);
+</span><span class='line'>      req.setHeader('Authorization','AWS ' + accessId + ':' + signature);
+</span><span class='line'>      req.setBody(csv_body);
+</span><span class='line'>      req.setMethod('PUT');
+</span><span class='line'>
+</span><span class='line'>      Http httpConnection = new Http();
+</span><span class='line'>      HTTPResponse res = httpConnection.send(req);
+</span><span class='line'>
+</span><span class='line'>      System.debug(res);
+</span><span class='line'>  }
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<p>アップされたCSVは、改行コード <code>\r\n</code> 、文字コードは、<code>UTF-8</code>となった。</p>
+
+<h2>環境情報</h2>
+
+<p>この例では、アクセスキーなどはベタで書いてしまっているが、実際には<a href="https://kayakuguri.github.io/blog/2016/02/01/custom-setting/">カスタム設定などで作成し</a>取得するようにした方がよい。<br/>
+それだと、sandboxと本番でS3の投げ先も変更出来る。</p>
+
+<h2>エンドポイント</h2>
+
+<p>送信先に設定している、<code>S3_Domain</code>は現状、日本リージョンのもの。<br/>
+各サービスのリージョン別のエンドポイントは以下を参考。<br/>
+<a href="http://docs.aws.amazon.com/ja_jp/general/latest/gr/rande.html#s3_region">http://docs.aws.amazon.com/ja_jp/general/latest/gr/rande.html#s3_region</a></p>
+
+<h2>ガバナ制限</h2>
+
+<blockquote><p>ファイルサイズが3MBを超えるとApexの実行時ガバナ制限に抵触する<br/>
+<a href="http://www30304u.sakura.ne.jp/blog/?p=1808">http://www30304u.sakura.ne.jp/blog/?p=1808</a></p></blockquote>
+
+<h1>参考</h1>
+
+<ul>
+<li><a href="http://www.nkjmkzk.net/?p=2638">CORSサポートを利用したAWS S3へのアップロード方法 – Force.comバージョン</a></li>
+<li><a href="http://blog.livedoor.jp/volvic_beer/archives/52481242.html">【salesforce】【apex】【aws】apexでs3にアップロードでエラーがでたよ</a></li>
+<li><a href="http://dev.classmethod.jp/cloud/aws/s3-cors-upload/">WebブラウザからAmazon S3に直接ファイルをアップロードする</a></li>
+<li><a href="http://docs.aws.amazon.com/ja_jp/AmazonS3/latest/dev/RESTAuthentication.html">REST リクエストの署名と認証</a></li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[開発者コンソールで表示させるデバッグログのレベルを変更する]]></title>
@@ -2976,246 +3098,6 @@ formなど各タグ内のIDは別にあってもなくてもよさそう。</p>
 <li><a href="http://appirio.co.jp/category/tech-blog/2012/07/force-com-apex%E3%81%AE%E3%80%8Cdescribe%E3%80%8D%E3%81%A7%E3%81%A7%E3%81%8D%E3%82%8B%E3%81%93%E3%81%A8%EF%BC%88%E3%81%9D%E3%81%AE%EF%BC%91%EF%BC%89/">Force.com Apexの「Describe」でできること（その１） &ndash; Appirio Japan</a></li>
 <li><a href="http://appirio.co.jp/category/tech-blog/2012/09/force-com-apex%E3%81%AE%E3%80%8Cdescribe%E3%80%8D%E3%81%A7%E3%81%A7%E3%81%8D%E3%82%8B%E3%81%93%E3%81%A8%EF%BC%88%E3%81%9D%E3%81%AE%EF%BC%92%EF%BC%89/">Force.com Apexの「Describe」でできること（その２） &ndash; Appirio Japan</a></li>
 <li><a href="http://vaindespair.blogspot.jp/2012/04/blog-post_04.html">memo: Force.com&#12288;&#65306;&#12288;Apex でオブジェクト及び項目の情報を取得する</a></li>
-</ul>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[PHP]CurlでのSSL接続をOpenSSL方式に変更する]]></title>
-    <link href="http://kayakuguri.github.io/blog/2016/07/07/curl-openssl-tls/"/>
-    <updated>2016-07-07T17:50:07+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2016/07/07/curl-openssl-tls</id>
-    <content type="html"><![CDATA[<p>curlでsslを接続する際に、opensslを利用した接続になっていなかったために接続出来ない事例があったのだが、curlを入れ替えてopensslを利用するようにしたら接続出来たのでそのメモ。</p>
-
-<!-- more -->
-
-
-<h1>前提</h1>
-
-<p>接続をしている環境は以下とする。</p>
-
-<ul>
-<li>CnetOS 5.6</li>
-<li>PHP 5.3</li>
-</ul>
-
-
-<p>この環境で、SalesforceへRestAPIを利用して接続をする。<br/>
-接続する際の認証は以下のクラスを利用している。</p>
-
-<ul>
-<li><a href="https://github.com/nkjm/Force.com-OAuth-Toolkit-for-PHP">nkjm/Force.com-OAuth-Toolkit-for-PHP: A toolkit to enable OAuth in external Web Services developed in php</a></li>
-</ul>
-
-
-<p>自作の <code>/sample/login</code>のエンドポイントへ接続するものとする。<br/>
-接続に利用しているPHP。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;?php
-</span><span class='line'>require_once('oauth.php');
-</span><span class='line'>
-</span><span class='line'>define('CLIENT_ID', 'xxx');
-</span><span class='line'>define('CLIENT_SECRET', 'xxx');
-</span><span class='line'>define('CALLBACK_URL', 'http://localhost/');
-</span><span class='line'>define('LOGIN_URL', 'https://test.salesforce.com');
-</span><span class='line'>define('USERNAME', 'xxx');
-</span><span class='line'>define('PASSWORD', 'xxx');
-</span><span class='line'>
-</span><span class='line'>$oauth = new oauth(CLIENT_ID, CLIENT_SECRET, CALLBACK_URL, LOGIN_URL);
-</span><span class='line'>$oauth-&gt;auth_with_password(USERNAME, PASSWORD, 120);
-</span><span class='line'>$url = "$oauth-&gt;instance_url/services/apexrest/sample/login";
-</span><span class='line'>$curl = curl_init($url);
-</span><span class='line'>$POST_DATA = array(
-</span><span class='line'>    'email' =&gt; 'sample',
-</span><span class='line'>    'passwd' =&gt; 'password'
-</span><span class='line'>);
-</span><span class='line'>
-</span><span class='line'>curl_setopt($curl, CURLOPT_POST, TRUE);
-</span><span class='line'>curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($POST_DATA));
-</span><span class='line'>curl_setopt($curl, CURLOPT_HEADER, false);
-</span><span class='line'>curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-</span><span class='line'>curl_setopt($curl, CURLOPT_HTTPHEADER, array('Content-type: application/x-www-form-urlencoded;charset=UTF-8', "Authorization: OAuth " . $oauth-&gt;access_token));
-</span><span class='line'>$output= curl_exec($curl);
-</span><span class='line'>curl_close($curl);
-</span><span class='line'>$response = json_decode($output, true);
-</span><span class='line'>
-</span><span class='line'>echo $output;</span></code></pre></td></tr></table></div></figure>
-
-
-<p>この辺詳しくは以下をどうぞ。<br/>
-<a href="http://kayakuguri.github.io/blog/2014/10/27/apex-rest-post/">[Salesforce]apex Rest APIでPOSTでデータを送信する</a></p>
-
-<h1>失敗する</h1>
-
-<p>このまま送信をすると、以下のようなエラーが出て失敗する。<br/>
-ちなみに、ログイン履歴には残っている。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>[
-</span><span class='line'>  {
-</span><span class='line'>      message: "この組織では TLS 1.0 が無効になりました。HTTPS を使用して Salesforce に接続するには、TLS 1.1 以降を使用してください。",
-</span><span class='line'>      errorCode: "UNSUPPORTED_CLIENT"
-</span><span class='line'>  }
-</span><span class='line'>]</span></code></pre></td></tr></table></div></figure>
-
-
-<h1>TLS</h1>
-
-<p>ssl通信をする時の暗号化規格で、TLS1.0は暗号化のレベルが低い、とかで1.1以上が推奨されているよう。<br/>
-<a href="http://www.intellilink.co.jp/article/pcidss/18.html">SSL/TLS 1.0 はいつまでに無効化しなければならないか？ | NTTデータ先端技術株式会社</a><br/>
-それに伴って、Salesforceでは、TLS1.0での接続を無効に切り替えていっている。<br/>
-変更内容など詳しくは公式で。</p>
-
-<ul>
-<li><a href="https://help.salesforce.com/apex/HTViewSolution?id=000221207&amp;language=ja">Salesforce による TLS 1.0 の無効化</a></li>
-</ul>
-
-
-<p>組織の設定から明示的に有効にする事も可能だが、強制的に切り替えが行われるタイミングは以下。</p>
-
-<ul>
-<li>Sandbox 組織 &ndash; 2016 年 6 月 25 日、午前 9:30 (太平洋夏時間) (16:30 UTC)</li>
-<li>本番組織 &ndash; 2017 年 3 月 4 日、午前 9:30 (太平洋標準時) (17:30 UTC)</li>
-</ul>
-
-
-<p>今回は、Sandboxでの設定が適用されたために接続が出来なくなったよう。</p>
-
-<p>ちなみにTLSについて調べていて、現状、SSLと呼んでいるものは全てTLSによる接続になっているらしい。</p>
-
-<blockquote><p>SSLはバージョン1.0と2.0は既に脆弱性で消えていたが、2014(平成26)年10月14日、GoogleのセキュリティチームによりSSL 3.0の深刻な脆弱性「POODLE」が発見されたことでSSLは全バージョンに脆弱性が発覚、これをもってSSLは現役を退いた。<br/>
-<a href="http://www.wdic.org/w/WDIC/TLS">http://www.wdic.org/w/WDIC/TLS</a></p></blockquote>
-
-<h1>原因</h1>
-
-<p>上記環境で原因を探ってみると、<code>curl</code>でエンドポイントへ投げる際に<code>NSS</code>という方式が使われている事が原因となっている事がわかった。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2016/07/tls01.jpg" alt="" /></p>
-
-<p><a href="https://developer.mozilla.org/ja/docs/NSS_FAQ">NSS FAQ | MDN</a></p>
-
-<p>NSSのバージョンは3.14だが、このバージョンでは一応TLS1.1には対応しているとリリースノートには書かれていたが…。詳細は不明。<br/>
-<a href="https://developer.mozilla.org/en-US/docs/Mozilla/Projects/NSS/NSS_3.14_release_notes">NSS 3.14 release notes &ndash; Mozilla | MDN</a></p>
-
-<h1>対処</h1>
-
-<p>というわけで、これを<code>NSS</code>ではなく、<code>OpenSSL</code>方式で接続するように変更する。<br/>
-といっても、設定変更で済むわけではなく、curlのインストールし直し、となる。</p>
-
-<p>作業内容は以下のサイトをそのまま利用させてもらった。<br/>
-<a href="http://www.apollo.jp/blog/?p=2382">wordpressの引っ越し | 紅い夕陽</a></p>
-
-<h2>作業</h2>
-
-<p>サーバー側での作業となる。<br/>
-今回はvagrant環境で作業をしたので、<code>$ vagrant ssh</code>でsshログインして作業した。<br/>
-また、ルートログインしておく。</p>
-
-<p>・必要なモジュールをインストール</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'># yum install gcc
-</span><span class='line'># yum -y install openssl-devel
-</span><span class='line'># yum -y install wget
-</span><span class='line'># yum -y install lbzip2</span></code></pre></td></tr></table></div></figure>
-
-
-<p>・curlを取得して展開(curlは少し前のバージョン)</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'># wget http://curl.haxx.se/download/curl-7.37.0.tar.bz2
-</span><span class='line'># tar xf curl-7.37.0.tar.bz2
-</span><span class='line'># cd curl-7.37.0
-</span><span class='line'># ./configure --enable-libcurl-option</span></code></pre></td></tr></table></div></figure>
-
-
-<p>・コンパイルしてインストール</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'># make
-</span><span class='line'># make install</span></code></pre></td></tr></table></div></figure>
-
-
-<p>・ライブラリを登録</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'># vi /etc/ld.so.conf.d/curl-x86_64.conf</span></code></pre></td></tr></table></div></figure>
-
-
-<p>内容</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>/usr/local/lib</span></code></pre></td></tr></table></div></figure>
-
-
-<p>・ライブラリを更新</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'># ldconfig -v</span></code></pre></td></tr></table></div></figure>
-
-
-<p>最後に、apacheを再起動しておく。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'># service httpd restart</span></code></pre></td></tr></table></div></figure>
-
-
-<p>これでOpensslを使うように変更できた。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2016/07/tls02.jpg" alt="" /></p>
-
-<p>この状態で再度冒頭のPHPでアクセスすると、無事、接続することが出来た。</p>
-
-<h1>参考</h1>
-
-<ul>
-<li><a href="http://www.apollo.jp/blog/?p=2382">wordpressの引っ越し | 紅い夕陽</a></li>
-<li><a href="http://blog.wnotes.net/blog/article/php_curl_error">PHPのcurlで&quot;SSL Connection Error.&quot;のエラーがどうしても出る時の対策 | ブログ :: Web notes.log</a></li>
-<li><a href="http://www.wdic.org/w/WDIC/TLS">TLS ‐ 通信用語の基礎知識</a></li>
-<li><a href="http://www.intellilink.co.jp/article/pcidss/18.html">SSL/TLS 1.0 はいつまでに無効化しなければならないか？ | NTTデータ先端技術株式会社</a></li>
-<li><a href="http://tkengo.github.io/blog/2015/12/01/https-details/">理解してるつもりの SSL/TLS でも、もっと理解したら面白かった話 &middot; けんごのお屋敷</a></li>
 </ul>
 
 ]]></content>
