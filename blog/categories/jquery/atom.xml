@@ -4,7 +4,7 @@
   <title><![CDATA[Category: jquery | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/jquery/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2017-04-10T12:35:22+09:00</updated>
+  <updated>2017-04-11T18:17:07+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,297 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[jQueryを使ったCloudinaryのダイレクトアップロード]]></title>
+    <link href="http://kayakuguri.github.io/blog/2017/04/11/cloudinary-direct-upload/"/>
+    <updated>2017-04-11T18:15:35+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2017/04/11/cloudinary-direct-upload</id>
+    <content type="html"><![CDATA[<p>PHPなどのサーバーサイドのプログラムなしにクライアントのJSだけでCloudinaryにアップロードしてみた。</p>
+
+<!-- more -->
+
+
+<h1>情報</h1>
+
+<p>Cloudinaryの情報として必要なものは以下。</p>
+
+<ul>
+<li>Upload Presets Name(unsigned)</li>
+<li>Cloud Name</li>
+</ul>
+
+
+<h2>Upload Presets Name</h2>
+
+<p>Cloudinaryへアップロードする際に、サイズや形式、フィルターなどをプリセットとして登録しておける。<br/>
+unsigned アップロード、というのは、たぶん、プリセット名とCloudinaryの名前さえわかっていれば認証なしでアップロード出来る、というものっぽい。<br/>
+これは、予め設定画面から有効にしてやる必要がある。</p>
+
+<p><code>Settings</code>の、<code>Upload</code>タブを開くと、<code>Upload presets</code>という項目があるので、そこで、<code>Enable unsigned uploading</code>をクリック。</p>
+
+<p><img src="/images/2017/04/cloudinary_setting_1.jpg" alt="" /></p>
+
+<p>有効となると情報が表示されるので、<code>Name</code>をメモっておく。</p>
+
+<p><img src="/images/2017/04/cloudinary_setting_2.jpg" alt="" /></p>
+
+<h2>Cloud Name</h2>
+
+<p><code>Dashboard</code>に表示されているので、メモっておく。</p>
+
+<p><img src="/images/2017/04/cloudinary_setting_3.jpg" alt="" /></p>
+
+<h1>ライブラリ</h1>
+
+<p>Cloudinaryが作成しているjQuery File Upload用のライブラリがあるのでそちらを利用する。</p>
+
+<ul>
+<li><a href="https://github.com/cloudinary/cloudinary_js">cloudinary/cloudinary_js</a></li>
+<li><a href="https://github.com/blueimp/jQuery-File-Upload">blueimp/jQuery-File-Upload</a></li>
+</ul>
+
+
+<p>先頭でもろもろ読み込む。</p>
+
+<p>```</p>
+
+<script src='jquery.min.js' type='text/javascript'></script>
+
+
+<script src='jquery.ui.widget.js' type='text/javascript'></script>
+
+
+<script src='jquery.iframe-transport.js' type='text/javascript'></script>
+
+
+<script src='jquery.fileupload.js' type='text/javascript'></script>
+
+
+<script src='jquery.cloudinary.js' type='text/javascript'></script>
+
+
+<p>```</p>
+
+<p>全部CDNでやった場合は以下。<br/>
+公式にはCDNはないので本番の案件では使わない方が無難かも。</p>
+
+<p>```</p>
+
+<script src='http://kayakuguri.github.io//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js' type='text/javascript'></script>
+
+
+<script src="http://kayakuguri.github.io//code.jquery.com/ui/1.12.1/jquery-ui.min.js" integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU=" crossorigin="anonymous"></script>
+
+
+<script src='http://kayakuguri.github.io//cdnjs.cloudflare.com/ajax/libs/jquery.iframe-transport/1.0.1/jquery.iframe-transport.min.js' type='text/javascript'></script>
+
+
+<script src='http://kayakuguri.github.io//cdnjs.cloudflare.com/ajax/libs/blueimp-file-upload/9.18.0/js/jquery.fileupload.min.js' type='text/javascript'></script>
+
+
+<script src='http://kayakuguri.github.io//cdnjs.cloudflare.com/ajax/libs/cloudinary-jquery-file-upload/2.3.0/cloudinary-jquery-file-upload.min.js' type='text/javascript'></script>
+
+
+<p>```</p>
+
+<p>※バージョンは記事投稿現在(2017/4/11)での最新版(jQueryは古い）</p>
+
+<h1>アップロードフォーム</h1>
+
+<h2>inputタグを自動生成</h2>
+
+<p>単純にアップロードするだけなら、自動でinputタグを挿入してくれる関数がある。</p>
+
+<p>[HTML]</p>
+
+<p>```</p>
+
+<div class="upload_form"></div>
+
+
+<p>```</p>
+
+<p>[JS]</p>
+
+<p>```
+$(function () {</p>
+
+<pre><code>$('.upload_form').append($.cloudinary.unsigned_upload_tag("preset-name-here", { cloud_name: 'cloud-name-here' }));
+</code></pre>
+
+<p>});
+```</p>
+
+<p>ライブラリを読み込んで、これで<code>append</code>すれば、自動的に、<code>&lt;input&gt;</code>タグが挿入される。<br/>
+そこでファイルを選択すれば、アップロードが行われる。<br/>
+(選ぶだけでアップロードされる）</p>
+
+<p>以下のようなHTMLが挿入される。</p>
+
+<p><code>
+&lt;input type="file" name="file" class="cloudinary_fileupload"&gt;
+</code></p>
+
+<h2>bind</h2>
+
+<p>アップロードされた後や、アップロード中に処理をおこないたい場合は、<code>bind</code>する。<br/>
+そのために、自分で<code>&lt;input&gt;</code>タグを作っておき、そのタグにたいして<code>bind</code>する。</p>
+
+<p>[HTML]</p>
+
+<p>```
+<input type="file" name="file" id="upload_form" /></p>
+
+<div class="progress"></div>
+
+
+<div class="thumbnails"></div>
+
+
+<p>```</p>
+
+<p>[JS]</p>
+
+<p>```
+$(function () {</p>
+
+<pre><code>$.cloudinary.config({ cloud_name: 'cloud_name_here'});
+$('#upload_form').unsigned_cloudinary_upload('preset_name_here',
+{ cloud_name: 'cloud_name_here', tags: 'browser_uploads' },
+{ multiple: true }
+</code></pre>
+
+<p>  )
+  .bind(&lsquo;cloudinaryprogress&rsquo;, function(e, data) {</p>
+
+<pre><code>$('.progress').text('アップロード中...');
+</code></pre>
+
+<p>  })
+  .bind(&lsquo;cloudinarydone&rsquo;, function(e, data) {</p>
+
+<pre><code>  $('.progress').text('完了');
+  $('.thumbnails').append($.cloudinary.image(data.result.public_id,
+    { format: 'jpg', width: 150, height: 100, crop: 'thumb' } ));
+}
+</code></pre>
+
+<p>  );
+});
+```</p>
+
+<p><code>cloudinaryprogress</code>がアップロード中の処理。アップロード中、というテキストを表示しているだけ。<br/>
+<code>cloudinarydone</code>がアップロード後の処理。完了、と表示させ、サムネイルを取得して表示している。</p>
+
+<p><code>$.cloudinary.image(name, option)</code>で画像を取得して表示させることが可能。<br/>
+冒頭で<code>cloud_name</code>を設定している。
+<code>data.result.public_id</code>でアップロードしたファイルのIDが取得可能。</p>
+
+<p>ファイルのURLを直接参照したい場合は以下。</p>
+
+<p><code>
+$.cloudinary.url(data.result.public_id);
+</code></p>
+
+<p>第二引数でサイズやクロップなどのオプションを指定してやることが可能。</p>
+
+<h1>注意</h1>
+
+<p>注意点としては、ファイルの選択を行っただけでアップロードが開始されてしまうところ。<br/>
+これを送信ボタンをクリックした時にアップロードを開始するようには変更出来るのだろうか…。<br/>
+ライブラリに手を入れないと無理な気もする…。</p>
+
+<h1>参考</h1>
+
+<h2>公式</h2>
+
+<ul>
+<li><a href="http://cloudinary.com/blog/direct_upload_made_easy_from_browser_or_mobile_app_to_the_cloud#direct_uploading_from_the_browser_using_jquery">Direct uploading from the browser using jQuery</a></li>
+<li><a href="http://cloudinary.com/documentation/jquery_integration">jQuery integration</a></li>
+<li><a href="http://cloudinary.com/documentation/jquery_image_manipulation">jQuery image manipulation</a></li>
+</ul>
+
+
+<h2>コードの参考</h2>
+
+<ul>
+<li><a href="http://www.nerdtutorials.com/cloudinary-image-uploader-sponsored/">Cloudinary Image Uploader (Sponsored)</a></li>
+<li><a href="http://stackoverflow.com/questions/40438882/restrict-uploading-file-size-greater-than-20-mb-cloudinary-api">restrict uploading file size greater than 20 mb [cloudinary api]</a></li>
+</ul>
+
+
+<h1>コード全文</h1>
+
+<p>```
+&lt;!doctype html></p>
+
+<p><html lang="ja">
+<head>
+  <meta charset="utf-8"></p>
+
+<script src='https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js' type='text/javascript'></script>
+
+
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js" integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU=" crossorigin="anonymous"></script>
+
+
+<script src='https://cdnjs.cloudflare.com/ajax/libs/jquery.iframe-transport/1.0.1/jquery.iframe-transport.min.js' type='text/javascript'></script>
+
+
+<script src='https://cdnjs.cloudflare.com/ajax/libs/blueimp-file-upload/9.18.0/js/jquery.fileupload.min.js' type='text/javascript'></script>
+
+
+<script src='https://cdnjs.cloudflare.com/ajax/libs/cloudinary-jquery-file-upload/2.3.0/cloudinary-jquery-file-upload.min.js' type='text/javascript'></script>
+
+
+
+
+<script>
+$(function () {
+  $.cloudinary.config({ cloud_name: 'cloud_name_here'});
+  $('#upload_form').unsigned_cloudinary_upload('preset_name_here',
+    { cloud_name: 'cloud_name_here', tags: 'browser_uploads' },
+    { multiple: true }
+  )
+  .bind('cloudinaryprogress', function(e, data) {
+    $('.progress').text('アップロード中...');
+  })
+  .bind('cloudinarydone', function(e, data) {
+      $('.progress').text('完了');
+      $('.thumbnails').append($.cloudinary.image(data.result.public_id,
+        { format: 'jpg', width: 150, height: 100, crop: 'thumb' } ));
+      var direct_url = $.cloudinary.url(data.result.public_id);
+    }
+  );
+});
+</script>
+
+
+<p>  <title>Cloudinary Upload Sample</title>
+</head></p>
+
+<p><body></p>
+
+<h1>Cloudinary Upload Test</h1>
+
+
+
+
+<div><input type="file" name="file" id="upload_form" /></div>
+
+
+<div class="progress"></div>
+
+
+<div class="thumbnails"></div>
+
+
+<p></body>
+</html>
+```</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[jQuery File Uploadを利用した大容量ファイルのアップロードをChunked uploadで実現する]]></title>
