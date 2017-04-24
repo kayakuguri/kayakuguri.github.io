@@ -4,7 +4,7 @@
   <title><![CDATA[Category: vagrant | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/vagrant/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2017-04-11T18:17:07+09:00</updated>
+  <updated>2017-04-24T17:32:07+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,91 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Vagrantで、Authentication failureのWarningが出た場合の対処]]></title>
+    <link href="http://kayakuguri.github.io/blog/2017/04/24/vagrant-authentication-error/"/>
+    <updated>2017-04-24T17:21:13+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2017/04/24/vagrant-authentication-error</id>
+    <content type="html"><![CDATA[<p>Vagrantを起動させた場合に、Warningが出て起動しなくなってしまった時にググった対処方のメモ。</p>
+
+<!-- more -->
+
+
+<h1>環境</h1>
+
+<p>```
+・ホスト側
+Mac OSX 10.11.6
+Vagrant 1.8.6
+Virtual Box 5.1.6</p>
+
+<p>・ゲスト側
+CentOX 6.5
+```</p>
+
+<h1>エラー内容</h1>
+
+<p>以下のエラーが出た。</p>
+
+<p><code>
+Warning: Authentication failure. Retrying...
+</code></p>
+
+<p>起動途中で上記のwarningが連発し、タイムアウトで終了してしまう。</p>
+
+<h1>原因</h1>
+
+<p>vagrant 1.7以降の場合に、vagrantで使用している秘密鍵と公開鍵の不一致？によって引き起こされるエラーのよう。</p>
+
+<h1>対処法</h1>
+
+<p>以下の手順で対処した。</p>
+
+<p><code>Vagrantfile</code>に、ゲストOSの公開鍵を書き換えないように以下の設定を追記。</p>
+
+<p><code>
+config.ssh.insert_key = false
+</code></p>
+
+<p><code>$ vagrant up</code>でvagrantを起動。途中、warningが出るが、<code>ctrl + c</code>で中断する。<br/>
+中断してもvagrant自体は立ち上がっているので、<code>$ vagraht ssh</code>でゲストOSにログインする。</p>
+
+<p><code>/home/vagrant/</code>以下に、<code>.ssh</code>ディレクトリがなければ作成する。<br/>
+(すでにあったので今回は作成していない)</p>
+
+<p>vagrantの作者のGithubリポジトリから公開鍵を取得し、<code>authorized_keys</code>という名前で保存する。</p>
+
+<p><code>
+$ wget --no-check-certificate https://raw.github.com/mitchellh/vagrant/master/keys/vagrant.pub -O /home/vagrant/.ssh/authorized_keys
+</code></p>
+
+<p>ファイルやディレクトリのパーミッションを変更する。</p>
+
+<p><code>
+$ chmod 0700 /home/vagrant/.ssh
+$ chmod 0600 /home/vagrant/.ssh/authorized_keys
+$ chown -R vagrant /home/vagrant/.ssh
+</code></p>
+
+<p>ホストOS側にある、<code>.vagrant</code>ディレクトリ内の<code>private_key</code>を削除する。
+<code>.vagrant/machines/default/virtualbox/private_key</code> を削除。</p>
+
+<p><code>$ vagrant halt</code>で停止する。</p>
+
+<p>これで再度、<code>$ vagrant up</code>することで起動することが出来た。</p>
+
+<h1>参考</h1>
+
+<ul>
+<li><a href="http://qiita.com/shyse/items/9ec50b868b90f847c75f">vagrant upコマンド実行時にAuthentication failure.エラーが発生する</a></li>
+<li><a href="https://github.com/NetCommons3/NetCommons3/wiki/vagrant-up-%E3%81%A7Authentication-failure.-Retrying...">vagrant up でAuthentication failure. Retrying&hellip;</a></li>
+<li><a href="http://qiita.com/megane42/items/1d8ae7444d8c1b10bbd7">Vagrant で作った VM にやってはいけない2つのこと</a></li>
+<li><a href="http://qiita.com/t_732_twit/items/2303a0c3f27c288382c5#1-4">Vagrantで自分の作成した公開鍵と秘密鍵を使う方法</a></li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[ScotchboxでのPHPエラーの出力場所]]></title>
@@ -170,7 +255,7 @@ timezone: &ldquo;Asia/Tokyo&rdquo;
 <p>admin:
   user: admin
   password: admin
-  email: <a href="&#x6d;&#x61;&#105;&#x6c;&#x74;&#111;&#58;&#109;&#x61;&#105;&#x6c;&#64;&#x64;&#111;&#x6d;&#x61;&#x69;&#x6e;&#x2e;&#x74;&#x6c;&#100;">&#109;&#97;&#105;&#x6c;&#64;&#x64;&#111;&#x6d;&#x61;&#105;&#x6e;&#x2e;&#x74;&#108;&#x64;</a>
+  email: <a href="&#109;&#97;&#x69;&#108;&#116;&#x6f;&#58;&#109;&#97;&#105;&#x6c;&#x40;&#x64;&#x6f;&#109;&#x61;&#x69;&#110;&#x2e;&#116;&#108;&#x64;">&#109;&#x61;&#x69;&#108;&#x40;&#100;&#111;&#109;&#x61;&#105;&#110;&#46;&#116;&#x6c;&#x64;</a>
   first_name: &ldquo;&rdquo;
   last_name: &ldquo;&rdquo;
 ```</p>
@@ -670,54 +755,6 @@ ip: "192.168.10.10"
 <li><a href="http://qiita.com/megane42/items/1d8ae7444d8c1b10bbd7">Vagrant で作った VM にやってはいけない2つのこと &ndash; Qiita</a></li>
 </ul>
 
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[CentOS6.5にPHP5.4を入れる]]></title>
-    <link href="http://kayakuguri.github.io/blog/2015/11/26/centos65-php54/"/>
-    <updated>2015-11-26T17:50:35+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2015/11/26/centos65-php54</id>
-    <content type="html"><![CDATA[<p>CentOS6.5の標準のPHPは5.3。<br/>
-5.4環境が欲しかったので作ってみたメモ。</p>
-
-<!-- more -->
-
-
-<p>PHPは入ってない状態から始める。</p>
-
-<pre><code>$ php -v
--bash: php: command not found
-</code></pre>
-
-<h2>rpmでレポジトリを追加</h2>
-
-<p>あまり意味はわかってないですが、epelとremiレポジトリを追加。<br/>
-<code>vagrant</code>にSSHで入ってからの作業。</p>
-
-<p><code>
-$ sudo rpm -Uvh http://dl.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm
-$ sudo rpm -Uvh http://dl.iuscommunity.org/pub/ius/stable/Redhat/6/x86_64/ius-release-1.0-11.ius.el6.noarch.rpm
-$ sudo rpm -Uvh http://rpms.famillecollet.com/enterprise/remi-release-6.rpm
-</code></p>
-
-<h2>PHPをインストール</h2>
-
-<pre><code>$ sudo yum install php --enablerepo=remi
-</code></pre>
-
-<h2>確認</h2>
-
-<pre><code>$ php -v
-PHP 5.4.45 (cli) (built: Sep 30 2015 15:56:06) 
-Copyright (c) 1997-2014 The PHP Group
-Zend Engine v2.4.0, Copyright (c) 1998-2014 Zend Technologies
-</code></pre>
-
-<h2>参考</h2>
-
-<p><a href="http://qiita.com/Chrowa3/items/6c045d952a191a1203b4">Vagrant chef/centos-6.5 に PHP 5.4 を突っ込む &ndash; Qiita</a><br/>
-<a href="http://blog.ybbo.net/2014/01/22/%E3%80%90%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%80%91centos6%E3%81%ABphp5-4%E3%82%92yum%E3%81%A7%E7%B0%A1%E5%8D%98%E3%81%AB%E3%82%A4%E3%83%B3%E3%82%B9%E3%83%88%E3%83%BC%E3%83%AB%E3%81%99%E3%82%8B/">【シンプル】CentOS6にPHP5.4をyumで簡単にインストールする手順田舎に住みたいエンジニアの日記 | 田舎に住みたいエンジニアの日記</a></p>
 ]]></content>
   </entry>
   
