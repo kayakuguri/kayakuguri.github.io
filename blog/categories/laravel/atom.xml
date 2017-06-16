@@ -4,7 +4,7 @@
   <title><![CDATA[Category: laravel | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/laravel/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2017-04-24T17:32:07+09:00</updated>
+  <updated>2017-06-16T16:08:03+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,60 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Laravelで標準出力にエラーログを出力する]]></title>
+    <link href="http://kayakuguri.github.io/blog/2017/06/16/larave-std-error/"/>
+    <updated>2017-06-16T16:01:28+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2017/06/16/larave-std-error</id>
+    <content type="html"><![CDATA[<p>HerokuでWebサイトを作る場合、ログの出力はPapertrailを入れることが多い、というか必ず利用しています。<br/>
+Papertrailでは標準出力に出力したログは漏れなく拾ってくれるので、Laravelも標準出力にエラーログを出力するようにする方法を毎回ググルので備忘録。</p>
+
+<!-- more -->
+
+
+<h1>設定</h1>
+
+<p>以下の記述を、<code>bootstrap/app.php</code> に追加します。</p>
+
+<p>```
+$app->configureMonologUsing(function ($monolog) {</p>
+
+<pre><code>$monolog-&gt;pushHandler(new \Monolog\Handler\StreamHandler('php://stderr'));
+</code></pre>
+
+<p>});
+```</p>
+
+<h1>出力</h1>
+
+<p>以下のようにすると出力可能です。</p>
+
+<p><code>
+Log::error('TEST LOG');
+</code></p>
+
+<h1>結果</h1>
+
+<p>すると、以下のように出力されます。</p>
+
+<p><code>
+[2017-06-16 04:02:16] dev.ERROR: TEST LOG [] []
+</code></p>
+
+<p><code>dev.ERROR</code>の<code>dev</code>の部分は、環境変数の<code>APP_ENV</code>で設定している文字列が出ます。<br/>
+なので、<code>dev.ERROR</code>とかでひっかけてPapertrailでアラートを設定してやれば自分で出力したエラーログで通知とかが出せたりします。</p>
+
+<h1>参考</h1>
+
+<p>以下、参考にしました。ありがとうございます。</p>
+
+<ul>
+<li><a href="http://qiita.com/iakio/items/86086e046f73826c9bef">Laravelのログを標準エラーに出力する &ndash; Qiita</a></li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[Laravel]フォームのバリデーションをRequestクラスに分離する]]></title>
