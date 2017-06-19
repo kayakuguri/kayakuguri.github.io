@@ -4,7 +4,7 @@
   <title><![CDATA[Category: laravel | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/laravel/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2017-06-16T16:08:03+09:00</updated>
+  <updated>2017-06-19T11:45:55+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,166 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[LaravelでCORSに対応する]]></title>
+    <link href="http://kayakuguri.github.io/blog/2017/06/19/larave-cors/"/>
+    <updated>2017-06-19T11:45:01+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2017/06/19/larave-cors</id>
+    <content type="html"><![CDATA[<p>Laravelでクロスオリジン、CORS (Cross-Origin Resource Sharing) に対応する方法。<br/>
+対応用のLaravelライブラリがあるのでそれを利用する。</p>
+
+<!-- more -->
+
+
+<p>JSからajaxなどで通信する場合、ドメインをまたいだ通信の場合(クロスオリジン)はセキュリティ上禁止されている。<br/>
+ので、それを通信を受けるサーバーサイドで許可してやる。</p>
+
+<h1>barryvdh/laravel-cors</h1>
+
+<p>ライブラリがあるので、そちらを利用する。</p>
+
+<h2>インストール</h2>
+
+<p>Composerで導入する。</p>
+
+<p><code>
+$ composer require barryvdh/laravel-cors
+</code></p>
+
+<h2>セットアップ</h2>
+
+<p><code>config/app.php</code>の <code>providers</code>の配列に以下を追加。</p>
+
+<p><code>
+Barryvdh\Cors\ServiceProvider::class,
+</code></p>
+
+<p><code>app/Http/Kernel.php</code> の <code>$middleware</code> に以下を追加。</p>
+
+<p>```
+protected $middleware = [</p>
+
+<pre><code>// ...
+\Barryvdh\Cors\HandleCors::class,
+</code></pre>
+
+<p>];
+```</p>
+
+<p>上記は全体に対応する場合。<br/>
+もし、APIのみに許可したい場合は以下のようにする。</p>
+
+<p>```
+protected $middlewareGroups = [</p>
+
+<pre><code>'web' =&gt; [
+   // ...
+],
+
+'api' =&gt; [
+    // ...
+    \Barryvdh\Cors\HandleCors::class,
+],
+</code></pre>
+
+<p>];
+```</p>
+
+<h2>設定ファイル</h2>
+
+<p>設定ファイルを以下のコマンドで作成する。</p>
+
+<p><code>
+$ php artisan vendor:publish --provider="Barryvdh\Cors\ServiceProvider"
+</code></p>
+
+<p>以下の内容で作成される。</p>
+
+<p>```
+return [</p>
+
+<pre><code> /*
+ |--------------------------------------------------------------------------
+ | Laravel CORS
+ |--------------------------------------------------------------------------
+ |
+ | allowedOrigins, allowedHeaders and allowedMethods can be set to array('*')
+ | to accept any value.
+ |
+ */
+'supportsCredentials' =&gt; false,
+'allowedOrigins' =&gt; ['*'],
+'allowedHeaders' =&gt; ['Content-Type', 'X-Requested-With'],
+'allowedMethods' =&gt; ['*'], // ex: ['GET', 'POST', 'PUT',  'DELETE']
+'exposedHeaders' =&gt; [],
+'maxAge' =&gt; 0,
+</code></pre>
+
+<p>]
+```</p>
+
+<ul>
+<li><code>supportsCredentials</code> : クッキーやBasic認証の許可設定</li>
+<li><code>allowedOrigins</code> : 許可するドメイン</li>
+<li><code>allowedHeaders</code> : 許可するヘッダー</li>
+<li><code>allowedMethods</code> : 許可するメソッド</li>
+<li><code>exposedHeaders</code> : レスポンスに含める内容があれば</li>
+</ul>
+
+
+<p>それぞれ、 <code>*</code> とすれば全て許可する設定となる。<br/>
+(<code>maxAge</code>はよくわからない…）</p>
+
+<p>これで完了。</p>
+
+<h1>CURLで確認</h1>
+
+<p>curlで設定されているかどうかを確認する。</p>
+
+<p><code>
+$ curl -X GET -I -H "Origin: http://sample.jp" https://your-domain.com/your/api
+</code></p>
+
+<ul>
+<li><code>-I</code> : Headerのみ取得し出力</li>
+<li><code>-X</code> : アクションメソッドの指定</li>
+<li><code>-H</code> : ヘッダの指定</li>
+</ul>
+
+
+<p>ヘッダの <code>Origin</code> に送信元のURLを指定する。<br/>
+許可されているドメインの場合は、 <code>200</code> が返ってくるが、<br/>
+許可されていない場合は、 <code>403</code> が返ってくる。</p>
+
+<p>OKの場合のレスポンス</p>
+
+<p><code>
+HTTP/1.1 200 OK
+Connection: keep-alive
+Date: Mon, 19 Jun 2017 02:17:21 GMT
+Server: Apache
+Cache-Control: no-cache, private
+Access-Control-Allow-Origin: http://sample.jp
+Vary: Origin
+Transfer-Encoding: chunked
+Content-Type: application/json
+Via: 1.1 vegur
+</code></p>
+
+<h1>参考</h1>
+
+<ul>
+<li><a href="http://qiita.com/bmf_san/items/a90255bf645890d96d0b">LaravelでCORS対応 &ndash; Qiita</a></li>
+<li><a href="https://github.com/barryvdh/laravel-cors">barryvdh/laravel-cors: Adds CORS (Cross-Origin Resource Sharing) headers support in your Laravel application</a></li>
+<li><a href="http://qiita.com/polikeiji/items/c8b79554015d75c073f8">curlでCORS設定を確認する &ndash; Qiita</a></li>
+<li><a href="https://stackoverflow.com/questions/12173990/how-can-you-debug-a-cors-request-with-curl">How can you debug a CORS request with cURL? &ndash; Stack Overflow</a></li>
+<li><a href="http://blog.toshimaru.net/s3-cloudfront-cors-setting/">AWS S3 + CloudFront のCORS設定手順 &ndash; Hack Your Design!</a></li>
+<li><a href="http://www.minimalab.com/blog/2014/12/08/curl-option/">Curl の個人的によく使うオプションまとめ</a></li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Laravelで標準出力にエラーログを出力する]]></title>
@@ -624,69 +784,6 @@ ip: "192.168.10.10"
 <li><a href="http://qiita.com/megane42/items/1d8ae7444d8c1b10bbd7">Vagrant で作った VM にやってはいけない2つのこと &ndash; Qiita</a></li>
 </ul>
 
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[lumenのテーブル名を既存のものに合わせる]]></title>
-    <link href="http://kayakuguri.github.io/blog/2016/01/05/lumen-eloquent/"/>
-    <updated>2016-01-05T17:37:23+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2016/01/05/lumen-eloquent</id>
-    <content type="html"><![CDATA[<p>lumenやlaravelではモデル名が単数形で、DBのテーブル名はその複数形、が基本の仕様となっている。<br/>
-なので、新規にテーブル名を作成する場合や、テーブル名が複数形であればとくに問題ないのだが、<br/>
-既存のテーブル名を利用する際に単数形となってしまっている時には明示的に指定してやる必要がある。<br/>
-指定は<code>Eloquent</code>を利用してやる。</p>
-
-<!-- more -->
-
-
-<blockquote><p>Eloquentとは、PHPフレームワークのLaravelに最初から含まれているORM（Object-relational mapping:オブジェクト関係マッピング）です。</p></blockquote>
-
-<h2>lumenでの利用</h2>
-
-<p>lumenではデフォルトではEloquentの利用がオフになっている。<br/>
-なので、<code>bootstrap/app.php</code>内のコメントアウトを外して有効にしてやる。</p>
-
-<pre><code>$app-&gt;withEloquent();
-</code></pre>
-
-<h2>モデルの作成</h2>
-
-<p>モデルは、<code>app/</code>以下に作成する。<br/>
-例えば、user、というテーブル名を利用したい場合は、<code>app/User.php</code>を作成してやる。<br/>
-その中で、<code>protected $table</code>の箇所がテーブル名を指定している箇所となるので、ここで単数形のテーブル名を指定してやる。</p>
-
-<p>```
-&lt;?php namespace App;
-use Illuminate\Database\Eloquent\Model;
-class User extends Model {</p>
-
-<pre><code>protected $table = ‘user’;
-protected $fillable = [
-    ‘name’,
-    ‘username’,
-    ‘password’
-];
-protected $hidden = [ ‘password’ ];
-</code></pre>
-
-<p>}
-```</p>
-
-<h2>利用</h2>
-
-<p>マイグレーションは作成しなくても動作した。<br/>
-(項目をDBとコードで同期させる時にartisanから利用するよう。lumenでも利用できる）</p>
-
-<p>以下の様な形で取得できた。</p>
-
-<pre><code>DB::table('user')-&gt;get();
-</code></pre>
-
-<h2>参考</h2>
-
-<p><a href="http://laravel4.winroad.jp/2014/03/06/eloquent-orm%E3%81%AE%E5%9F%BA%E6%9C%AC%E7%9A%84%E3%81%AA%E4%BD%BF%E7%94%A8%E6%B3%95/">Eloquent ORMの基本的な使用法 | WinRoadのLaravel4初心者講座</a><br/>
-<a href="https://medium.com/@petehouston/enable-eloquent-orm-in-laravel-lumen-micro-framework-7a4f2fbcaf5d#.pe3a4ibc8">Enable Eloquent ORM in Laravel Lumen micro-framework — Medium</a></p>
 ]]></content>
   </entry>
   
