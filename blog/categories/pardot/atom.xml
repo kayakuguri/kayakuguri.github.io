@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: pardot | KayaMemo]]></title>
+  <link href="http://kayakuguri.github.io/blog/categories/pardot/atom.xml" rel="self"/>
+  <link href="http://kayakuguri.github.io/"/>
+  <updated>2017-07-31T19:24:14+09:00</updated>
+  <id>http://kayakuguri.github.io/</id>
+  <author>
+    <name><![CDATA[萱潜]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Pardot APIでの認証と作成]]></title>
+    <link href="http://kayakuguri.github.io/blog/2017/07/31/pardot-api/"/>
+    <updated>2017-07-31T19:04:08+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2017/07/31/pardot-api</id>
+    <content type="html"><![CDATA[<p>Pardot APIを使用する事になったのでAPI送信方法のメモ。</p>
+
+<!-- more -->
+
+
+<h1>バージョン</h1>
+
+<p>APIのバージョンは、3と4が稼働中のよう。<br/>
+使い分けは以下との事。</p>
+
+<blockquote><p>同じメールアドレスで複数のプロスペクトを作成できないアカウントの場合、バージョン 3 を参照してください。<br/>
+同じメールアドレスで複数のプロスペクトを作成できるアカウントの場合、バージョン 4 を参照してください。<br/>
+<a href="http://help.pardot.com/customer/ja/portal/articles/2128635-pardot-api-%E3%82%92%E4%BD%BF%E7%94%A8%E3%81%99%E3%82%8B%E5%A0%B4%E5%90%88?b_id=11139">Pardot API を使用する場合</a></p></blockquote>
+
+<h1>Authentication</h1>
+
+<p><a href="http://developer.pardot.com/#authentication">http://developer.pardot.com/#authentication</a></p>
+
+<p>送信パラメータは、ログイン用の <code>email</code> と <code>password</code> と、そのユーザの <code>user_key</code> 。<br/>
+<code>user_key</code> は、 設定画面の MY PROFILEから確認出来る。</p>
+
+<p>curlから送信した内容は以下。</p>
+
+<p><code>
+$ curl --request POST \
+--url https://pi.pardot.com/api/login/version/4 \
+--header 'content-type: multipart/form-data' \
+--form 'email=test@example.com' \
+--form 'password=your_password' \
+--form user_key=your_user_key
+</code></p>
+
+<p>レスポンスは以下のようにXMLで返ってくる。</p>
+
+<p>```
+&lt;?xml version=&ldquo;1.0&rdquo; encoding=&ldquo;UTF-8&rdquo;?>
+<rsp stat="ok" version="1.0"></p>
+
+<pre><code>&lt;api_key&gt;you_api_key_here&lt;/api_key&gt;
+&lt;version&gt;4&lt;/version&gt;
+</code></pre>
+
+<p></rsp>
+```</p>
+
+<h1>Create</h1>
+
+<p><a href="http://developer.pardot.com/kb/api-version-4/prospects/#creating-prospects">http://developer.pardot.com/kb/api-version-4/prospects/#creating-prospects</a></p>
+
+<p>Prospectを作成するには以下のエンドポイントにPOSTで送信する。<br/>
+(APIの送信は認証も含めて全てPOSTで送信するよう。)</p>
+
+<p><code>
+POST : /api/prospect/version/4/do/create/email/
+</code></p>
+
+<p>パラメータの必須項目は以下。</p>
+
+<ul>
+<li><code>email</code> : 作成するプロスペクトのメールアドレス</li>
+<li><code>api_key</code> : 認証で取得したキー</li>
+<li><code>user_key</code> : ユーザのキー</li>
+</ul>
+
+
+<p>emailはパラメータにつけずに、エンドポイントの最後につけてしまってもよいよう。</p>
+
+<p><code>
+/api/prospect/version/4/do/create/email/&lt;email&gt;
+</code></p>
+
+<p>curlで送信した内容は以下。</p>
+
+<p><code>
+curl --request POST \
+  --url https://pi.pardot.com/api/prospect/version/4/do/create/email/ \
+  --header 'content-type: multipart/form-data' \
+  --form api_key=your_api_key \
+  --form user_key=your_user_key \
+  --form email=create_email@example.com
+</code></p>
+
+<p>返却されるXMLは以下。</p>
+
+<p>```
+&lt;?xml version=&ldquo;1.0&rdquo; encoding=&ldquo;UTF-8&rdquo;?>
+<rsp stat="ok" version="1.0"></p>
+
+<pre><code>&lt;prospect&gt;
+    &lt;id&gt;xxxxxxxx&lt;/id&gt;
+    &lt;campaign_id&gt;xxx&lt;/campaign_id&gt;
+    &lt;salutation/&gt;
+    &lt;first_name/&gt;
+    &lt;last_name/&gt;
+    &lt;email&gt;create_email@example.com&lt;/email&gt;
+    &lt;password/&gt;
+    &lt;company/&gt;
+    &lt;website/&gt;
+    &lt;job_title/&gt;
+    &lt;department/&gt;
+    &lt;country/&gt;
+    &lt;address_one/&gt;
+    &lt;address_two/&gt;
+    &lt;city/&gt;
+    &lt;state/&gt;
+    &lt;territory/&gt;
+    &lt;zip/&gt;
+    &lt;phone/&gt;
+    &lt;fax/&gt;
+    &lt;source/&gt;
+    &lt;annual_revenue/&gt;
+    &lt;employees/&gt;
+    &lt;industry/&gt;
+    &lt;years_in_business/&gt;
+    &lt;comments/&gt;
+    &lt;notes/&gt;
+    &lt;score&gt;0&lt;/score&gt;
+    &lt;grade/&gt;
+    &lt;last_activity_at/&gt;
+    &lt;recent_interaction&gt;Never active&lt;/recent_interaction&gt;
+    &lt;crm_lead_fid/&gt;
+    &lt;crm_contact_fid/&gt;
+    &lt;crm_owner_fid/&gt;
+    &lt;crm_account_fid/&gt;
+    &lt;salesforce_fid/&gt;
+    &lt;crm_last_sync/&gt;
+    &lt;crm_url/&gt;
+    &lt;is_do_not_email&gt;&lt;/is_do_not_email&gt;
+    &lt;is_do_not_call&gt;&lt;/is_do_not_call&gt;
+    &lt;opted_out&gt;&lt;/opted_out&gt;
+    &lt;is_reviewed&gt;&lt;/is_reviewed&gt;
+    &lt;is_starred&gt;&lt;/is_starred&gt;
+    &lt;created_at&gt;2017-07-31 18:49:34&lt;/created_at&gt;
+    &lt;updated_at&gt;2017-07-31 18:49:34&lt;/updated_at&gt;
+    &lt;campaign&gt;
+        &lt;id&gt;xxx&lt;/id&gt;
+        &lt;name&gt;Website Tracking&lt;/name&gt;
+    &lt;/campaign&gt;
+    &lt;profile&gt;
+        &lt;id&gt;xxx&lt;/id&gt;
+        &lt;name&gt;Default&lt;/name&gt;
+        &lt;profile_criteria&gt;
+            &lt;id&gt;xxx&lt;/id&gt;
+            &lt;name&gt;Company Size&lt;/name&gt;
+            &lt;matches&gt;Unknown&lt;/matches&gt;
+        &lt;/profile_criteria&gt;
+        &lt;profile_criteria&gt;
+            &lt;id&gt;xxx&lt;/id&gt;
+            &lt;name&gt;Industry&lt;/name&gt;
+            &lt;matches&gt;Unknown&lt;/matches&gt;
+        &lt;/profile_criteria&gt;
+        &lt;profile_criteria&gt;
+            &lt;id&gt;xxx&lt;/id&gt;
+            &lt;name&gt;Location&lt;/name&gt;
+            &lt;matches&gt;Unknown&lt;/matches&gt;
+        &lt;/profile_criteria&gt;
+        &lt;profile_criteria&gt;
+            &lt;id&gt;xxx&lt;/id&gt;
+            &lt;name&gt;Job Title&lt;/name&gt;
+            &lt;matches&gt;Unknown&lt;/matches&gt;
+        &lt;/profile_criteria&gt;
+        &lt;profile_criteria&gt;
+            &lt;id&gt;xxx&lt;/id&gt;
+            &lt;name&gt;Department&lt;/name&gt;
+            &lt;matches&gt;Unknown&lt;/matches&gt;
+        &lt;/profile_criteria&gt;
+    &lt;/profile&gt;
+    &lt;visitors/&gt;
+    &lt;visitor_activities/&gt;
+    &lt;lists/&gt;
+&lt;/prospect&gt;
+</code></pre>
+
+<p></rsp>
+```</p>
+
+<p>環境によってフィールドとかの増減があるのかも。<br/>
+作成されたプロスペクトは、IDからURLでアクセス出来る。</p>
+
+<blockquote><p><a href="https://pi.pardot.com/prospect/read/id/xxxxxxxx">https://pi.pardot.com/prospect/read/id/xxxxxxxx</a></p></blockquote>
+
+<p>Prospectの全標準項目は、以下のよう。<br/>
+<a href="http://developer.pardot.com/kb/object-field-references/#prospect">http://developer.pardot.com/kb/object-field-references/#prospect</a></p>
+]]></content>
+  </entry>
+  
+</feed>
