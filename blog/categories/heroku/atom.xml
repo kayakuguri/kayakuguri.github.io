@@ -4,7 +4,7 @@
   <title><![CDATA[Category: heroku | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/heroku/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2017-07-31T19:24:14+09:00</updated>
+  <updated>2017-08-04T18:40:08+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,440 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[カスタムドメイン取得とLet's Encrypt証明書とHeroku SSLと]]></title>
+    <link href="http://kayakuguri.github.io/blog/2017/08/04/customdomain-letsencrypt-herokussl/"/>
+    <updated>2017-08-04T17:06:28+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2017/08/04/customdomain-letsencrypt-herokussl</id>
+    <content type="html"><![CDATA[<p>Herokuへの証明書アップロード手順の確認のために、カスタムドメイン・証明書の取得から試してみた。<br/>
+長い記事になりますが、備忘録として。</p>
+
+<!-- more -->
+
+
+<h1>ドメインの取得</h1>
+
+<p>無料で独自ドメインを取得出来るという、 <a href="http://www.freenom.com/ja/index.html">freenom</a>を使用する。<br/>
+(やはり無料だけあって色々とデメリットがあげられたりしているので、ご利用は自己責任で)<br/>
+取得できるドメインは5種類で、 <code>.tk/.ml/.ga/.cf/.gq</code> となっている。</p>
+
+<p>詳しい登録方法などは以下を参考にさせてもらいました。</p>
+
+<ul>
+<li><a href="http://qiita.com/teekay/items/135dc67e39f24997019e">無料のドメインを取得する（2016年10月） &ndash; Qiita</a></li>
+</ul>
+
+
+<p>今回は <code>.tk</code> のドメインで取得した。<br/>
+ちなみに、<code>.tk</code>のドメインは90日間で25アクセス以下だった場合には登録が削除されるらしいので運用の際は注意。</p>
+
+<p>以下のドメインで取得してみた。(もうドメイン登録はキャンセル済み）</p>
+
+<blockquote><p>ssl-sni-test.tk</p></blockquote>
+
+<p>ユーザー登録はメールアドレスからの登録にしたが、住所や名前などは必須となっていた。<br/>
+以下が必須だった項目。</p>
+
+<ul>
+<li>first name</li>
+<li>last name</li>
+<li>address1</li>
+<li>city</li>
+<li>state</li>
+<li>postcode</li>
+<li>phone number</li>
+<li>password</li>
+</ul>
+
+
+<p>登録すれば同時にドメインの申請も完了。</p>
+
+<h2>ネームサーバとDNS</h2>
+
+<p>freenomには無料で利用できるDNSサーバが用意されているのでそれを利用する。</p>
+
+<p>上部メニューから <code>Services -&gt; My Domains</code> を選択。<br/>
+編集したいドメインの、 <code>Manage Domain</code>をクリック。</p>
+
+<p>タブメニューの <code>Management Tools -&gt; Nameservers</code>を選択。<br/>
+<code>Use default nameservers</code>を選択して、<code>Change Nameservers</code>をクリック。<br/>
+これで、freenomのネームサーバを使う設定に変更できた。<br/>
+（デフォルトではfreenomのネームサーバを使うように設定されていないため、DNSの設定が出来なかった。）</p>
+
+<p>あとは、タブメニューの <code>Manage Freenom DNS</code>を選択。<br/>
+ここで、DNSの設定が可能となる。</p>
+
+<h1>証明書の取得</h1>
+
+<p>証明書は無料で発行出来る、 <code>Let</code>s Encrypt`を利用する。<br/>
+証明書の発行には、ブラウザ上で発行出来るサービスがあるのでそちらを利用させてもらう。<br/>
+以下に作者さんの詳しい説明があるので、そちらから。</p>
+
+<ul>
+<li><a href="http://qiita.com/tappie/items/76881fdf7996c57a105a">Let&#39;s Encrypt の証明書をブラウザ上で簡単取得 (dns-01 / ECDSA もあるよ) &ndash; Qiita</a></li>
+</ul>
+
+
+<p>基本、そのまま進めて問題ないが、１点だけ、秘密鍵はブラウザ上では作らずにローカルPC上で作成したものをアップした方がよさそう。<br/>
+ブラウザ上で作ったものをHerokuにアップするとパスフレーズを解除しろ、と言われ、パスフレーズを解除しようとコマンドを入れるとエラーが出たりしたため、最初からパスフレーズがかかっていないものを作成し、アップロードした方が確実と思われる。</p>
+
+<p><code>
+$ openssl genrsa 2048 &gt; key.pem
+</code></p>
+
+<p>ドメインの所有証明は、<code>dns-01</code>の方法を使用した。<br/>
+取得したチャレンジトークンをTXTレコードとしてDNSに登録する。</p>
+
+<p>登録例</p>
+
+<table>
+<thead>
+<tr>
+<th></th>
+<th align="left"> Name </th>
+<th align="left"> Type </th>
+<th align="left"> TTL </th>
+<th align="left"> Target </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td></td>
+<td align="left"> <code>_acme-challenge.ssl-sni-test.tk.</code> </td>
+<td align="left"> TXT </td>
+<td align="left"> 14440 </td>
+<td align="left"> <code>"L9Dlzt3Kzfu2mLYbmW2RTUdEzNBuNPiyyBt6yQyEjKk"</code> |</td>
+</tr>
+</tbody>
+</table>
+
+
+<p>結構すぐに反映された。<br/>
+あとは証明書を発行するのみ。</p>
+
+<h1>Herokuへアップロード</h1>
+
+<p>Herokuのアプリに証明書を適用させるには2種類の方法がある。</p>
+
+<ul>
+<li><code>SSL Endpoint</code> : SSLアドオンを利用した方法 ($20/month)
+
+<ul>
+<li>Typeは <code>sni</code></li>
+</ul>
+</li>
+<li><code>Heroku SSL</code> : Heroku標準の機能 (無料)
+
+<ul>
+<li>Typeは <code>endpoint</code></li>
+</ul>
+</li>
+</ul>
+
+
+<p><code>SSL Endpoint</code>は従来からの方法で、2016年末ごろに<code>Heroku SSL</code>が追加された。<br/>
+なので、今後追加する場合には<code>Heroku SSL</code>を利用する方がよい。</p>
+
+<p>ただし、<code>Heroku SSL</code>はFree Dynoで利用しているアプリには使用出来ないので注意。<br/>
+今回は <code>Heroku SSL</code>を利用する。</p>
+
+<h2>アップロード方法</h2>
+
+<p>アップロード方法は管理画面からGUI操作で行うか、Heroku CLI経由でコマンドラインから行うかの2種類がある。</p>
+
+<h3>管理画面からアップロードする</h3>
+
+<p><code>Setting</code>から、<code>Domains and certificates</code>セクションにある、<code>Configure SSL</code>をクリック。</p>
+
+<p><img src="/2017/08/ssl01.jpg" alt="" /></p>
+
+<p>更新方法を聞かれるので、今回は<code>Manually</code>を選択。<br/>
+<code>Automatically</code>はLet&rsquo;s Encryptの場合にのみ使える自動更新のオプションで、今回はLet&rsquo;s Enctyptなので利用出来るのだが、普通はマニュアルになるため今回もマニュアルにした。</p>
+
+<p><img src="/2017/08/ssl02.jpg" alt="" /></p>
+
+<p>アップロードするウインドウが表示されるので、ファイルをドラッグ。</p>
+
+<p><img src="/2017/08/ssl03.jpg" alt="" /></p>
+
+<p>アップするものは以下。</p>
+
+<ul>
+<li>証明書 (+中間証明書)</li>
+<li>秘密鍵</li>
+</ul>
+
+
+<p>中間証明書は、Let&rsquo;s Encryptの場合だけなのかは不明だが、今回はなしでもアップすることが出来た。<br/>
+通常は必要だと思われる（証明書発行会社のページには一緒にアップして下さい、とある）ので末尾に追加しておく。</p>
+
+<p><img src="/2017/08/ssl04.jpg" alt="" /></p>
+
+<p>無事、アップされると以下のようになる。</p>
+
+<p><img src="/2017/08/ssl06.jpg" alt="" /></p>
+
+<h3>コマンドからのアップロード</h3>
+
+<p><code>certs:add</code>でアップ可能。コマンドのヘルプは以下。</p>
+
+<p>```
+$ heroku certs:add -h
+Usage: heroku certs:add CRT KEY [flags]</p>
+
+<p>add an SSL certificate to an app</p>
+
+<p>Flags:
+ -a, &mdash;app     (required) app to run command against
+ -r, &mdash;remote  git remote of app to use
+ &mdash;bypass      bypass the trust chain completion step
+ &mdash;domains     domains to create after certificate upload
+ &mdash;type        type to create, either &lsquo;sni&rsquo; or &lsquo;endpoint&rsquo;</p>
+
+<p>Note: certificates with PEM encoding are also valid</p>
+
+<p>Example:</p>
+
+<pre><code>$ heroku certs:add example.com.crt example.com.key
+</code></pre>
+
+<p>Example (Certificate Intermediary):</p>
+
+<pre><code> $ heroku certs:add intermediary.crt example.com.crt example.com.key
+</code></pre>
+
+<p>```</p>
+
+<p>アップする。</p>
+
+<p>```
+$ heroku certs:add ssl-sni-test-cert.pem ssl-sni-test-server-nopass.key -a sni-test
+Resolving trust chain&hellip; done
+Adding SSL certificate to ⬢ sni-test&hellip; done
+Certificate details:
+Common Name(s): ssl-sni-test.tk
+Expires At:     2017-11-02 02:12 UTC
+Issuer:         /C=US/O=Let&rsquo;s Encrypt/CN=Let&rsquo;s Encrypt Authority X3
+Starts At:      2017-08-04 02:12 UTC
+Subject:        /CN=ssl-sni-test.tk
+SSL certificate is verified by a root authority.
+? Select domains you would like to add</p>
+
+<p>=== Your certificate has been added successfully.  Add a custom domain to your app by running ⬢ heroku domains:add &lt;yourdomain.com>
+```</p>
+
+<p>途中、ドメインの選択する箇所があったが、一つしかないしそのままエンターでいけた。</p>
+
+<p>コマンドからアップ状況を確認する。</p>
+
+<p><code>
+$ heroku certs -a sni-test
+Name              Common Name(s)   Expires               Trusted  Type
+────────────────  ───────────────  ────────────────────  ───────  ────
+pteranodon-48202  ssl-sni-test.tk  2017-11-02 02:12 UTC  True     SNI
+</code></p>
+
+<h1>ドメインの設定</h1>
+
+<p>Herokuへのドメイン追加、と、DNSの設定、の２つが必要。</p>
+
+<h2>Herokuへのドメイン追加</h2>
+
+<p>証明書をアップした時と同じく、<code>Setting</code>画面から追加する。</p>
+
+<p><img src="/2017/08/ssl07.jpg" alt="" /></p>
+
+<p>追加したいドメインを登録。</p>
+
+<p><img src="/2017/08/ssl08.jpg" alt="" /></p>
+
+<p>登録すると以下のようになる。</p>
+
+<p><img src="/2017/08/ssl09.jpg" alt="" /></p>
+
+<p>もちろん、コマンドからも登録可能。</p>
+
+<p>```
+$ heroku domains:add ssl-sni-test.tk -a sni-test
+Adding ssl-sni-test.tk to ⬢ sni-test&hellip; done
+ ▸    Configure your app&rsquo;s DNS provider to point to the DNS Target ssl-sni-test.tk.herokudns.com.
+ ▸    For help, see <a href="https://devcenter.heroku.com/articles/custom-domains">https://devcenter.heroku.com/articles/custom-domains</a></p>
+
+<p>The domain ssl-sni-test.tk has been enqueued for addition
+ ▸    Run heroku domains:wait &lsquo;ssl-sni-test.tk&rsquo; to wait for completion
+```</p>
+
+<p>コマンドから確認すると以下のようになる。</p>
+
+<p>```
+$ heroku domains -a sni-test
+=== sni-test Heroku Domain
+sni-test.herokuapp.com</p>
+
+<p>=== sni-test Custom Domains
+Domain Name      DNS Target
+───────────────  ─────────────────────────────
+ssl-sni-test.tk  ssl-sni-test.tk.herokudns.com
+```</p>
+
+<h2>DNSの設定</h2>
+
+<p>freenomからDNSの設定を行う。<br/>
+Heroku側のドメイン追加で取得したDNS TargetをCNAMEとして登録する。以下のような形で追加した。</p>
+
+<table>
+<thead>
+<tr>
+<th></th>
+<th align="left"> Name </th>
+<th align="left"> Type </th>
+<th align="left"> TTL </th>
+<th align="left"> Target </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td></td>
+<td align="left">  </td>
+<td align="left"> CNAME </td>
+<td align="left"> 14440 </td>
+<td align="left"> <code>ssl-sni-test.tk.herokudns.com</code> |</td>
+</tr>
+</tbody>
+</table>
+
+
+<h1>アクセス</h1>
+
+<p><code>https</code>でアクセスすると、無事、アクセス出来た。<br/>
+SSLもLet&rsquo;s Encryptでちゃんと反映されていた。</p>
+
+<p><img src="/2017/08/ssl10.jpg" alt="" /></p>
+
+<h1>2つの証明書と2つのドメイン</h1>
+
+<p>ここからは応用検証。<br/>
+一つのHerokuアプリに2つのドメインを適用させ、それぞれに別々の証明書を適用させてみる。</p>
+
+<h2>サブドメインの証明書</h2>
+
+<p>先ほどと同じようにサブドメインの証明書を取得した。以下で取得する。</p>
+
+<blockquote><p>add.ssl-sni-test.tk</p></blockquote>
+
+<p>チャレンジトークンも変わるので、DNSレコードに2つ目のTXTレコードを追加する。</p>
+
+<h2>Herokuへアップ</h2>
+
+<p>管理画面から同じようにアップしてみたが、すでにアップされているものを置き換える事になるようで、複数の証明書をアップすることは出来なかった。<br/>
+次にコマンドから追加してみるも、以下のようにエラーが出た。</p>
+
+<p><code>
+$ heroku certs:add cert.pem server.key -a sni-test
+Resolving trust chain... done
+Adding SSL certificate to ⬢ sni-test... !
+ ▸    Only one SNI endpoint is allowed per app (try certs:update instead).
+</code></p>
+
+<p>どうやら証明書は一つしかアップ出来ないよう。<br/>
+しかし、<code>Only one SNI endpoint</code>とあるように、<code>sni</code>のタイプには証明書は一つしかアップできない、とのことのよう。</p>
+
+<h3>SSL Endpoint</h3>
+
+<p>というわけで、SSL Endpointのアドオンを追加し、試してみた。<br/>
+アドオンを追加する。(有料なので注意)</p>
+
+<p><code>
+$ heroku addons:create ssl:endpoint
+</code></p>
+
+<p>証明書をアップする。その際、typeに<code>endpoint</code>を指定する。</p>
+
+<p>```
+$ heroku certs:add cert.pem server.key &mdash;type endpoint -a sni-test
+Resolving trust chain&hellip; done
+Adding SSL certificate to ⬢ sni-test&hellip; done
+⬢ sni-test now served by kanagawa-69051.herokussl.com
+Certificate details:
+Common Name(s): add.ssl-sni-test.tk
+Expires At:     2017-11-02 02:49 UTC
+Issuer:         /C=US/O=Let&rsquo;s Encrypt/CN=Let&rsquo;s Encrypt Authority X3
+Starts At:      2017-08-04 02:49 UTC
+Subject:        /CN=add.ssl-sni-test.tk
+SSL certificate is verified by a root authority.
+? Select domains you would like to add</p>
+
+<p>=== Your certificate has been added successfully.  Update your application&rsquo;s DNS settings as follows
+Domain           Record Type  DNS Target
+───────────────  ───────────  ─────────────────────────────
+ssl-sni-test.tk  ALIAS/ANAME  ssl-sni-test.tk.herokudns.com
+```</p>
+
+<p>やはりtypeが違うのでアップすることが出来た。<br/>
+証明書のアップ状況を確認してみる。</p>
+
+<p><code>
+$ heroku certs -a sni-test
+Name                 Endpoint                      Common Name(s)       Expires               Trusted  Type
+───────────────────  ────────────────────────────  ───────────────────  ────────────────────  ───────  ────────
+kanagawa-69051       kanagawa-69051.herokussl.com  add.ssl-sni-test.tk  2017-11-02 02:49 UTC  True     Endpoint
+corythosaurus-87918  (Not applicable for SNI)      ssl-sni-test.tk      2017-11-02 02:12 UTC  True     SNI
+</code></p>
+
+<h2>ドメインの追加</h2>
+
+<p>同じく、Herokuへドメインを追加する。<br/>
+登録するTarget Nameは、<code>herokudns.com</code>のものでもよいし、<code>kanagawa-69051.herokussl.com</code>のSSL Endpointで設定されているものでもどちらでもよい。</p>
+
+<p>DNSには以下のように追加した。</p>
+
+<table>
+<thead>
+<tr>
+<th></th>
+<th align="left"> Name </th>
+<th align="left"> Type </th>
+<th align="left"> TTL </th>
+<th align="left"> Target </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td></td>
+<td align="left"> <code>add</code> </td>
+<td align="left"> CNAME </td>
+<td align="left"> 14440 </td>
+<td align="left"> <code>kanagawa-69051.herokussl.com</code> |</td>
+</tr>
+</tbody>
+</table>
+
+
+<h2>アクセス</h2>
+
+<p>これで無事、 <code>ssl-sni-test.tk</code> と、 <code>add.ssl-sni-test.tk</code> の両方へアクセス出来るようになった。<br/>
+さらに、どちらにも別々の証明書を適用させる事が出来た。</p>
+
+<h1>感想</h1>
+
+<p>無料ドメインと無料証明書はかなり便利そう。ドメインの方は運用に不安が残るが、全く無料で独自ドメインのHTTPSのサイトが持てるというのはちょっと驚き。(Herokuは無料では不可能）</p>
+
+<p>Herokuの場合はアプリを気軽に作る事が出来るため、一つのサーバ(アプリ)での運用、というのはあまりすることがないと思われる。<br/>
+そのため、<code>sni</code> <code>endpoint</code> それぞれのタイプで一つしか証明書がアップ出来ないようになっているのだと思う。それだったらアプリを分ければいいよ、との考え方だと思うので、複数アップロードの出番はまずないと思われる。</p>
+
+<h1>参考</h1>
+
+<ul>
+<li><a href="http://qiita.com/teekay/items/135dc67e39f24997019e">無料のドメインを取得する（2016年10月） &ndash; Qiita</a></li>
+<li><a href="http://qiita.com/tappie/items/76881fdf7996c57a105a">Let&#39;s Encrypt の証明書をブラウザ上で簡単取得 (dns-01 / ECDSA もあるよ) &ndash; Qiita</a></li>
+<li><a href="https://zenlogic.jp/user-support/knowledge/ssl/sni.html">SSL基礎知識 1つのサーバーで複数の証明書が使える、SNIって？｜Zenlogic &ndash; ファーストサーバ株式会社</a></li>
+<li><a href="https://devcenter.heroku.com/articles/ssl">Heroku SSL | Heroku Dev Center</a></li>
+<li><a href="https://devcenter.heroku.com/articles/ssl-endpoint">SSL Endpoint | Heroku Dev Center</a></li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Herokuで独自ドメインを指定する際に使用するターゲット名]]></title>
@@ -431,165 +865,6 @@ $now-&gt;format('Y-m-d H:i:s');
 
 <p>WordPressはともかく、herokuとPHPのタイムゾーン設定はherokuでPHPを使うのなら、デフォルトで設定しておいた方が後々間違いがなさそう。<br/>
 環境構築の際にまず設定しておくとよさげ。</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[Heroku] アドオンを共有機能を使って管理する]]></title>
-    <link href="http://kayakuguri.github.io/blog/2016/05/16/heroku-addon-attach/"/>
-    <updated>2016-05-16T16:51:59+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2016/05/16/heroku-addon-attach</id>
-    <content type="html"><![CDATA[<p>herokuでPostgreSQLやRedisなどを他のアプリでも共有したい場合、環境変数をコピペして使っていたのだけれど、
-それだとちょっとマズイ場合もあるらしく、attacheing add-on を使ってみた。</p>
-
-<!-- more -->
-
-
-<h1>共有する理由</h1>
-
-<p>環境変数にパスワードなどをコピペするよりも確実、という理由もあるが、一番大きなところとしては、
-メンテナンスなどでアドオンのDB名やユーザー名などの情報が変わってしまうことがあるよう。<br/>
-その時に、直接入れているアプリの方では自動的に環境変数も書き換わるため支障はないが、
-コピペで設定している他のアプリが合った場合には参照が出来なくなってしまう。
-その時に共有設定していれば、設定しているアプリの環境変数も自動で書き換わるためメンテナンスの手間がなくなる。
-なによりも突然アクセスできなくなる事がなくなる、というわけ。</p>
-
-<p>コピペなんていう不確定な方法よりもherokuの公式機能に乗った方が確実に安全。</p>
-
-<h1>アドオンの追加</h1>
-
-<p>例えば今回は、<code>dog</code>、というアプリにheroku postgresを入れてみる。</p>
-
-<p><code>
-$ heroku addons:create heroku-postgresql:hobby-dev -a dog
-Creating postgresql-opaque-93277... done, (free)
-Adding postgresql-opaque-93277 to dog... done
-Setting DATABASE_URL and restarting dog... done, v10
-Database has been created and is available
-</code></p>
-
-<p><a href="https://devcenter.heroku.com/articles/heroku-postgresql">https://devcenter.heroku.com/articles/heroku-postgresql</a></p>
-
-<p>DBの設定内容は、環境変数の<code>DATABASE_URL</code>に保存されている。</p>
-
-<h1>アドオンの共有</h1>
-
-<p>作ったアドオンを別のアプリでも利用してみる。<br/>
-その際にアドオンの名前が必要になる。<br/>
-上記作成時に名前が返ってきており、<code>postgresql-opaque-93277</code>が今回の名前になる。<br/>
-後から確認するには、アプリの一覧を見ればわかる。</p>
-
-<p>```
-$ heroku addons -a dog</p>
-
-<p>Add-on                                       Plan       Price
-───────────────────────────────────────────  ─────────  ─────
-heroku-postgresql (postgresql-opaque-93277)  hobby-dev  free
- └─ as DATABASE
-```</p>
-
-<p>名前がわかったところで、この名前を利用して他のアプリと共有させる。<br/>
-例えば今回は<code>cat</code> というアプリに共有させたとする。</p>
-
-<p><code>
-$ heroku addons:attach -a cat postgresql-opaque-93277
-Attaching postgresql-opaque-93277 to cat... done
-Setting DATABASE vars and restarting cat... done, v17
-</code></p>
-
-<p>ここでアドオンの名前を指定する。<br/>
-アドオン一覧で確認すると<code>dog</code>アプリから共有されていることがわかる。</p>
-
-<p>```
-$ heroku addons -a cat</p>
-
-<p>Add-on                                       Plan       Price
-───────────────────────────────────────────  ─────────  ────────────────────
-heroku-postgresql (postgresql-opaque-93277)  hobby-dev  (billed to dog app)
- ├─ as DATABASE
- └─ as DATABASE on dog app
-```</p>
-
-<p>DBの設定内容は、環境変数の<code>DATABASE_URL</code>に保存されている。</p>
-
-<p>heorkuのダッシュボード上では以下のように共有されている事がわかるようになっている。</p>
-
-<p><img src="/images/2016/05/attach01.jpg" alt="" /></p>
-
-<h1>アドオンの削除</h1>
-
-<h2>共有の解除</h2>
-
-<p>共有の解除は、<code>detach</code>を使う。</p>
-
-<p><code>
-$ heroku addons:detach -a cat postgresql-opaque-93277
-Removing DATABASE attachment to postgresql-opaque-93277 from cat... done
-Unsetting DATABASE vars and restarting cat... done, v18
-</code></p>
-
-<h2>削除</h2>
-
-<p>削除には、<code>destroy</code>を使う。<br/>
-共有をしている場合は、先に共有設定を全て解除しておく必要がある。<br/>
-途中、確認のためにアプリ名の入力を求められるので入力する。</p>
-
-<p>```
-$ heroku addons:destroy postgresql-opaque-93277</p>
-
-<p> !    WARNING: Destructive Action
- !    This command will affect the app: dog
- !    To proceed, type &ldquo;dog&rdquo; or re-run this command with &mdash;confirm dog</p>
-
-<blockquote><p>dog
-Destroying postgresql-opaque-93277 on dog&hellip; done, (free)
-Removing vars for DATABASE from dog and restarting&hellip; done, v13
-```</p></blockquote>
-
-<h1>アドオン名の指定</h1>
-
-<p>ここまでで一通りのアドオンの設定方法は終わりだけど、それぞれのアドオンを追加、共有する時に名前を変更できる。</p>
-
-<h2>追加時</h2>
-
-<p><code>
-$ heroku addons:create heroku-postgresql:hobby-dev -a dog --name dog-database --as DOG_DATABASE
-Creating dog-database... done, (free)
-Adding dog-database to dog... done
-Setting DOG_DATABASE_URL and restarting dog... done, v16
-Database has been created and is available
-</code></p>
-
-<p><code>--name</code>は、アドオンの名前を指定している。<br/>
-<code>--as</code>は環境変数に追加する名前を指定している。<br/>
-<code>as</code>で指定する名前は、アルファベットの大文字で、使用できる記号も決まっている。(<code>-</code>ハイフンは使用できない)</p>
-
-<p>この場合、DBの設定内容は、環境変数の<code>DOG_DATABASE_URL</code>に保存されている。</p>
-
-<p><code>
-$ heroku config -a dog
-=== dog Config Vars
-DOG_DATABASE_URL: postgres://yo....
-</code></p>
-
-<h2>共有時</h2>
-
-<p>共有時にはアドオンの名前は設定出来ない(元を参照するので)が、<code>as</code>の指定は可能。</p>
-
-<p><code>
-$ heroku addons:attach -a cat dog-database --as CAT_DATABASE
-Attaching dog-database as CAT_DATABASE to cat... done
-Setting CAT_DATABASE vars and restarting cat... done, v19
-</code></p>
-
-<h1>参考</h1>
-
-<ul>
-<li><a href="https://devcenter.heroku.com/articles/heroku-postgresql">Heroku Postgres | Heroku Dev Center</a></li>
-<li><a href="https://devcenter.heroku.com/articles/managing-add-ons">Managing Add-ons | Heroku Dev Center</a></li>
-<li><a href="http://blog.flect.co.jp/labo/2015/01/addon-a943.html">Addon のアプリ間共有 &ndash; フレクトのHeroku Lab</a></li>
-</ul>
-
 ]]></content>
   </entry>
   
