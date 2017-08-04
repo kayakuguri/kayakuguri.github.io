@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2017-08-04T18:40:08+09:00</updated>
+  <updated>2017-08-04T18:43:08+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -158,16 +158,16 @@
 
 <p><code>Setting</code>から、<code>Domains and certificates</code>セクションにある、<code>Configure SSL</code>をクリック。</p>
 
-<p><img src="http://kayakuguri.github.io/2017/08/ssl01.jpg" alt="" /></p>
+<p><img src="http://kayakuguri.github.io/images/2017/08/ssl01.jpg" alt="" /></p>
 
 <p>更新方法を聞かれるので、今回は<code>Manually</code>を選択。<br/>
 <code>Automatically</code>はLet&rsquo;s Encryptの場合にのみ使える自動更新のオプションで、今回はLet&rsquo;s Enctyptなので利用出来るのだが、普通はマニュアルになるため今回もマニュアルにした。</p>
 
-<p><img src="http://kayakuguri.github.io/2017/08/ssl02.jpg" alt="" /></p>
+<p><img src="http://kayakuguri.github.io/images/2017/08/ssl02.jpg" alt="" /></p>
 
 <p>アップロードするウインドウが表示されるので、ファイルをドラッグ。</p>
 
-<p><img src="http://kayakuguri.github.io/2017/08/ssl03.jpg" alt="" /></p>
+<p><img src="http://kayakuguri.github.io/images/2017/08/ssl03.jpg" alt="" /></p>
 
 <p>アップするものは以下。</p>
 
@@ -180,11 +180,11 @@
 <p>中間証明書は、Let&rsquo;s Encryptの場合だけなのかは不明だが、今回はなしでもアップすることが出来た。<br/>
 通常は必要だと思われる（証明書発行会社のページには一緒にアップして下さい、とある）ので末尾に追加しておく。</p>
 
-<p><img src="http://kayakuguri.github.io/2017/08/ssl04.jpg" alt="" /></p>
+<p><img src="http://kayakuguri.github.io/images/2017/08/ssl04.jpg" alt="" /></p>
 
 <p>無事、アップされると以下のようになる。</p>
 
-<p><img src="http://kayakuguri.github.io/2017/08/ssl06.jpg" alt="" /></p>
+<p><img src="http://kayakuguri.github.io/images/2017/08/ssl06.jpg" alt="" /></p>
 
 <h3>コマンドからのアップロード</h3>
 
@@ -286,15 +286,15 @@
 
 <p>証明書をアップした時と同じく、<code>Setting</code>画面から追加する。</p>
 
-<p><img src="http://kayakuguri.github.io/2017/08/ssl07.jpg" alt="" /></p>
+<p><img src="http://kayakuguri.github.io/images/2017/08/ssl07.jpg" alt="" /></p>
 
 <p>追加したいドメインを登録。</p>
 
-<p><img src="http://kayakuguri.github.io/2017/08/ssl08.jpg" alt="" /></p>
+<p><img src="http://kayakuguri.github.io/images/2017/08/ssl08.jpg" alt="" /></p>
 
 <p>登録すると以下のようになる。</p>
 
-<p><img src="http://kayakuguri.github.io/2017/08/ssl09.jpg" alt="" /></p>
+<p><img src="http://kayakuguri.github.io/images/2017/08/ssl09.jpg" alt="" /></p>
 
 <p>もちろん、コマンドからも登録可能。</p>
 
@@ -366,7 +366,7 @@ Heroku側のドメイン追加で取得したDNS TargetをCNAMEとして登録�
 <p><code>https</code>でアクセスすると、無事、アクセス出来た。<br/>
 SSLもLet&rsquo;s Encryptでちゃんと反映されていた。</p>
 
-<p><img src="http://kayakuguri.github.io/2017/08/ssl10.jpg" alt="" /></p>
+<p><img src="http://kayakuguri.github.io/images/2017/08/ssl10.jpg" alt="" /></p>
 
 <h1>2つの証明書と2つのドメイン</h1>
 
