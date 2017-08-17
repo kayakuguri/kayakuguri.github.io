@@ -4,7 +4,7 @@
   <title><![CDATA[Category: salesforce | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/salesforce/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2017-08-04T18:43:08+09:00</updated>
+  <updated>2017-08-17T15:37:09+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,105 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[Visualforce] テキストエリア入力欄の表示]]></title>
+    <link href="http://kayakuguri.github.io/blog/2017/08/17/vf-textarea/"/>
+    <updated>2017-08-17T15:16:25+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2017/08/17/vf-textarea</id>
+    <content type="html"><![CDATA[<p>Visualforceページにて、テキストエリアの入力欄を表示する際に、大きさを指定したりした時の表示のされ方などのまとめ。</p>
+
+<!-- more -->
+
+
+<h2>apex:inputField</h2>
+
+<p>一番基本となる、<code>apex:inputField</code>の場合。<br/>
+<code>value</code>で指定した項目の型を読み取って自動で入力フォームのタイプを変更してくれるので、普通はこちらを使っておけばよい。</p>
+
+<p>ただし、テキストエリア項目の場合は以下のように入力欄がすごく小さい。</p>
+
+<p><code>
+&lt;apex:inputField value="{!項目名}" required="true" label="inputFieldサンプル" /&gt;
+</code></p>
+
+<p><img src="/images/2017/08/vf_textarea01.jpg" alt="" /></p>
+
+<p>なので、サイズを調整したいが、<code>apex:inputField</code>には<code>rows</code>や<code>cols</code>などのオプションがない。<br/>
+よって、スタイスを直接書いてやるしかなさそう。</p>
+
+<p><code>
+&lt;apex:inputField value="{!項目名}" required="true" style="width:315px; height:70px;" label="inputFieldサンプル サイズ変更" /&gt;
+</code></p>
+
+<p><img src="/images/2017/08/vf_textarea02.jpg" alt="" /></p>
+
+<p>これで、サイズを任意に変更しつつ必須表示にも対応。</p>
+
+<h3>エラー</h3>
+
+<p><code>apex:inputField</code>を使った場合はそのままエラーの表示にも対応している。</p>
+
+<p><img src="/images/2017/08/vf_textarea06.jpg" alt="" /></p>
+
+<h2>apex:inputtextArea</h2>
+
+<p><code>apex:inputtextArea</code>を利用すると、<code>rows</code> <code>cols</code>でのサイズ指定が可能。<br/>
+<code>apex:outputlabel</code>も使うと標準の表示を同じようにラベルを配置してやれる。</p>
+
+<p>```
+&lt;apex:pageblocksectionItem></p>
+
+<pre><code>&lt;apex:outputlabel value = "outputlabelサンプル"/&gt;
+&lt;apex:inputtextArea value = "{!項目名}" cols = "50" rows = "5" required="true" /&gt;
+</code></pre>
+
+<p>&lt;/apex:pageblocksectionItem>
+```</p>
+
+<p><img src="/images/2017/08/vf_textarea03.jpg" alt="" /></p>
+
+<p>しかし、この場合だと <code>required="true"</code> を指定していても赤い線が表示されない。<br/>
+その赤い線を再現してやるには、divでクラスをつけて構造を再現してやる必要があるよう。</p>
+
+<p>```
+&lt;apex:pageBlockSectionItem></p>
+
+<pre><code>&lt;apex:outputlabel value = "outputlabelサンプル 必須再現"/&gt;
+&lt;apex:outputPanel&gt;
+    &lt;div class="requiredInput"&gt;
+    &lt;div class="requiredBlock"&gt;&lt;/div&gt;
+    &lt;apex:inputtextArea value="{!項目名}" cols = "50" rows = "5" required="true" /&gt;
+&lt;/div&gt;
+&lt;/apex:outputPanel&gt;
+</code></pre>
+
+<p>&lt;/apex:pageBlockSectionItem>
+```</p>
+
+<p><img src="/images/2017/08/vf_textarea04.jpg" alt="" /></p>
+
+<p>これで任意のサイズを指定しつつ、必須表示も出来るようになった。</p>
+
+<p>これらを並べてやると以下のような感じ。</p>
+
+<p><img src="/images/2017/08/vf_textarea05.jpg" alt="" /></p>
+
+<h3>エラー</h3>
+
+<p>エラー表示はそのままだと対応していないため、以下のような方法で自前で実装してやる必要がある。</p>
+
+<p><a href="https://developer.salesforce.com/forums/?id=906F0000000AhwaIAC">&#12456;&#12521;&#12540;&#12513;&#12483;&#12475;&#12540;&#12472;&#12395;&#12388;&#12356;&#12390; &ndash; Salesforce Developer Community</a></p>
+
+<h2>参考</h2>
+
+<ul>
+<li><a href="https://developer.salesforce.com/forums/?id=906F000000095xFIAQ">How do I alter dimensions of inputField Text and TextArea fields ? &ndash; Salesforce Developer Community</a></li>
+<li><a href="https://salesforce.stackexchange.com/questions/5462/required-field-mark-red-vertical-bar-not-coming">visualforce &ndash; Required field mark (Red Vertical Bar) not coming &ndash; Salesforce Stack Exchange</a></li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[salesforce] レコードのデータを取得し、CSVにしてS3にアップロードする]]></title>
@@ -405,60 +504,6 @@ Forrest::custom(&lsquo;/myEndpoint&rsquo;, [</p>
 
 <ul>
 <li><a href="https://github.com/omniphx/forrest">omniphx/forrest: Salesforce.com REST API Client for Laravel 5</a></li>
-</ul>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[Salesforce] Let’s Encryptの証明書ではSFからのコールアウトを受けられない]]></title>
-    <link href="http://kayakuguri.github.io/blog/2016/08/10/sf-lets-encrypt/"/>
-    <updated>2016-08-10T11:49:42+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2016/08/10/sf-lets-encrypt</id>
-    <content type="html"><![CDATA[<p>Let’s Encryptで取得した証明書を適用させたサイトへコールアウトしたところエラーが発生し接続出来なかったので、調査してみた。</p>
-
-<!-- more -->
-
-
-<h1>エラー内容</h1>
-
-<p>エラーは下記の内容。</p>
-
-<blockquote><p>System.CalloutException: sun.security.validator.ValidatorException: <br/>
-PKIX path building failed: <br/>
-sun.security.provider.certpath.SunCertPathBuilderException: <br/>
-unable to find valid certification path to requested target</p></blockquote>
-
-<p>エラー内容で調べてみると、自己証明書、ではSFからのアクセスが出来ない、という情報があり、その中で紹介されているエラーが上記内容と酷似していることがわかった。</p>
-
-<p><a href="http://appirio.co.jp/category/tech-blog/2013/05/apex%E3%82%B3%E3%83%BC%E3%83%AB%E3%82%A2%E3%82%A6%E3%83%88%E3%81%AE%E3%83%99%E3%82%B9%E3%83%88%E3%83%97%E3%83%A9%E3%82%AF%E3%83%86%E3%82%A3%E3%82%B9part-2/">Apexコールアウトのベストプラクティス:Part 2 &ndash; Appirio Japan</a></p>
-
-<p>しかし、Let’s Encryptは自己証明書ではない…。</p>
-
-<h1>SFが許可するCA</h1>
-
-<p>引き続き調べてみると、どうやらsalesforceは接続出来る認証局 (CA) をホワイトリスト方式で設定しているよう。</p>
-
-<p><a href="https://help.salesforce.com/HTViewSolution?id=000007225&amp;language=en_US">Salesforce.com SSL certificates Salesforce supports</a></p>
-
-<p>以下が許可されている認証局のリスト。</p>
-
-<p><a href="https://developer.salesforce.com/page/Outbound_Messaging_SSL_CA_Certificates">Outbound Messaging SSL CA Certificates &ndash; developer.force.com</a></p>
-
-<p>このリストには、Let’s Encryptがない。<br/>
-というわけで、SFがLet’s Encrypt認証局が作成した証明書を適用したサイトへの接続は許可していない、ということになり、冒頭のエラーが発生していた、ということになる。</p>
-
-<p>ちなみに、Let’s Encryptの認証局をリストに加えてほしい、という要望は結構前から上がっているよう。</p>
-
-<p><a href="https://success.salesforce.com/ideaView?id=08730000000E28LAAS">Support Let&rsquo;s Encrypt CA Certificate &ndash; Ideas &ndash; Salesforce Success Community</a></p>
-
-<p>対応する気はないのか、まだ手が回ってないだけなのか…。</p>
-
-<h1>参考</h1>
-
-<ul>
-<li><a href="https://jp.globalsign.com/service/knowledge/ca/">認証局 （CA：Certification Authority）とは？ | SSL・電子証明書ならGMOグローバルサイン</a></li>
-<li><a href="http://qiita.com/kawaz/items/f90810b9ea823b6556a8">認証局を立ててぼろもうけしたいんですが＞無理な理由を理解しよう &ndash; Qiita</a></li>
 </ul>
 
 ]]></content>
