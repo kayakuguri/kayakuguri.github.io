@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2017-08-17T15:37:09+09:00</updated>
+  <updated>2017-08-21T19:32:14+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,119 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[Visualforce] カスタム設定から選択肢を設定し必須表示する]]></title>
+    <link href="http://kayakuguri.github.io/blog/2017/08/18/custom-selectlist-req/"/>
+    <updated>2017-08-18T18:25:33+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2017/08/18/custom-selectlist-req</id>
+    <content type="html"><![CDATA[<p>Visualforceページにて、選択リストをカスタム設定のリストから取得し、必須の赤いバーを表示させる方法。</p>
+
+<!-- more -->
+
+
+<p>今回は都道府県の設定をカスタム設定で設定しているとする。</p>
+
+<ul>
+<li>カスタム設定のAPI参照名 : <code>Prefectures__c</code></li>
+<li>都道府県名を保存している項目名 : <code>Label__c</code></li>
+<li>入力先の項目名 : <code>pref__c</code></li>
+</ul>
+
+
+<h1>カスタム設定の取得</h1>
+
+<p>これは別で記事を書いているのでそちらをどうぞ。</p>
+
+<p><a href="http://kayakuguri.github.io/blog/2016/02/01/custom-setting/">カスタム設定を作成して取得してみる &ndash; KayaMemo</a></p>
+
+<p>こんな感じ。<br/>
+これでVFページからは、 <code>{!options}</code>で呼び出せる。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>public List&lt;SelectOption&gt; getOptions() {
+</span><span class='line'>  Map&lt;String, Prefectures__c&gt; prefs = Prefectures__c.getAll();
+</span><span class='line'>  List&lt;SelectOption&gt; options = new List&lt;SelectOption&gt;();
+</span><span class='line'>  for(String key : prefs.keySet()){
+</span><span class='line'>      Prefectures__c pref_obj = prefs.get(key);
+</span><span class='line'>      options.add(new SelectOption(pref_obj.Label__c, pref_obj.Label__c));
+</span><span class='line'>  }
+</span><span class='line'>  return options;
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>選択リストに任意の値を設定</h1>
+
+<p><code>apex:inputField</code>を使うと楽だが、それではその項目に設定されている選択肢しか表示できない。<br/>
+(そもそも選択リスト型でないと選択リストにならない)</p>
+
+<p>よって、<code>apex:selectList</code>を使うと設定可能。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;apex:selectList value="{!pref__c}" size="1" multiselect="false" required="true"&gt;
+</span><span class='line'>    &lt;apex:selectOptions value="{!options}"/&gt;
+</span><span class='line'>&lt;/apex:selectList&gt;</span></code></pre></td></tr></table></div></figure>
+
+
+<p>表示は以下のようになる。</p>
+
+<p><img src="images/2017/08/select_pref01.jpg" alt="" /></p>
+
+<h1>必須の表示</h1>
+
+<p>上記画像からわかるように、<code>required="true"</code>を指定しているにも関わらず、SF標準の赤い線が出てくれない。<br/>
+これは、<code>apex:inputField</code>を利用している時にしか自動で表示してくれないため、自分で設定してやる必要がある。<br/>
+以下のようになる。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;apex:pageBlockSectionItem &gt;
+</span><span class='line'>  &lt;apex:outputLabel value="都道府県" for="prefcbx"/&gt;
+</span><span class='line'>  &lt;apex:outputPanel styleClass="requiredInput" layout="block"&gt;
+</span><span class='line'>      &lt;apex:outputPanel styleClass="requiredBlock" layout="block"/&gt;
+</span><span class='line'>      &lt;apex:selectList value="{!pref__c}" id="prefcbx" size="1" required="true"&gt;
+</span><span class='line'>          &lt;apex:selectOptions value="{!options}"/&gt;
+</span><span class='line'>      &lt;/apex:selectList&gt;
+</span><span class='line'>  &lt;/apex:outputPanel&gt;
+</span><span class='line'>&lt;/apex:pageBlockSectionItem&gt;</span></code></pre></td></tr></table></div></figure>
+
+
+<p>これで以下のような表示となる。</p>
+
+<p><img src="images/2017/08/select_pref01.jpg" alt="" /></p>
+
+<h1>エラー表示</h1>
+
+<p>さらに同じく空だった場合のエラーの表示も自動で挿入してくれなくなるため、これも自分で表示してやる必要がある。<br/>
+が、このエラー表示がかなり難航してるため、解決したら別ポストで。</p>
+
+<h1>参考</h1>
+
+<ul>
+<li><a href="http://vaindespair.blogspot.jp/2011/04/blog-post_733.html">memo: Force.com&#12288;&#65306;&#12288;任意の選択リストを作成したい&#65339;Visualforceタグ&#65341;</a></li>
+<li><a href="http://kayakuguri.github.io/blog/2016/02/01/custom-setting/">カスタム設定を作成して取得してみる &ndash; KayaMemo</a></li>
+<li><a href="http://blog.jeffdouglas.com/2008/11/16/displaying-the-required-red-bar-for-a-control/">Displaying the Required Red Bar for a Control</a></li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[Visualforce] テキストエリア入力欄の表示]]></title>
@@ -3302,57 +3415,6 @@ ChatterのコメントをApex経由で<code>@</code>メンション付きで投�
 
 <p>プログラムとしては無駄なIfなのであまり綺麗な方法ではないかもしれないが…。<br/>
 とりあえず、これで意図した動作をさせることが出来た。</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[herokuにComodoで取得したSSL証明書を反映させる]]></title>
-    <link href="http://kayakuguri.github.io/blog/2016/09/07/heroku-comodo-ssl/"/>
-    <updated>2016-09-07T10:27:28+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2016/09/07/heroku-comodo-ssl</id>
-    <content type="html"><![CDATA[<p>ちょっとつなげ方とかが特殊だったのでメモ。</p>
-
-<!-- more -->
-
-
-<p><a href="https://comodo.jp/">トップページ | COMODO JAPAN  | SSL 証明書</a></p>
-
-<p>通常の流れであれば、取得した証明書の末尾に、対応している中間CA証明書をくっつけて、秘密鍵と共にアップすればOK。<br/>
-<a href="http://kayakuguri.github.io/blog/2014/09/30/heroku-ssl-subdomain/">[heroku]herokuでのSSL設定とカスタムサブドメインの適用方法 &ndash; KayaMemo</a></p>
-
-<p>しかし、Comodoという発行会社で取得したSSLの場合は以下のような内容で4つのファイルが送られてくる。</p>
-
-<ul>
-<li>AddTrustExternalCARoot.crt (ルート証明書)</li>
-<li>COMODORSAAddTrustCA.crt    (中間証明書 その1)</li>
-<li>COMODORSADomainValidationSecureServerCA.crt (中間証明書 その2)</li>
-<li>STAR_example_com.crt   (サーバ証明書)</li>
-</ul>
-
-
-<p>アップする際にはこれらを全てつなげたファイルが必要になるよう。<br/>
-そしてそのつなげ方にも順番があるようで、下から順番に末尾に追加していく形。<br/>
-コマンドは以下となる。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>$ cat STAR_example_com.crt COMODORSADomainValidationSecureServerCA.crt COMODORSAAddTrustCA.crt AddTrustExternalCARoot.crt &gt; STAR_example_com-bundle.pem</span></code></pre></td></tr></table></div></figure>
-
-
-<p>これで全てつなげたファイル、 <code>STAR_example_com-bundle.pem</code> が出来上がる。<br/>
-あとは、秘密鍵と共にアップするだけ。<br/>
-(秘密鍵は、 <code>server.key</code> とする）</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>$ heroku certs:add STAR_example_com-bundle.pem server.key -a YOUR_APP</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>参考</h2>
-
-<ul>
-<li><a href="http://stackoverflow.com/questions/26100642/heroku-comodo-ssl-and-it-not-working">Heroku Comodo SSL and it not working? &ndash; Stack Overflow</a></li>
-<li><a href="http://qiita.com/white_aspara25/items/d9a1f99e8abdee0b5450">ELB の ComodoSSL 証明書を更新 &ndash; Qiita</a></li>
-</ul>
-
 ]]></content>
   </entry>
   

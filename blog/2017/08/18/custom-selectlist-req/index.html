@@ -1,0 +1,322 @@
+
+<!DOCTYPE HTML>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>[Visualforce] カスタム設定から選択肢を設定し必須表示する - KayaMemo</title>
+
+	
+	<meta name="description" content="<!-- google_ad_client = "ca-pub-0887267957680144"; /* kayakuguri top */ google_ad_slot = "1210228675"; google_ad_width = 468; google_ad_height = 60 &hellip;">
+	
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+	<link href="/atom.xml" rel="alternate" title="KayaMemo" type="application/atom+xml">
+	<link rel="canonical" href="">
+	<link href="/favicon.png" rel="shortcut icon">
+	<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+	<script async="true" src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+	
+<meta property="og:title" content="[Visualforce] カスタム設定から選択肢を設定し必須表示する - KayaMemo" />
+<meta property="og:type" content="article" />
+<meta property="og:description" content="<!-- google_ad_client = "ca-pub-0887267957680144"; /* kayakuguri top */ google_ad_slot = "1210228675"; google_ad_width = 468; google_ad_height = 60 &hellip;" />
+
+<meta property="og:url" content="" />
+<meta property="og:image" content="http://kayakuguri.github.io/images/about_me.jpg" />
+<meta property="og:author" content="kayakuguri" />
+<meta property="og:site_name" content="KayaMemo" />
+<meta property="og:locale" content="ja_JP" />
+<meta property="fb:app_id" content="509051419202319" />
+</head>
+
+
+<body>
+	<header id="header" class="inner"><h1><a href="/">KayaMemo</a></h1>
+<nav id="main-nav"><ul class="main">
+	<li><a href="/">Blog</a></li>
+	<li><a href="/blog/archives">Archives</a></li>
+</ul>
+</nav>
+<nav id="mobile-nav">
+	<div class="alignleft menu">
+		<a class="button">Menu</a>
+		<div class="container"><ul class="main">
+	<li><a href="/">Blog</a></li>
+	<li><a href="/blog/archives">Archives</a></li>
+</ul>
+</div>
+	</div>
+	<div class="alignright search">
+		<a class="button"></a>
+		<div class="container">
+			<form action="http://google.com/search" method="get">
+				<input type="text" name="q" results="0">
+				<input type="hidden" name="q" value="site:kayakuguri.github.io">
+			</form>
+		</div>
+	</div>
+</nav>
+<nav id="sub-nav" class="alignright">
+	<div class="social">
+		
+		
+		
+		<a class="twitter" href="http://twitter.com/usk" title="Twitter">Twitter</a>
+		
+		
+    
+		
+		
+		
+		
+		
+		<a class="rss" href="/atom.xml" title="RSS">RSS</a>
+		
+    
+	</div>
+	<form class="search" action="http://google.com/search" method="get">
+		<input class="alignright" type="text" name="q" results="0">
+		<input type="hidden" name="q" value="site:kayakuguri.github.io">
+	</form>
+</nav>
+
+</header>
+	
+		
+	
+	<div id="content" class="inner"><article class="post">
+	<h2 class="title">[Visualforce] カスタム設定から選択肢を設定し必須表示する</h2>
+	<div class="entry-content">
+        <div class="adArea">
+    <script type="text/javascript"><!--
+    google_ad_client = "ca-pub-0887267957680144";
+    /* kayakuguri top */
+    google_ad_slot = "1210228675";
+    google_ad_width = 468;
+    google_ad_height = 60;
+    //-->
+    </script>
+    <script type="text/javascript"
+            src="//pagead2.googlesyndication.com/pagead/show_ads.js">
+    </script>
+</div>
+        <p>Visualforceページにて、選択リストをカスタム設定のリストから取得し、必須の赤いバーを表示させる方法。</p>
+
+<!-- more -->
+
+
+<p>今回は都道府県の設定をカスタム設定で設定しているとする。</p>
+
+<ul>
+<li>カスタム設定のAPI参照名 : <code>Prefectures__c</code></li>
+<li>都道府県名を保存している項目名 : <code>Label__c</code></li>
+<li>入力先の項目名 : <code>pref__c</code></li>
+</ul>
+
+
+<h1>カスタム設定の取得</h1>
+
+<p>これは別で記事を書いているのでそちらをどうぞ。</p>
+
+<p><a href="http://kayakuguri.github.io/blog/2016/02/01/custom-setting/">カスタム設定を作成して取得してみる &ndash; KayaMemo</a></p>
+
+<p>こんな感じ。<br/>
+これでVFページからは、 <code>{!options}</code>で呼び出せる。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>public List&lt;SelectOption&gt; getOptions() {
+</span><span class='line'>  Map&lt;String, Prefectures__c&gt; prefs = Prefectures__c.getAll();
+</span><span class='line'>  List&lt;SelectOption&gt; options = new List&lt;SelectOption&gt;();
+</span><span class='line'>  for(String key : prefs.keySet()){
+</span><span class='line'>      Prefectures__c pref_obj = prefs.get(key);
+</span><span class='line'>      options.add(new SelectOption(pref_obj.Label__c, pref_obj.Label__c));
+</span><span class='line'>  }
+</span><span class='line'>  return options;
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>選択リストに任意の値を設定</h1>
+
+<p><code>apex:inputField</code>を使うと楽だが、それではその項目に設定されている選択肢しか表示できない。<br/>
+(そもそも選択リスト型でないと選択リストにならない)</p>
+
+<p>よって、<code>apex:selectList</code>を使うと設定可能。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;apex:selectList value="{!pref__c}" size="1" multiselect="false" required="true"&gt;
+</span><span class='line'>    &lt;apex:selectOptions value="{!options}"/&gt;
+</span><span class='line'>&lt;/apex:selectList&gt;</span></code></pre></td></tr></table></div></figure>
+
+
+<p>表示は以下のようになる。</p>
+
+<p><img src="images/2017/08/select_pref01.jpg" alt="" /></p>
+
+<h1>必須の表示</h1>
+
+<p>上記画像からわかるように、<code>required="true"</code>を指定しているにも関わらず、SF標準の赤い線が出てくれない。<br/>
+これは、<code>apex:inputField</code>を利用している時にしか自動で表示してくれないため、自分で設定してやる必要がある。<br/>
+以下のようになる。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;apex:pageBlockSectionItem &gt;
+</span><span class='line'>  &lt;apex:outputLabel value="都道府県" for="prefcbx"/&gt;
+</span><span class='line'>  &lt;apex:outputPanel styleClass="requiredInput" layout="block"&gt;
+</span><span class='line'>      &lt;apex:outputPanel styleClass="requiredBlock" layout="block"/&gt;
+</span><span class='line'>      &lt;apex:selectList value="{!pref__c}" id="prefcbx" size="1" required="true"&gt;
+</span><span class='line'>          &lt;apex:selectOptions value="{!options}"/&gt;
+</span><span class='line'>      &lt;/apex:selectList&gt;
+</span><span class='line'>  &lt;/apex:outputPanel&gt;
+</span><span class='line'>&lt;/apex:pageBlockSectionItem&gt;</span></code></pre></td></tr></table></div></figure>
+
+
+<p>これで以下のような表示となる。</p>
+
+<p><img src="images/2017/08/select_pref01.jpg" alt="" /></p>
+
+<h1>エラー表示</h1>
+
+<p>さらに同じく空だった場合のエラーの表示も自動で挿入してくれなくなるため、これも自分で表示してやる必要がある。<br/>
+が、このエラー表示がかなり難航してるため、解決したら別ポストで。</p>
+
+<h1>参考</h1>
+
+<ul>
+<li><a href="http://vaindespair.blogspot.jp/2011/04/blog-post_733.html">memo: Force.com&#12288;&#65306;&#12288;任意の選択リストを作成したい&#65339;Visualforceタグ&#65341;</a></li>
+<li><a href="http://kayakuguri.github.io/blog/2016/02/01/custom-setting/">カスタム設定を作成して取得してみる &ndash; KayaMemo</a></li>
+<li><a href="http://blog.jeffdouglas.com/2008/11/16/displaying-the-required-red-bar-for-a-control/">Displaying the Required Red Bar for a Control</a></li>
+</ul>
+
+
+    </div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2017-08-18T18:25:33+09:00" pubdate data-updated="true">Aug 18<span>th</span>, 2017</time></div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/salesforce/'>salesforce</a>
+
+
+</div>
+	
+</div>
+</article>
+
+	<div class="share">
+	<div class="addthis_toolbox addthis_default_style ">
+		
+        <div id="fb-root"></div>
+<script>(function(d, s, id) {
+    var js, fjs = d.getElementsByTagName(s)[0];
+    if (d.getElementById(id)) return;
+    js = d.createElement(s); js.id = id;
+    js.src = "//connect.facebook.net/ja_JP/all.js#xfbml=1&appId=509051419202319";
+    fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+        <div class="fb-like" data-href="http://kayakuguri.github.io/blog/2017/08/18/custom-selectlist-req/" data-layout="button_count" data-action="like" data-show-faces="true" data-share="false"></div>
+		
+		
+        &nbsp;&nbsp;<a href="https://twitter.com/share" class="twitter-share-button" data-via="kayakuguri123" data-lang="ja" data-count="none">ツイート</a>
+<script>
+  !function(d,s,id){
+      var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';
+      if(!d.getElementById(id)){
+          js=d.createElement(s);
+          js.id=id;js.src=p+'://platform.twitter.com/widgets.js';
+          fjs.parentNode.insertBefore(js,fjs);
+      }
+  }(document, 'script', 'twitter-wjs');
+</script>
+		
+		
+		<a class="addthis_button_google_plusone" g:plusone:size="medium"></a>
+		
+		
+        
+        <a href="http://b.hatena.ne.jp/entry/http://kayakuguri.github.io/blog/2017/08/18/custom-selectlist-req/" class="hatena-bookmark-button" data-hatena-bookmark-title="[Visualforce] カスタム設定から選択肢を設定し必須表示する - KayaMemo" data-hatena-bookmark-layout="standard-noballoon" data-hatena-bookmark-lang="ja" title="このエントリーをはてなブックマークに追加">
+<img src="http://b.st-hatena.com/images/entry-button/button-only@2x.png" alt="このエントリーをはてなブックマークに追加" width="20" height="20" style="border: none;" /></a>
+<script type="text/javascript" src="http://b.st-hatena.com/js/bookmark_button.js" charset="utf-8" async="async"></script>
+        
+	</div>
+	
+</div>
+
+
+<div class="share">
+    <script type="text/javascript"><!--
+    google_ad_client = "ca-pub-0887267957680144";
+    /* kayakuguri git */
+    google_ad_slot = "2041160274";
+    google_ad_width = 336;
+    google_ad_height = 280;
+    //-->
+    </script>
+    <script type="text/javascript"
+            src="//pagead2.googlesyndication.com/pagead/show_ads.js">
+    </script>
+</div>
+</div>
+	<footer id="footer" class="inner">Copyright &copy; 2017
+
+    萱潜
+
+</footer>
+	<script src="/javascripts/slash.js"></script>
+<script src="/javascripts/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+	$('.fancybox').fancybox();
+})(jQuery);
+</script> <!-- Delete or comment this line to disable Fancybox -->
+
+
+
+
+	<script type="text/javascript">
+		var _gaq = _gaq || [];
+		_gaq.push(['_setAccount', 'UA-3730932-4']);
+		_gaq.push(['_trackPageview']);
+
+		(function() {
+			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+		})();
+	</script>
+
+
+
+</body>
+</html>

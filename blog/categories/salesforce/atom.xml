@@ -4,7 +4,7 @@
   <title><![CDATA[Category: salesforce | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/salesforce/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2017-08-17T15:37:09+09:00</updated>
+  <updated>2017-08-21T19:32:14+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,110 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[Visualforce] カスタム設定から選択肢を設定し必須表示する]]></title>
+    <link href="http://kayakuguri.github.io/blog/2017/08/18/custom-selectlist-req/"/>
+    <updated>2017-08-18T18:25:33+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2017/08/18/custom-selectlist-req</id>
+    <content type="html"><![CDATA[<p>Visualforceページにて、選択リストをカスタム設定のリストから取得し、必須の赤いバーを表示させる方法。</p>
+
+<!-- more -->
+
+
+<p>今回は都道府県の設定をカスタム設定で設定しているとする。</p>
+
+<ul>
+<li>カスタム設定のAPI参照名 : <code>Prefectures__c</code></li>
+<li>都道府県名を保存している項目名 : <code>Label__c</code></li>
+<li>入力先の項目名 : <code>pref__c</code></li>
+</ul>
+
+
+<h1>カスタム設定の取得</h1>
+
+<p>これは別で記事を書いているのでそちらをどうぞ。</p>
+
+<p><a href="http://kayakuguri.github.io/blog/2016/02/01/custom-setting/">カスタム設定を作成して取得してみる &ndash; KayaMemo</a></p>
+
+<p>こんな感じ。<br/>
+これでVFページからは、 <code>{!options}</code>で呼び出せる。</p>
+
+<p>```
+public List<SelectOption> getOptions() {</p>
+
+<pre><code>Map&lt;String, Prefectures__c&gt; prefs = Prefectures__c.getAll();
+List&lt;SelectOption&gt; options = new List&lt;SelectOption&gt;();
+for(String key : prefs.keySet()){
+    Prefectures__c pref_obj = prefs.get(key);
+    options.add(new SelectOption(pref_obj.Label__c, pref_obj.Label__c));
+}
+return options;
+</code></pre>
+
+<p>}
+```</p>
+
+<h1>選択リストに任意の値を設定</h1>
+
+<p><code>apex:inputField</code>を使うと楽だが、それではその項目に設定されている選択肢しか表示できない。<br/>
+(そもそも選択リスト型でないと選択リストにならない)</p>
+
+<p>よって、<code>apex:selectList</code>を使うと設定可能。</p>
+
+<p>```
+&lt;apex:selectList value=&ldquo;{!pref__c}&rdquo; size=&ldquo;1&rdquo; multiselect=&ldquo;false&rdquo; required=&ldquo;true&rdquo;></p>
+
+<pre><code>&lt;apex:selectOptions value="{!options}"/&gt;
+</code></pre>
+
+<p>&lt;/apex:selectList>
+```</p>
+
+<p>表示は以下のようになる。</p>
+
+<p><img src="images/2017/08/select_pref01.jpg" alt="" /></p>
+
+<h1>必須の表示</h1>
+
+<p>上記画像からわかるように、<code>required="true"</code>を指定しているにも関わらず、SF標準の赤い線が出てくれない。<br/>
+これは、<code>apex:inputField</code>を利用している時にしか自動で表示してくれないため、自分で設定してやる必要がある。<br/>
+以下のようになる。</p>
+
+<p>```
+&lt;apex:pageBlockSectionItem ></p>
+
+<pre><code>&lt;apex:outputLabel value="都道府県" for="prefcbx"/&gt;
+&lt;apex:outputPanel styleClass="requiredInput" layout="block"&gt;
+    &lt;apex:outputPanel styleClass="requiredBlock" layout="block"/&gt;
+    &lt;apex:selectList value="{!pref__c}" id="prefcbx" size="1" required="true"&gt;
+        &lt;apex:selectOptions value="{!options}"/&gt;
+    &lt;/apex:selectList&gt;
+&lt;/apex:outputPanel&gt;
+</code></pre>
+
+<p>&lt;/apex:pageBlockSectionItem>
+```</p>
+
+<p>これで以下のような表示となる。</p>
+
+<p><img src="images/2017/08/select_pref01.jpg" alt="" /></p>
+
+<h1>エラー表示</h1>
+
+<p>さらに同じく空だった場合のエラーの表示も自動で挿入してくれなくなるため、これも自分で表示してやる必要がある。<br/>
+が、このエラー表示がかなり難航してるため、解決したら別ポストで。</p>
+
+<h1>参考</h1>
+
+<ul>
+<li><a href="http://vaindespair.blogspot.jp/2011/04/blog-post_733.html">memo: Force.com&#12288;&#65306;&#12288;任意の選択リストを作成したい&#65339;Visualforceタグ&#65341;</a></li>
+<li><a href="http://kayakuguri.github.io/blog/2016/02/01/custom-setting/">カスタム設定を作成して取得してみる &ndash; KayaMemo</a></li>
+<li><a href="http://blog.jeffdouglas.com/2008/11/16/displaying-the-required-red-bar-for-a-control/">Displaying the Required Red Bar for a Control</a></li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[Visualforce] テキストエリア入力欄の表示]]></title>
@@ -344,166 +448,6 @@ URLのドメイン部分を先程取得した、 <code>instance_url</code> を�
 
 <ul>
 <li><a href="http://sfdcbeginner.com/how-to-test-salesforce-rest-api.html">HOW TO TEST SALESFORCE REST API</a></li>
-</ul>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[SalesforceのREST API接続用のLaravelパッケージを使ってみる]]></title>
-    <link href="http://kayakuguri.github.io/blog/2016/11/17/forrest-sfapi-laravel/"/>
-    <updated>2016-11-17T14:00:34+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2016/11/17/forrest-sfapi-laravel</id>
-    <content type="html"><![CDATA[<p>Salesforce接続用のLaravel5パッケージ、<code>omniphx/forrest</code>を使ってみた。</p>
-
-<!-- more -->
-
-
-<h1>セットアップ</h1>
-
-<p>Composerに追加。</p>
-
-<p><code>
-$ composer require "omniphx/forrest":"2.*"
-</code></p>
-
-<p><code>config/app.php</code>に以下を追加</p>
-
-<p>```
-&lsquo;providers&rsquo; => [
-  // &hellip;
-  Omniphx\Forrest\Providers\Laravel\ForrestServiceProvider::class,
-  // &hellip;
-],</p>
-
-<p>&hellip;</p>
-
-<p>&lsquo;aliases&rsquo; => [
-  // &hellip;</p>
-
-<pre><code>'Forrest' =&gt; Omniphx\Forrest\Providers\Laravel\Facades\Forrest::class
-</code></pre>
-
-<p>  // &hellip;
-],
-```
-以下で設定ファイルを生成させる。</p>
-
-<p><code>
-$ php artisan vendor:publish
-</code></p>
-
-<h1>設定ファイル</h1>
-
-<p>SFへの接続方法は２つから選択可能。</p>
-
-<ul>
-<li>Web Server authentication flow &ndash; 個別のSFアカウントでのログイン</li>
-<li>Username-Password authentication flow &ndash; 接続用のアカウントを使用したログイン</li>
-</ul>
-
-
-<p>通常は、Username-Password authentication を利用する事が多い。</p>
-
-<p><code>config/forrest.php</code>で以下を書き換え。</p>
-
-<p><code>
-//11行目
-'authentication' =&gt; 'WebServer',
-↓↓
-'authentication' =&gt; 'UserPassword',
-</code></p>
-
-<p>あとは、<code>.env</code>ファイルでユーザ名やパスワード、アプリのキーなどを設定する。</p>
-
-<p><code>
-CONSUMER_KEY=xxx
-CONSUMER_SECRET=xxx
-LOGIN_URL=https://login.salesforce.com/
-USERNAME=xxx
-PASSWORD=xxx
-</code></p>
-
-<p><code>LOGIN_URL</code>を <code>https://test.salesforce.com/</code>としておくと常にsandboxへの接続となる。</p>
-
-<h1>利用</h1>
-
-<h2>ログイン</h2>
-
-<p>以下でログイン。</p>
-
-<p><code>
-use Omniphx\Forrest\Providers\Laravel\Facades\Forrest;
-...
-Forrest::authenticate();
-</code></p>
-
-<p>(PHPStormの補完が効かない…）</p>
-
-<h2>クエリの発行</h2>
-
-<p><code>
-Forrest::query('SELECT Id FROM Account');
-</code></p>
-
-<h2>レコードの作成など</h2>
-
-<p>```
-$body = [&lsquo;Name&rsquo; => &lsquo;New Account&rsquo;];
-Forrest::sobjects(&lsquo;Account&rsquo;,[</p>
-
-<pre><code>'method' =&gt; 'post',
-'body'   =&gt; $body]);
-</code></pre>
-
-<p>```</p>
-
-<p><code>sobjects</code>で第一引数にオブジェクトを指定し、第二引数に送信する内容を指定する。<br/>
-送信内容は配列でキーを指定してやればよい。<br/>
-<code>method</code>はそれぞれ以下。</p>
-
-<ul>
-<li>post &ndash; 作成</li>
-<li>put &ndash; 更新</li>
-<li>patch &ndash; アップサート</li>
-<li>delete &ndash; 削除</li>
-</ul>
-
-
-<p>削除の場合は以下のようにREST形式でSFIDを指定してやる。</p>
-
-<p><code>
-Forrest::sobjects('Account/001i000000xxx', ['method' =&gt; 'delete']);
-</code></p>
-
-<h2>トークンの操作</h2>
-
-<ul>
-<li>リフレッシュ &ndash; <code>refresh()</code></li>
-<li>廃止 &ndash; <code>revoke()</code></li>
-</ul>
-
-
-<h2>カスタムエンドポイント</h2>
-
-<p>以下の様のして送信する。</p>
-
-<p>```
-Forrest::custom(&lsquo;/myEndpoint&rsquo;, [</p>
-
-<pre><code>'method' =&gt; 'post',
-'body' =&gt; ['foo' =&gt; 'bar'],
-'parameters' =&gt; ['flim' =&gt; 'flam']]);
-</code></pre>
-
-<p>```</p>
-
-<p>その他は、GitHubのReadme参照。</p>
-
-<h1>参考</h1>
-
-<ul>
-<li><a href="https://github.com/omniphx/forrest">omniphx/forrest: Salesforce.com REST API Client for Laravel 5</a></li>
 </ul>
 
 ]]></content>
