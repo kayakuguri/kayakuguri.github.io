@@ -132,9 +132,11 @@
 <span class='line-number'>7</span>
 <span class='line-number'>8</span>
 <span class='line-number'>9</span>
+<span class='line-number'>10</span>
 </pre></td><td class='code'><pre><code class=''><span class='line'>public List&lt;SelectOption&gt; getOptions() {
 </span><span class='line'>  Map&lt;String, Prefectures__c&gt; prefs = Prefectures__c.getAll();
 </span><span class='line'>  List&lt;SelectOption&gt; options = new List&lt;SelectOption&gt;();
+</span><span class='line'>  options.add(new SelectOption('', '--なし--'));
 </span><span class='line'>  for(String key : prefs.keySet()){
 </span><span class='line'>      Prefectures__c pref_obj = prefs.get(key);
 </span><span class='line'>      options.add(new SelectOption(pref_obj.Label__c, pref_obj.Label__c));
@@ -196,6 +198,10 @@
 
 <p>さらに同じく空だった場合のエラーの表示も自動で挿入してくれなくなるため、これも自分で表示してやる必要がある。<br/>
 が、このエラー表示がかなり難航してるため、解決したら別ポストで。</p>
+
+<p>以下に書きました。<br/>
+↓↓<br/>
+<a href="http://kayakuguri.github.io/blog/2017/08/22/custom-vf-error/">[Visualforce] 必須チェックのエラー文言をカスタマイズする</a></p>
 
 <h1>参考</h1>
 

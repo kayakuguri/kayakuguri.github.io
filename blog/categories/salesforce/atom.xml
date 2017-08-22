@@ -4,7 +4,7 @@
   <title><![CDATA[Category: salesforce | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/salesforce/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2017-08-22T13:59:27+09:00</updated>
+  <updated>2017-08-22T15:13:31+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,215 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[Visualforce] 必須チェックのエラー文言をカスタマイズする]]></title>
+    <link href="http://kayakuguri.github.io/blog/2017/08/22/custom-vf-error/"/>
+    <updated>2017-08-22T15:11:17+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2017/08/22/custom-vf-error</id>
+    <content type="html"><![CDATA[<p>前記事の続きで、<code>apex:inputField</code> を使わない場合のバリデーションエラーの表示方法を調べたメモ。<br/>
+結局標準の表示では対応してくれないようなので、自前で実装することになった。</p>
+
+<!-- more -->
+
+
+<p><a href="http://kayakuguri.github.io/blog/2017/08/18/custom-selectlist-req/">前回</a>までで作成した状態はこちら。</p>
+
+<p>```
+&lt;apex:pageBlockSectionItem >
+  &lt;apex:outputLabel value=&ldquo;都道府県&rdquo; for=&ldquo;prefcbx&rdquo;/>
+  &lt;apex:outputPanel styleClass=&ldquo;requiredInput&rdquo; layout=&ldquo;block&rdquo;></p>
+
+<pre><code>  &lt;apex:outputPanel styleClass="requiredBlock" layout="block"/&gt;
+  &lt;apex:selectList value="{!pref__c}" id="prefcbx" size="1" required="true"&gt;
+      &lt;apex:selectOptions value="{!options}"/&gt;
+  &lt;/apex:selectList&gt;
+</code></pre>
+
+<p>  &lt;/apex:outputPanel>
+&lt;/apex:pageBlockSectionItem>
+```</p>
+
+<p><img src="/images/2017/08/custom_selectlist02.jpg" alt="" /></p>
+
+<h1>apex:message</h1>
+
+<p>このまま空で送信しても内部的にはエラーとなり送信出来ないのだが、エラーの内容が表示されない。<br/>
+そこで、<code>&lt;apex:message&gt;</code>を追加するとエラーは出るようになった。</p>
+
+<p><code>
+&lt;apex:message for="prefcbx" styleClass="errorMsg" /&gt;
+</code></p>
+
+<p>表示は以下。</p>
+
+<p><img src="/images/2017/08/custom_error01.jpg" alt="" /></p>
+
+<p>問題点は以下。</p>
+
+<ul>
+<li>エラー文言が英語</li>
+<li>選択リストのボックスがエラー表示になってない(赤枠がない）</li>
+</ul>
+
+
+<h1>required=true</h1>
+
+<p>この英語のエラーをローカライズして表示させる方法がわからなかった。(<code>lang</code>オプションを設定しても違うようだった）<br/>
+なので、apex内で指定したエラー文言を表示させてやることに。</p>
+
+<p><code>&lt;apex:inputField&gt;</code>タグなどに、<code>required=true</code>をつけると必須のチェックを自動で行ってくれるようになるのだが、このチェックは<code>form</code>の<code>action</code>で指定したメソッドなどの送信処理が走る前にチェックがされてしまうよう。<br/>
+そのため、入力が空だった場合にはこのエラー文言を表示する、などカスタマイズしようにもすることが出来なかった。</p>
+
+<p>よって、<code>required</code>を外してやる。<br/>
+そうすると、必須のエラーも自分で検知してやらないといけなくなる。</p>
+
+<p>```
+if(String.isBlank(pref__c)){</p>
+
+<pre><code>//必須エラー
+</code></pre>
+
+<p>}
+```</p>
+
+<p>そして<code>required=true</code>を外してしまうと、必須の赤い線が<code>apex:inputField</code>タグで表示されなくなってしまうため、全ての項目の必須表示を自前で実装してやる必要がある。</p>
+
+<h1>addError()</h1>
+
+<p>ちなみに、sObjectに<code>addError()</code>メソッドでエラーを追加してやると追加した文言がエラーとして表示されるようになる。<br/>
+ただしこれも上記<code>required=true</code>が入っているとapexの処理が通らないため、<code>required</code>オプションは外しておく。</p>
+
+<p><code>
+pref__c.addError('入力して下さい。');
+</code></p>
+
+<p>上記のように追加すると、以下のように表示がされる。</p>
+
+<blockquote><p><strong>エラー:</strong> 入力して下さい。</p></blockquote>
+
+<h1>apex:outputText</h1>
+
+<p>よって、普通のテキスト表示である、<code>apex:outputText</code>を利用してエラーの有無で出し分けをしてやる。<br/>
+さらに、選択リストの部分には、<code>error</code>クラスをつけてやることでエラー表示の赤枠を出してやることが出来るため、エラー時のみ、クラスを<code>error</code>としてやることにする。</p>
+
+<p>```
+public String errorMessage{get;set;}
+public String errorClass{get;set;}</p>
+
+<p>public PageReference save(){</p>
+
+<pre><code>if(String.isBlank(town.addr1_1name__c)){
+    errorMessage = '都道府県を入力して下さい';
+    errorClass = 'error';
+}
+</code></pre>
+
+<p>}
+```</p>
+
+<p>これでようやく以下のように目的通りの表示が出来た。</p>
+
+<p><img src="/images/2017/08/custom_error02.jpg" alt="" /></p>
+
+<h1>結果</h1>
+
+<p>最終的に標準と全く同じように必須のエラーを表示してやるように調整した場合、以下のようになった。</p>
+
+<h3>apex</h3>
+
+<p>```
+public with sharing class CusotmSelectList_Sample {</p>
+
+<pre><code>public CustomObject__c object{get;set;}
+public String errorMessage{get;set;}
+public String errorClass{get;set;}
+
+public CusotmSelectList_Sample(ApexPages.StandardController controller) {
+    object = new CustomObject__c();
+}
+
+/**
+ * カスタム設定から都道府県のリストを取得する
+ * @type List&lt;SelectOption&gt;
+ */
+public List&lt;SelectOption&gt; getOptions() {
+  Map&lt;String, Prefectures__c&gt; prefs = Prefectures__c.getAll();
+  List&lt;SelectOption&gt; options = new List&lt;SelectOption&gt;();
+  options.add(new SelectOption('', '--なし--'));
+  for(String key : prefs.keySet()){
+      Prefectures__c pref_obj = prefs.get(key);
+      options.add(new SelectOption(pref_obj.Label__c, pref_obj.Label__c));
+  }
+  return options;
+}
+
+public PageReference save(){
+    if(String.isBlank(object.pref__c)){
+        errorMessage = '&lt;strong&gt;エラー:&lt;/strong&gt; 値を入力してください';
+        errorClass = 'error';
+        return null;
+    }
+
+    insert object; //エラーがなければ保存
+    return null; //完了画面とかに遷移させる
+}
+</code></pre>
+
+<p>}
+```</p>
+
+<h3>VF Page</h3>
+
+<p>```
+&lt;apex:page showHeader=&ldquo;true&rdquo; sidebar=&ldquo;true&rdquo; title=&ldquo;作成&rdquo; standardController=&ldquo;CustomObject__c&rdquo; extensions=&ldquo;CusotmSelectList_Sample&rdquo;></p>
+
+<pre><code>&lt;apex:sectionHeader title="レコードの作成" /&gt;
+&lt;apex:form&gt;
+    &lt;apex:pageBlock title="" mode="edit"&gt;
+
+        &lt;apex:pageBlockButtons&gt;
+            &lt;apex:commandButton action="{!save}" value="保存"/&gt;
+        &lt;/apex:pageBlockButtons&gt;
+
+        &lt;apex:pageBlockSection title="内容" columns="1"&gt;
+            &lt;apex:pageBlockSectionItem &gt;
+            &lt;apex:outputLabel value="都道府県" for="prefcbx"/&gt;
+            &lt;apex:outputPanel styleClass="requiredInput" layout="block"&gt;
+                &lt;apex:outputPanel styleClass="requiredBlock" layout="block"/&gt;
+                &lt;apex:selectList value="{!object.pref__c}" id="prefcbx" size="1" styleClass="{!errorClass}"&gt;
+                &lt;apex:selectOptions value="{!options}"/&gt;
+                &lt;/apex:selectList&gt;
+                    &lt;br /&gt;
+                    &lt;apex:outputText value="{!errorMessage}" styleClass="errorMsg" rendered="{!LEN(errorMessage)&gt;0}" escape="false"/&gt;
+            &lt;/apex:outputPanel&gt;
+            &lt;/apex:pageBlockSectionItem&gt;
+        &lt;/apex:pageBlockSection&gt;
+
+    &lt;/apex:pageBlock&gt;
+&lt;/apex:form&gt;
+</code></pre>
+
+<p>&lt;/apex:page>
+```</p>
+
+<h1>結果</h1>
+
+<p>とりあえずこれで一つの項目で、必須表示〜エラー表示まで実装してやることが出来た。<br/>
+ただし、複数項目で実現するためには項目の数だけエラー表示用の変数が必要になるため、クラスにするなど何かしら工夫しないとコードが冗長になりそう。<br/>
+また、バリデーション用のコードもヘルパークラスに分けるなどした方がよいかもしれない。</p>
+
+<h1>参考</h1>
+
+<ul>
+<li><a href="https://developer.salesforce.com/forums/?id=906F0000000AhwaIAC">&#12456;&#12521;&#12540;&#12513;&#12483;&#12475;&#12540;&#12472;&#12395;&#12388;&#12356;&#12390; &ndash; Salesforce Developer Community</a></li>
+<li><a href="https://blog.freedom-man.com/forcecom_apexmessage/">apex:Messageの挙動について調べてみる</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.ja-jp.pages.meta/pages/pages_compref_message.htm">apex:message</a></li>
+<li><a href="https://help.salesforce.com/articleView?id=000006300&amp;language=ja&amp;type=1">Visualforce 上のテキストボックスの下に、カスタムエラーメッセージを表示する方法</a></li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[Visualforce] カスタム設定から選択肢を設定し必須表示する]]></title>
@@ -46,6 +255,7 @@ public List<SelectOption> getOptions() {</p>
 
 <pre><code>Map&lt;String, Prefectures__c&gt; prefs = Prefectures__c.getAll();
 List&lt;SelectOption&gt; options = new List&lt;SelectOption&gt;();
+options.add(new SelectOption('', '--なし--'));
 for(String key : prefs.keySet()){
     Prefectures__c pref_obj = prefs.get(key);
     options.add(new SelectOption(pref_obj.Label__c, pref_obj.Label__c));
@@ -105,6 +315,10 @@ return options;
 
 <p>さらに同じく空だった場合のエラーの表示も自動で挿入してくれなくなるため、これも自分で表示してやる必要がある。<br/>
 が、このエラー表示がかなり難航してるため、解決したら別ポストで。</p>
+
+<p>以下に書きました。<br/>
+↓↓<br/>
+<a href="http://kayakuguri.github.io/blog/2017/08/22/custom-vf-error/">[Visualforce] 必須チェックのエラー文言をカスタマイズする</a></p>
 
 <h1>参考</h1>
 
@@ -373,83 +587,6 @@ public with sharing class SaveCSVSample {</p>
 <p><img src="/images/2017/04/debug_log_level_06.jpg" alt="" /></p>
 
 <p>以上。</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[PostmanでSalesforce REST APIに接続]]></title>
-    <link href="http://kayakuguri.github.io/blog/2016/12/07/sf-rest-api-postman/"/>
-    <updated>2016-12-07T16:27:12+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2016/12/07/sf-rest-api-postman</id>
-    <content type="html"><![CDATA[<p>以前まではRestAPIの接続確認には、<a href="https://apigee.com/providers">Apigee</a>を使用していたのだけれど、TLS1.0無効化の問題の影響からsandboxでは接続できなくなってしまった。<br/>
-なので、代替としてちょっとめんどうだけれど、Postmanで接続してみた。</p>
-
-<!-- more -->
-
-
-<h1>アクセストークンの取得</h1>
-
-<p>ドメインは、sandboxの場合は、 <code>test.salesforce.com</code> 、本番は、 <code>login.salesforce.com</code> となる。<br/>
-今回はsandboxで試す。</p>
-
-<p>Postmanにて、以下の内容で送信。</p>
-
-<blockquote><p>POST : <a href="https://test.salesforce.com/services/oauth2/token">https://test.salesforce.com/services/oauth2/token</a></p></blockquote>
-
-<ul>
-<li><code>grant_type</code> : <code>password</code></li>
-<li><code>client_id</code> : 接続アプリケーションのコンシューマ鍵</li>
-<li><code>client_secret</code> : 接続アプリケーションのコンシューマの秘密</li>
-<li><code>username</code> : 使用するアカウントのユーザ名</li>
-<li><code>password</code> : パスワード。必要な場合は、パスワード+セキュリティトークン</li>
-</ul>
-
-
-<p><img src="/images/2016/12/sf_api_postman_01.jpg" alt="" /></p>
-
-<p>正しくログイン出来ると以下のようにJSONが返ってくる。</p>
-
-<p><code>
-{
-  "access_token": "xxx",
-  "instance_url": "https://xxxx.salesforce.com",
-  "id": "https://test.salesforce.com/id/xxxx/xxxx",
-  "token_type": "Bearer",
-  "issued_at": "xxx",
-  "signature": "xxx"
-}
-</code></p>
-
-<p><code>access_token</code>と<code>instance_url</code>だけ必要。</p>
-
-<h1>APIに接続</h1>
-
-<p>例として、オブジェクトの一覧を取得してみる。<br/>
-URLのドメイン部分を先程取得した、 <code>instance_url</code> を使用する。</p>
-
-<blockquote><p>GET : <a href="https://xxx.salesforce.com/services/data/v24.0/sobjects">https://xxx.salesforce.com/services/data/v24.0/sobjects</a></p></blockquote>
-
-<p>ヘッダーに以下を追加。<br/>
-<code>ACCESS_TOKEN</code>には先程取得した、<code>access_token</code>を使用する。</p>
-
-<ul>
-<li><code>Authorization</code> : <code>Bearer ACCESS_TOKEN</code></li>
-</ul>
-
-
-<p><img src="/images/2016/12/sf_api_postman_02.jpg" alt="" /></p>
-
-<p>カスタムRestAPIの場合は以下のURLになる。<br/>
-<code>hoge/hoge</code>が<code>@RestResource(urlMapping='/hoge/hoge')</code>で指定したURLとなる。</p>
-
-<blockquote><p><a href="https://xxx.salesforce.com/services/apexrest/hoge/hoge">https://xxx.salesforce.com/services/apexrest/hoge/hoge</a></p></blockquote>
-
-<h1>参考</h1>
-
-<ul>
-<li><a href="http://sfdcbeginner.com/how-to-test-salesforce-rest-api.html">HOW TO TEST SALESFORCE REST API</a></li>
-</ul>
-
 ]]></content>
   </entry>
   
