@@ -4,7 +4,7 @@
   <title><![CDATA[Category: php | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/php/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2017-08-22T15:13:31+09:00</updated>
+  <updated>2017-09-21T15:25:46+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,73 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[heroku]PostgresとRedisの環境設定]]></title>
+    <link href="http://kayakuguri.github.io/blog/2017/09/21/heroku-postgres-redis/"/>
+    <updated>2017-09-21T15:16:32+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2017/09/21/heroku-postgres-redis</id>
+    <content type="html"><![CDATA[<p>LaravelをHerokuで使用する際に、Heroku PostgresとHeroku Redisの接続情報を環境変数から取得する設定のメモ。</p>
+
+<!-- more -->
+
+
+<h1>概要</h1>
+
+<p>改めて。<br/>
+Herokuでは標準のadd-onとして<a href="https://elements.heroku.com/addons/heroku-postgresql">Heroku Postgres</a>と<a href="https://elements.heroku.com/addons/heroku-redis">Heroku Redis</a>が用意されている。<br/>
+クレジットカードさえ登録していれば無料で使えるので便利。</p>
+
+<p>この接続情報はアドオンを登録した際に自動的に以下のような変数で登録がされる。</p>
+
+<p><strong>Postgres</strong><br/>
+<code>DATABASE_URL</code> = <code>postgres://password:username@hostname.amazonaws.com:5432/database</code></p>
+
+<p><strong>Redis</strong><br/>
+<code>REDIS_URL</code> = <code>redis://h:password@hostname.amazonaws.com:port_no</code></p>
+
+<p>各種情報がURL形式で組み込まれているのだが、間違ってもこれを自分でバラしてそれぞれ個別に環境変数に入れる、などとしてはいけない。<br/>
+というのも、この接続情報はPostgresやRedisにメンテナンスが入った際に前の接続情報は破棄され、新しい情報が同じ環境変数で設定されるため、<br/>
+自前でバラして作ってしまうとその変更した情報に対応できなくなり、接続エラーとなってしまう。</p>
+
+<p>よって、必ず自動でセットされる、<code>DATABASE_URL</code>や<code>REDIS_URL</code>を使うこと。<br/>
+これはHerokuを使う際には常識として覚えておくこと。</p>
+
+<h1>取得</h1>
+
+<p>というわけで、それぞれの値を取得したURLからパースしてLaravel用に環境変数にセットする。<br/>
+以下のように環境変数があればそれをパースして環境変数としてセットしてやるようにするのがスマートっぽい。<br/>
+これだとローカルでは個別に<code>.env</code>ファイルで設定した値を使用してやることが出来る。</p>
+
+<p><code>/config/database.php</code> の冒頭に書く。</p>
+
+<p>```
+//Postgres
+if (getenv(&lsquo;DATABASE_URL&rsquo;)) {</p>
+
+<pre><code>$url = parse_url(getenv('DATABASE_URL'));
+putenv('DB_HOST='.$url['host']);
+putenv('DB_PORT='.$url['port']);
+putenv('DB_DATABASE='.substr($url["path"], 1));
+putenv('DB_USERNAME='.$url["user"]);
+putenv('DB_PASSWORD='.$url['pass']);
+</code></pre>
+
+<p>}</p>
+
+<p>//Redis
+if (getenv(&lsquo;REDIS_URL&rsquo;)) {</p>
+
+<pre><code>$url = parse_url(getenv('REDIS_URL'));
+putenv('REDIS_HOST='.$url['host']);
+putenv('REDIS_PORT='.$url['port']);
+putenv('REDIS_PASSWORD='.$url['pass']);
+</code></pre>
+
+<p>}
+```</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[Scotchbox]Ubuntuの環境でのphp.ini]]></title>
@@ -447,57 +514,6 @@ $response = json_decode($output, true);</p>
 <li><a href="http://tkengo.github.io/blog/2015/12/01/https-details/">理解してるつもりの SSL/TLS でも、もっと理解したら面白かった話 &middot; けんごのお屋敷</a></li>
 </ul>
 
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[UbuntuでApacheの環境変数を設定する方法]]></title>
-    <link href="http://kayakuguri.github.io/blog/2016/04/22/ubuntu-env/"/>
-    <updated>2016-04-22T16:21:16+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2016/04/22/ubuntu-env</id>
-    <content type="html"><![CDATA[<p><a href="http://kayakuguri.github.io/blog/2015/05/26/vagrant-env/">以前に書いた環境変数の設定方法</a>は、centOS用だったので(後で知った）、ubuntuでの方法も書いておく。<br/>
-といってもパスのメモだけど。</p>
-
-<!-- more -->
-
-
-<p>Ubuntuでの設定が必要になった理由としては、いつも愛用している<a href="https://box.scotch.io/">Scotchbox</a>がUbuntuのディストリビューションだったため。</p>
-
-<h1>設定ファイルのパス</h1>
-
-<p>以下。</p>
-
-<p><code>
-/etc/apache2/envvars
-</code></p>
-
-<p>このファイルの末尾などに、以下のように追記する。</p>
-
-<p><code>
-export HOGE=xxx
-</code></p>
-
-<h1>apatch再起動</h1>
-
-<p><code>service</code>で再起動。</p>
-
-<p><code>
-$ sudo service apache2 restart
-</code></p>
-
-<p>以上で設定完了。</p>
-
-<h1>取得</h1>
-
-<p>取得は通常通り、<code>getenv</code>で可能。</p>
-
-<p><code>
-getenv('HOGE');
-</code></p>
-
-<h1>参考</h1>
-
-<p><a href="http://www.yamamo10.jp/yamamoto/comp/home_server/ubuntu_server/apache/index.php">自宅サーバー(ubuntu server Apache)</a></p>
 ]]></content>
   </entry>
   

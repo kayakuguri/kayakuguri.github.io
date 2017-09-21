@@ -4,7 +4,7 @@
   <title><![CDATA[Category: heroku | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/heroku/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2017-08-22T15:13:31+09:00</updated>
+  <updated>2017-09-21T15:25:46+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,73 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[heroku]PostgresとRedisの環境設定]]></title>
+    <link href="http://kayakuguri.github.io/blog/2017/09/21/heroku-postgres-redis/"/>
+    <updated>2017-09-21T15:16:32+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2017/09/21/heroku-postgres-redis</id>
+    <content type="html"><![CDATA[<p>LaravelをHerokuで使用する際に、Heroku PostgresとHeroku Redisの接続情報を環境変数から取得する設定のメモ。</p>
+
+<!-- more -->
+
+
+<h1>概要</h1>
+
+<p>改めて。<br/>
+Herokuでは標準のadd-onとして<a href="https://elements.heroku.com/addons/heroku-postgresql">Heroku Postgres</a>と<a href="https://elements.heroku.com/addons/heroku-redis">Heroku Redis</a>が用意されている。<br/>
+クレジットカードさえ登録していれば無料で使えるので便利。</p>
+
+<p>この接続情報はアドオンを登録した際に自動的に以下のような変数で登録がされる。</p>
+
+<p><strong>Postgres</strong><br/>
+<code>DATABASE_URL</code> = <code>postgres://password:username@hostname.amazonaws.com:5432/database</code></p>
+
+<p><strong>Redis</strong><br/>
+<code>REDIS_URL</code> = <code>redis://h:password@hostname.amazonaws.com:port_no</code></p>
+
+<p>各種情報がURL形式で組み込まれているのだが、間違ってもこれを自分でバラしてそれぞれ個別に環境変数に入れる、などとしてはいけない。<br/>
+というのも、この接続情報はPostgresやRedisにメンテナンスが入った際に前の接続情報は破棄され、新しい情報が同じ環境変数で設定されるため、<br/>
+自前でバラして作ってしまうとその変更した情報に対応できなくなり、接続エラーとなってしまう。</p>
+
+<p>よって、必ず自動でセットされる、<code>DATABASE_URL</code>や<code>REDIS_URL</code>を使うこと。<br/>
+これはHerokuを使う際には常識として覚えておくこと。</p>
+
+<h1>取得</h1>
+
+<p>というわけで、それぞれの値を取得したURLからパースしてLaravel用に環境変数にセットする。<br/>
+以下のように環境変数があればそれをパースして環境変数としてセットしてやるようにするのがスマートっぽい。<br/>
+これだとローカルでは個別に<code>.env</code>ファイルで設定した値を使用してやることが出来る。</p>
+
+<p><code>/config/database.php</code> の冒頭に書く。</p>
+
+<p>```
+//Postgres
+if (getenv(&lsquo;DATABASE_URL&rsquo;)) {</p>
+
+<pre><code>$url = parse_url(getenv('DATABASE_URL'));
+putenv('DB_HOST='.$url['host']);
+putenv('DB_PORT='.$url['port']);
+putenv('DB_DATABASE='.substr($url["path"], 1));
+putenv('DB_USERNAME='.$url["user"]);
+putenv('DB_PASSWORD='.$url['pass']);
+</code></pre>
+
+<p>}</p>
+
+<p>//Redis
+if (getenv(&lsquo;REDIS_URL&rsquo;)) {</p>
+
+<pre><code>$url = parse_url(getenv('REDIS_URL'));
+putenv('REDIS_HOST='.$url['host']);
+putenv('REDIS_PORT='.$url['port']);
+putenv('REDIS_PASSWORD='.$url['pass']);
+</code></pre>
+
+<p>}
+```</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[カスタムドメイン取得とLet's Encrypt証明書とHeroku SSLと]]></title>
@@ -769,102 +836,6 @@ RewriteRule ^/cgi-bin/hoge/hoge.php$ /abc/hoge/hoge.php [R=301,L]
 <p>cgi-binディレクトリからリダイレクト、というのは実際の要件としてはめったにあることではないけれど、herokuのPHPの設定として、confファイルをカスタマイズしたい要件はあると思う。<br/>
 実際、htaccessでのリダイレクトより、confファイルでのリダイレクトのほうが早いようなので出来るならそっちの方がよかったりするだろうし。<br/>
 herokuは簡単に利用出来る反面、設定が触れずガチガチだと思われガチだけど、結構設定はいじれたりする。</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[heroku] タイムゾーンの設定各種]]></title>
-    <link href="http://kayakuguri.github.io/blog/2016/09/01/heroku-timezone/"/>
-    <updated>2016-09-01T10:02:04+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2016/09/01/heroku-timezone</id>
-    <content type="html"><![CDATA[<p>heroku環境でタイムゾーンの設定が色々あったのでまとめ。</p>
-
-<!-- more -->
-
-
-<h1>サーバー時間</h1>
-
-<p>まずは、herokuのサーバー時間のタイムゾーン設定。<br/>
-これは簡単で、環境変数に入れてやるだけ。</p>
-
-<blockquote><p>TZ : Asia/Tokyo</p></blockquote>
-
-<p>コマンドで入れる場合は以下。</p>
-
-<p><code>
-$ heroku config:add TZ=Asia/Tokyo -a APP_NAME
-</code></p>
-
-<p>きちんと反映されているかどうかは下記コマンドから参照可能。<br/>
-意図した時間が返ってきてればOK。</p>
-
-<p><code>
-$ heroku run date -a APP_NAME
-Running date on ⬢ APP_NAME... up, run.1198
-Thu Sep  1 10:06:57 JST 2016
-</code></p>
-
-<h2>参考</h2>
-
-<ul>
-<li><a href="http://blog.skktmlab.info/blog/2015_03_02_2">Herokuでホスティングしているブログのタイムゾーンを設定する</a></li>
-</ul>
-
-
-<h1>PHP</h1>
-
-<p>PHPの設定でタイムゾーンを指定する場合。<br/>
-通常は、 <code>php.ini</code> で設定するが、herokuの場合は、 <code>.user.ini</code> ファイルを使う。</p>
-
-<p>ドキュメントルート直下に <code>.user.ini</code> ファイルを設置。<br/>
-中に以下を記述。</p>
-
-<p><code>
-date.timezone = "Asia/Tokyo"
-</code></p>
-
-<p>この設定ではその他にはアップロードの最大容量なんかを指定する場合が多い。<br/>
-参考 : <a href="http://kayakuguri.github.io/blog/2014/02/18/change-max-filesize/">[PHP][heroku]upload_max_filesizeを変更する &ndash; KayaMemo</a></p>
-
-<h2>参考</h2>
-
-<ul>
-<li><a href="http://qiita.com/hiro_y/items/bc631a27c9701f81a4f9#runtime-settings">HerokuでPHPを使うときに気を付けるところ &ndash; Qiita</a></li>
-<li><a href="https://devcenter.heroku.com/articles/custom-php-settings#php-runtime-settings-ini-settings">Customizing Web Server and Runtime Settings for PHP | Heroku Dev Center</a></li>
-</ul>
-
-
-<h1>WordPress</h1>
-
-<p>最後はherokuと直接は関係ないけれど、wordpressのタイムゾーン。<br/>
-WordPressのタイムゾーンはデフォルトで標準時になるようにしてある、とのこと。<br/>
-しかしこれは設定で変更するものではなく、取得する際に調整するもののよう。</p>
-
-<p>一番簡易なものとしては、 <code>date</code> 関数で取得していた箇所をWordPress関数である、 <code>date_i18n</code> を利用して取得するようにする、というもの。<br/>
-これだけで、日本時間で取得できるようになる。</p>
-
-<p><code>
-date_i18n('Y-m-d H:i:s');
-</code></p>
-
-<p>その他では、 <code>datetime</code> クラスを使用してタイムゾーンを指定する方法もあり。</p>
-
-<p><code>
-$now = new DateTime('', new DateTimeZone('Asia/Tokyo'));
-$now-&gt;format('Y-m-d H:i:s');
-</code></p>
-
-<h2>参考</h2>
-
-<ul>
-<li><a href="http://qiita.com/yousan/items/a385f794a9bb433aecbb">WordPressで現在時刻を利用すると9時間ずれてしまう問題 &ndash; Qiita</a></li>
-</ul>
-
-
-<h1>まとめ</h1>
-
-<p>WordPressはともかく、herokuとPHPのタイムゾーン設定はherokuでPHPを使うのなら、デフォルトで設定しておいた方が後々間違いがなさそう。<br/>
-環境構築の際にまず設定しておくとよさげ。</p>
 ]]></content>
   </entry>
   

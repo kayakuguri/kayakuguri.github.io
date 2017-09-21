@@ -4,7 +4,7 @@
   <title><![CDATA[Category: laravel | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/laravel/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2017-08-22T15:13:31+09:00</updated>
+  <updated>2017-09-21T15:25:46+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,73 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[heroku]PostgresとRedisの環境設定]]></title>
+    <link href="http://kayakuguri.github.io/blog/2017/09/21/heroku-postgres-redis/"/>
+    <updated>2017-09-21T15:16:32+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2017/09/21/heroku-postgres-redis</id>
+    <content type="html"><![CDATA[<p>LaravelをHerokuで使用する際に、Heroku PostgresとHeroku Redisの接続情報を環境変数から取得する設定のメモ。</p>
+
+<!-- more -->
+
+
+<h1>概要</h1>
+
+<p>改めて。<br/>
+Herokuでは標準のadd-onとして<a href="https://elements.heroku.com/addons/heroku-postgresql">Heroku Postgres</a>と<a href="https://elements.heroku.com/addons/heroku-redis">Heroku Redis</a>が用意されている。<br/>
+クレジットカードさえ登録していれば無料で使えるので便利。</p>
+
+<p>この接続情報はアドオンを登録した際に自動的に以下のような変数で登録がされる。</p>
+
+<p><strong>Postgres</strong><br/>
+<code>DATABASE_URL</code> = <code>postgres://password:username@hostname.amazonaws.com:5432/database</code></p>
+
+<p><strong>Redis</strong><br/>
+<code>REDIS_URL</code> = <code>redis://h:password@hostname.amazonaws.com:port_no</code></p>
+
+<p>各種情報がURL形式で組み込まれているのだが、間違ってもこれを自分でバラしてそれぞれ個別に環境変数に入れる、などとしてはいけない。<br/>
+というのも、この接続情報はPostgresやRedisにメンテナンスが入った際に前の接続情報は破棄され、新しい情報が同じ環境変数で設定されるため、<br/>
+自前でバラして作ってしまうとその変更した情報に対応できなくなり、接続エラーとなってしまう。</p>
+
+<p>よって、必ず自動でセットされる、<code>DATABASE_URL</code>や<code>REDIS_URL</code>を使うこと。<br/>
+これはHerokuを使う際には常識として覚えておくこと。</p>
+
+<h1>取得</h1>
+
+<p>というわけで、それぞれの値を取得したURLからパースしてLaravel用に環境変数にセットする。<br/>
+以下のように環境変数があればそれをパースして環境変数としてセットしてやるようにするのがスマートっぽい。<br/>
+これだとローカルでは個別に<code>.env</code>ファイルで設定した値を使用してやることが出来る。</p>
+
+<p><code>/config/database.php</code> の冒頭に書く。</p>
+
+<p>```
+//Postgres
+if (getenv(&lsquo;DATABASE_URL&rsquo;)) {</p>
+
+<pre><code>$url = parse_url(getenv('DATABASE_URL'));
+putenv('DB_HOST='.$url['host']);
+putenv('DB_PORT='.$url['port']);
+putenv('DB_DATABASE='.substr($url["path"], 1));
+putenv('DB_USERNAME='.$url["user"]);
+putenv('DB_PASSWORD='.$url['pass']);
+</code></pre>
+
+<p>}</p>
+
+<p>//Redis
+if (getenv(&lsquo;REDIS_URL&rsquo;)) {</p>
+
+<pre><code>$url = parse_url(getenv('REDIS_URL'));
+putenv('REDIS_HOST='.$url['host']);
+putenv('REDIS_PORT='.$url['port']);
+putenv('REDIS_PASSWORD='.$url['pass']);
+</code></pre>
+
+<p>}
+```</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[LaravelでCORSに対応する]]></title>
@@ -620,168 +687,6 @@ Forrest::custom(&lsquo;/myEndpoint&rsquo;, [</p>
 
 <ul>
 <li><a href="https://github.com/omniphx/forrest">omniphx/forrest: Salesforce.com REST API Client for Laravel 5</a></li>
-</ul>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Laravel HomesteadのPostgreSQLにPosticoから接続する]]></title>
-    <link href="http://kayakuguri.github.io/blog/2016/06/09/homestead-postgres-via-homestead/"/>
-    <updated>2016-06-09T14:56:23+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2016/06/09/homestead-postgres-via-homestead</id>
-    <content type="html"><![CDATA[<p>まとまって情報がなかったのでメモ。</p>
-
-<!-- more -->
-
-
-<h1>SSH</h1>
-
-<p>ssh接続する際のユーザー名・パスワードは、デフォルトでは、<code>vagrant/vagrant</code>のよう。
-ユーザー名はホスト名とは別で、vagrantを立ち上げた状態で以下のコマンドで確認出来た。</p>
-
-<p><code>
-$ vagrant ssh-config
-Host default
-  HostName 127.0.0.1
-  User vagrant
-  Port 2222
-  UserKnownHostsFile /dev/null
-  StrictHostKeyChecking no
-  PasswordAuthentication no
-  IdentityFile /Users/USER_NAME/Vagrant/app_folder/.vagrant/machines/default/virtualbox/private_key
-  IdentitiesOnly yes
-  LogLevel FATAL
-  ForwardAgent yes
-</code></p>
-
-<p>この中の、<code>User vagrant</code>という部分。</p>
-
-<p>SSH Hostは、<code>Homestead.yaml</code>で指定したip。
-デフォルトは、<code>192.168.10.10</code>だと思う。</p>
-
-<p><code>
-ip: "192.168.10.10"
-</code></p>
-
-<h1>Postgres</h1>
-
-<p>Postgresはデフォルトでは以下の設定になっている。</p>
-
-<table>
-<thead>
-<tr>
-<th></th>
-<th align="left"> 項目 </th>
-<th align="left"> 内容 </th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td></td>
-<td align="left">ホスト名 </td>
-<td align="left"> localhost </td>
-</tr>
-<tr>
-<td></td>
-<td align="left"> DB名 </td>
-<td align="left"> homestead </td>
-</tr>
-<tr>
-<td></td>
-<td align="left"> ユーザー名 </td>
-<td align="left"> homestead </td>
-</tr>
-<tr>
-<td></td>
-<td align="left"> パスワード </td>
-<td align="left"> secret </td>
-</tr>
-</tbody>
-</table>
-
-
-<h1>Postico</h1>
-
-<p>Posticoから接続する際には、Optionsから、<code>Connect via SSH</code>を選択してSSH接続設定をしておく。</p>
-
-<table>
-<thead>
-<tr>
-<th></th>
-<th align="left"> 項目 </th>
-<th align="left"> 内容 </th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td></td>
-<td align="left"> Nickname </td>
-<td align="left"> (なんでも) </td>
-</tr>
-<tr>
-<td></td>
-<td align="left"> Host </td>
-<td align="left"> localhost (デフォルト) </td>
-</tr>
-<tr>
-<td></td>
-<td align="left"> Port </td>
-<td align="left"> 5432 (デフォルト) </td>
-</tr>
-<tr>
-<td></td>
-<td align="left"> User </td>
-<td align="left"> homestead </td>
-</tr>
-<tr>
-<td></td>
-<td align="left"> Password </td>
-<td align="left"> secret </td>
-</tr>
-<tr>
-<td></td>
-<td align="left"> Database </td>
-<td align="left"> homestead </td>
-</tr>
-<tr>
-<td></td>
-<td align="left"> SSH Host </td>
-<td align="left"> 192.168.10.10 </td>
-</tr>
-<tr>
-<td></td>
-<td align="left"> Port </td>
-<td align="left"> 22 (デフォルト) </td>
-</tr>
-<tr>
-<td></td>
-<td align="left"> User </td>
-<td align="left"> vagrant </td>
-</tr>
-<tr>
-<td></td>
-<td align="left"> Password </td>
-<td align="left"> vagrant </td>
-</tr>
-<tr>
-<td></td>
-<td align="left"> Private Key </td>
-<td align="left"> なし </td>
-</tr>
-</tbody>
-</table>
-
-
-<p><img src="/images/2016/06/postico_homestead.jpg" alt="" /></p>
-
-<p>これで接続出来た。</p>
-
-<h1>参考</h1>
-
-<ul>
-<li><a href="https://laravel.com/docs/5.1/homestead">Laravel Homestead</a></li>
-<li><a href="http://qiita.com/megane42/items/1d8ae7444d8c1b10bbd7">Vagrant で作った VM にやってはいけない2つのこと &ndash; Qiita</a></li>
 </ul>
 
 ]]></content>

@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2017-08-22T15:13:31+09:00</updated>
+  <updated>2017-09-21T15:25:46+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,85 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[heroku]PostgresとRedisの環境設定]]></title>
+    <link href="http://kayakuguri.github.io/blog/2017/09/21/heroku-postgres-redis/"/>
+    <updated>2017-09-21T15:16:32+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2017/09/21/heroku-postgres-redis</id>
+    <content type="html"><![CDATA[<p>LaravelをHerokuで使用する際に、Heroku PostgresとHeroku Redisの接続情報を環境変数から取得する設定のメモ。</p>
+
+<!-- more -->
+
+
+<h1>概要</h1>
+
+<p>改めて。<br/>
+Herokuでは標準のadd-onとして<a href="https://elements.heroku.com/addons/heroku-postgresql">Heroku Postgres</a>と<a href="https://elements.heroku.com/addons/heroku-redis">Heroku Redis</a>が用意されている。<br/>
+クレジットカードさえ登録していれば無料で使えるので便利。</p>
+
+<p>この接続情報はアドオンを登録した際に自動的に以下のような変数で登録がされる。</p>
+
+<p><strong>Postgres</strong><br/>
+<code>DATABASE_URL</code> = <code>postgres://password:username@hostname.amazonaws.com:5432/database</code></p>
+
+<p><strong>Redis</strong><br/>
+<code>REDIS_URL</code> = <code>redis://h:password@hostname.amazonaws.com:port_no</code></p>
+
+<p>各種情報がURL形式で組み込まれているのだが、間違ってもこれを自分でバラしてそれぞれ個別に環境変数に入れる、などとしてはいけない。<br/>
+というのも、この接続情報はPostgresやRedisにメンテナンスが入った際に前の接続情報は破棄され、新しい情報が同じ環境変数で設定されるため、<br/>
+自前でバラして作ってしまうとその変更した情報に対応できなくなり、接続エラーとなってしまう。</p>
+
+<p>よって、必ず自動でセットされる、<code>DATABASE_URL</code>や<code>REDIS_URL</code>を使うこと。<br/>
+これはHerokuを使う際には常識として覚えておくこと。</p>
+
+<h1>取得</h1>
+
+<p>というわけで、それぞれの値を取得したURLからパースしてLaravel用に環境変数にセットする。<br/>
+以下のように環境変数があればそれをパースして環境変数としてセットしてやるようにするのがスマートっぽい。<br/>
+これだとローカルでは個別に<code>.env</code>ファイルで設定した値を使用してやることが出来る。</p>
+
+<p><code>/config/database.php</code> の冒頭に書く。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>//Postgres
+</span><span class='line'>if (getenv('DATABASE_URL')) {
+</span><span class='line'>    $url = parse_url(getenv('DATABASE_URL'));
+</span><span class='line'>    putenv('DB_HOST='.$url['host']);
+</span><span class='line'>    putenv('DB_PORT='.$url['port']);
+</span><span class='line'>    putenv('DB_DATABASE='.substr($url["path"], 1));
+</span><span class='line'>    putenv('DB_USERNAME='.$url["user"]);
+</span><span class='line'>    putenv('DB_PASSWORD='.$url['pass']);
+</span><span class='line'>}
+</span><span class='line'>
+</span><span class='line'>//Redis
+</span><span class='line'>if (getenv('REDIS_URL')) {
+</span><span class='line'>    $url = parse_url(getenv('REDIS_URL'));
+</span><span class='line'>    putenv('REDIS_HOST='.$url['host']);
+</span><span class='line'>    putenv('REDIS_PORT='.$url['port']);
+</span><span class='line'>    putenv('REDIS_PASSWORD='.$url['pass']);
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[Visualforce] 必須チェックのエラー文言をカスタマイズする]]></title>
@@ -3416,163 +3495,6 @@ localeは日本版の場合は、<code>ja</code>となる。(<code>ja_JP</code>�
 <ul>
 <li><a href="https://box.scotch.io/">Scotch Box ♥ A Vagrant LAMP Stack That Just Works</a></li>
 <li><a href="https://github.com/flurinduerst/WPDistillery#setup">flurinduerst/WPDistillery: WordPress Setup runner for Scotch Box</a></li>
-</ul>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Chatter in Apxを利用してコメントをメンション付きで投稿する]]></title>
-    <link href="http://kayakuguri.github.io/blog/2016/10/17/coonect-api-post-comment/"/>
-    <updated>2016-10-17T18:37:58+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2016/10/17/coonect-api-post-comment</id>
-    <content type="html"><![CDATA[<p>タイトル通り。<br/>
-ChatterのコメントをApex経由で<code>@</code>メンション付きで投稿する。</p>
-
-<!-- more -->
-
-
-<p>Chatterコメントは、<code>FeedComment</code>というオブジェクト名で作成されているので、
-このオブジェクトにレコードをインサートすればコメントは作成出来る。
-しかしその場合はコメントにそのまま<code>@ユーザ名</code>とつけてもメンションとして認識されない。<br/>
-そのため、メンションをapex経由でつけるには、Chatter in Apex、<code>ConnectAip</code>を使用する。</p>
-
-<h1>コメントの投稿</h1>
-
-<p>Chatter in Apexのドキュメントは以下。(英語)<br/>
-<a href="https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/connectAPI_overview.htm">Chatter in Apex</a></p>
-
-<p>この中で、コメントの投稿には、<code>postCommentToFeedElement</code>メソッドを使う。<br/>
-以下のサンプルがほぼそのまま。<br/>
-<a href="https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/connectapi_examples_post_comment_feed_element_2.htm">Post a Comment with a Mention</a></p>
-
-<p>以下、順番に組み立ててみる。</p>
-
-<h2>postCommentToFeedElement</h2>
-
-<p><code>postCommentToFeedElement</code>の引数は以下となっている。</p>
-
-<ol>
-<li><code>communityId</code><br/>
-投稿するユーザーのコミュニティのID。<code>null</code>可。</li>
-<li><code>feedElementId</code><br/>
-親となる投稿(<code>FeedItem</code>)のSFID</li>
-<li><code>comment</code><br/>
-投稿するコメントの情報</li>
-<li><code>feedElementFileUpload</code><br/>
-投稿するファイルのバイナリ情報</li>
-</ol>
-
-
-<h2>(第二引数)comment</h2>
-
-<p><code>ConnectApi.CommentInput</code>型。<br/>
-<a href="https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_connectapi_input_comment.htm#apex_connectapi_input_comment">ConnectApi.CommentInput Class</a></p>
-
-<p><code>body</code>メソッドに本文などの情報を入力する</p>
-
-<h3>body</h3>
-
-<p><code>ConnectApi.MessageBodyInput</code>型<br/>
-<a href="https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_connectapi_input_msgBody.htm">ConnectApi.MessageBodyInput Class</a></p>
-
-<p>メソッドは、<code>mesageSegments</code>のみ。</p>
-
-<h3>mesageSegments</h3>
-
-<p><code>List&lt;ConnectApi.MessageSegmentInput&gt;</code>型<br/>
-<code>ConnectApi.MessageSegmentInput</code>クラスは、入力したい内容の型のクラスが継承している。<br/>
-テキストの入力内容は、<code>ConnectApi.TextSegmentInput</code>クラスを使用する。<br/>
-メンションの場合は、<code>ConnectApi.MentionSegmentInput</code>クラス、となっている。</p>
-
-<p><a href="https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_connectapi_input_messageSegmentInput.htm">ConnectApi.MessageSegmentInput Class</a></p>
-
-<h3>ConnectApi.TextSegmentInput</h3>
-
-<p><code>text</code>メソッドのみ。ここに投稿する本文を入れる。<br/>
-<a href="https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_connectapi_input_TxtMsgSeg.htm">ConnectApi.TextSegmentInput Class</a></p>
-
-<h3>ConnectApi.MentionSegmentInput</h3>
-
-<p><code>id</code>メソッドにメンションを送りたいユーザーのIDを入力する。
-もしくは、APIバージョン38以降なら、<code>username</code>メソッドでユーザー名も利用出来るよう。<br/>
-<a href="https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_connectapi_input_mentionMsgSeg.htm">ConnectApi.MentionSegmentInput Class</a></p>
-
-<h3>コード</h3>
-
-<p>一通りのコード全文は以下。<br/>
-引数で、入力内容、親の投稿ID、メンションをつけるユーザのIDを渡すようにしている。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>/**
-</span><span class='line'> * コメントを投稿する
-</span><span class='line'> * 
-</span><span class='line'> * @param body String 本文
-</span><span class='line'> * @param feedId Id 親の投稿ID
-</span><span class='line'> * @param userId Id メンションを付ける
-</span><span class='line'> * @return ConnectApi.Comment コメントクラス
-</span><span class='line'> */
-</span><span class='line'>public static void doPostComment(String body, Id feedId, Id userId){
-</span><span class='line'>  //子の投稿を作る
-</span><span class='line'>  ConnectApi.CommentInput commentInput = new ConnectApi.CommentInput();
-</span><span class='line'>  ConnectApi.MessageBodyInput messageBodyInput = new ConnectApi.MessageBodyInput();
-</span><span class='line'>  messageBodyInput.messageSegments = new List&lt;ConnectApi.MessageSegmentInput&gt;();
-</span><span class='line'>  
-</span><span class='line'>  //本文を作る
-</span><span class='line'>  ConnectApi.TextSegmentInput textSegmentInput = new ConnectApi.TextSegmentInput();
-</span><span class='line'>  textSegmentInput.text = body;
-</span><span class='line'>  messageBodyInput.messageSegments.add(textSegmentInput);
-</span><span class='line'>  //メンションを作る
-</span><span class='line'>  ConnectApi.MentionSegmentInput mentionSegmentInput = new ConnectApi.MentionSegmentInput();
-</span><span class='line'>  mentionSegmentInput.id = userId;
-</span><span class='line'>  messageBodyInput.messageSegments.add(mentionSegmentInput);
-</span><span class='line'>
-</span><span class='line'>  //投稿として追加
-</span><span class='line'>  commentInput.body = messageBodyInput;
-</span><span class='line'>  
-</span><span class='line'>  //コメントを投稿
-</span><span class='line'>  ConnectApi.Comment comment = ConnectApi.ChatterFeeds.postCommentToFeedElement(null, feedId, commentInput, null);
-</span><span class='line'>  return comment;
-</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
-
-
-<p>返却される<code>ConnectApi.Comment</code>クラスは以下。<br/>
-<a href="https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_connectapi_output_comment.htm">ConnectApi.Comment Class</a></p>
-
-<h2>参考</h2>
-
-<ul>
-<li><a href="https://help.salesforce.com/apex/HTViewSolution?id=000199689&amp;language=ja">Apexからの@メンションについて</a></li>
-<li><a href="http://qiita.com/tyoshikawa1106/items/c68f8fbcd657a1a89ef2">Connect APIとTest Class &ndash; Qiita</a></li>
 </ul>
 
 ]]></content>
