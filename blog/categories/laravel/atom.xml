@@ -4,7 +4,7 @@
   <title><![CDATA[Category: laravel | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/laravel/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2017-09-21T15:41:12+09:00</updated>
+  <updated>2017-09-22T12:35:06+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,80 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[Laravel] キューのsleepとtimeoutの関係]]></title>
+    <link href="http://kayakuguri.github.io/blog/2017/09/22/laravel-queue-sleep-timeout/"/>
+    <updated>2017-09-22T12:16:53+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2017/09/22/laravel-queue-sleep-timeout</id>
+    <content type="html"><![CDATA[<p>Laravelのキューを実際に使ってみた際にちょっと変な挙動だと思ったメモ。</p>
+
+<!-- more -->
+
+
+<h1>sleep</h1>
+
+<p>キューを実行するコマンドのオプションに<code>sleep</code>というものがある。<br/>
+コマンドのヘルプの説明は以下。</p>
+
+<p><code>
+--sleep[=SLEEP]      Number of seconds to sleep when no job is available [default: "3"]
+</code></p>
+
+<p>ジョブがない場合に次のジョブを取得するまでにスリープする秒数の設定、とのこと。<br/>
+例えばこれをゼロにすると、常にジョブを取得するためのポーリングが実行され続けるため、ジョブの保存先をキューイングサービスなどにしている場合に、ものすごい数のキュー取得リクエストが飛んでしまう。<br/>
+それを避けるためのスリープ時間の設定。</p>
+
+<h1>timeout</h1>
+
+<p>処理の<code>timeout</code>オプション。</p>
+
+<p><code>
+--timeout[=TIMEOUT]  The number of seconds a child process can run [default: "60"]
+</code></p>
+
+<p>処理に指定した時間以上の時間がかかった場合はタイムアウトとする設定。デフォルトは60秒。</p>
+
+<h1>sleepとtimeoutの関係</h1>
+
+<p>sleepの時間を長く設定すると、タイムアウトエラーが発生してしまう。<br/>
+例えば以下。</p>
+
+<p><code>
+php artisan queue:listen --sleep=120 --timeout=60
+</code></p>
+
+<p>というのも、次のキュー取得を実行するまでのスリープ時間もタイムアウトの対象の時間に含まれてしまう、よう。<br/>
+なので必ずsleep時間よりもtimeoutの時間を多く設定してやらないといけない。<br/>
+上記の場合だと<code>sleep</code>を120秒にしてるので、<code>timeout</code>を(少なくとも)120秒より大きく設定しないといけない。</p>
+
+<p><code>
+php artisan queue:listen --sleep=120 --timeout=125
+</code></p>
+
+<p>これだと無事、動作する。<br/>
+(処理内容に5秒以上かかると合計が125秒を越えてしまうのでタイムアウトになるが）</p>
+
+<h1>疑問</h1>
+
+<p>単にポーリングの待ち時間のはずなのに実行時間のタイムアウトの対象に含まれるのはおかしいのでは？という疑問はやはり出ていたようで、Githubのissueでやりとりがされていた。</p>
+
+<p><a href="https://github.com/laravel/framework/issues/6206">queue:listen&#39;s sleep duration contributing towards timeout · Issue #6206 · laravel/framework</a></p>
+
+<p>内容を読んでいくと、そもそものプロセスの処理に組み込まれてしまっているため、根本的な修正は難しく、timeoutの時間をsleep時間を足して設定してやる、とかしか無理じゃない？みたいなやり取りになっている。</p>
+
+<p>そしてその後、5.1の時にtimeout時間をsleep時間よりも短く設定出来ないようにする制限が組み込まれたようだが、巨大な処理を行う場合にtimeoutをなしにするためにゼロ秒にセットしたいのに出来ない、という意見が出て結局削除されている。</p>
+
+<p>結果、制約も入らず対処もされていないようなので、現状は前述のように、timeout時間をsleep時間より必ず大きく設定してやらないといけない、ということになっているよう。</p>
+
+<h1>余談</h1>
+
+<p>キューのサンプルを作っている時に事象に遭遇したのだけど、そのキューのサンプルはGitHubにあげてる。<br/>
+HerokuButtonで起動できるようにしたりしてみたので、よかったらお試しあれ。</p>
+
+<p><a href="https://github.com/k-usk/laravel-queue-sample">https://github.com/k-usk/laravel-queue-sample</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[heroku]PostgresとRedisの環境設定]]></title>
@@ -529,166 +603,6 @@ public function attributes()
 
 <p>}
 ```</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[SalesforceのREST API接続用のLaravelパッケージを使ってみる]]></title>
-    <link href="http://kayakuguri.github.io/blog/2016/11/17/forrest-sfapi-laravel/"/>
-    <updated>2016-11-17T14:00:34+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2016/11/17/forrest-sfapi-laravel</id>
-    <content type="html"><![CDATA[<p>Salesforce接続用のLaravel5パッケージ、<code>omniphx/forrest</code>を使ってみた。</p>
-
-<!-- more -->
-
-
-<h1>セットアップ</h1>
-
-<p>Composerに追加。</p>
-
-<p><code>
-$ composer require "omniphx/forrest":"2.*"
-</code></p>
-
-<p><code>config/app.php</code>に以下を追加</p>
-
-<p>```
-&lsquo;providers&rsquo; => [
-  // &hellip;
-  Omniphx\Forrest\Providers\Laravel\ForrestServiceProvider::class,
-  // &hellip;
-],</p>
-
-<p>&hellip;</p>
-
-<p>&lsquo;aliases&rsquo; => [
-  // &hellip;</p>
-
-<pre><code>'Forrest' =&gt; Omniphx\Forrest\Providers\Laravel\Facades\Forrest::class
-</code></pre>
-
-<p>  // &hellip;
-],
-```
-以下で設定ファイルを生成させる。</p>
-
-<p><code>
-$ php artisan vendor:publish
-</code></p>
-
-<h1>設定ファイル</h1>
-
-<p>SFへの接続方法は２つから選択可能。</p>
-
-<ul>
-<li>Web Server authentication flow &ndash; 個別のSFアカウントでのログイン</li>
-<li>Username-Password authentication flow &ndash; 接続用のアカウントを使用したログイン</li>
-</ul>
-
-
-<p>通常は、Username-Password authentication を利用する事が多い。</p>
-
-<p><code>config/forrest.php</code>で以下を書き換え。</p>
-
-<p><code>
-//11行目
-'authentication' =&gt; 'WebServer',
-↓↓
-'authentication' =&gt; 'UserPassword',
-</code></p>
-
-<p>あとは、<code>.env</code>ファイルでユーザ名やパスワード、アプリのキーなどを設定する。</p>
-
-<p><code>
-CONSUMER_KEY=xxx
-CONSUMER_SECRET=xxx
-LOGIN_URL=https://login.salesforce.com/
-USERNAME=xxx
-PASSWORD=xxx
-</code></p>
-
-<p><code>LOGIN_URL</code>を <code>https://test.salesforce.com/</code>としておくと常にsandboxへの接続となる。</p>
-
-<h1>利用</h1>
-
-<h2>ログイン</h2>
-
-<p>以下でログイン。</p>
-
-<p><code>
-use Omniphx\Forrest\Providers\Laravel\Facades\Forrest;
-...
-Forrest::authenticate();
-</code></p>
-
-<p>(PHPStormの補完が効かない…）</p>
-
-<h2>クエリの発行</h2>
-
-<p><code>
-Forrest::query('SELECT Id FROM Account');
-</code></p>
-
-<h2>レコードの作成など</h2>
-
-<p>```
-$body = [&lsquo;Name&rsquo; => &lsquo;New Account&rsquo;];
-Forrest::sobjects(&lsquo;Account&rsquo;,[</p>
-
-<pre><code>'method' =&gt; 'post',
-'body'   =&gt; $body]);
-</code></pre>
-
-<p>```</p>
-
-<p><code>sobjects</code>で第一引数にオブジェクトを指定し、第二引数に送信する内容を指定する。<br/>
-送信内容は配列でキーを指定してやればよい。<br/>
-<code>method</code>はそれぞれ以下。</p>
-
-<ul>
-<li>post &ndash; 作成</li>
-<li>put &ndash; 更新</li>
-<li>patch &ndash; アップサート</li>
-<li>delete &ndash; 削除</li>
-</ul>
-
-
-<p>削除の場合は以下のようにREST形式でSFIDを指定してやる。</p>
-
-<p><code>
-Forrest::sobjects('Account/001i000000xxx', ['method' =&gt; 'delete']);
-</code></p>
-
-<h2>トークンの操作</h2>
-
-<ul>
-<li>リフレッシュ &ndash; <code>refresh()</code></li>
-<li>廃止 &ndash; <code>revoke()</code></li>
-</ul>
-
-
-<h2>カスタムエンドポイント</h2>
-
-<p>以下の様のして送信する。</p>
-
-<p>```
-Forrest::custom(&lsquo;/myEndpoint&rsquo;, [</p>
-
-<pre><code>'method' =&gt; 'post',
-'body' =&gt; ['foo' =&gt; 'bar'],
-'parameters' =&gt; ['flim' =&gt; 'flam']]);
-</code></pre>
-
-<p>```</p>
-
-<p>その他は、GitHubのReadme参照。</p>
-
-<h1>参考</h1>
-
-<ul>
-<li><a href="https://github.com/omniphx/forrest">omniphx/forrest: Salesforce.com REST API Client for Laravel 5</a></li>
-</ul>
-
 ]]></content>
   </entry>
   

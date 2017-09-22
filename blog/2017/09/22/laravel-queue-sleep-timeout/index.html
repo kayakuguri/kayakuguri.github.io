@@ -1,0 +1,283 @@
+
+<!DOCTYPE HTML>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>[Laravel] キューのsleepとtimeoutの関係 - KayaMemo</title>
+
+	
+	<meta name="description" content="<!-- google_ad_client = "ca-pub-0887267957680144"; /* kayakuguri top */ google_ad_slot = "1210228675"; google_ad_width = 468; google_ad_height = 60 &hellip;">
+	
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+	<link href="/atom.xml" rel="alternate" title="KayaMemo" type="application/atom+xml">
+	<link rel="canonical" href="">
+	<link href="/favicon.png" rel="shortcut icon">
+	<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+	<script async="true" src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+	
+<meta property="og:title" content="[Laravel] キューのsleepとtimeoutの関係 - KayaMemo" />
+<meta property="og:type" content="article" />
+<meta property="og:description" content="<!-- google_ad_client = "ca-pub-0887267957680144"; /* kayakuguri top */ google_ad_slot = "1210228675"; google_ad_width = 468; google_ad_height = 60 &hellip;" />
+
+<meta property="og:url" content="" />
+<meta property="og:image" content="http://kayakuguri.github.io/images/about_me.jpg" />
+<meta property="og:author" content="kayakuguri" />
+<meta property="og:site_name" content="KayaMemo" />
+<meta property="og:locale" content="ja_JP" />
+<meta property="fb:app_id" content="509051419202319" />
+</head>
+
+
+<body>
+	<header id="header" class="inner"><h1><a href="/">KayaMemo</a></h1>
+<nav id="main-nav"><ul class="main">
+	<li><a href="/">Blog</a></li>
+	<li><a href="/blog/archives">Archives</a></li>
+</ul>
+</nav>
+<nav id="mobile-nav">
+	<div class="alignleft menu">
+		<a class="button">Menu</a>
+		<div class="container"><ul class="main">
+	<li><a href="/">Blog</a></li>
+	<li><a href="/blog/archives">Archives</a></li>
+</ul>
+</div>
+	</div>
+	<div class="alignright search">
+		<a class="button"></a>
+		<div class="container">
+			<form action="http://google.com/search" method="get">
+				<input type="text" name="q" results="0">
+				<input type="hidden" name="q" value="site:kayakuguri.github.io">
+			</form>
+		</div>
+	</div>
+</nav>
+<nav id="sub-nav" class="alignright">
+	<div class="social">
+		
+		
+		
+		<a class="twitter" href="http://twitter.com/usk" title="Twitter">Twitter</a>
+		
+		
+    
+		
+		
+		
+		
+		
+		<a class="rss" href="/atom.xml" title="RSS">RSS</a>
+		
+    
+	</div>
+	<form class="search" action="http://google.com/search" method="get">
+		<input class="alignright" type="text" name="q" results="0">
+		<input type="hidden" name="q" value="site:kayakuguri.github.io">
+	</form>
+</nav>
+
+</header>
+	
+		
+	
+	<div id="content" class="inner"><article class="post">
+	<h2 class="title">[Laravel] キューのsleepとtimeoutの関係</h2>
+	<div class="entry-content">
+        <div class="adArea">
+    <script type="text/javascript"><!--
+    google_ad_client = "ca-pub-0887267957680144";
+    /* kayakuguri top */
+    google_ad_slot = "1210228675";
+    google_ad_width = 468;
+    google_ad_height = 60;
+    //-->
+    </script>
+    <script type="text/javascript"
+            src="//pagead2.googlesyndication.com/pagead/show_ads.js">
+    </script>
+</div>
+        <p>Laravelのキューを実際に使ってみた際にちょっと変な挙動だと思ったメモ。</p>
+
+<!-- more -->
+
+
+<h1>sleep</h1>
+
+<p>キューを実行するコマンドのオプションに<code>sleep</code>というものがある。<br/>
+コマンドのヘルプの説明は以下。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>--sleep[=SLEEP]      Number of seconds to sleep when no job is available [default: "3"]</span></code></pre></td></tr></table></div></figure>
+
+
+<p>ジョブがない場合に次のジョブを取得するまでにスリープする秒数の設定、とのこと。<br/>
+例えばこれをゼロにすると、常にジョブを取得するためのポーリングが実行され続けるため、ジョブの保存先をキューイングサービスなどにしている場合に、ものすごい数のキュー取得リクエストが飛んでしまう。<br/>
+それを避けるためのスリープ時間の設定。</p>
+
+<h1>timeout</h1>
+
+<p>処理の<code>timeout</code>オプション。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>--timeout[=TIMEOUT]  The number of seconds a child process can run [default: "60"]</span></code></pre></td></tr></table></div></figure>
+
+
+<p>処理に指定した時間以上の時間がかかった場合はタイムアウトとする設定。デフォルトは60秒。</p>
+
+<h1>sleepとtimeoutの関係</h1>
+
+<p>sleepの時間を長く設定すると、タイムアウトエラーが発生してしまう。<br/>
+例えば以下。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>php artisan queue:listen --sleep=120 --timeout=60</span></code></pre></td></tr></table></div></figure>
+
+
+<p>というのも、次のキュー取得を実行するまでのスリープ時間もタイムアウトの対象の時間に含まれてしまう、よう。<br/>
+なので必ずsleep時間よりもtimeoutの時間を多く設定してやらないといけない。<br/>
+上記の場合だと<code>sleep</code>を120秒にしてるので、<code>timeout</code>を(少なくとも)120秒より大きく設定しないといけない。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>php artisan queue:listen --sleep=120 --timeout=125</span></code></pre></td></tr></table></div></figure>
+
+
+<p>これだと無事、動作する。<br/>
+(処理内容に5秒以上かかると合計が125秒を越えてしまうのでタイムアウトになるが）</p>
+
+<h1>疑問</h1>
+
+<p>単にポーリングの待ち時間のはずなのに実行時間のタイムアウトの対象に含まれるのはおかしいのでは？という疑問はやはり出ていたようで、Githubのissueでやりとりがされていた。</p>
+
+<p><a href="https://github.com/laravel/framework/issues/6206">queue:listen&#39;s sleep duration contributing towards timeout · Issue #6206 · laravel/framework</a></p>
+
+<p>内容を読んでいくと、そもそものプロセスの処理に組み込まれてしまっているため、根本的な修正は難しく、timeoutの時間をsleep時間を足して設定してやる、とかしか無理じゃない？みたいなやり取りになっている。</p>
+
+<p>そしてその後、5.1の時にtimeout時間をsleep時間よりも短く設定出来ないようにする制限が組み込まれたようだが、巨大な処理を行う場合にtimeoutをなしにするためにゼロ秒にセットしたいのに出来ない、という意見が出て結局削除されている。</p>
+
+<p>結果、制約も入らず対処もされていないようなので、現状は前述のように、timeout時間をsleep時間より必ず大きく設定してやらないといけない、ということになっているよう。</p>
+
+<h1>余談</h1>
+
+<p>キューのサンプルを作っている時に事象に遭遇したのだけど、そのキューのサンプルはGitHubにあげてる。<br/>
+HerokuButtonで起動できるようにしたりしてみたので、よかったらお試しあれ。</p>
+
+<p><a href="https://github.com/k-usk/laravel-queue-sample">https://github.com/k-usk/laravel-queue-sample</a></p>
+
+    </div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2017-09-22T12:16:53+09:00" pubdate data-updated="true">Sep 22<span>nd</span>, 2017</time></div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/laravel/'>laravel</a>
+
+
+</div>
+	
+</div>
+</article>
+
+	<div class="share">
+	<div class="addthis_toolbox addthis_default_style ">
+		
+        <div id="fb-root"></div>
+<script>(function(d, s, id) {
+    var js, fjs = d.getElementsByTagName(s)[0];
+    if (d.getElementById(id)) return;
+    js = d.createElement(s); js.id = id;
+    js.src = "//connect.facebook.net/ja_JP/all.js#xfbml=1&appId=509051419202319";
+    fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+        <div class="fb-like" data-href="http://kayakuguri.github.io/blog/2017/09/22/laravel-queue-sleep-timeout/" data-layout="button_count" data-action="like" data-show-faces="true" data-share="false"></div>
+		
+		
+        &nbsp;&nbsp;<a href="https://twitter.com/share" class="twitter-share-button" data-via="kayakuguri123" data-lang="ja" data-count="none">ツイート</a>
+<script>
+  !function(d,s,id){
+      var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';
+      if(!d.getElementById(id)){
+          js=d.createElement(s);
+          js.id=id;js.src=p+'://platform.twitter.com/widgets.js';
+          fjs.parentNode.insertBefore(js,fjs);
+      }
+  }(document, 'script', 'twitter-wjs');
+</script>
+		
+		
+		<a class="addthis_button_google_plusone" g:plusone:size="medium"></a>
+		
+		
+        
+        <a href="http://b.hatena.ne.jp/entry/http://kayakuguri.github.io/blog/2017/09/22/laravel-queue-sleep-timeout/" class="hatena-bookmark-button" data-hatena-bookmark-title="[Laravel] キューのsleepとtimeoutの関係 - KayaMemo" data-hatena-bookmark-layout="standard-noballoon" data-hatena-bookmark-lang="ja" title="このエントリーをはてなブックマークに追加">
+<img src="http://b.st-hatena.com/images/entry-button/button-only@2x.png" alt="このエントリーをはてなブックマークに追加" width="20" height="20" style="border: none;" /></a>
+<script type="text/javascript" src="http://b.st-hatena.com/js/bookmark_button.js" charset="utf-8" async="async"></script>
+        
+	</div>
+	
+</div>
+
+
+<div class="share">
+    <script type="text/javascript"><!--
+    google_ad_client = "ca-pub-0887267957680144";
+    /* kayakuguri git */
+    google_ad_slot = "2041160274";
+    google_ad_width = 336;
+    google_ad_height = 280;
+    //-->
+    </script>
+    <script type="text/javascript"
+            src="//pagead2.googlesyndication.com/pagead/show_ads.js">
+    </script>
+</div>
+</div>
+	<footer id="footer" class="inner">Copyright &copy; 2017
+
+    萱潜
+
+</footer>
+	<script src="/javascripts/slash.js"></script>
+<script src="/javascripts/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+	$('.fancybox').fancybox();
+})(jQuery);
+</script> <!-- Delete or comment this line to disable Fancybox -->
+
+
+
+
+	<script type="text/javascript">
+		var _gaq = _gaq || [];
+		_gaq.push(['_setAccount', 'UA-3730932-4']);
+		_gaq.push(['_trackPageview']);
+
+		(function() {
+			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+		})();
+	</script>
+
+
+
+</body>
+</html>
