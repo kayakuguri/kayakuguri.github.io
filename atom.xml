@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2017-09-22T12:35:06+09:00</updated>
+  <updated>2017-09-22T12:38:56+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -34,7 +34,7 @@
 
 <p>ジョブがない場合に次のジョブを取得するまでにスリープする秒数の設定、とのこと。<br/>
 例えばこれをゼロにすると、常にジョブを取得するためのポーリングが実行され続けるため、ジョブの保存先をキューイングサービスなどにしている場合に、ものすごい数のキュー取得リクエストが飛んでしまう。<br/>
-それを避けるためのスリープ時間の設定。</p>
+なのでsleepを設定してやれば(ジョブがなくなった時に)、ポーリング間隔を空ける事が出来るので負荷が減ったりする。</p>
 
 <h1>timeout</h1>
 
