@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2017-09-22T15:17:45+09:00</updated>
+  <updated>2017-09-22T15:19:00+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -105,6 +105,8 @@
 
 <p>これはバグだろうか…。<br/>
 本体のコードをちょっとだけ追ってみたけどよくわからなかったのでもし誰かわかればお願いします。</p>
+
+<p><a href="https://github.com/laravel/framework">laravel/framework</a></p>
 ]]></content>
   </entry>
   
