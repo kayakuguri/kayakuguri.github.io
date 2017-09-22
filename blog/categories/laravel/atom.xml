@@ -4,7 +4,7 @@
   <title><![CDATA[Category: laravel | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/laravel/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2017-09-22T12:38:56+09:00</updated>
+  <updated>2017-09-22T15:13:55+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,101 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[Laravel]キューのdelayとsleepオプション]]></title>
+    <link href="http://kayakuguri.github.io/blog/2017/09/22/laravel-queue-delay-sleep/"/>
+    <updated>2017-09-22T15:05:42+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2017/09/22/laravel-queue-delay-sleep</id>
+    <content type="html"><![CDATA[<p>Laravelにてキューを実行させる際に、delayとsleepオプションの関係がちょっと変だったのでメモ。</p>
+
+<!-- more -->
+
+
+<h1>sleep</h1>
+
+<p><code>
+--sleep[=SLEEP]      Number of seconds to sleep when no job is available [default: "3"]
+</code></p>
+
+<p>ジョブがない場合に次のジョブを取得するまでにスリープする秒数の設定。</p>
+
+<h1>delay</h1>
+
+<p><code>
+--delay[=DELAY]      The number of seconds to delay failed jobs [default: "0"]
+</code></p>
+
+<p>ジョブが失敗した場合に再試行するまでの遅延時間。</p>
+
+<h1>delayとsleep</h1>
+
+<p>両方設定した場合の動作が少し変な気がするのでそれぞれ試してみた。</p>
+
+<table>
+<thead>
+<tr>
+<th></th>
+<th align="left"> delay </th>
+<th align="left"> sleep </th>
+<th align="left"> 失敗時遅延 </th>
+<th align="left"> 待機 </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td></td>
+<td align="left"> なし </td>
+<td align="left"> 30 </td>
+<td align="left"> 0 </td>
+<td align="left"> 30 |</td>
+</tr>
+<tr>
+<td></td>
+<td align="left"> 30 </td>
+<td align="left"> なし </td>
+<td align="left"> 30 </td>
+<td align="left"> 0 |</td>
+</tr>
+<tr>
+<td></td>
+<td align="left"> 5 </td>
+<td align="left"> 30 </td>
+<td align="left"> 30 </td>
+<td align="left"> 30 |</td>
+</tr>
+<tr>
+<td></td>
+<td align="left"> 30 </td>
+<td align="left"> 5 </td>
+<td align="left"> 30 </td>
+<td align="left"> 5 |</td>
+</tr>
+</tbody>
+</table>
+
+
+<p>実行コマンドは以下。</p>
+
+<p><code>
+$ php artisan queue:listen --sleep=xx --delay=xx
+</code></p>
+
+<p>結果は、3行目の<code>delay=5 sleep=30</code>の時だけ意図した動作と違っていた。<br/>
+本来ならば<code>delay=5</code>なので失敗時の再試行までの遅延は5秒のはずなのに、sleepに設定している30秒が適用されているようだった。</p>
+
+<h1>結論</h1>
+
+<ul>
+<li>delay > sleep の場合は意図通り動作する</li>
+<li>delay &lt; sleep の場合はsleepに設定した時間がdelayにも適用される</li>
+</ul>
+
+
+<p>これはバグだろうか…。<br/>
+本体のコードをちょっとだけ追ってみたけどよくわからなかったのでもし誰かわかればお願いします。</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[Laravel] キューのsleepとtimeoutの関係]]></title>
@@ -365,244 +460,6 @@ Log::error('TEST LOG');
 <li><a href="http://qiita.com/iakio/items/86086e046f73826c9bef">Laravelのログを標準エラーに出力する &ndash; Qiita</a></li>
 </ul>
 
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[Laravel]フォームのバリデーションをRequestクラスに分離する]]></title>
-    <link href="http://kayakuguri.github.io/blog/2016/11/18/larave-request/"/>
-    <updated>2016-11-18T17:46:52+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2016/11/18/larave-request</id>
-    <content type="html"><![CDATA[<p>LaraveのバリデーションチェックをRequestクラスの別ファイルにまとめる方法。<br/>
-すでに各所で解説が書かれているだろうけれど、自分なりに把握出来たのでメモ。</p>
-
-<!-- more -->
-
-
-<h1>作成</h1>
-
-<h2>生成</h2>
-
-<p><code>
-$ php artisan make:request HogeRequest
-</code></p>
-
-<p>これで、<code>app/Http/Requests/</code>以下に生成される。</p>
-
-<p>デフォルトで生成される内容は以下。</p>
-
-<p>```
-&lt;?php</p>
-
-<p>namespace App\Http\Requests;</p>
-
-<p>use App\Http\Requests\Request;</p>
-
-<p>class HogeRequest extends Request
-{</p>
-
-<pre><code>/**
- * Determine if the user is authorized to make this request.
- *
- * @return bool
- */
-public function authorize()
-{
-    return false;
-}
-
-/**
- * Get the validation rules that apply to the request.
- *
- * @return array
- */
-public function rules()
-{
-    return [
-        //
-    ];
-}
-</code></pre>
-
-<p>}
-```</p>
-
-<h2>認証</h2>
-
-<p>一つ目のメソッド、<code>authorize</code>はデフォルトでは<code>false</code>となっている。<br/>
-これは、このフォームを送信出来るユーザの認証を判定する箇所で、デフォルトの<code>false</code>だと全てのユーザが弾かれてしまう。<br/>
-なのでこれは<code>true</code>に変更する。</p>
-
-<h2>バリデーションルール</h2>
-
-<p>肝心のバリデーションルールは、<code>rules()</code>メソッド内の戻り値として書く。<br/>
-配列にコントローラーに書いていた時と同じように書く。</p>
-
-<p>例）</p>
-
-<p>```
-public function rules()
-{</p>
-
-<pre><code>return [
-    'LastName' =&gt; 'required',
-    'FirstName' =&gt; 'required',
-    'Email' =&gt; 'required|email',
-];
-</code></pre>
-
-<p>}
-```</p>
-
-<h2>項目の名前 (日本語化)</h2>
-
-<p>バリデーションルールに引っかかった際に返されるエラーメッセージはデフォルトでは英語になっている。<br/>
-これを日本語にするには、言語ファイルを用意してやるとよい。<br/>
-<code>resouces/lang/ja/</code>以下に、<code>validation.php</code>を置いてやる。<br/>
-以下が、デフォルトの英語ファイルを日本語訳してくれているもの。<br/>
-<a href="https://gist.github.com/syokunin/b37725686b5baf09255b">https://gist.github.com/syokunin/b37725686b5baf09255b</a></p>
-
-<p>しかしこのままだと、項目名についてはnameで指定したもののママになってしまう。<br/>
-これをカスタムで日本語化するには、さきほど追加した、<code>validation.php</code>の<code>attributes</code>で指定してやる。</p>
-
-<p>例）</p>
-
-<p>```
-&lsquo;attributes&rsquo; => [</p>
-
-<pre><code>'title' =&gt; 'タイトル',
-'body' =&gt; '本文',
-'published_at' =&gt; '公開日',
-</code></pre>
-
-<p>],
-```</p>
-
-<ul>
-<li><a href="https://laravel10.wordpress.com/2015/03/11/%E5%88%9D%E3%82%81%E3%81%A6%E3%81%AElaravel-5-19-%E3%82%A8%E3%83%A9%E3%83%BC%E3%83%A1%E3%83%83%E3%82%BB%E3%83%BC%E3%82%B8%E3%81%AE%E6%97%A5%E6%9C%AC%E8%AA%9E%E5%8C%96/">初めてのLaravel 5.1 : (19) エラーメッセージの日本語化 &#8211; ララ帳</a></li>
-</ul>
-
-
-<p>ここでの設定は全体での適用となるので、一括指定出来る反面、切り分けが出来ない。<br/>
-これを各フォーム個別の設定としてやるために、先ほどの、Requestクラスに追加してやることが可能。</p>
-
-<p>例）</p>
-
-<p>```
-public function attributes()
-{</p>
-
-<pre><code>return [
-    'name'    =&gt; 'お名前',
-    'email'   =&gt; 'メールアドレス',
-    'subject' =&gt; '件名',
-    'content' =&gt; '内容',
-];
-</code></pre>
-
-<p>}
-```</p>
-
-<ul>
-<li><a href="http://qiita.com/ponko2/items/fd7ac38b964e10f16f52#%E3%81%8A%E5%95%8F%E3%81%84%E5%90%88%E3%82%8F%E3%81%9B%E7%94%BB%E9%9D%A2%E3%81%AErequest">Laravel 5で確認画面付き問い合わせフォームを作る &ndash; Qiita</a></li>
-</ul>
-
-
-<h2>戻り先</h2>
-
-<p>デフォルトの状態では、バリデーションエラーがあった場合は一つ前のページへ自動的に遷移する。<br/>
-入力 → 確認 という遷移なら、確認に遷移してきた時点でエラーが出ると、一つ前の入力ページへ飛ぶ。</p>
-
-<p>しかし、確認画面を挟むようなフォームの場合、確認画面から完了画面の際にもバリデーションチェックが必要となる。<br/>
-これがデフォルトのままだと、<br/>
-確認 → 完了 という遷移となり、エラーが出ると一つ前の確認画面に戻ってしまう。<br/>
-ここでは入力画面に戻って欲しい。</p>
-
-<p>その場合、Requestクラスで戻り先を指定してやる事が出来る。</p>
-
-<p><code>
-protected $redirect = 'hoge_input';
-</code></p>
-
-<p>変数名で指定の仕方を変えてやることが可能。</p>
-
-<ul>
-<li><code>redirect</code> &ndash; URIでの指定</li>
-<li><code>redirectRoute</code> &ndash; 名前付きルートの名前での指定</li>
-<li><code>redirectAction</code> &ndash; コントローラーのアクションでの指定</li>
-</ul>
-
-
-<p>[参考]</p>
-
-<ul>
-<li><a href="http://n2utech.hatenablog.jp/entry/2015/11/13/154754">【メモ】 Laravel 5.1 において FormRequest でエラーが発生した際の戻し先を変更する &ndash; n2utech</a></li>
-<li><a href="https://github.com/laravel/framework/blob/5.1/src/Illuminate/Foundation/Http/FormRequest.php#L34-L53">framework/FormRequest.php at 5.1 · laravel/framework · GitHub</a></li>
-</ul>
-
-
-<h1>完成</h1>
-
-<p>最終的に以下のような形とした。</p>
-
-<p>```
-&lt;?php</p>
-
-<p>namespace App\Http\Requests;</p>
-
-<p>use App\Http\Requests\Request;</p>
-
-<p>class HogeRequest extends Request
-{</p>
-
-<pre><code>/**
- * 戻り先
- *
- * @var string
- */
-protected $redirect = 'hoge_input';
-
-/**
- * Determine if the user is authorized to make this request.
- *
- * @return bool
- */
-public function authorize()
-{
-    return true;
-}
-
-/**
- * バリデーションルール
- *
- * @return array
- */
-public function rules()
-{
-    return [
-        'LastName' =&gt; 'required',
-        'FirstName' =&gt; 'required',
-        'Email' =&gt; 'required|email',
-    ];
-}
-
-/**
- * エラー時に表示する項目名
- *
- * @return array
- */
-public function attributes()
-{
-    return [
-        'LastName' =&gt; '姓',
-        'FirstName' =&gt; '名',
-        'Email' =&gt; 'メールアドレス',
-    ];
-}
-</code></pre>
-
-<p>}
-```</p>
 ]]></content>
   </entry>
   

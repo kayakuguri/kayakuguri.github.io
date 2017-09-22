@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2017-09-22T12:38:56+09:00</updated>
+  <updated>2017-09-22T15:13:55+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,101 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[Laravel]キューのdelayとsleepオプション]]></title>
+    <link href="http://kayakuguri.github.io/blog/2017/09/22/laravel-queue-delay-sleep/"/>
+    <updated>2017-09-22T15:05:42+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2017/09/22/laravel-queue-delay-sleep</id>
+    <content type="html"><![CDATA[<p>Laravelにてキューを実行させる際に、delayとsleepオプションの関係がちょっと変だったのでメモ。</p>
+
+<!-- more -->
+
+
+<h1>sleep</h1>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>--sleep[=SLEEP]      Number of seconds to sleep when no job is available [default: "3"]</span></code></pre></td></tr></table></div></figure>
+
+
+<p>ジョブがない場合に次のジョブを取得するまでにスリープする秒数の設定。</p>
+
+<h1>delay</h1>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>--delay[=DELAY]      The number of seconds to delay failed jobs [default: "0"]</span></code></pre></td></tr></table></div></figure>
+
+
+<p>ジョブが失敗した場合に再試行するまでの遅延時間。</p>
+
+<h1>delayとsleep</h1>
+
+<p>両方設定した場合の動作が少し変な気がするのでそれぞれ試してみた。</p>
+
+<table>
+<thead>
+<tr>
+<th></th>
+<th align="left"> delay </th>
+<th align="left"> sleep </th>
+<th align="left"> 失敗時遅延 </th>
+<th align="left"> 待機 </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td></td>
+<td align="left"> なし </td>
+<td align="left"> 30 </td>
+<td align="left"> 0 </td>
+<td align="left"> 30 |</td>
+</tr>
+<tr>
+<td></td>
+<td align="left"> 30 </td>
+<td align="left"> なし </td>
+<td align="left"> 30 </td>
+<td align="left"> 0 |</td>
+</tr>
+<tr>
+<td></td>
+<td align="left"> 5 </td>
+<td align="left"> 30 </td>
+<td align="left"> 30 </td>
+<td align="left"> 30 |</td>
+</tr>
+<tr>
+<td></td>
+<td align="left"> 30 </td>
+<td align="left"> 5 </td>
+<td align="left"> 30 </td>
+<td align="left"> 5 |</td>
+</tr>
+</tbody>
+</table>
+
+
+<p>実行コマンドは以下。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$ php artisan queue:listen --sleep=xx --delay=xx</span></code></pre></td></tr></table></div></figure>
+
+
+<p>結果は、3行目の<code>delay=5 sleep=30</code>の時だけ意図した動作と違っていた。<br/>
+本来ならば<code>delay=5</code>なので失敗時の再試行までの遅延は5秒のはずなのに、sleepに設定している30秒が適用されているようだった。</p>
+
+<h1>結論</h1>
+
+<ul>
+<li>delay > sleep の場合は意図通り動作する</li>
+<li>delay &lt; sleep の場合はsleepに設定した時間がdelayにも適用される</li>
+</ul>
+
+
+<p>これはバグだろうか…。<br/>
+本体のコードをちょっとだけ追ってみたけどよくわからなかったのでもし誰かわかればお願いします。</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[Laravel] キューのsleepとtimeoutの関係]]></title>
@@ -3000,185 +3095,6 @@ URLのドメイン部分を先程取得した、 <code>instance_url</code> を�
 </span><span class='line'>    }
 </span><span class='line'>
 </span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[SalesforceのREST API接続用のLaravelパッケージを使ってみる]]></title>
-    <link href="http://kayakuguri.github.io/blog/2016/11/17/forrest-sfapi-laravel/"/>
-    <updated>2016-11-17T14:00:34+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2016/11/17/forrest-sfapi-laravel</id>
-    <content type="html"><![CDATA[<p>Salesforce接続用のLaravel5パッケージ、<code>omniphx/forrest</code>を使ってみた。</p>
-
-<!-- more -->
-
-
-<h1>セットアップ</h1>
-
-<p>Composerに追加。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>$ composer require "omniphx/forrest":"2.*"</span></code></pre></td></tr></table></div></figure>
-
-
-<p><code>config/app.php</code>に以下を追加</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>'providers' =&gt; [
-</span><span class='line'>  // ...
-</span><span class='line'>  Omniphx\Forrest\Providers\Laravel\ForrestServiceProvider::class,
-</span><span class='line'>  // ...
-</span><span class='line'>],
-</span><span class='line'>
-</span><span class='line'>...
-</span><span class='line'>
-</span><span class='line'>'aliases' =&gt; [
-</span><span class='line'>  // ...
-</span><span class='line'>    'Forrest' =&gt; Omniphx\Forrest\Providers\Laravel\Facades\Forrest::class
-</span><span class='line'>  // ...
-</span><span class='line'>],</span></code></pre></td></tr></table></div></figure>
-
-
-<p>以下で設定ファイルを生成させる。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>$ php artisan vendor:publish</span></code></pre></td></tr></table></div></figure>
-
-
-<h1>設定ファイル</h1>
-
-<p>SFへの接続方法は２つから選択可能。</p>
-
-<ul>
-<li>Web Server authentication flow &ndash; 個別のSFアカウントでのログイン</li>
-<li>Username-Password authentication flow &ndash; 接続用のアカウントを使用したログイン</li>
-</ul>
-
-
-<p>通常は、Username-Password authentication を利用する事が多い。</p>
-
-<p><code>config/forrest.php</code>で以下を書き換え。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>//11行目
-</span><span class='line'>'authentication' =&gt; 'WebServer',
-</span><span class='line'>↓↓
-</span><span class='line'>'authentication' =&gt; 'UserPassword',</span></code></pre></td></tr></table></div></figure>
-
-
-<p>あとは、<code>.env</code>ファイルでユーザ名やパスワード、アプリのキーなどを設定する。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>CONSUMER_KEY=xxx
-</span><span class='line'>CONSUMER_SECRET=xxx
-</span><span class='line'>LOGIN_URL=https://login.salesforce.com/
-</span><span class='line'>USERNAME=xxx
-</span><span class='line'>PASSWORD=xxx</span></code></pre></td></tr></table></div></figure>
-
-
-<p><code>LOGIN_URL</code>を <code>https://test.salesforce.com/</code>としておくと常にsandboxへの接続となる。</p>
-
-<h1>利用</h1>
-
-<h2>ログイン</h2>
-
-<p>以下でログイン。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>use Omniphx\Forrest\Providers\Laravel\Facades\Forrest;
-</span><span class='line'>...
-</span><span class='line'>Forrest::authenticate();</span></code></pre></td></tr></table></div></figure>
-
-
-<p>(PHPStormの補完が効かない…）</p>
-
-<h2>クエリの発行</h2>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>Forrest::query('SELECT Id FROM Account');</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>レコードの作成など</h2>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>$body = ['Name' =&gt; 'New Account'];
-</span><span class='line'>Forrest::sobjects('Account',[
-</span><span class='line'>    'method' =&gt; 'post',
-</span><span class='line'>    'body'   =&gt; $body]);</span></code></pre></td></tr></table></div></figure>
-
-
-<p><code>sobjects</code>で第一引数にオブジェクトを指定し、第二引数に送信する内容を指定する。<br/>
-送信内容は配列でキーを指定してやればよい。<br/>
-<code>method</code>はそれぞれ以下。</p>
-
-<ul>
-<li>post &ndash; 作成</li>
-<li>put &ndash; 更新</li>
-<li>patch &ndash; アップサート</li>
-<li>delete &ndash; 削除</li>
-</ul>
-
-
-<p>削除の場合は以下のようにREST形式でSFIDを指定してやる。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>Forrest::sobjects('Account/001i000000xxx', ['method' =&gt; 'delete']);</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>トークンの操作</h2>
-
-<ul>
-<li>リフレッシュ &ndash; <code>refresh()</code></li>
-<li>廃止 &ndash; <code>revoke()</code></li>
-</ul>
-
-
-<h2>カスタムエンドポイント</h2>
-
-<p>以下の様のして送信する。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>Forrest::custom('/myEndpoint', [
-</span><span class='line'>    'method' =&gt; 'post',
-</span><span class='line'>    'body' =&gt; ['foo' =&gt; 'bar'],
-</span><span class='line'>    'parameters' =&gt; ['flim' =&gt; 'flam']]);</span></code></pre></td></tr></table></div></figure>
-
-
-<p>その他は、GitHubのReadme参照。</p>
-
-<h1>参考</h1>
-
-<ul>
-<li><a href="https://github.com/omniphx/forrest">omniphx/forrest: Salesforce.com REST API Client for Laravel 5</a></li>
-</ul>
 
 ]]></content>
   </entry>
