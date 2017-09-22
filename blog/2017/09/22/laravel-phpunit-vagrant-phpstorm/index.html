@@ -140,42 +140,42 @@ LaravelではデフォルトでComposerに入っているので特に設定は�
 <code>Languages &amp; Frameworks -&gt; PHP -&gt; Test Frameworks</code>を選択。<br/>
 <code>+</code>マークをクリックし、<code>PHPUnit by Remote Interpreter</code>を選択する。</p>
 
-<p><img src="/images/2017/09/phpunit01.jpg" alt="" /></p>
+<p><img src="/images/2017/09/phpunit_01.jpg" alt="" /></p>
 
 <p>Interpreterを選択するウインドウが開くが、interpreterがないので作成する。<br/>
 右端の<code>...</code>をクリックする。</p>
 
-<p><img src="/images/2017/09/phpunit02.jpg" alt="" /></p>
+<p><img src="/images/2017/09/phpunit_02.jpg" alt="" /></p>
 
 <p>ウインドウが開くので、<code>+</code>をクリックし、<code>From Docker, Vagrant, VM, Remote...</code>を選択。</p>
 
-<p><img src="/images/2017/09/phpunit03.jpg" alt="" /></p>
+<p><img src="/images/2017/09/phpunit_03.jpg" alt="" /></p>
 
 <p>開いたウインドウで、<code>Vagrant</code>を選択。すると自動で設定が読み込まれるのでそのままOKする。</p>
 
-<p><img src="/images/2017/09/phpunit04.jpg" alt="" /></p>
+<p><img src="/images/2017/09/phpunit_04.jpg" alt="" /></p>
 
 <p>OKをクリックすると、SSH接続が行われ情報が自動で読み込まれる。<br/>
 そのままでOKなのでOKをクリックする。</p>
 
-<p><img src="/images/2017/09/phpunit05.jpg" alt="" /></p>
+<p><img src="/images/2017/09/phpunit_05.jpg" alt="" /></p>
 
 <p>Interpreterを選択する画面に戻るので、作成したInterpreterを選択し、OKをクリック。</p>
 
-<p><img src="/images/2017/09/phpunit06.jpg" alt="" /></p>
+<p><img src="/images/2017/09/phpunit_06.jpg" alt="" /></p>
 
 <p>追加したInterpreterでPHPUnitのライブラリを指定するが、Composer経由でのロードになるので、デフォルトの<code>Use Composer autoloader</code>のままでよい。<br/>
 Vagrant内でのautolodのパスを指定するので、<code>...</code>をクリック。</p>
 
-<p><img src="/images/2017/09/phpunit07.jpg" alt="" /></p>
+<p><img src="/images/2017/09/phpunit_07.jpg" alt="" /></p>
 
 <p>Scothboxは<code>/var/www</code>がホストと共有しているディレクトリになるので、そこから<code>vendor/autoload.php</code>を選択する。</p>
 
-<p><img src="/images/2017/09/phpunit08.jpg" alt="" /></p>
+<p><img src="/images/2017/09/phpunit_08.jpg" alt="" /></p>
 
 <p>選択すると、追加されているPHPUnitのバージョンが表示される。</p>
 
-<p><img src="/images/2017/09/phpunit09.jpg" alt="" /></p>
+<p><img src="/images/2017/09/phpunit_09.jpg" alt="" /></p>
 
 <p>これでInterpreterの設定は完了。</p>
 
@@ -187,19 +187,19 @@ Vagrant内でのautolodのパスを指定するので、<code>...</code>をク�
 
 <p><code>+</code>をクリックし、<code>PHPUnit</code>のConfigurationを追加する。</p>
 
-<p><img src="/images/2017/09/phpunit10.jpg" alt="" /></p>
+<p><img src="/images/2017/09/phpunit_10.jpg" alt="" /></p>
 
 <p>Nameは適当に書く。<br/>
 Test scopeはテストしたいディレクトリを選択する。<br/>
 Laravelのtestsディレクトリを指定しておく。（どこでもよい）<br/>
 この設定の下部に、Errorと出ているのでFixをクリック。</p>
 
-<p><img src="/images/2017/09/phpunit11.jpg" alt="" /></p>
+<p><img src="/images/2017/09/phpunit_11.jpg" alt="" /></p>
 
 <p>PHPの設定ウインドウが開くので、<code>PHP language level</code>はVagrant環境に合わせて<code>7</code>を選択。<br/>
 <code>CLI Interpreter</code>は設定したinterpreterを選択する。</p>
 
-<p><img src="/images/2017/09/phpunit12.jpg" alt="" /></p>
+<p><img src="/images/2017/09/phpunit_12.jpg" alt="" /></p>
 
 <p>OKで閉じる。</p>
 
@@ -207,12 +207,12 @@ Laravelのtestsディレクトリを指定しておく。（どこでもよい�
 
 <p>右上のセレクトボックスが、先ほど作成したConfigurationが選択されている状態になっているはずなので、そのまま緑の三角をクリック。</p>
 
-<p><img src="/images/2017/09/phpunit13.jpg" alt="" /></p>
+<p><img src="/images/2017/09/phpunit_13.jpg" alt="" /></p>
 
 <p>すると、<code>tests</code>ディレクトリ以下のテストファイルが自動で起動し、テストが実行される。<br/>
 デフォルトのサンプルテストは必ず成功するので、無事、テストが通ればOK。</p>
 
-<p><img src="/images/2017/09/phpunit14.jpg" alt="" /></p>
+<p><img src="/images/2017/09/phpunit_14.jpg" alt="" /></p>
 
 <p><code>ExampleTest.php</code>の<code>assertTrue</code>を<code>false</code>にしてみて失敗させてみる。</p>
 
@@ -229,7 +229,7 @@ Laravelのtestsディレクトリを指定しておく。（どこでもよい�
 <p>ファイルを選択して右クリックすれば、そのファイルのみをテスト実行する事も可能。<br/>
 失敗すると以下のようになる。</p>
 
-<p><img src="/images/2017/09/phpunit15.jpg" alt="" /></p>
+<p><img src="/images/2017/09/phpunit_15.jpg" alt="" /></p>
 
 <p>これで無事、成功と失敗の動作が確認できた。</p>
 
