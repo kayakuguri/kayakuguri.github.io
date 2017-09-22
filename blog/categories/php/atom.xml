@@ -4,7 +4,7 @@
   <title><![CDATA[Category: php | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/php/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2017-09-22T15:19:00+09:00</updated>
+  <updated>2017-09-22T19:09:54+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,153 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[PhpStormを使用してPHP UnitのテストをVagrantのリモート上で実行する]]></title>
+    <link href="http://kayakuguri.github.io/blog/2017/09/22/laravel-phpunit-vagrant-phpstorm/"/>
+    <updated>2017-09-22T19:05:58+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2017/09/22/laravel-phpunit-vagrant-phpstorm</id>
+    <content type="html"><![CDATA[<p>LaravelのUnitテストを実行すべく、ローカルのVagrant環境上でPHP Unitを実行するように設定してみた。</p>
+
+<!-- more -->
+
+
+<h1>環境</h1>
+
+<ul>
+<li>Vagrant
+
+<ul>
+<li><a href="https://box.scotch.io/">ScotchBox</a></li>
+</ul>
+</li>
+<li>Laravel 5.5.7</li>
+<li>PHP 7.0</li>
+</ul>
+
+
+<h1>PHP Unit</h1>
+
+<p>PHP UnitはCompoerにてプロジェクトディレクトリにインストールする。<br/>
+LaravelではデフォルトでComposerに入っているので特に設定はなし。<br/>
+(Linuxに入れる必要はない)</p>
+
+<p><code>
+"phpunit/phpunit": "~6.0"
+</code></p>
+
+<h1>PhpStorm</h1>
+
+<p>PhpStormでの設定方法。<br/>
+設定したいプロジェクトのルートディレクトリを開いた状態で設定する。</p>
+
+<h2>PHP Interpreter</h2>
+
+<p><code>Preference</code>を開く。<br/>
+<code>Languages &amp; Frameworks -&gt; PHP -&gt; Test Frameworks</code>を選択。<br/>
+<code>+</code>マークをクリックし、<code>PHPUnit by Remote Interpreter</code>を選択する。</p>
+
+<p><img src="/images/2017/09/phpunit01.jpg" alt="" /></p>
+
+<p>Interpreterを選択するウインドウが開くが、interpreterがないので作成する。<br/>
+右端の<code>...</code>をクリックする。</p>
+
+<p><img src="/images/2017/09/phpunit02.jpg" alt="" /></p>
+
+<p>ウインドウが開くので、<code>+</code>をクリックし、<code>From Docker, Vagrant, VM, Remote...</code>を選択。</p>
+
+<p><img src="/images/2017/09/phpunit03.jpg" alt="" /></p>
+
+<p>開いたウインドウで、<code>Vagrant</code>を選択。すると自動で設定が読み込まれるのでそのままOKする。</p>
+
+<p><img src="/images/2017/09/phpunit04.jpg" alt="" /></p>
+
+<p>OKをクリックすると、SSH接続が行われ情報が自動で読み込まれる。<br/>
+そのままでOKなのでOKをクリックする。</p>
+
+<p><img src="/images/2017/09/phpunit05.jpg" alt="" /></p>
+
+<p>Interpreterを選択する画面に戻るので、作成したInterpreterを選択し、OKをクリック。</p>
+
+<p><img src="/images/2017/09/phpunit06.jpg" alt="" /></p>
+
+<p>追加したInterpreterでPHPUnitのライブラリを指定するが、Composer経由でのロードになるので、デフォルトの<code>Use Composer autoloader</code>のままでよい。<br/>
+Vagrant内でのautolodのパスを指定するので、<code>...</code>をクリック。</p>
+
+<p><img src="/images/2017/09/phpunit07.jpg" alt="" /></p>
+
+<p>Scothboxは<code>/var/www</code>がホストと共有しているディレクトリになるので、そこから<code>vendor/autoload.php</code>を選択する。</p>
+
+<p><img src="/images/2017/09/phpunit08.jpg" alt="" /></p>
+
+<p>選択すると、追加されているPHPUnitのバージョンが表示される。</p>
+
+<p><img src="/images/2017/09/phpunit09.jpg" alt="" /></p>
+
+<p>これでInterpreterの設定は完了。</p>
+
+<h2>Run/Debug Configurations</h2>
+
+<p>Configurationsの設定を行う。</p>
+
+<p>メニューから、<code>Run -&gt; Edit Configurations</code>を選択。</p>
+
+<p><code>+</code>をクリックし、<code>PHPUnit</code>のConfigurationを追加する。</p>
+
+<p><img src="/images/2017/09/phpunit10.jpg" alt="" /></p>
+
+<p>Nameは適当に書く。<br/>
+Test scopeはテストしたいディレクトリを選択する。<br/>
+Laravelのtestsディレクトリを指定しておく。（どこでもよい）<br/>
+この設定の下部に、Errorと出ているのでFixをクリック。</p>
+
+<p><img src="/images/2017/09/phpunit11.jpg" alt="" /></p>
+
+<p>PHPの設定ウインドウが開くので、<code>PHP language level</code>はVagrant環境に合わせて<code>7</code>を選択。<br/>
+<code>CLI Interpreter</code>は設定したinterpreterを選択する。</p>
+
+<p><img src="/images/2017/09/phpunit12.jpg" alt="" /></p>
+
+<p>OKで閉じる。</p>
+
+<h2>実行</h2>
+
+<p>右上のセレクトボックスが、先ほど作成したConfigurationが選択されている状態になっているはずなので、そのまま緑の三角をクリック。</p>
+
+<p><img src="/images/2017/09/phpunit13.jpg" alt="" /></p>
+
+<p>すると、<code>tests</code>ディレクトリ以下のテストファイルが自動で起動し、テストが実行される。<br/>
+デフォルトのサンプルテストは必ず成功するので、無事、テストが通ればOK。</p>
+
+<p><img src="/images/2017/09/phpunit14.jpg" alt="" /></p>
+
+<p><code>ExampleTest.php</code>の<code>assertTrue</code>を<code>false</code>にしてみて失敗させてみる。</p>
+
+<p>```
+public function testBasicTest()
+{</p>
+
+<pre><code>$this-&gt;assertTrue(false);
+</code></pre>
+
+<p>}
+```</p>
+
+<p>ファイルを選択して右クリックすれば、そのファイルのみをテスト実行する事も可能。<br/>
+失敗すると以下のようになる。</p>
+
+<p><img src="/images/2017/09/phpunit15.jpg" alt="" /></p>
+
+<p>これで無事、成功と失敗の動作が確認できた。</p>
+
+<h1>参考</h1>
+
+<ul>
+<li><a href="https://confluence.jetbrains.com/display/PhpStorm/Running+PHPUnit+tests+over+SSH+on+a+remote+server+with+PhpStorm">Running PHPUnit tests over SSH on a remote server with PhpStorm &ndash; PhpStorm &ndash; Confluence</a></li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[heroku]PostgresとRedisの環境設定]]></title>
@@ -289,231 +436,6 @@ $now-&gt;format('Y-m-d H:i:s');
 
 <p>WordPressはともかく、herokuとPHPのタイムゾーン設定はherokuでPHPを使うのなら、デフォルトで設定しておいた方が後々間違いがなさそう。<br/>
 環境構築の際にまず設定しておくとよさげ。</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[PHP]CurlでのSSL接続をOpenSSL方式に変更する]]></title>
-    <link href="http://kayakuguri.github.io/blog/2016/07/07/curl-openssl-tls/"/>
-    <updated>2016-07-07T17:50:07+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2016/07/07/curl-openssl-tls</id>
-    <content type="html"><![CDATA[<p>curlでsslを接続する際に、opensslを利用した接続になっていなかったために接続出来ない事例があったのだが、curlを入れ替えてopensslを利用するようにしたら接続出来たのでそのメモ。</p>
-
-<!-- more -->
-
-
-<h1>前提</h1>
-
-<p>接続をしている環境は以下とする。</p>
-
-<ul>
-<li>CnetOS 5.6</li>
-<li>PHP 5.3</li>
-</ul>
-
-
-<p>この環境で、SalesforceへRestAPIを利用して接続をする。<br/>
-接続する際の認証は以下のクラスを利用している。</p>
-
-<ul>
-<li><a href="https://github.com/nkjm/Force.com-OAuth-Toolkit-for-PHP">nkjm/Force.com-OAuth-Toolkit-for-PHP: A toolkit to enable OAuth in external Web Services developed in php</a></li>
-</ul>
-
-
-<p>自作の <code>/sample/login</code>のエンドポイントへ接続するものとする。<br/>
-接続に利用しているPHP。</p>
-
-<p>```
-&lt;?php
-require_once(&lsquo;oauth.php&rsquo;);</p>
-
-<p>define(&lsquo;CLIENT_ID&rsquo;, &lsquo;xxx&rsquo;);
-define(&lsquo;CLIENT_SECRET&rsquo;, &lsquo;xxx&rsquo;);
-define(&lsquo;CALLBACK_URL&rsquo;, &lsquo;<a href="http://localhost/">http://localhost/</a>&rsquo;);
-define(&lsquo;LOGIN_URL&rsquo;, &lsquo;<a href="https://test.salesforce.com">https://test.salesforce.com</a>&rsquo;);
-define(&lsquo;USERNAME&rsquo;, &lsquo;xxx&rsquo;);
-define(&lsquo;PASSWORD&rsquo;, &lsquo;xxx&rsquo;);</p>
-
-<p>$oauth = new oauth(CLIENT_ID, CLIENT_SECRET, CALLBACK_URL, LOGIN_URL);
-$oauth->auth_with_password(USERNAME, PASSWORD, 120);
-$url = &ldquo;$oauth->instance_url/services/apexrest/sample/login&rdquo;;
-$curl = curl_init($url);
-$POST_DATA = array(</p>
-
-<pre><code>'email' =&gt; 'sample',
-'passwd' =&gt; 'password'
-</code></pre>
-
-<p>);</p>
-
-<p>curl_setopt($curl, CURLOPT_POST, TRUE);
-curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($POST_DATA));
-curl_setopt($curl, CURLOPT_HEADER, false);
-curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-curl_setopt($curl, CURLOPT_HTTPHEADER, array(&lsquo;Content-type: application/x-www-form-urlencoded;charset=UTF-8&rsquo;, &ldquo;Authorization: OAuth &rdquo; . $oauth->access_token));
-$output= curl_exec($curl);
-curl_close($curl);
-$response = json_decode($output, true);</p>
-
-<p>echo $output;
-```</p>
-
-<p>この辺詳しくは以下をどうぞ。<br/>
-<a href="http://kayakuguri.github.io/blog/2014/10/27/apex-rest-post/">[Salesforce]apex Rest APIでPOSTでデータを送信する</a></p>
-
-<h1>失敗する</h1>
-
-<p>このまま送信をすると、以下のようなエラーが出て失敗する。<br/>
-ちなみに、ログイン履歴には残っている。</p>
-
-<p>```
-[</p>
-
-<pre><code>{
-    message: "この組織では TLS 1.0 が無効になりました。HTTPS を使用して Salesforce に接続するには、TLS 1.1 以降を使用してください。",
-    errorCode: "UNSUPPORTED_CLIENT"
-}
-</code></pre>
-
-<p>]
-```</p>
-
-<h1>TLS</h1>
-
-<p>ssl通信をする時の暗号化規格で、TLS1.0は暗号化のレベルが低い、とかで1.1以上が推奨されているよう。<br/>
-<a href="http://www.intellilink.co.jp/article/pcidss/18.html">SSL/TLS 1.0 はいつまでに無効化しなければならないか？ | NTTデータ先端技術株式会社</a><br/>
-それに伴って、Salesforceでは、TLS1.0での接続を無効に切り替えていっている。<br/>
-変更内容など詳しくは公式で。</p>
-
-<ul>
-<li><a href="https://help.salesforce.com/apex/HTViewSolution?id=000221207&amp;language=ja">Salesforce による TLS 1.0 の無効化</a></li>
-</ul>
-
-
-<p>組織の設定から明示的に有効にする事も可能だが、強制的に切り替えが行われるタイミングは以下。</p>
-
-<ul>
-<li>Sandbox 組織 &ndash; 2016 年 6 月 25 日、午前 9:30 (太平洋夏時間) (16:30 UTC)</li>
-<li>本番組織 &ndash; 2017 年 3 月 4 日、午前 9:30 (太平洋標準時) (17:30 UTC)</li>
-</ul>
-
-
-<p>今回は、Sandboxでの設定が適用されたために接続が出来なくなったよう。</p>
-
-<p>ちなみにTLSについて調べていて、現状、SSLと呼んでいるものは全てTLSによる接続になっているらしい。</p>
-
-<blockquote><p>SSLはバージョン1.0と2.0は既に脆弱性で消えていたが、2014(平成26)年10月14日、GoogleのセキュリティチームによりSSL 3.0の深刻な脆弱性「POODLE」が発見されたことでSSLは全バージョンに脆弱性が発覚、これをもってSSLは現役を退いた。<br/>
-<a href="http://www.wdic.org/w/WDIC/TLS">http://www.wdic.org/w/WDIC/TLS</a></p></blockquote>
-
-<h1>原因</h1>
-
-<p>上記環境で原因を探ってみると、<code>curl</code>でエンドポイントへ投げる際に<code>NSS</code>という方式が使われている事が原因となっている事がわかった。</p>
-
-<p><img src="/images/2016/07/tls01.jpg" alt="" /></p>
-
-<p><a href="https://developer.mozilla.org/ja/docs/NSS_FAQ">NSS FAQ | MDN</a></p>
-
-<p>NSSのバージョンは3.14だが、このバージョンでは一応TLS1.1には対応しているとリリースノートには書かれていたが…。詳細は不明。<br/>
-<a href="https://developer.mozilla.org/en-US/docs/Mozilla/Projects/NSS/NSS_3.14_release_notes">NSS 3.14 release notes &ndash; Mozilla | MDN</a></p>
-
-<h1>対処</h1>
-
-<p>というわけで、これを<code>NSS</code>ではなく、<code>OpenSSL</code>方式で接続するように変更する。<br/>
-といっても、設定変更で済むわけではなく、curlのインストールし直し、となる。</p>
-
-<p>作業内容は以下のサイトをそのまま利用させてもらった。<br/>
-<a href="http://www.apollo.jp/blog/?p=2382">wordpressの引っ越し | 紅い夕陽</a></p>
-
-<h2>作業</h2>
-
-<p>サーバー側での作業となる。<br/>
-今回はvagrant環境で作業をしたので、<code>$ vagrant ssh</code>でsshログインして作業した。<br/>
-また、ルートログインしておく。</p>
-
-<p>・必要なモジュールをインストール</p>
-
-<p>```</p>
-
-<h1>yum install gcc</h1>
-
-<h1>yum -y install openssl-devel</h1>
-
-<h1>yum -y install wget</h1>
-
-<h1>yum -y install lbzip2</h1>
-
-<p>```</p>
-
-<p>・curlを取得して展開(curlは少し前のバージョン)</p>
-
-<p>```</p>
-
-<h1>wget <a href="http://curl.haxx.se/download/curl-7.37.0.tar.bz2">http://curl.haxx.se/download/curl-7.37.0.tar.bz2</a></h1>
-
-<h1>tar xf curl-7.37.0.tar.bz2</h1>
-
-<h1>cd curl-7.37.0</h1>
-
-<h1>./configure &mdash;enable-libcurl-option</h1>
-
-<p>```</p>
-
-<p>・コンパイルしてインストール</p>
-
-<p>```</p>
-
-<h1>make</h1>
-
-<h1>make install</h1>
-
-<p>```</p>
-
-<p>・ライブラリを登録</p>
-
-<p>```</p>
-
-<h1>vi /etc/ld.so.conf.d/curl-x86_64.conf</h1>
-
-<p>```</p>
-
-<p>内容</p>
-
-<p><code>
-/usr/local/lib
-</code></p>
-
-<p>・ライブラリを更新</p>
-
-<p>```</p>
-
-<h1>ldconfig -v</h1>
-
-<p>```</p>
-
-<p>最後に、apacheを再起動しておく。</p>
-
-<p>```</p>
-
-<h1>service httpd restart</h1>
-
-<p>```</p>
-
-<p>これでOpensslを使うように変更できた。</p>
-
-<p><img src="/images/2016/07/tls02.jpg" alt="" /></p>
-
-<p>この状態で再度冒頭のPHPでアクセスすると、無事、接続することが出来た。</p>
-
-<h1>参考</h1>
-
-<ul>
-<li><a href="http://www.apollo.jp/blog/?p=2382">wordpressの引っ越し | 紅い夕陽</a></li>
-<li><a href="http://blog.wnotes.net/blog/article/php_curl_error">PHPのcurlで&quot;SSL Connection Error.&quot;のエラーがどうしても出る時の対策 | ブログ :: Web notes.log</a></li>
-<li><a href="http://www.wdic.org/w/WDIC/TLS">TLS ‐ 通信用語の基礎知識</a></li>
-<li><a href="http://www.intellilink.co.jp/article/pcidss/18.html">SSL/TLS 1.0 はいつまでに無効化しなければならないか？ | NTTデータ先端技術株式会社</a></li>
-<li><a href="http://tkengo.github.io/blog/2015/12/01/https-details/">理解してるつもりの SSL/TLS でも、もっと理解したら面白かった話 &middot; けんごのお屋敷</a></li>
-</ul>
-
 ]]></content>
   </entry>
   

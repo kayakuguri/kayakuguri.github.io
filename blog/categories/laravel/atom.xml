@@ -4,7 +4,7 @@
   <title><![CDATA[Category: laravel | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/laravel/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2017-09-22T15:19:00+09:00</updated>
+  <updated>2017-09-22T19:09:54+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,153 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[PhpStormを使用してPHP UnitのテストをVagrantのリモート上で実行する]]></title>
+    <link href="http://kayakuguri.github.io/blog/2017/09/22/laravel-phpunit-vagrant-phpstorm/"/>
+    <updated>2017-09-22T19:05:58+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2017/09/22/laravel-phpunit-vagrant-phpstorm</id>
+    <content type="html"><![CDATA[<p>LaravelのUnitテストを実行すべく、ローカルのVagrant環境上でPHP Unitを実行するように設定してみた。</p>
+
+<!-- more -->
+
+
+<h1>環境</h1>
+
+<ul>
+<li>Vagrant
+
+<ul>
+<li><a href="https://box.scotch.io/">ScotchBox</a></li>
+</ul>
+</li>
+<li>Laravel 5.5.7</li>
+<li>PHP 7.0</li>
+</ul>
+
+
+<h1>PHP Unit</h1>
+
+<p>PHP UnitはCompoerにてプロジェクトディレクトリにインストールする。<br/>
+LaravelではデフォルトでComposerに入っているので特に設定はなし。<br/>
+(Linuxに入れる必要はない)</p>
+
+<p><code>
+"phpunit/phpunit": "~6.0"
+</code></p>
+
+<h1>PhpStorm</h1>
+
+<p>PhpStormでの設定方法。<br/>
+設定したいプロジェクトのルートディレクトリを開いた状態で設定する。</p>
+
+<h2>PHP Interpreter</h2>
+
+<p><code>Preference</code>を開く。<br/>
+<code>Languages &amp; Frameworks -&gt; PHP -&gt; Test Frameworks</code>を選択。<br/>
+<code>+</code>マークをクリックし、<code>PHPUnit by Remote Interpreter</code>を選択する。</p>
+
+<p><img src="/images/2017/09/phpunit01.jpg" alt="" /></p>
+
+<p>Interpreterを選択するウインドウが開くが、interpreterがないので作成する。<br/>
+右端の<code>...</code>をクリックする。</p>
+
+<p><img src="/images/2017/09/phpunit02.jpg" alt="" /></p>
+
+<p>ウインドウが開くので、<code>+</code>をクリックし、<code>From Docker, Vagrant, VM, Remote...</code>を選択。</p>
+
+<p><img src="/images/2017/09/phpunit03.jpg" alt="" /></p>
+
+<p>開いたウインドウで、<code>Vagrant</code>を選択。すると自動で設定が読み込まれるのでそのままOKする。</p>
+
+<p><img src="/images/2017/09/phpunit04.jpg" alt="" /></p>
+
+<p>OKをクリックすると、SSH接続が行われ情報が自動で読み込まれる。<br/>
+そのままでOKなのでOKをクリックする。</p>
+
+<p><img src="/images/2017/09/phpunit05.jpg" alt="" /></p>
+
+<p>Interpreterを選択する画面に戻るので、作成したInterpreterを選択し、OKをクリック。</p>
+
+<p><img src="/images/2017/09/phpunit06.jpg" alt="" /></p>
+
+<p>追加したInterpreterでPHPUnitのライブラリを指定するが、Composer経由でのロードになるので、デフォルトの<code>Use Composer autoloader</code>のままでよい。<br/>
+Vagrant内でのautolodのパスを指定するので、<code>...</code>をクリック。</p>
+
+<p><img src="/images/2017/09/phpunit07.jpg" alt="" /></p>
+
+<p>Scothboxは<code>/var/www</code>がホストと共有しているディレクトリになるので、そこから<code>vendor/autoload.php</code>を選択する。</p>
+
+<p><img src="/images/2017/09/phpunit08.jpg" alt="" /></p>
+
+<p>選択すると、追加されているPHPUnitのバージョンが表示される。</p>
+
+<p><img src="/images/2017/09/phpunit09.jpg" alt="" /></p>
+
+<p>これでInterpreterの設定は完了。</p>
+
+<h2>Run/Debug Configurations</h2>
+
+<p>Configurationsの設定を行う。</p>
+
+<p>メニューから、<code>Run -&gt; Edit Configurations</code>を選択。</p>
+
+<p><code>+</code>をクリックし、<code>PHPUnit</code>のConfigurationを追加する。</p>
+
+<p><img src="/images/2017/09/phpunit10.jpg" alt="" /></p>
+
+<p>Nameは適当に書く。<br/>
+Test scopeはテストしたいディレクトリを選択する。<br/>
+Laravelのtestsディレクトリを指定しておく。（どこでもよい）<br/>
+この設定の下部に、Errorと出ているのでFixをクリック。</p>
+
+<p><img src="/images/2017/09/phpunit11.jpg" alt="" /></p>
+
+<p>PHPの設定ウインドウが開くので、<code>PHP language level</code>はVagrant環境に合わせて<code>7</code>を選択。<br/>
+<code>CLI Interpreter</code>は設定したinterpreterを選択する。</p>
+
+<p><img src="/images/2017/09/phpunit12.jpg" alt="" /></p>
+
+<p>OKで閉じる。</p>
+
+<h2>実行</h2>
+
+<p>右上のセレクトボックスが、先ほど作成したConfigurationが選択されている状態になっているはずなので、そのまま緑の三角をクリック。</p>
+
+<p><img src="/images/2017/09/phpunit13.jpg" alt="" /></p>
+
+<p>すると、<code>tests</code>ディレクトリ以下のテストファイルが自動で起動し、テストが実行される。<br/>
+デフォルトのサンプルテストは必ず成功するので、無事、テストが通ればOK。</p>
+
+<p><img src="/images/2017/09/phpunit14.jpg" alt="" /></p>
+
+<p><code>ExampleTest.php</code>の<code>assertTrue</code>を<code>false</code>にしてみて失敗させてみる。</p>
+
+<p>```
+public function testBasicTest()
+{</p>
+
+<pre><code>$this-&gt;assertTrue(false);
+</code></pre>
+
+<p>}
+```</p>
+
+<p>ファイルを選択して右クリックすれば、そのファイルのみをテスト実行する事も可能。<br/>
+失敗すると以下のようになる。</p>
+
+<p><img src="/images/2017/09/phpunit15.jpg" alt="" /></p>
+
+<p>これで無事、成功と失敗の動作が確認できた。</p>
+
+<h1>参考</h1>
+
+<ul>
+<li><a href="https://confluence.jetbrains.com/display/PhpStorm/Running+PHPUnit+tests+over+SSH+on+a+remote+server+with+PhpStorm">Running PHPUnit tests over SSH on a remote server with PhpStorm &ndash; PhpStorm &ndash; Confluence</a></li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[Laravel]キューのdelayとsleepオプション]]></title>
@@ -406,60 +553,6 @@ Via: 1.1 vegur
 <li><a href="https://stackoverflow.com/questions/12173990/how-can-you-debug-a-cors-request-with-curl">How can you debug a CORS request with cURL? &ndash; Stack Overflow</a></li>
 <li><a href="http://blog.toshimaru.net/s3-cloudfront-cors-setting/">AWS S3 + CloudFront のCORS設定手順 &ndash; Hack Your Design!</a></li>
 <li><a href="http://www.minimalab.com/blog/2014/12/08/curl-option/">Curl の個人的によく使うオプションまとめ</a></li>
-</ul>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Laravelで標準出力にエラーログを出力する]]></title>
-    <link href="http://kayakuguri.github.io/blog/2017/06/16/larave-std-error/"/>
-    <updated>2017-06-16T16:01:28+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2017/06/16/larave-std-error</id>
-    <content type="html"><![CDATA[<p>HerokuでWebサイトを作る場合、ログの出力はPapertrailを入れることが多い、というか必ず利用しています。<br/>
-Papertrailでは標準出力に出力したログは漏れなく拾ってくれるので、Laravelも標準出力にエラーログを出力するようにする方法を毎回ググルので備忘録。</p>
-
-<!-- more -->
-
-
-<h1>設定</h1>
-
-<p>以下の記述を、<code>bootstrap/app.php</code> に追加します。</p>
-
-<p>```
-$app->configureMonologUsing(function ($monolog) {</p>
-
-<pre><code>$monolog-&gt;pushHandler(new \Monolog\Handler\StreamHandler('php://stderr'));
-</code></pre>
-
-<p>});
-```</p>
-
-<h1>出力</h1>
-
-<p>以下のようにすると出力可能です。</p>
-
-<p><code>
-Log::error('TEST LOG');
-</code></p>
-
-<h1>結果</h1>
-
-<p>すると、以下のように出力されます。</p>
-
-<p><code>
-[2017-06-16 04:02:16] dev.ERROR: TEST LOG [] []
-</code></p>
-
-<p><code>dev.ERROR</code>の<code>dev</code>の部分は、環境変数の<code>APP_ENV</code>で設定している文字列が出ます。<br/>
-なので、<code>dev.ERROR</code>とかでひっかけてPapertrailでアラートを設定してやれば自分で出力したエラーログで通知とかが出せたりします。</p>
-
-<h1>参考</h1>
-
-<p>以下、参考にしました。ありがとうございます。</p>
-
-<ul>
-<li><a href="http://qiita.com/iakio/items/86086e046f73826c9bef">Laravelのログを標準エラーに出力する &ndash; Qiita</a></li>
 </ul>
 
 ]]></content>

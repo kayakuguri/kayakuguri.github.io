@@ -4,7 +4,7 @@
   <title><![CDATA[Category: vagrant | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/vagrant/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2017-09-22T15:19:00+09:00</updated>
+  <updated>2017-09-22T19:09:54+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,153 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[PhpStormを使用してPHP UnitのテストをVagrantのリモート上で実行する]]></title>
+    <link href="http://kayakuguri.github.io/blog/2017/09/22/laravel-phpunit-vagrant-phpstorm/"/>
+    <updated>2017-09-22T19:05:58+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2017/09/22/laravel-phpunit-vagrant-phpstorm</id>
+    <content type="html"><![CDATA[<p>LaravelのUnitテストを実行すべく、ローカルのVagrant環境上でPHP Unitを実行するように設定してみた。</p>
+
+<!-- more -->
+
+
+<h1>環境</h1>
+
+<ul>
+<li>Vagrant
+
+<ul>
+<li><a href="https://box.scotch.io/">ScotchBox</a></li>
+</ul>
+</li>
+<li>Laravel 5.5.7</li>
+<li>PHP 7.0</li>
+</ul>
+
+
+<h1>PHP Unit</h1>
+
+<p>PHP UnitはCompoerにてプロジェクトディレクトリにインストールする。<br/>
+LaravelではデフォルトでComposerに入っているので特に設定はなし。<br/>
+(Linuxに入れる必要はない)</p>
+
+<p><code>
+"phpunit/phpunit": "~6.0"
+</code></p>
+
+<h1>PhpStorm</h1>
+
+<p>PhpStormでの設定方法。<br/>
+設定したいプロジェクトのルートディレクトリを開いた状態で設定する。</p>
+
+<h2>PHP Interpreter</h2>
+
+<p><code>Preference</code>を開く。<br/>
+<code>Languages &amp; Frameworks -&gt; PHP -&gt; Test Frameworks</code>を選択。<br/>
+<code>+</code>マークをクリックし、<code>PHPUnit by Remote Interpreter</code>を選択する。</p>
+
+<p><img src="/images/2017/09/phpunit01.jpg" alt="" /></p>
+
+<p>Interpreterを選択するウインドウが開くが、interpreterがないので作成する。<br/>
+右端の<code>...</code>をクリックする。</p>
+
+<p><img src="/images/2017/09/phpunit02.jpg" alt="" /></p>
+
+<p>ウインドウが開くので、<code>+</code>をクリックし、<code>From Docker, Vagrant, VM, Remote...</code>を選択。</p>
+
+<p><img src="/images/2017/09/phpunit03.jpg" alt="" /></p>
+
+<p>開いたウインドウで、<code>Vagrant</code>を選択。すると自動で設定が読み込まれるのでそのままOKする。</p>
+
+<p><img src="/images/2017/09/phpunit04.jpg" alt="" /></p>
+
+<p>OKをクリックすると、SSH接続が行われ情報が自動で読み込まれる。<br/>
+そのままでOKなのでOKをクリックする。</p>
+
+<p><img src="/images/2017/09/phpunit05.jpg" alt="" /></p>
+
+<p>Interpreterを選択する画面に戻るので、作成したInterpreterを選択し、OKをクリック。</p>
+
+<p><img src="/images/2017/09/phpunit06.jpg" alt="" /></p>
+
+<p>追加したInterpreterでPHPUnitのライブラリを指定するが、Composer経由でのロードになるので、デフォルトの<code>Use Composer autoloader</code>のままでよい。<br/>
+Vagrant内でのautolodのパスを指定するので、<code>...</code>をクリック。</p>
+
+<p><img src="/images/2017/09/phpunit07.jpg" alt="" /></p>
+
+<p>Scothboxは<code>/var/www</code>がホストと共有しているディレクトリになるので、そこから<code>vendor/autoload.php</code>を選択する。</p>
+
+<p><img src="/images/2017/09/phpunit08.jpg" alt="" /></p>
+
+<p>選択すると、追加されているPHPUnitのバージョンが表示される。</p>
+
+<p><img src="/images/2017/09/phpunit09.jpg" alt="" /></p>
+
+<p>これでInterpreterの設定は完了。</p>
+
+<h2>Run/Debug Configurations</h2>
+
+<p>Configurationsの設定を行う。</p>
+
+<p>メニューから、<code>Run -&gt; Edit Configurations</code>を選択。</p>
+
+<p><code>+</code>をクリックし、<code>PHPUnit</code>のConfigurationを追加する。</p>
+
+<p><img src="/images/2017/09/phpunit10.jpg" alt="" /></p>
+
+<p>Nameは適当に書く。<br/>
+Test scopeはテストしたいディレクトリを選択する。<br/>
+Laravelのtestsディレクトリを指定しておく。（どこでもよい）<br/>
+この設定の下部に、Errorと出ているのでFixをクリック。</p>
+
+<p><img src="/images/2017/09/phpunit11.jpg" alt="" /></p>
+
+<p>PHPの設定ウインドウが開くので、<code>PHP language level</code>はVagrant環境に合わせて<code>7</code>を選択。<br/>
+<code>CLI Interpreter</code>は設定したinterpreterを選択する。</p>
+
+<p><img src="/images/2017/09/phpunit12.jpg" alt="" /></p>
+
+<p>OKで閉じる。</p>
+
+<h2>実行</h2>
+
+<p>右上のセレクトボックスが、先ほど作成したConfigurationが選択されている状態になっているはずなので、そのまま緑の三角をクリック。</p>
+
+<p><img src="/images/2017/09/phpunit13.jpg" alt="" /></p>
+
+<p>すると、<code>tests</code>ディレクトリ以下のテストファイルが自動で起動し、テストが実行される。<br/>
+デフォルトのサンプルテストは必ず成功するので、無事、テストが通ればOK。</p>
+
+<p><img src="/images/2017/09/phpunit14.jpg" alt="" /></p>
+
+<p><code>ExampleTest.php</code>の<code>assertTrue</code>を<code>false</code>にしてみて失敗させてみる。</p>
+
+<p>```
+public function testBasicTest()
+{</p>
+
+<pre><code>$this-&gt;assertTrue(false);
+</code></pre>
+
+<p>}
+```</p>
+
+<p>ファイルを選択して右クリックすれば、そのファイルのみをテスト実行する事も可能。<br/>
+失敗すると以下のようになる。</p>
+
+<p><img src="/images/2017/09/phpunit15.jpg" alt="" /></p>
+
+<p>これで無事、成功と失敗の動作が確認できた。</p>
+
+<h1>参考</h1>
+
+<ul>
+<li><a href="https://confluence.jetbrains.com/display/PhpStorm/Running+PHPUnit+tests+over+SSH+on+a+remote+server+with+PhpStorm">Running PHPUnit tests over SSH on a remote server with PhpStorm &ndash; PhpStorm &ndash; Confluence</a></li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Vagrantで、Authentication failureのWarningが出た場合の対処]]></title>
@@ -255,7 +402,7 @@ timezone: &ldquo;Asia/Tokyo&rdquo;
 <p>admin:
   user: admin
   password: admin
-  email: <a href="&#109;&#x61;&#x69;&#108;&#x74;&#x6f;&#x3a;&#x6d;&#x61;&#105;&#108;&#64;&#100;&#111;&#109;&#97;&#105;&#x6e;&#x2e;&#116;&#x6c;&#x64;">&#109;&#x61;&#105;&#x6c;&#64;&#100;&#x6f;&#109;&#x61;&#x69;&#x6e;&#46;&#x74;&#108;&#x64;</a>
+  email: <a href="&#109;&#x61;&#x69;&#x6c;&#x74;&#111;&#58;&#x6d;&#x61;&#105;&#x6c;&#64;&#100;&#x6f;&#109;&#x61;&#x69;&#110;&#46;&#x74;&#x6c;&#100;">&#109;&#97;&#x69;&#x6c;&#64;&#x64;&#x6f;&#x6d;&#97;&#x69;&#110;&#46;&#116;&#x6c;&#100;</a>
   first_name: &ldquo;&rdquo;
   last_name: &ldquo;&rdquo;
 ```</p>
@@ -591,168 +738,6 @@ DocumentRoot /var/www/public
 <li><a href="https://www.k4750.net/2013/10/13/self-signed-cert/">（正しい）オレオレ証明書の作り方 |  K4750.net</a></li>
 <li><a href="http://takuya-1st.hatenablog.jp/entry/20100730/1280474385">超簡単・オレオレ証明書の作り方 &ndash; それマグで！</a></li>
 <li><a href="http://blog.inouetakuya.info/entry/20110605/1307261417">それ etckeeper でできるよ &ndash; /etc 以下を Git で自動的にバージョン管理 &ndash; 彼女からは、おいちゃんと呼ばれています</a></li>
-</ul>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Laravel HomesteadのPostgreSQLにPosticoから接続する]]></title>
-    <link href="http://kayakuguri.github.io/blog/2016/06/09/homestead-postgres-via-homestead/"/>
-    <updated>2016-06-09T14:56:23+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2016/06/09/homestead-postgres-via-homestead</id>
-    <content type="html"><![CDATA[<p>まとまって情報がなかったのでメモ。</p>
-
-<!-- more -->
-
-
-<h1>SSH</h1>
-
-<p>ssh接続する際のユーザー名・パスワードは、デフォルトでは、<code>vagrant/vagrant</code>のよう。
-ユーザー名はホスト名とは別で、vagrantを立ち上げた状態で以下のコマンドで確認出来た。</p>
-
-<p><code>
-$ vagrant ssh-config
-Host default
-  HostName 127.0.0.1
-  User vagrant
-  Port 2222
-  UserKnownHostsFile /dev/null
-  StrictHostKeyChecking no
-  PasswordAuthentication no
-  IdentityFile /Users/USER_NAME/Vagrant/app_folder/.vagrant/machines/default/virtualbox/private_key
-  IdentitiesOnly yes
-  LogLevel FATAL
-  ForwardAgent yes
-</code></p>
-
-<p>この中の、<code>User vagrant</code>という部分。</p>
-
-<p>SSH Hostは、<code>Homestead.yaml</code>で指定したip。
-デフォルトは、<code>192.168.10.10</code>だと思う。</p>
-
-<p><code>
-ip: "192.168.10.10"
-</code></p>
-
-<h1>Postgres</h1>
-
-<p>Postgresはデフォルトでは以下の設定になっている。</p>
-
-<table>
-<thead>
-<tr>
-<th></th>
-<th align="left"> 項目 </th>
-<th align="left"> 内容 </th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td></td>
-<td align="left">ホスト名 </td>
-<td align="left"> localhost </td>
-</tr>
-<tr>
-<td></td>
-<td align="left"> DB名 </td>
-<td align="left"> homestead </td>
-</tr>
-<tr>
-<td></td>
-<td align="left"> ユーザー名 </td>
-<td align="left"> homestead </td>
-</tr>
-<tr>
-<td></td>
-<td align="left"> パスワード </td>
-<td align="left"> secret </td>
-</tr>
-</tbody>
-</table>
-
-
-<h1>Postico</h1>
-
-<p>Posticoから接続する際には、Optionsから、<code>Connect via SSH</code>を選択してSSH接続設定をしておく。</p>
-
-<table>
-<thead>
-<tr>
-<th></th>
-<th align="left"> 項目 </th>
-<th align="left"> 内容 </th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td></td>
-<td align="left"> Nickname </td>
-<td align="left"> (なんでも) </td>
-</tr>
-<tr>
-<td></td>
-<td align="left"> Host </td>
-<td align="left"> localhost (デフォルト) </td>
-</tr>
-<tr>
-<td></td>
-<td align="left"> Port </td>
-<td align="left"> 5432 (デフォルト) </td>
-</tr>
-<tr>
-<td></td>
-<td align="left"> User </td>
-<td align="left"> homestead </td>
-</tr>
-<tr>
-<td></td>
-<td align="left"> Password </td>
-<td align="left"> secret </td>
-</tr>
-<tr>
-<td></td>
-<td align="left"> Database </td>
-<td align="left"> homestead </td>
-</tr>
-<tr>
-<td></td>
-<td align="left"> SSH Host </td>
-<td align="left"> 192.168.10.10 </td>
-</tr>
-<tr>
-<td></td>
-<td align="left"> Port </td>
-<td align="left"> 22 (デフォルト) </td>
-</tr>
-<tr>
-<td></td>
-<td align="left"> User </td>
-<td align="left"> vagrant </td>
-</tr>
-<tr>
-<td></td>
-<td align="left"> Password </td>
-<td align="left"> vagrant </td>
-</tr>
-<tr>
-<td></td>
-<td align="left"> Private Key </td>
-<td align="left"> なし </td>
-</tr>
-</tbody>
-</table>
-
-
-<p><img src="/images/2016/06/postico_homestead.jpg" alt="" /></p>
-
-<p>これで接続出来た。</p>
-
-<h1>参考</h1>
-
-<ul>
-<li><a href="https://laravel.com/docs/5.1/homestead">Laravel Homestead</a></li>
-<li><a href="http://qiita.com/megane42/items/1d8ae7444d8c1b10bbd7">Vagrant で作った VM にやってはいけない2つのこと &ndash; Qiita</a></li>
 </ul>
 
 ]]></content>
