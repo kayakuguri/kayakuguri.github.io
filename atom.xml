@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2017-09-22T19:13:06+09:00</updated>
+  <updated>2017-10-10T15:16:42+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,97 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[さくらのレンタルサーバでのhttps強制とベーシック認証]]></title>
+    <link href="http://kayakuguri.github.io/blog/2017/10/10/sakura-ssl/"/>
+    <updated>2017-10-10T14:55:28+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2017/10/10/sakura-ssl</id>
+    <content type="html"><![CDATA[<p>普段はheorkuを触っている事が多いのだが、今回はさくらのレンタルサーバを使用することになり、その環境でのhttps強制を設定しようとしたところ、リダイレクトループでハマったのでメモ。</p>
+
+<!-- more -->
+
+
+<h2>通常のリダイレクト</h2>
+
+<p>どうやらさくらのサーバはかなりクセの強いことで有名らしく、以下のような普通の？https強制のコードだとリダイレクトループとなってしまう。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>RewriteEngine On
+</span><span class='line'>RewriteCond %{HTTPS} off
+</span><span class='line'>RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>ロードバランサのリダイレクト</h2>
+
+<p>ロードバランサを使っている場合は<code>HTTPS</code>が<code>on</code>にならないため、ずっとoffの状態になりリダイレクトループが起こる。<br/>
+よって、以下のように書く。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>RewriteEngine On
+</span><span class='line'>RewriteCond %{HTTP:X-Forwarded-Proto} !https
+</span><span class='line'>RewriteRule ^(.*)?$ https://%{HTTP:Host}%{REQUEST_URI} [L,R=301]</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>さくらのリダイレクト</h2>
+
+<p>しかしさくらの場合は特殊なようで、以下ような挙動になっているよう。</p>
+
+<ul>
+<li><code>%{SERVER_PORT}</code>には常に<code>80</code>が設定されている</li>
+<li>SSLアクセス時には、<code>%{ENV:HTTPS}</code>には<code>ON</code>、<code>%{HTTP:X-Sakura-Forwarded-For}</code>にはリクエスト元のIPが設定される</li>
+</ul>
+
+
+<p>よってhttps<strong>でない</strong>判定の場合は、<code>%{ENV:HTTPS}</code>がonではない、<code>%{HTTP:X-Sakura-Forwarded-For}</code>は空、の場合はリダイレクト、という判定にすればよいよう。</p>
+
+<p>よって以下となる。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>RewriteEngine On
+</span><span class='line'>RewriteCond %{ENV:HTTPS} !^on$
+</span><span class='line'>RewriteCond %{HTTP:X-SAKURA-FORWARDED-FOR} ^$
+</span><span class='line'>RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>ベーシック認証</h2>
+
+<p>ベーシックをかける際に、そのままベタで書いてしまうとhttpsへリダイレクトさせている関係上、httpでベーシック認証、httpsでベーシック認証、と2回聞かれることになってしまう。<br/>
+これをhttpsでのアクセス時にのみ有効としたいので、上記のさくらサーバの特性を活かして、<code>%{HTTP:X-Sakura-Forwarded-For}</code>が空でない場合にのみ、ベーシックを有効とするようにした。<br/>
+(<code>%{ENV:HTTPS}</code>は、ケースによっては<code>on</code>にならない場合もあるよう)</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;If "%{HTTP:X-SAKURA-FORWARDED-FOR} != ''"&gt;
+</span><span class='line'>AuthType Basic
+</span><span class='line'>AuthName "Input your ID and Password."
+</span><span class='line'>AuthUserFile /your/password/path/.htpasswd
+</span><span class='line'>require valid-user
+</span><span class='line'>&lt;/If&gt;</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>参考</h2>
+
+<ul>
+<li><a href="https://qiita.com/foursue/items/58e74c4a8c946dd49e12">htaccessでHTTPSにリダイレクトする &ndash; Qiita</a></li>
+<li><a href="https://qiita.com/kumita_ryusuke/items/377428f4d8219608bdbd">【AWS】ロードバランサー+ApacheでHTTPSリダイレクトをしてみる &ndash; Qiita</a></li>
+<li><a href="https://qiita.com/kawaz/items/5e96dae9686e3ac402fe">httpsへ強制リダイレクトするコピペ用RewriteRule（ELBやCloudFront対応） &ndash; Qiita</a></li>
+<li><a href="http://furyu.hatenablog.com/entry/20150410/1428674881">さくらのレンタルサーバ・共有SSLで .htaccess によりSSLのみのアクセス許可を設定する方法 &ndash; 風柳メモ</a></li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[PhpStormを使用してPHP UnitのテストをVagrantのリモート上で実行する]]></title>
@@ -2842,82 +2933,6 @@ URLのドメイン部分を先程取得した、 <code>instance_url</code> を�
 <li><a href="http://sfdcbeginner.com/how-to-test-salesforce-rest-api.html">HOW TO TEST SALESFORCE REST API</a></li>
 </ul>
 
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[ScotchboxでのPHPエラーの出力場所]]></title>
-    <link href="http://kayakuguri.github.io/blog/2016/12/05/ubuntu-error-log/"/>
-    <updated>2016-12-05T17:02:15+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2016/12/05/ubuntu-error-log</id>
-    <content type="html"><![CDATA[<p>自分用メモ。<br/>
-<a href="https://box.scotch.io/">Scotchbox</a>のVagrant環境で、PHPの標準エラー出力がどこに吐かれるかをいつも調べるのでメモ。</p>
-
-<!-- more -->
-
-
-<h1>環境</h1>
-
-<p>環境は以下。</p>
-
-<ul>
-<li>Scotchbox 2.5</li>
-<li>Ubuntu 14.04 LTS</li>
-<li>PHP 5.6</li>
-</ul>
-
-
-<p>純粋なUbuntuでも同じ場所にログが出力されるのかは調査していないので、あくまでもScotchbox環境、とする</p>
-
-<h1>結果</h1>
-
-<p>結論から書くと、以下のパスに保存されていた。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>/var/log/apache2/error.log</span></code></pre></td></tr></table></div></figure>
-
-
-<p>というわけで、<code>tail</code>する場合は以下。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'># tail -f /var/log/apache2/error.log</span></code></pre></td></tr></table></div></figure>
-
-
-<h1>設定内容</h1>
-
-<p>出力するパスは、以下のファイルで設定されている。<br/>
-<code>/etc/apache2/sites-available/000-default.conf</code></p>
-
-<p>内容</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;VirtualHost *:80&gt;
-</span><span class='line'>  ...
-</span><span class='line'>  ErrorLog ${APACHE_LOG_DIR}/error.log
-</span><span class='line'>  ...
-</span><span class='line'>&lt;/VirtualHost&gt;  </span></code></pre></td></tr></table></div></figure>
-
-
-<p><code>APACHE_LOG_DIR</code>という環境変数で設定されていることがわかる。<br/>
-では、この環境変数はどこで設定しているかというと、以下のファイル。</p>
-
-<p><code>/etc/apache2/envvars</code></p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>...
-</span><span class='line'>export APACHE_LOG_DIR=/var/log/apache2$SUFFIX
-</span><span class='line'>...</span></code></pre></td></tr></table></div></figure>
-
-
-<p>というわけで、冒頭のディレクトリに保存されていた。<br/>
-もし変更したい場合は上記<code>envvars</code>にて変更すればよさそう。<br/>
-(パーミッションの設定を与えてやる必要はあると思う。)</p>
 ]]></content>
   </entry>
   

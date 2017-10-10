@@ -4,7 +4,7 @@
   <title><![CDATA[Category: htaccess | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/htaccess/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2017-09-22T19:13:06+09:00</updated>
+  <updated>2017-10-10T15:16:42+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,85 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[さくらのレンタルサーバでのhttps強制とベーシック認証]]></title>
+    <link href="http://kayakuguri.github.io/blog/2017/10/10/sakura-ssl/"/>
+    <updated>2017-10-10T14:55:28+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2017/10/10/sakura-ssl</id>
+    <content type="html"><![CDATA[<p>普段はheorkuを触っている事が多いのだが、今回はさくらのレンタルサーバを使用することになり、その環境でのhttps強制を設定しようとしたところ、リダイレクトループでハマったのでメモ。</p>
+
+<!-- more -->
+
+
+<h2>通常のリダイレクト</h2>
+
+<p>どうやらさくらのサーバはかなりクセの強いことで有名らしく、以下のような普通の？https強制のコードだとリダイレクトループとなってしまう。</p>
+
+<p><code>
+RewriteEngine On
+RewriteCond %{HTTPS} off
+RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
+</code></p>
+
+<h2>ロードバランサのリダイレクト</h2>
+
+<p>ロードバランサを使っている場合は<code>HTTPS</code>が<code>on</code>にならないため、ずっとoffの状態になりリダイレクトループが起こる。<br/>
+よって、以下のように書く。</p>
+
+<p><code>
+RewriteEngine On
+RewriteCond %{HTTP:X-Forwarded-Proto} !https
+RewriteRule ^(.*)?$ https://%{HTTP:Host}%{REQUEST_URI} [L,R=301]
+</code></p>
+
+<h2>さくらのリダイレクト</h2>
+
+<p>しかしさくらの場合は特殊なようで、以下ような挙動になっているよう。</p>
+
+<ul>
+<li><code>%{SERVER_PORT}</code>には常に<code>80</code>が設定されている</li>
+<li>SSLアクセス時には、<code>%{ENV:HTTPS}</code>には<code>ON</code>、<code>%{HTTP:X-Sakura-Forwarded-For}</code>にはリクエスト元のIPが設定される</li>
+</ul>
+
+
+<p>よってhttps<strong>でない</strong>判定の場合は、<code>%{ENV:HTTPS}</code>がonではない、<code>%{HTTP:X-Sakura-Forwarded-For}</code>は空、の場合はリダイレクト、という判定にすればよいよう。</p>
+
+<p>よって以下となる。</p>
+
+<p><code>
+RewriteEngine On
+RewriteCond %{ENV:HTTPS} !^on$
+RewriteCond %{HTTP:X-SAKURA-FORWARDED-FOR} ^$
+RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
+</code></p>
+
+<h2>ベーシック認証</h2>
+
+<p>ベーシックをかける際に、そのままベタで書いてしまうとhttpsへリダイレクトさせている関係上、httpでベーシック認証、httpsでベーシック認証、と2回聞かれることになってしまう。<br/>
+これをhttpsでのアクセス時にのみ有効としたいので、上記のさくらサーバの特性を活かして、<code>%{HTTP:X-Sakura-Forwarded-For}</code>が空でない場合にのみ、ベーシックを有効とするようにした。<br/>
+(<code>%{ENV:HTTPS}</code>は、ケースによっては<code>on</code>にならない場合もあるよう)</p>
+
+<p><code>
+&lt;If "%{HTTP:X-SAKURA-FORWARDED-FOR} != ''"&gt;
+AuthType Basic
+AuthName "Input your ID and Password."
+AuthUserFile /your/password/path/.htpasswd
+require valid-user
+&lt;/If&gt;
+</code></p>
+
+<h2>参考</h2>
+
+<ul>
+<li><a href="https://qiita.com/foursue/items/58e74c4a8c946dd49e12">htaccessでHTTPSにリダイレクトする &ndash; Qiita</a></li>
+<li><a href="https://qiita.com/kumita_ryusuke/items/377428f4d8219608bdbd">【AWS】ロードバランサー+ApacheでHTTPSリダイレクトをしてみる &ndash; Qiita</a></li>
+<li><a href="https://qiita.com/kawaz/items/5e96dae9686e3ac402fe">httpsへ強制リダイレクトするコピペ用RewriteRule（ELBやCloudFront対応） &ndash; Qiita</a></li>
+<li><a href="http://furyu.hatenablog.com/entry/20150410/1428674881">さくらのレンタルサーバ・共有SSLで .htaccess によりSSLのみのアクセス許可を設定する方法 &ndash; 風柳メモ</a></li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[サブディレクトリに別のベーシック認証をかける]]></title>
