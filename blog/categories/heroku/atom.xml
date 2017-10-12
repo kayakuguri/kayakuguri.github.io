@@ -4,7 +4,7 @@
   <title><![CDATA[Category: heroku | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/heroku/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2017-10-12T16:59:05+09:00</updated>
+  <updated>2017-10-12T17:01:54+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -76,7 +76,7 @@ ProximoだとURLをパースしたりとかが必要なのか…など悩んで�
 
 <p>よって、環境変数に追加されたURLの最後に <code>:80</code> とポート番号を追加してやると、無事、アクセスすることが出来た。</p>
 
-<p>```php
+<p>```
 $proxy_url = env(&lsquo;PROXIMO_URL&rsquo;) . &lsquo;:80&rsquo;;
 $res = $client->request(&lsquo;GET&rsquo;, &lsquo;<a href="http://ip.jsontest.com/">http://ip.jsontest.com/</a>&rsquo;, [</p>
 

@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2017-10-10T15:16:42+09:00</updated>
+  <updated>2017-10-12T17:01:54+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,96 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[Heroku] Guzzleを使用してProximo経由で接続する]]></title>
+    <link href="http://kayakuguri.github.io/blog/2017/10/12/heroku-guzzle-proximo/"/>
+    <updated>2017-10-12T16:40:29+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2017/10/12/heroku-guzzle-proximo</id>
+    <content type="html"><![CDATA[<p>Herokuにて、外部APIに接続する際に固定IPにて接続したいことはたまにある。<br/>
+<a href="http://kayakuguri.github.io/blog/2014/09/26/static-ip-heroku/">以前、QuotaGuard Staticを使用してのやり方は書いた</a>けれど、今回はProximoを利用した際に少しハマったのでメモ。</p>
+
+<!-- more -->
+
+
+<h1>Proximo</h1>
+
+<p>Proximoは一番下のプランでも$5/月かかる有料アドオンとなっている。</p>
+
+<ul>
+<li><a href="https://elements.heroku.com/addons/proximo">Proximo &ndash; Add-ons &ndash; Heroku Elements</a></li>
+<li><a href="https://devcenter.heroku.com/articles/proximo">Proximo | Heroku Dev Center</a></li>
+</ul>
+
+
+<h1>Guzzle</h1>
+
+<p>以前の記事ではCURLで接続していたが、今回はGuzzleを使って接続してみる。</p>
+
+<ul>
+<li><a href="https://github.com/guzzle/guzzle">Guzzle, PHP HTTP client</a></li>
+<li><a href="http://docs.guzzlephp.org/en/stable/">Guzzle Documentation</a></li>
+</ul>
+
+
+<h1>proxy経由で接続</h1>
+
+<p>ドキュメントを確認すると、以下の方法でプロキシを指定可能、とのこと。<br/>
+<a href="http://docs.guzzlephp.org/en/stable/request-options.html#proxy">http://docs.guzzlephp.org/en/stable/request-options.html#proxy</a></p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$client-&gt;request('GET', '/', ['proxy' =&gt; 'tcp://localhost:8125']);</span></code></pre></td></tr></table></div></figure>
+
+
+<p>ProximoをHerokuに追加すると、環境変数に自動的にプロキシのURLが追加される。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>PROXIMO_URL=http://proxy:your-password-here@proxy-xx-xxx-x-xxx.proximo.io</span></code></pre></td></tr></table></div></figure>
+
+
+<p>上記URL内の、<code>xx-xxx-x-xxx</code>の部分の数字が固定IPとなる。<br/>
+(ダッシュボードからも確認可）</p>
+
+<p>これをそのままproxyのURLとして指定してやればOK…だと思ったのだが、エラーが出てしまった。</p>
+
+<blockquote><p>cURL error 56: Proxy CONNECT aborted</p></blockquote>
+
+<p>QuotaGuard Staticのアドオンを追加した際に取得出来るURLを同じように指定してやったところ、問題なくアクセス出来たので、Guzzleは悪くなさそう。<br/>
+ProximoだとURLをパースしたりとかが必要なのか…など悩んでいて、URLを見比べていると、ProximoのURLにはポート番号がついてないことに気付く。</p>
+
+<p>改めてドキュメントを確認してみると、ポート番号は<code>80</code>で固定、とのこと。</p>
+
+<blockquote><p>If you’d rather use Proximo as a standard HTTP proxy, use PROXIMO_URL on port 80.<br/>
+<a href="https://devcenter.heroku.com/articles/proximo#using-the-proximo-http-proxy">https://devcenter.heroku.com/articles/proximo#using-the-proximo-http-proxy</a></p></blockquote>
+
+<p>よって、環境変数に追加されたURLの最後に <code>:80</code> とポート番号を追加してやると、無事、アクセスすることが出来た。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$proxy_url = env('PROXIMO_URL') . ':80';
+</span><span class='line'>$res = $client-&gt;request('GET', 'http://ip.jsontest.com/', [
+</span><span class='line'>  'proxy' =&gt; $proxy_url
+</span><span class='line'>]);
+</span><span class='line'>$res_body = json_decode($res-&gt;getBody(), true);
+</span><span class='line'>var_dump($res_body);</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Proximoの固定IPがJSON内に返ってきたらOK。</p>
+
+<p>ポート番号がデフォルトでは入っていないため、少しハマってしまった。</p>
+
+<h1>参考</h1>
+
+<ul>
+<li><a href="https://qiita.com/sho7650/items/872b5757e250d4b3eb95">[Heroku]外部接続時に固定IP化する2つの方法[Proximo] &ndash; Qiita</a></li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[さくらのレンタルサーバでのhttps強制とベーシック認証]]></title>
@@ -2847,90 +2937,6 @@ ScotchboxのデフォルトUbuntu環境での<code>php.ini</code>の場所にハ
 <li>CNAME設定がどんなものなのかのイメージに</li>
 </ul>
 </li>
-</ul>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[PostmanでSalesforce REST APIに接続]]></title>
-    <link href="http://kayakuguri.github.io/blog/2016/12/07/sf-rest-api-postman/"/>
-    <updated>2016-12-07T16:27:12+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2016/12/07/sf-rest-api-postman</id>
-    <content type="html"><![CDATA[<p>以前まではRestAPIの接続確認には、<a href="https://apigee.com/providers">Apigee</a>を使用していたのだけれど、TLS1.0無効化の問題の影響からsandboxでは接続できなくなってしまった。<br/>
-なので、代替としてちょっとめんどうだけれど、Postmanで接続してみた。</p>
-
-<!-- more -->
-
-
-<h1>アクセストークンの取得</h1>
-
-<p>ドメインは、sandboxの場合は、 <code>test.salesforce.com</code> 、本番は、 <code>login.salesforce.com</code> となる。<br/>
-今回はsandboxで試す。</p>
-
-<p>Postmanにて、以下の内容で送信。</p>
-
-<blockquote><p>POST : <a href="https://test.salesforce.com/services/oauth2/token">https://test.salesforce.com/services/oauth2/token</a></p></blockquote>
-
-<ul>
-<li><code>grant_type</code> : <code>password</code></li>
-<li><code>client_id</code> : 接続アプリケーションのコンシューマ鍵</li>
-<li><code>client_secret</code> : 接続アプリケーションのコンシューマの秘密</li>
-<li><code>username</code> : 使用するアカウントのユーザ名</li>
-<li><code>password</code> : パスワード。必要な場合は、パスワード+セキュリティトークン</li>
-</ul>
-
-
-<p><img src="http://kayakuguri.github.io/images/2016/12/sf_api_postman_01.jpg" alt="" /></p>
-
-<p>正しくログイン出来ると以下のようにJSONが返ってくる。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>{
-</span><span class='line'>  "access_token": "xxx",
-</span><span class='line'>  "instance_url": "https://xxxx.salesforce.com",
-</span><span class='line'>  "id": "https://test.salesforce.com/id/xxxx/xxxx",
-</span><span class='line'>  "token_type": "Bearer",
-</span><span class='line'>  "issued_at": "xxx",
-</span><span class='line'>  "signature": "xxx"
-</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
-
-
-<p><code>access_token</code>と<code>instance_url</code>だけ必要。</p>
-
-<h1>APIに接続</h1>
-
-<p>例として、オブジェクトの一覧を取得してみる。<br/>
-URLのドメイン部分を先程取得した、 <code>instance_url</code> を使用する。</p>
-
-<blockquote><p>GET : <a href="https://xxx.salesforce.com/services/data/v24.0/sobjects">https://xxx.salesforce.com/services/data/v24.0/sobjects</a></p></blockquote>
-
-<p>ヘッダーに以下を追加。<br/>
-<code>ACCESS_TOKEN</code>には先程取得した、<code>access_token</code>を使用する。</p>
-
-<ul>
-<li><code>Authorization</code> : <code>Bearer ACCESS_TOKEN</code></li>
-</ul>
-
-
-<p><img src="http://kayakuguri.github.io/images/2016/12/sf_api_postman_02.jpg" alt="" /></p>
-
-<p>カスタムRestAPIの場合は以下のURLになる。<br/>
-<code>hoge/hoge</code>が<code>@RestResource(urlMapping='/hoge/hoge')</code>で指定したURLとなる。</p>
-
-<blockquote><p><a href="https://xxx.salesforce.com/services/apexrest/hoge/hoge">https://xxx.salesforce.com/services/apexrest/hoge/hoge</a></p></blockquote>
-
-<h1>参考</h1>
-
-<ul>
-<li><a href="http://sfdcbeginner.com/how-to-test-salesforce-rest-api.html">HOW TO TEST SALESFORCE REST API</a></li>
 </ul>
 
 ]]></content>
