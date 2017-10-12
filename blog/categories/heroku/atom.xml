@@ -4,7 +4,7 @@
   <title><![CDATA[Category: heroku | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/heroku/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2017-10-10T15:16:42+09:00</updated>
+  <updated>2017-10-12T16:59:05+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,94 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[Heroku] Guzzleを使用してProximo経由で接続する]]></title>
+    <link href="http://kayakuguri.github.io/blog/2017/10/12/heroku-guzzle-proximo/"/>
+    <updated>2017-10-12T16:40:29+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2017/10/12/heroku-guzzle-proximo</id>
+    <content type="html"><![CDATA[<p>Herokuにて、外部APIに接続する際に固定IPにて接続したいことはたまにある。<br/>
+<a href="http://kayakuguri.github.io/blog/2014/09/26/static-ip-heroku/">以前、QuotaGuard Staticを使用してのやり方は書いた</a>けれど、今回はProximoを利用した際に少しハマったのでメモ。</p>
+
+<!-- more -->
+
+
+<h1>Proximo</h1>
+
+<p>Proximoは一番下のプランでも$5/月かかる有料アドオンとなっている。</p>
+
+<ul>
+<li><a href="https://elements.heroku.com/addons/proximo">Proximo &ndash; Add-ons &ndash; Heroku Elements</a></li>
+<li><a href="https://devcenter.heroku.com/articles/proximo">Proximo | Heroku Dev Center</a></li>
+</ul>
+
+
+<h1>Guzzle</h1>
+
+<p>以前の記事ではCURLで接続していたが、今回はGuzzleを使って接続してみる。</p>
+
+<ul>
+<li><a href="https://github.com/guzzle/guzzle">Guzzle, PHP HTTP client</a></li>
+<li><a href="http://docs.guzzlephp.org/en/stable/">Guzzle Documentation</a></li>
+</ul>
+
+
+<h1>proxy経由で接続</h1>
+
+<p>ドキュメントを確認すると、以下の方法でプロキシを指定可能、とのこと。<br/>
+<a href="http://docs.guzzlephp.org/en/stable/request-options.html#proxy">http://docs.guzzlephp.org/en/stable/request-options.html#proxy</a></p>
+
+<p><code>
+$client-&gt;request('GET', '/', ['proxy' =&gt; 'tcp://localhost:8125']);
+</code></p>
+
+<p>ProximoをHerokuに追加すると、環境変数に自動的にプロキシのURLが追加される。</p>
+
+<p><code>
+PROXIMO_URL=http://proxy:your-password-here@proxy-xx-xxx-x-xxx.proximo.io
+</code></p>
+
+<p>上記URL内の、<code>xx-xxx-x-xxx</code>の部分の数字が固定IPとなる。<br/>
+(ダッシュボードからも確認可）</p>
+
+<p>これをそのままproxyのURLとして指定してやればOK…だと思ったのだが、エラーが出てしまった。</p>
+
+<blockquote><p>cURL error 56: Proxy CONNECT aborted</p></blockquote>
+
+<p>QuotaGuard Staticのアドオンを追加した際に取得出来るURLを同じように指定してやったところ、問題なくアクセス出来たので、Guzzleは悪くなさそう。<br/>
+ProximoだとURLをパースしたりとかが必要なのか…など悩んでいて、URLを見比べていると、ProximoのURLにはポート番号がついてないことに気付く。</p>
+
+<p>改めてドキュメントを確認してみると、ポート番号は<code>80</code>で固定、とのこと。</p>
+
+<blockquote><p>If you’d rather use Proximo as a standard HTTP proxy, use PROXIMO_URL on port 80.<br/>
+<a href="https://devcenter.heroku.com/articles/proximo#using-the-proximo-http-proxy">https://devcenter.heroku.com/articles/proximo#using-the-proximo-http-proxy</a></p></blockquote>
+
+<p>よって、環境変数に追加されたURLの最後に <code>:80</code> とポート番号を追加してやると、無事、アクセスすることが出来た。</p>
+
+<p>```php
+$proxy_url = env(&lsquo;PROXIMO_URL&rsquo;) . &lsquo;:80&rsquo;;
+$res = $client->request(&lsquo;GET&rsquo;, &lsquo;<a href="http://ip.jsontest.com/">http://ip.jsontest.com/</a>&rsquo;, [</p>
+
+<pre><code>'proxy' =&gt; $proxy_url
+</code></pre>
+
+<p>]);
+$res_body = json_decode($res->getBody(), true);
+var_dump($res_body);
+```</p>
+
+<p>Proximoの固定IPがJSON内に返ってきたらOK。</p>
+
+<p>ポート番号がデフォルトでは入っていないため、少しハマってしまった。</p>
+
+<h1>参考</h1>
+
+<ul>
+<li><a href="https://qiita.com/sho7650/items/872b5757e250d4b3eb95">[Heroku]外部接続時に固定IP化する2つの方法[Proximo] &ndash; Qiita</a></li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[heroku]PostgresとRedisの環境設定]]></title>
@@ -690,152 +778,6 @@ $ heroku certs:add STAR_example_com-bundle.pem server.key -a YOUR_APP
 <li><a href="http://qiita.com/white_aspara25/items/d9a1f99e8abdee0b5450">ELB の ComodoSSL 証明書を更新 &ndash; Qiita</a></li>
 </ul>
 
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[heroku] confファイルでのリダイレクトを設定する]]></title>
-    <link href="http://kayakuguri.github.io/blog/2016/09/01/heroku-cgi-bin-redirect/"/>
-    <updated>2016-09-01T19:51:39+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2016/09/01/heroku-cgi-bin-redirect</id>
-    <content type="html"><![CDATA[<p>herokuで構築したサイトで、ドキュメントルートにある、 <code>/cgi-bin/</code> 以下にある特定のファイルへのアクセスがあった場合に、別のディレクトリへリダイレクトさせて欲しい、という要件があった。<br/>
-普通に設定しようと思ったらかなり深い話になったので備忘録。</p>
-
-<!-- more -->
-
-
-<p><code>/cgi-bin/hoge/hoge.php</code> を、<br/>
-<code>/abc/hoge/hoge.php</code> へリダイレクトするとする。<br/>
-(cgi-binディレクトリからabcディレクトリへリダイレクト)</p>
-
-<h1>htacessでリダイレクト</h1>
-
-<p>まずは何も考えずに <code>.htaccess</code> を利用してのリダイレクトを設定する。</p>
-
-<p><code>
-RewriteEngine on
-RewriteRule ^cgi-bin/hoge/hoge.php$ /abc/hoge/hoge.php [R=301,L]
-</code></p>
-
-<p>これでアクセスしてみるも、 Not Found の表示。</p>
-
-<p>試しに、<code>/cgi-bin/</code> のディレクトリを作り、その中にファイルを設置してアクセスしてみるも、同じくNot Found。<br/>
-リダイレクト以前に、<code>/cgi-bin/</code> ディレクトリ自体にアクセスが出来ていない。</p>
-
-<h1>cgi-bin</h1>
-
-<p>apacheのデフォルト設定では、 <code>/cgi-bin/</code> ディレクトリは別のディレクトリへエイリアスが貼られている事が多いような記述があった。<br/>
-セキュリティ的にドキュメントルートのcgi-binには直接アクセスさせないようになっているらしい。</p>
-
-<p><a href="http://www.adminweb.jp/apache/cgi/index1.html">CGI用エイリアスの設定(ScriptAlias) &ndash; CGIの利用 &ndash; Apache入門</a></p>
-
-<p>Herokuもこの設定が行われているらしく、PHP環境のherokuのconfファイルを確認すると、以下のような設定が書かれている。</p>
-
-<p><code>
-ScriptAlias /cgi-bin/ "/app/.heroku/php//share/apache2/cgi-bin/"
-</code></p>
-
-<p>そのため、ドキュメントルート以下のcgi-binディレクトリにファイルをおいても、上記ディレクトリには該当のファイルがなく、not foundとなっていたよう。</p>
-
-<p>さらに、htaccessよりも、confファイルの方が早く呼ばれるため、htaccessでのリダイレクトが効く前に上記にエイリアスで飛ばされ、htaccessによるリダイレクトも効かなかった事が原因だった。</p>
-
-<h1>confファイル</h1>
-
-<p>herokuのPHPのビルドパックでは、Procfileにて任意のconfファイルを読みこませる事が出来るよう。
-そこで、そのconfファイルにてリダイレクト設定を書くことで対応する。</p>
-
-<h2>Procfile</h2>
-
-<p>Procfileでの設定内容のオプションなどは、PHPのビルドパックのソース内に書かれている。</p>
-
-<p><a href="https://github.com/heroku/heroku-buildpack-php/blob/master/bin/heroku-php-apache2#L46">https://github.com/heroku/heroku-buildpack-php/blob/master/bin/heroku-php-apache2#L46</a></p>
-
-<p>このヘルプの通り、以下の書式で記述することが可能。</p>
-
-<p><code>
-web: vendor/bin/heroku-php-apache2 [options] [&lt;DOCUMENT_ROOT&gt;]
-</code></p>
-
-<h2>confファイルの読み込み</h2>
-
-<p>任意のconfファイルを読みこませるには、2つのオプションがある。<br/>
-一つは、全く新しいconfファイルを読みこませる方法。これには、小文字のcを使用する。</p>
-
-<p><code>
--c &lt;httpd.conf&gt;
-</code></p>
-
-<p>これは既存の設定を全て上書きするため、正しく設定出来ていない場合はアプリケーションの起動に失敗するので注意が必要。<br/>
-デフォルトで読み込まれているconfファイルは以下となる。</p>
-
-<p><a href="https://github.com/heroku/heroku-buildpack-php/blob/master/conf/apache2/heroku.conf">https://github.com/heroku/heroku-buildpack-php/blob/master/conf/apache2/heroku.conf</a></p>
-
-<p>これはあまり指定することはないと思われる。</p>
-
-<p>もう一つは、既存のconfファイルに追加するもの。<br/>
-こちらは、大文字のCを使う。</p>
-
-<p><code>
--C &lt;httpd.inc.conf&gt;
-</code></p>
-
-<p>デフォルトで読み込まれているファイルは以下となる。
-<a href="https://github.com/heroku/heroku-buildpack-php/blob/master/conf/apache2/default_include.conf">https://github.com/heroku/heroku-buildpack-php/blob/master/conf/apache2/default_include.conf</a></p>
-
-<p>このファイルではディレクトリインデックスの設定のみが書かれている状態。
-このように、設定したい内容を記述したファイルを作成し、大文字のCオプションで読み込ませることで既存の設定に追加で反映が出来る。</p>
-
-<h2>Procfileでの設定</h2>
-
-<p>アプリのルートに、 <code>my_app.conf</code> ファイルを作成し読み込ませるとする。<br/>
-また、ドキュメントルートは <code>htdocs</code> で設定したい場合は、以下の様な内容となる。</p>
-
-<p><code>
-web: vendor/bin/heroku-php-apache2 -C ./my_app.conf htdocs
-</code></p>
-
-<p>ファイルのパスは、 <code>/app</code> からの相対パスでの指定となる。<br/>
-これでアプリの起動時に、 <code>my_app.conf</code> ファイルが読み込まれることとなる。</p>
-
-<h2>confファイルでのリダイレクト</h2>
-
-<p>そういうわけで、confファイル内に直接リダイレクトの設定を記述する。<br/>
-１点注意点としては、 <code>htaccess</code>による設定の場合は、相対パスで記述する場合は先頭の <code>/</code> が必要ないのだが、<br/>
-confファイルによる設定の場合は、先頭に <code>/</code> が必要となる。</p>
-
-<p><a href="http://ysklog.net/mod-rewrite/related05.html">【mod_rewrite】「.htaccess」と「httpd.conf」での設定による違い &#8211; mod rewrite</a></p>
-
-<p>よって、以下のように記述する。</p>
-
-<p><code>
-RewriteEngine on
-RewriteRule ^/cgi-bin/hoge/hoge.php$ /abc/hoge/hoge.php [R=301,L]
-</code></p>
-
-<p>ちなみに、デフォルトで読み込まれているファイルに記述されている、ディレクトリインデックスの設定を記述せずに読み込ませると、その設定が消えてしまい、<code>/</code> でアクセスした場合には、 <code>index.html</code> が最初に呼び出されるようになってしまう。<br/>
-よって、ディレクトリインデックスの設定も合わせて書いておくと挙動が変わらずに設定できる。
-一応、全文は以下。</p>
-
-<p>```
-DirectoryIndex index.php index.html index.htm</p>
-
-<p>RewriteEngine on
-RewriteRule ^/cgi-bin/hoge/hoge.php$ /abc/hoge/hoge.php [R=301,L]
-```</p>
-
-<h2>参考</h2>
-
-<ul>
-<li><a href="http://ysklog.net/mod-rewrite/related02.html">【mod_rewrite】「httpd.conf」での設定方法 &#8211; mod rewrite</a></li>
-<li><a href="https://devcenter.heroku.com/articles/custom-php-settings#apache">Customizing Web Server and Runtime Settings for PHP | Heroku Dev Center</a></li>
-</ul>
-
-
-<h1>まとめ</h1>
-
-<p>cgi-binディレクトリからリダイレクト、というのは実際の要件としてはめったにあることではないけれど、herokuのPHPの設定として、confファイルをカスタマイズしたい要件はあると思う。<br/>
-実際、htaccessでのリダイレクトより、confファイルでのリダイレクトのほうが早いようなので出来るならそっちの方がよかったりするだろうし。<br/>
-herokuは簡単に利用出来る反面、設定が触れずガチガチだと思われガチだけど、結構設定はいじれたりする。</p>
 ]]></content>
   </entry>
   

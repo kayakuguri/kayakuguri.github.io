@@ -4,7 +4,7 @@
   <title><![CDATA[Category: php | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/php/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2017-10-10T15:16:42+09:00</updated>
+  <updated>2017-10-12T16:59:05+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,94 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[Heroku] Guzzleを使用してProximo経由で接続する]]></title>
+    <link href="http://kayakuguri.github.io/blog/2017/10/12/heroku-guzzle-proximo/"/>
+    <updated>2017-10-12T16:40:29+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2017/10/12/heroku-guzzle-proximo</id>
+    <content type="html"><![CDATA[<p>Herokuにて、外部APIに接続する際に固定IPにて接続したいことはたまにある。<br/>
+<a href="http://kayakuguri.github.io/blog/2014/09/26/static-ip-heroku/">以前、QuotaGuard Staticを使用してのやり方は書いた</a>けれど、今回はProximoを利用した際に少しハマったのでメモ。</p>
+
+<!-- more -->
+
+
+<h1>Proximo</h1>
+
+<p>Proximoは一番下のプランでも$5/月かかる有料アドオンとなっている。</p>
+
+<ul>
+<li><a href="https://elements.heroku.com/addons/proximo">Proximo &ndash; Add-ons &ndash; Heroku Elements</a></li>
+<li><a href="https://devcenter.heroku.com/articles/proximo">Proximo | Heroku Dev Center</a></li>
+</ul>
+
+
+<h1>Guzzle</h1>
+
+<p>以前の記事ではCURLで接続していたが、今回はGuzzleを使って接続してみる。</p>
+
+<ul>
+<li><a href="https://github.com/guzzle/guzzle">Guzzle, PHP HTTP client</a></li>
+<li><a href="http://docs.guzzlephp.org/en/stable/">Guzzle Documentation</a></li>
+</ul>
+
+
+<h1>proxy経由で接続</h1>
+
+<p>ドキュメントを確認すると、以下の方法でプロキシを指定可能、とのこと。<br/>
+<a href="http://docs.guzzlephp.org/en/stable/request-options.html#proxy">http://docs.guzzlephp.org/en/stable/request-options.html#proxy</a></p>
+
+<p><code>
+$client-&gt;request('GET', '/', ['proxy' =&gt; 'tcp://localhost:8125']);
+</code></p>
+
+<p>ProximoをHerokuに追加すると、環境変数に自動的にプロキシのURLが追加される。</p>
+
+<p><code>
+PROXIMO_URL=http://proxy:your-password-here@proxy-xx-xxx-x-xxx.proximo.io
+</code></p>
+
+<p>上記URL内の、<code>xx-xxx-x-xxx</code>の部分の数字が固定IPとなる。<br/>
+(ダッシュボードからも確認可）</p>
+
+<p>これをそのままproxyのURLとして指定してやればOK…だと思ったのだが、エラーが出てしまった。</p>
+
+<blockquote><p>cURL error 56: Proxy CONNECT aborted</p></blockquote>
+
+<p>QuotaGuard Staticのアドオンを追加した際に取得出来るURLを同じように指定してやったところ、問題なくアクセス出来たので、Guzzleは悪くなさそう。<br/>
+ProximoだとURLをパースしたりとかが必要なのか…など悩んでいて、URLを見比べていると、ProximoのURLにはポート番号がついてないことに気付く。</p>
+
+<p>改めてドキュメントを確認してみると、ポート番号は<code>80</code>で固定、とのこと。</p>
+
+<blockquote><p>If you’d rather use Proximo as a standard HTTP proxy, use PROXIMO_URL on port 80.<br/>
+<a href="https://devcenter.heroku.com/articles/proximo#using-the-proximo-http-proxy">https://devcenter.heroku.com/articles/proximo#using-the-proximo-http-proxy</a></p></blockquote>
+
+<p>よって、環境変数に追加されたURLの最後に <code>:80</code> とポート番号を追加してやると、無事、アクセスすることが出来た。</p>
+
+<p>```php
+$proxy_url = env(&lsquo;PROXIMO_URL&rsquo;) . &lsquo;:80&rsquo;;
+$res = $client->request(&lsquo;GET&rsquo;, &lsquo;<a href="http://ip.jsontest.com/">http://ip.jsontest.com/</a>&rsquo;, [</p>
+
+<pre><code>'proxy' =&gt; $proxy_url
+</code></pre>
+
+<p>]);
+$res_body = json_decode($res->getBody(), true);
+var_dump($res_body);
+```</p>
+
+<p>Proximoの固定IPがJSON内に返ってきたらOK。</p>
+
+<p>ポート番号がデフォルトでは入っていないため、少しハマってしまった。</p>
+
+<h1>参考</h1>
+
+<ul>
+<li><a href="https://qiita.com/sho7650/items/872b5757e250d4b3eb95">[Heroku]外部接続時に固定IP化する2つの方法[Proximo] &ndash; Qiita</a></li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[PhpStormを使用してPHP UnitのテストをVagrantのリモート上で実行する]]></title>
@@ -340,102 +428,6 @@ export APACHE_LOG_DIR=/var/log/apache2$SUFFIX
 <p>というわけで、冒頭のディレクトリに保存されていた。<br/>
 もし変更したい場合は上記<code>envvars</code>にて変更すればよさそう。<br/>
 (パーミッションの設定を与えてやる必要はあると思う。)</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[heroku] タイムゾーンの設定各種]]></title>
-    <link href="http://kayakuguri.github.io/blog/2016/09/01/heroku-timezone/"/>
-    <updated>2016-09-01T10:02:04+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2016/09/01/heroku-timezone</id>
-    <content type="html"><![CDATA[<p>heroku環境でタイムゾーンの設定が色々あったのでまとめ。</p>
-
-<!-- more -->
-
-
-<h1>サーバー時間</h1>
-
-<p>まずは、herokuのサーバー時間のタイムゾーン設定。<br/>
-これは簡単で、環境変数に入れてやるだけ。</p>
-
-<blockquote><p>TZ : Asia/Tokyo</p></blockquote>
-
-<p>コマンドで入れる場合は以下。</p>
-
-<p><code>
-$ heroku config:add TZ=Asia/Tokyo -a APP_NAME
-</code></p>
-
-<p>きちんと反映されているかどうかは下記コマンドから参照可能。<br/>
-意図した時間が返ってきてればOK。</p>
-
-<p><code>
-$ heroku run date -a APP_NAME
-Running date on ⬢ APP_NAME... up, run.1198
-Thu Sep  1 10:06:57 JST 2016
-</code></p>
-
-<h2>参考</h2>
-
-<ul>
-<li><a href="http://blog.skktmlab.info/blog/2015_03_02_2">Herokuでホスティングしているブログのタイムゾーンを設定する</a></li>
-</ul>
-
-
-<h1>PHP</h1>
-
-<p>PHPの設定でタイムゾーンを指定する場合。<br/>
-通常は、 <code>php.ini</code> で設定するが、herokuの場合は、 <code>.user.ini</code> ファイルを使う。</p>
-
-<p>ドキュメントルート直下に <code>.user.ini</code> ファイルを設置。<br/>
-中に以下を記述。</p>
-
-<p><code>
-date.timezone = "Asia/Tokyo"
-</code></p>
-
-<p>この設定ではその他にはアップロードの最大容量なんかを指定する場合が多い。<br/>
-参考 : <a href="http://kayakuguri.github.io/blog/2014/02/18/change-max-filesize/">[PHP][heroku]upload_max_filesizeを変更する &ndash; KayaMemo</a></p>
-
-<h2>参考</h2>
-
-<ul>
-<li><a href="http://qiita.com/hiro_y/items/bc631a27c9701f81a4f9#runtime-settings">HerokuでPHPを使うときに気を付けるところ &ndash; Qiita</a></li>
-<li><a href="https://devcenter.heroku.com/articles/custom-php-settings#php-runtime-settings-ini-settings">Customizing Web Server and Runtime Settings for PHP | Heroku Dev Center</a></li>
-</ul>
-
-
-<h1>WordPress</h1>
-
-<p>最後はherokuと直接は関係ないけれど、wordpressのタイムゾーン。<br/>
-WordPressのタイムゾーンはデフォルトで標準時になるようにしてある、とのこと。<br/>
-しかしこれは設定で変更するものではなく、取得する際に調整するもののよう。</p>
-
-<p>一番簡易なものとしては、 <code>date</code> 関数で取得していた箇所をWordPress関数である、 <code>date_i18n</code> を利用して取得するようにする、というもの。<br/>
-これだけで、日本時間で取得できるようになる。</p>
-
-<p><code>
-date_i18n('Y-m-d H:i:s');
-</code></p>
-
-<p>その他では、 <code>datetime</code> クラスを使用してタイムゾーンを指定する方法もあり。</p>
-
-<p><code>
-$now = new DateTime('', new DateTimeZone('Asia/Tokyo'));
-$now-&gt;format('Y-m-d H:i:s');
-</code></p>
-
-<h2>参考</h2>
-
-<ul>
-<li><a href="http://qiita.com/yousan/items/a385f794a9bb433aecbb">WordPressで現在時刻を利用すると9時間ずれてしまう問題 &ndash; Qiita</a></li>
-</ul>
-
-
-<h1>まとめ</h1>
-
-<p>WordPressはともかく、herokuとPHPのタイムゾーン設定はherokuでPHPを使うのなら、デフォルトで設定しておいた方が後々間違いがなさそう。<br/>
-環境構築の際にまず設定しておくとよさげ。</p>
 ]]></content>
   </entry>
   
