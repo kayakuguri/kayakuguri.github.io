@@ -4,7 +4,7 @@
   <title><![CDATA[Category: php | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/php/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2017-10-12T17:01:54+09:00</updated>
+  <updated>2017-10-20T14:03:50+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,273 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Laravel Passportのクライアント認証を試してみる]]></title>
+    <link href="http://kayakuguri.github.io/blog/2017/10/20/laravel-passport-sample/"/>
+    <updated>2017-10-20T14:01:59+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2017/10/20/laravel-passport-sample</id>
+    <content type="html"><![CDATA[<p>Laravel Passportを使ってAPIからのアクセスにOAuth認証をかけたい。<br/>
+一般に公開するものではなく、特定のクライアントからのアクセスのみを想定する。<br/>
+そのため、ユーザデータは使用しない。</p>
+
+<!-- more -->
+
+
+<h2>インストール</h2>
+
+<p>Laravel Passportをインストール。</p>
+
+<p><code>
+$ composer require laravel/passport
+</code></p>
+
+<p>Package Auto-Discovery に対応しているため、プロバイダに追加してやる作業は必要ない。</p>
+
+<ul>
+<li><a href="https://laravel-news.com/package-auto-discovery">Laravel Package Auto-Discovery &ndash; Laravel News</a></li>
+</ul>
+
+
+<h2>セットアップ</h2>
+
+<p>DBに必要なテーブルを作成する。</p>
+
+<p><code>
+$ php artisan migrate
+</code></p>
+
+<p>OAuth用に以下のテーブルが作成される。</p>
+
+<ul>
+<li><code>oauth_access_tokens</code></li>
+<li><code>oauth_auth_codes</code></li>
+<li><code>oauth_clients</code></li>
+<li><code>oauth_personal_access_clients</code></li>
+<li><code>oauth_refresh_tokens</code></li>
+</ul>
+
+
+<p>トークン作成時に使用されるキーを生成する。</p>
+
+<p><code>
+$ php artisan passport:install
+</code></p>
+
+<p>キーは、<code>/storage/</code>以下に生成される。<br/>
+デフォルトでは<code>.gitignore</code>で無視する設定となっているので注意。<br/>
+また、公開リポジトリにアップしてはいけない。<br/>
+対処法などは以下参考。</p>
+
+<ul>
+<li><a href="https://qiita.com/kawax/items/59fde47056816cec52ec">Laravel Passport keyファイルの扱い &ndash; Qiita</a></li>
+</ul>
+
+
+<p>また、キーの生成とともに、DBにクライアントが作成される。</p>
+
+<p><code>
+Encryption keys generated successfully.
+Personal access client created successfully.
+Client ID: 1
+Client Secret: tR7FSAHLQ8qw1xIgEWMKQ26QK2nKUxHahSHvY3RW
+Password grant client created successfully.
+Client ID: 2
+Client Secret: 6n4TGzdrJHYdEJwPoMsaYuCA9EaFpXiGFr4dMVc8
+</code></p>
+
+<p>一つ目が、 <code>Laravel Personal Access Client</code><br/>
+二つ目が、<code>Laravel Password Grant Client</code></p>
+
+<p>二つ目はユーザ名＋パスワードを利用したアクセストークンの発行に利用出来る。<br/>
+(ユーザーとの紐付けは特に必要なし)<br/>
+(必要なければ消しておいてもよい)</p>
+
+<h3>コードに追加</h3>
+
+<h4><code>AuthServiceProvider.php</code>に追加</h4>
+
+<p><code>/app/Providers/AuthServiceProvider.php</code></p>
+
+<p>```php
+public function boot()
+{</p>
+
+<pre><code>$this-&gt;registerPolicies();
+
+Passport::routes();
+</code></pre>
+
+<p>}
+```</p>
+
+<h4><code>auth.php</code>のdriverをpassportに変更</h4>
+
+<p><code>/config/auth.php</code></p>
+
+<p>```php
+&lsquo;guards&rsquo; => [</p>
+
+<pre><code>'web' =&gt; [
+    'driver' =&gt; 'session',
+    'provider' =&gt; 'users',
+],
+
+'api' =&gt; [
+    'driver' =&gt; 'passport',
+    'provider' =&gt; 'users',
+],
+</code></pre>
+
+<p>],
+```</p>
+
+<h2>クライアント認証情報グラントトークン</h2>
+
+<p>冒頭の趣旨を実現するために、マシン-マシン間の認証に最適、という認証方式を採用する。</p>
+
+<h4><code>Kanel.php</code>に追加</h4>
+
+<p><code>/app/Http/Kanel.php</code></p>
+
+<p>```php
+protected $routeMiddleware = [</p>
+
+<pre><code>...
+'client' =&gt; CheckClientCredentials::class,
+</code></pre>
+
+<p>];<br/>
+```</p>
+
+<h2>アクセストークンの取得</h2>
+
+<p>以下にアクセスして取得出来る。</p>
+
+<p>・リクエスト</p>
+
+<p><code>
+POST : /oauth/token
+</code></p>
+
+<table>
+<thead>
+<tr>
+<th></th>
+<th align="left"> 項目 </th>
+<th align="left"> 内容 </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td></td>
+<td align="left"> <code>grant_type</code> </td>
+<td align="left"> <code>client_credentials</code> |</td>
+</tr>
+<tr>
+<td></td>
+<td align="left"> <code>client_id</code> </td>
+<td align="left"> 発行したクライアントのID(数字) |</td>
+</tr>
+<tr>
+<td></td>
+<td align="left"> <code>client_secret</code> </td>
+<td align="left"> 発行したクライアントのシークレット |</td>
+</tr>
+<tr>
+<td></td>
+<td align="left"> <code>scope</code> </td>
+<td align="left"> アクセスするスコープ |</td>
+</tr>
+</tbody>
+</table>
+
+
+<p>・レスポンス</p>
+
+<p>```
+{</p>
+
+<pre><code>"token_type": "Bearer",
+"expires_in": 31536000,
+"access_token": "YOUR-ACCESS-TOKEN-HERE"
+</code></pre>
+
+<p>}
+```</p>
+
+<p>発行されたトークンは、<code>oauth_access_tokens</code>テーブルに格納されていく。</p>
+
+<h3>有効期限</h3>
+
+<p>デフォルトではトークンの有効期限は１年間となっている。</p>
+
+<p>変更するには、<code>AuthServiceProvider</code>の<code>boot</code>メソッドから変更可能。</p>
+
+<p><code>/app/Providers/AuthServiceProvider.php</code></p>
+
+<p>```php
+public function boot()
+{</p>
+
+<pre><code>$this-&gt;registerPolicies();
+
+Passport::routes();
+Passport::tokensExpireIn(Carbon::now()-&gt;addMinute(60));
+Passport::refreshTokensExpireIn(Carbon::now()-&gt;addHour(2));
+</code></pre>
+
+<p>}
+```</p>
+
+<h2>APIへのアクセス</h2>
+
+<p>上記トークンを使用してアクセス制限をかけたAPIへアクセスする。</p>
+
+<h3>ルートに追加</h3>
+
+<p>追加したミドルウェアを使用して、apiのルートにこの認証で使用するエンドポイントのリクエストを追加。</p>
+
+<p><code>/routes/api.php</code></p>
+
+<p>```php
+Route::get(&lsquo;/hoge&rsquo;, function (){</p>
+
+<pre><code>return 'OK';
+</code></pre>
+
+<p>})&ndash;>middleware(&lsquo;client&rsquo;);
+```</p>
+
+<h3>アクセス</h3>
+
+<p>apiのルーティングは、<code>/api</code>以下に作成される。<br/>
+よって、エンドポイントは以下になる</p>
+
+<p><code>
+GET : /api/hoge
+</code></p>
+
+<p>ヘッダにアクセストークンを付与してアクセスする。</p>
+
+<ul>
+<li>Authorization : <code>Bearer YOUR-ACCESS-TOKEN</code></li>
+</ul>
+
+
+<h4>エラー</h4>
+
+<p>アクセストークンが間違っているなどの場合は、<code>InvalidArgumentException</code>が発生する。</p>
+
+<h1>参考</h1>
+
+<ul>
+<li><a href="https://readouble.com/laravel/5.5/ja/passport.html">API認証(Passport) 5.5 Laravel</a></li>
+<li><a href="https://qiita.com/niiyz/items/fffff94acb6061ecc9d4">Laravel5.5でAPI認証のパッケージ(Laravel Passport)を利用する &ndash; Qiita</a></li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[Heroku] Guzzleを使用してProximo経由で接続する]]></title>
@@ -353,81 +620,6 @@ ScotchboxのデフォルトUbuntu環境での<code>php.ini</code>の場所にハ
 
 
 <p>以上、メモ。</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[ScotchboxでのPHPエラーの出力場所]]></title>
-    <link href="http://kayakuguri.github.io/blog/2016/12/05/ubuntu-error-log/"/>
-    <updated>2016-12-05T17:02:15+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2016/12/05/ubuntu-error-log</id>
-    <content type="html"><![CDATA[<p>自分用メモ。<br/>
-<a href="https://box.scotch.io/">Scotchbox</a>のVagrant環境で、PHPの標準エラー出力がどこに吐かれるかをいつも調べるのでメモ。</p>
-
-<!-- more -->
-
-
-<h1>環境</h1>
-
-<p>環境は以下。</p>
-
-<ul>
-<li>Scotchbox 2.5</li>
-<li>Ubuntu 14.04 LTS</li>
-<li>PHP 5.6</li>
-</ul>
-
-
-<p>純粋なUbuntuでも同じ場所にログが出力されるのかは調査していないので、あくまでもScotchbox環境、とする</p>
-
-<h1>結果</h1>
-
-<p>結論から書くと、以下のパスに保存されていた。</p>
-
-<p><code>
-/var/log/apache2/error.log
-</code></p>
-
-<p>というわけで、<code>tail</code>する場合は以下。</p>
-
-<p>```</p>
-
-<h1>tail -f /var/log/apache2/error.log</h1>
-
-<p>```</p>
-
-<h1>設定内容</h1>
-
-<p>出力するパスは、以下のファイルで設定されている。<br/>
-<code>/etc/apache2/sites-available/000-default.conf</code></p>
-
-<p>内容</p>
-
-<p>```
-<VirtualHost *:80></p>
-
-<pre><code>...
-ErrorLog ${APACHE_LOG_DIR}/error.log
-...
-</code></pre>
-
-<p></VirtualHost><br/>
-```</p>
-
-<p><code>APACHE_LOG_DIR</code>という環境変数で設定されていることがわかる。<br/>
-では、この環境変数はどこで設定しているかというと、以下のファイル。</p>
-
-<p><code>/etc/apache2/envvars</code></p>
-
-<p><code>
-...
-export APACHE_LOG_DIR=/var/log/apache2$SUFFIX
-...
-</code></p>
-
-<p>というわけで、冒頭のディレクトリに保存されていた。<br/>
-もし変更したい場合は上記<code>envvars</code>にて変更すればよさそう。<br/>
-(パーミッションの設定を与えてやる必要はあると思う。)</p>
 ]]></content>
   </entry>
   

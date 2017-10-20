@@ -4,7 +4,7 @@
   <title><![CDATA[Category: laravel | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/laravel/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2017-10-12T17:01:54+09:00</updated>
+  <updated>2017-10-20T14:03:50+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,273 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Laravel Passportのクライアント認証を試してみる]]></title>
+    <link href="http://kayakuguri.github.io/blog/2017/10/20/laravel-passport-sample/"/>
+    <updated>2017-10-20T14:01:59+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2017/10/20/laravel-passport-sample</id>
+    <content type="html"><![CDATA[<p>Laravel Passportを使ってAPIからのアクセスにOAuth認証をかけたい。<br/>
+一般に公開するものではなく、特定のクライアントからのアクセスのみを想定する。<br/>
+そのため、ユーザデータは使用しない。</p>
+
+<!-- more -->
+
+
+<h2>インストール</h2>
+
+<p>Laravel Passportをインストール。</p>
+
+<p><code>
+$ composer require laravel/passport
+</code></p>
+
+<p>Package Auto-Discovery に対応しているため、プロバイダに追加してやる作業は必要ない。</p>
+
+<ul>
+<li><a href="https://laravel-news.com/package-auto-discovery">Laravel Package Auto-Discovery &ndash; Laravel News</a></li>
+</ul>
+
+
+<h2>セットアップ</h2>
+
+<p>DBに必要なテーブルを作成する。</p>
+
+<p><code>
+$ php artisan migrate
+</code></p>
+
+<p>OAuth用に以下のテーブルが作成される。</p>
+
+<ul>
+<li><code>oauth_access_tokens</code></li>
+<li><code>oauth_auth_codes</code></li>
+<li><code>oauth_clients</code></li>
+<li><code>oauth_personal_access_clients</code></li>
+<li><code>oauth_refresh_tokens</code></li>
+</ul>
+
+
+<p>トークン作成時に使用されるキーを生成する。</p>
+
+<p><code>
+$ php artisan passport:install
+</code></p>
+
+<p>キーは、<code>/storage/</code>以下に生成される。<br/>
+デフォルトでは<code>.gitignore</code>で無視する設定となっているので注意。<br/>
+また、公開リポジトリにアップしてはいけない。<br/>
+対処法などは以下参考。</p>
+
+<ul>
+<li><a href="https://qiita.com/kawax/items/59fde47056816cec52ec">Laravel Passport keyファイルの扱い &ndash; Qiita</a></li>
+</ul>
+
+
+<p>また、キーの生成とともに、DBにクライアントが作成される。</p>
+
+<p><code>
+Encryption keys generated successfully.
+Personal access client created successfully.
+Client ID: 1
+Client Secret: tR7FSAHLQ8qw1xIgEWMKQ26QK2nKUxHahSHvY3RW
+Password grant client created successfully.
+Client ID: 2
+Client Secret: 6n4TGzdrJHYdEJwPoMsaYuCA9EaFpXiGFr4dMVc8
+</code></p>
+
+<p>一つ目が、 <code>Laravel Personal Access Client</code><br/>
+二つ目が、<code>Laravel Password Grant Client</code></p>
+
+<p>二つ目はユーザ名＋パスワードを利用したアクセストークンの発行に利用出来る。<br/>
+(ユーザーとの紐付けは特に必要なし)<br/>
+(必要なければ消しておいてもよい)</p>
+
+<h3>コードに追加</h3>
+
+<h4><code>AuthServiceProvider.php</code>に追加</h4>
+
+<p><code>/app/Providers/AuthServiceProvider.php</code></p>
+
+<p>```php
+public function boot()
+{</p>
+
+<pre><code>$this-&gt;registerPolicies();
+
+Passport::routes();
+</code></pre>
+
+<p>}
+```</p>
+
+<h4><code>auth.php</code>のdriverをpassportに変更</h4>
+
+<p><code>/config/auth.php</code></p>
+
+<p>```php
+&lsquo;guards&rsquo; => [</p>
+
+<pre><code>'web' =&gt; [
+    'driver' =&gt; 'session',
+    'provider' =&gt; 'users',
+],
+
+'api' =&gt; [
+    'driver' =&gt; 'passport',
+    'provider' =&gt; 'users',
+],
+</code></pre>
+
+<p>],
+```</p>
+
+<h2>クライアント認証情報グラントトークン</h2>
+
+<p>冒頭の趣旨を実現するために、マシン-マシン間の認証に最適、という認証方式を採用する。</p>
+
+<h4><code>Kanel.php</code>に追加</h4>
+
+<p><code>/app/Http/Kanel.php</code></p>
+
+<p>```php
+protected $routeMiddleware = [</p>
+
+<pre><code>...
+'client' =&gt; CheckClientCredentials::class,
+</code></pre>
+
+<p>];<br/>
+```</p>
+
+<h2>アクセストークンの取得</h2>
+
+<p>以下にアクセスして取得出来る。</p>
+
+<p>・リクエスト</p>
+
+<p><code>
+POST : /oauth/token
+</code></p>
+
+<table>
+<thead>
+<tr>
+<th></th>
+<th align="left"> 項目 </th>
+<th align="left"> 内容 </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td></td>
+<td align="left"> <code>grant_type</code> </td>
+<td align="left"> <code>client_credentials</code> |</td>
+</tr>
+<tr>
+<td></td>
+<td align="left"> <code>client_id</code> </td>
+<td align="left"> 発行したクライアントのID(数字) |</td>
+</tr>
+<tr>
+<td></td>
+<td align="left"> <code>client_secret</code> </td>
+<td align="left"> 発行したクライアントのシークレット |</td>
+</tr>
+<tr>
+<td></td>
+<td align="left"> <code>scope</code> </td>
+<td align="left"> アクセスするスコープ |</td>
+</tr>
+</tbody>
+</table>
+
+
+<p>・レスポンス</p>
+
+<p>```
+{</p>
+
+<pre><code>"token_type": "Bearer",
+"expires_in": 31536000,
+"access_token": "YOUR-ACCESS-TOKEN-HERE"
+</code></pre>
+
+<p>}
+```</p>
+
+<p>発行されたトークンは、<code>oauth_access_tokens</code>テーブルに格納されていく。</p>
+
+<h3>有効期限</h3>
+
+<p>デフォルトではトークンの有効期限は１年間となっている。</p>
+
+<p>変更するには、<code>AuthServiceProvider</code>の<code>boot</code>メソッドから変更可能。</p>
+
+<p><code>/app/Providers/AuthServiceProvider.php</code></p>
+
+<p>```php
+public function boot()
+{</p>
+
+<pre><code>$this-&gt;registerPolicies();
+
+Passport::routes();
+Passport::tokensExpireIn(Carbon::now()-&gt;addMinute(60));
+Passport::refreshTokensExpireIn(Carbon::now()-&gt;addHour(2));
+</code></pre>
+
+<p>}
+```</p>
+
+<h2>APIへのアクセス</h2>
+
+<p>上記トークンを使用してアクセス制限をかけたAPIへアクセスする。</p>
+
+<h3>ルートに追加</h3>
+
+<p>追加したミドルウェアを使用して、apiのルートにこの認証で使用するエンドポイントのリクエストを追加。</p>
+
+<p><code>/routes/api.php</code></p>
+
+<p>```php
+Route::get(&lsquo;/hoge&rsquo;, function (){</p>
+
+<pre><code>return 'OK';
+</code></pre>
+
+<p>})&ndash;>middleware(&lsquo;client&rsquo;);
+```</p>
+
+<h3>アクセス</h3>
+
+<p>apiのルーティングは、<code>/api</code>以下に作成される。<br/>
+よって、エンドポイントは以下になる</p>
+
+<p><code>
+GET : /api/hoge
+</code></p>
+
+<p>ヘッダにアクセストークンを付与してアクセスする。</p>
+
+<ul>
+<li>Authorization : <code>Bearer YOUR-ACCESS-TOKEN</code></li>
+</ul>
+
+
+<h4>エラー</h4>
+
+<p>アクセストークンが間違っているなどの場合は、<code>InvalidArgumentException</code>が発生する。</p>
+
+<h1>参考</h1>
+
+<ul>
+<li><a href="https://readouble.com/laravel/5.5/ja/passport.html">API認証(Passport) 5.5 Laravel</a></li>
+<li><a href="https://qiita.com/niiyz/items/fffff94acb6061ecc9d4">Laravel5.5でAPI認証のパッケージ(Laravel Passport)を利用する &ndash; Qiita</a></li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[PhpStormを使用してPHP UnitのテストをVagrantのリモート上で実行する]]></title>
@@ -395,166 +662,6 @@ putenv('REDIS_PASSWORD='.$url['pass']);
 
 <p>}
 ```</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[LaravelでCORSに対応する]]></title>
-    <link href="http://kayakuguri.github.io/blog/2017/06/19/larave-cors/"/>
-    <updated>2017-06-19T11:45:01+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2017/06/19/larave-cors</id>
-    <content type="html"><![CDATA[<p>Laravelでクロスオリジン、CORS (Cross-Origin Resource Sharing) に対応する方法。<br/>
-対応用のLaravelライブラリがあるのでそれを利用する。</p>
-
-<!-- more -->
-
-
-<p>JSからajaxなどで通信する場合、ドメインをまたいだ通信の場合(クロスオリジン)はセキュリティ上禁止されている。<br/>
-ので、それを通信を受けるサーバーサイドで許可してやる。</p>
-
-<h1>barryvdh/laravel-cors</h1>
-
-<p>ライブラリがあるので、そちらを利用する。</p>
-
-<h2>インストール</h2>
-
-<p>Composerで導入する。</p>
-
-<p><code>
-$ composer require barryvdh/laravel-cors
-</code></p>
-
-<h2>セットアップ</h2>
-
-<p><code>config/app.php</code>の <code>providers</code>の配列に以下を追加。</p>
-
-<p><code>
-Barryvdh\Cors\ServiceProvider::class,
-</code></p>
-
-<p><code>app/Http/Kernel.php</code> の <code>$middleware</code> に以下を追加。</p>
-
-<p>```
-protected $middleware = [</p>
-
-<pre><code>// ...
-\Barryvdh\Cors\HandleCors::class,
-</code></pre>
-
-<p>];
-```</p>
-
-<p>上記は全体に対応する場合。<br/>
-もし、APIのみに許可したい場合は以下のようにする。</p>
-
-<p>```
-protected $middlewareGroups = [</p>
-
-<pre><code>'web' =&gt; [
-   // ...
-],
-
-'api' =&gt; [
-    // ...
-    \Barryvdh\Cors\HandleCors::class,
-],
-</code></pre>
-
-<p>];
-```</p>
-
-<h2>設定ファイル</h2>
-
-<p>設定ファイルを以下のコマンドで作成する。</p>
-
-<p><code>
-$ php artisan vendor:publish --provider="Barryvdh\Cors\ServiceProvider"
-</code></p>
-
-<p>以下の内容で作成される。</p>
-
-<p>```
-return [</p>
-
-<pre><code> /*
- |--------------------------------------------------------------------------
- | Laravel CORS
- |--------------------------------------------------------------------------
- |
- | allowedOrigins, allowedHeaders and allowedMethods can be set to array('*')
- | to accept any value.
- |
- */
-'supportsCredentials' =&gt; false,
-'allowedOrigins' =&gt; ['*'],
-'allowedHeaders' =&gt; ['Content-Type', 'X-Requested-With'],
-'allowedMethods' =&gt; ['*'], // ex: ['GET', 'POST', 'PUT',  'DELETE']
-'exposedHeaders' =&gt; [],
-'maxAge' =&gt; 0,
-</code></pre>
-
-<p>]
-```</p>
-
-<ul>
-<li><code>supportsCredentials</code> : クッキーやBasic認証の許可設定</li>
-<li><code>allowedOrigins</code> : 許可するドメイン</li>
-<li><code>allowedHeaders</code> : 許可するヘッダー</li>
-<li><code>allowedMethods</code> : 許可するメソッド</li>
-<li><code>exposedHeaders</code> : レスポンスに含める内容があれば</li>
-</ul>
-
-
-<p>それぞれ、 <code>*</code> とすれば全て許可する設定となる。<br/>
-(<code>maxAge</code>はよくわからない…）</p>
-
-<p>これで完了。</p>
-
-<h1>CURLで確認</h1>
-
-<p>curlで設定されているかどうかを確認する。</p>
-
-<p><code>
-$ curl -X GET -I -H "Origin: http://sample.jp" https://your-domain.com/your/api
-</code></p>
-
-<ul>
-<li><code>-I</code> : Headerのみ取得し出力</li>
-<li><code>-X</code> : アクションメソッドの指定</li>
-<li><code>-H</code> : ヘッダの指定</li>
-</ul>
-
-
-<p>ヘッダの <code>Origin</code> に送信元のURLを指定する。<br/>
-許可されているドメインの場合は、 <code>200</code> が返ってくるが、<br/>
-許可されていない場合は、 <code>403</code> が返ってくる。</p>
-
-<p>OKの場合のレスポンス</p>
-
-<p><code>
-HTTP/1.1 200 OK
-Connection: keep-alive
-Date: Mon, 19 Jun 2017 02:17:21 GMT
-Server: Apache
-Cache-Control: no-cache, private
-Access-Control-Allow-Origin: http://sample.jp
-Vary: Origin
-Transfer-Encoding: chunked
-Content-Type: application/json
-Via: 1.1 vegur
-</code></p>
-
-<h1>参考</h1>
-
-<ul>
-<li><a href="http://qiita.com/bmf_san/items/a90255bf645890d96d0b">LaravelでCORS対応 &ndash; Qiita</a></li>
-<li><a href="https://github.com/barryvdh/laravel-cors">barryvdh/laravel-cors: Adds CORS (Cross-Origin Resource Sharing) headers support in your Laravel application</a></li>
-<li><a href="http://qiita.com/polikeiji/items/c8b79554015d75c073f8">curlでCORS設定を確認する &ndash; Qiita</a></li>
-<li><a href="https://stackoverflow.com/questions/12173990/how-can-you-debug-a-cors-request-with-curl">How can you debug a CORS request with cURL? &ndash; Stack Overflow</a></li>
-<li><a href="http://blog.toshimaru.net/s3-cloudfront-cors-setting/">AWS S3 + CloudFront のCORS設定手順 &ndash; Hack Your Design!</a></li>
-<li><a href="http://www.minimalab.com/blog/2014/12/08/curl-option/">Curl の個人的によく使うオプションまとめ</a></li>
-</ul>
-
 ]]></content>
   </entry>
   
