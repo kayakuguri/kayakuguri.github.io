@@ -4,7 +4,7 @@
   <title><![CDATA[Category: laravel | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/laravel/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2017-10-27T15:36:17+09:00</updated>
+  <updated>2017-10-27T15:42:56+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,51 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Laravelでロードバランサを挟んだ時のisSecure判定を動作させる]]></title>
+    <link href="http://kayakuguri.github.io/blog/2017/10/27/laravel-https-loadbalancer/"/>
+    <updated>2017-10-27T15:28:33+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2017/10/27/laravel-https-loadbalancer</id>
+    <content type="html"><![CDATA[<p>Laravelの小ネタ。<br/>
+ELBなどのロードバランサを挟むと <code>Request</code> の <code>isSecure</code> が正しく動作してくれなかったのでメモ。</p>
+
+<!-- more -->
+
+
+<p>ブレードでリンクを生成する時に、<code>{{ Request::root() }}</code>と記述して組み立てていたのだが、ローカル環境では正しく<code>https</code>のURLで絶対パスが指定されていたのに、herokuにアップした途端に<code>http</code>で生成されるようになってしまった。</p>
+
+<p><code>Request</code>の<code>root()</code>がどうやって判定しているのかを辿っていくと、<code>getScheme()</code>というRequestの関数内で、以下のように判定して取得していた。</p>
+
+<p>```
+public function getScheme()
+{</p>
+
+<pre><code>return $this-&gt;isSecure() ? 'https' : 'http';
+</code></pre>
+
+<p>}
+```</p>
+
+<p>よってこの、<code>isSecure</code>が正しく動作していないと思われる。<br/>
+Herokuはロードバランサが標準で入っているため、その辺りだろうとググってみると公式ドキュメントがヒット。</p>
+
+<blockquote><p>TLS／SSL証明を行うロードバランサの裏でアプリケーションが実行されている場合、アプリケーションが時々HTTPSリンクを生成しないことに、気づくでしょう。典型的な理由は、トラフィックがロードバランサにより８０番ポートへフォワーディングされるため、セキュアなリンクを生成すべきだと判断できないからです。</p></blockquote>
+
+<ul>
+<li><a href="https://readouble.com/laravel/5.5/ja/requests.html">Laravel 5.5 HTTPリクエスト</a> 最下部の、信用するプロキシの設定</li>
+</ul>
+
+
+<p>まさにこの通りで、<code>app/Http/Middleware/TrustProxies.php</code>で全てのプロキシを信用するようにしたところ、無事、<code>https</code>で生成されるようになった。</p>
+
+<p><code>
+protected $proxies = '**';
+</code></p>
+
+<blockquote><p>Amazon AWSや他の「クラウド」ロードバランサプロバイダを使用している場合は、実際のバランサのIPアドレスは分かりません。このような場合、全プロキシを信用するために、**を使います。</p></blockquote>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Laravel Passportのクライアント認証を試してみる]]></title>
@@ -595,73 +640,6 @@ php artisan queue:listen --sleep=120 --timeout=125
 HerokuButtonで起動できるようにしたりしてみたので、よかったらお試しあれ。</p>
 
 <p><a href="https://github.com/k-usk/laravel-queue-sample">https://github.com/k-usk/laravel-queue-sample</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[heroku]PostgresとRedisの環境設定]]></title>
-    <link href="http://kayakuguri.github.io/blog/2017/09/21/heroku-postgres-redis/"/>
-    <updated>2017-09-21T15:16:32+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2017/09/21/heroku-postgres-redis</id>
-    <content type="html"><![CDATA[<p>LaravelをHerokuで使用する際に、Heroku PostgresとHeroku Redisの接続情報を環境変数から取得する設定のメモ。</p>
-
-<!-- more -->
-
-
-<h1>概要</h1>
-
-<p>改めて。<br/>
-Herokuでは標準のadd-onとして<a href="https://elements.heroku.com/addons/heroku-postgresql">Heroku Postgres</a>と<a href="https://elements.heroku.com/addons/heroku-redis">Heroku Redis</a>が用意されている。<br/>
-クレジットカードさえ登録していれば無料で使えるので便利。</p>
-
-<p>この接続情報はアドオンを登録した際に自動的に以下のような変数で登録がされる。</p>
-
-<p><strong>Postgres</strong><br/>
-<code>DATABASE_URL</code> = <code>postgres://username:password@hostname.amazonaws.com:5432/database</code></p>
-
-<p><strong>Redis</strong><br/>
-<code>REDIS_URL</code> = <code>redis://h:password@hostname.amazonaws.com:port_no</code></p>
-
-<p>各種情報がURL形式で組み込まれているのだが、間違ってもこれを自分でバラしてそれぞれ個別に環境変数に入れる、などとしてはいけない。<br/>
-というのも、この接続情報はPostgresやRedisにメンテナンスが入った際に前の接続情報は破棄され、新しい情報が同じ環境変数で設定されるため、<br/>
-自前でバラして作ってしまうとその変更した情報に対応できなくなり、接続エラーとなってしまう。</p>
-
-<p>よって、必ず自動でセットされる、<code>DATABASE_URL</code>や<code>REDIS_URL</code>を使うこと。<br/>
-これはHerokuを使う際には常識として覚えておくこと。</p>
-
-<h1>取得</h1>
-
-<p>というわけで、それぞれの値を取得したURLからパースしてLaravel用に環境変数にセットする。<br/>
-以下のように環境変数があればそれをパースして環境変数としてセットしてやるようにするのがスマートっぽい。<br/>
-これだとローカルでは個別に<code>.env</code>ファイルで設定した値を使用してやることが出来る。</p>
-
-<p><code>/config/database.php</code> の冒頭に書く。</p>
-
-<p>```
-//Postgres
-if (getenv(&lsquo;DATABASE_URL&rsquo;)) {</p>
-
-<pre><code>$url = parse_url(getenv('DATABASE_URL'));
-putenv('DB_HOST='.$url['host']);
-putenv('DB_PORT='.$url['port']);
-putenv('DB_DATABASE='.substr($url["path"], 1));
-putenv('DB_USERNAME='.$url["user"]);
-putenv('DB_PASSWORD='.$url['pass']);
-</code></pre>
-
-<p>}</p>
-
-<p>//Redis
-if (getenv(&lsquo;REDIS_URL&rsquo;)) {</p>
-
-<pre><code>$url = parse_url(getenv('REDIS_URL'));
-putenv('REDIS_HOST='.$url['host']);
-putenv('REDIS_PORT='.$url['port']);
-putenv('REDIS_PASSWORD='.$url['pass']);
-</code></pre>
-
-<p>}
-```</p>
 ]]></content>
   </entry>
   
