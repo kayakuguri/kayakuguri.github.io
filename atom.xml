@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2017-10-12T17:01:54+09:00</updated>
+  <updated>2017-10-27T15:44:34+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,337 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Laravelでロードバランサを挟んだ時のisSecure判定を動作させる]]></title>
+    <link href="http://kayakuguri.github.io/blog/2017/10/27/laravel-https-loadbalancer/"/>
+    <updated>2017-10-27T15:28:33+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2017/10/27/laravel-https-loadbalancer</id>
+    <content type="html"><![CDATA[<p>Laravelの小ネタ。<br/>
+ELBなどのロードバランサを挟むと <code>Request</code> の <code>isSecure</code> が正しく動作してくれなかったのでメモ。</p>
+
+<!-- more -->
+
+
+<p>ブレードでリンクを生成する時に、<code>`と記述して組み立てていたのだが、ローカル環境では正しく</code>https<code>のURLで絶対パスが指定されていたのに、herokuにアップした途端に</code>http`で生成されるようになってしまった。</p>
+
+<p><code>Request</code>の<code>root()</code>がどうやって判定しているのかを辿っていくと、<code>getScheme()</code>というRequestの関数内で、以下のように判定して取得していた。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>public function getScheme()
+</span><span class='line'>{
+</span><span class='line'>    return $this-&gt;isSecure() ? 'https' : 'http';
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<p>よってこの、<code>isSecure</code>が正しく動作していないと思われる。<br/>
+Herokuはロードバランサが標準で入っているため、その辺りだろうとググってみると公式ドキュメントがヒット。</p>
+
+<blockquote><p>TLS／SSL証明を行うロードバランサの裏でアプリケーションが実行されている場合、アプリケーションが時々HTTPSリンクを生成しないことに、気づくでしょう。典型的な理由は、トラフィックがロードバランサにより８０番ポートへフォワーディングされるため、セキュアなリンクを生成すべきだと判断できないからです。</p></blockquote>
+
+<ul>
+<li><a href="https://readouble.com/laravel/5.5/ja/requests.html">Laravel 5.5 HTTPリクエスト</a> 最下部の、信用するプロキシの設定</li>
+</ul>
+
+
+<p>まさにこの通りで、<code>app/Http/Middleware/TrustProxies.php</code>で全てのプロキシを信用するようにしたところ、無事、<code>https</code>で生成されるようになった。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>protected $proxies = '**';</span></code></pre></td></tr></table></div></figure>
+
+
+<blockquote><p>Amazon AWSや他の「クラウド」ロードバランサプロバイダを使用している場合は、実際のバランサのIPアドレスは分かりません。このような場合、全プロキシを信用するために、**を使います。</p></blockquote>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Laravel Passportのクライアント認証を試してみる]]></title>
+    <link href="http://kayakuguri.github.io/blog/2017/10/20/laravel-passport-sample/"/>
+    <updated>2017-10-20T14:01:59+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2017/10/20/laravel-passport-sample</id>
+    <content type="html"><![CDATA[<p>Laravel Passportを使ってAPIからのアクセスにOAuth認証をかけたい。<br/>
+一般に公開するものではなく、特定のクライアントからのアクセスのみを想定する。<br/>
+そのため、ユーザデータは使用しない。</p>
+
+<!-- more -->
+
+
+<h2>インストール</h2>
+
+<p>Laravel Passportをインストール。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$ composer require laravel/passport</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Package Auto-Discovery に対応しているため、プロバイダに追加してやる作業は必要ない。</p>
+
+<ul>
+<li><a href="https://laravel-news.com/package-auto-discovery">Laravel Package Auto-Discovery &ndash; Laravel News</a></li>
+</ul>
+
+
+<h2>セットアップ</h2>
+
+<p>DBに必要なテーブルを作成する。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$ php artisan migrate</span></code></pre></td></tr></table></div></figure>
+
+
+<p>OAuth用に以下のテーブルが作成される。</p>
+
+<ul>
+<li><code>oauth_access_tokens</code></li>
+<li><code>oauth_auth_codes</code></li>
+<li><code>oauth_clients</code></li>
+<li><code>oauth_personal_access_clients</code></li>
+<li><code>oauth_refresh_tokens</code></li>
+</ul>
+
+
+<p>トークン作成時に使用されるキーを生成する。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$ php artisan passport:install</span></code></pre></td></tr></table></div></figure>
+
+
+<p>キーは、<code>/storage/</code>以下に生成される。<br/>
+デフォルトでは<code>.gitignore</code>で無視する設定となっているので注意。<br/>
+また、公開リポジトリにアップしてはいけない。<br/>
+対処法などは以下参考。</p>
+
+<ul>
+<li><a href="https://qiita.com/kawax/items/59fde47056816cec52ec">Laravel Passport keyファイルの扱い &ndash; Qiita</a></li>
+</ul>
+
+
+<p>また、キーの生成とともに、DBにクライアントが作成される。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>Encryption keys generated successfully.
+</span><span class='line'>Personal access client created successfully.
+</span><span class='line'>Client ID: 1
+</span><span class='line'>Client Secret: tR7FSAHLQ8qw1xIgEWMKQ26QK2nKUxHahSHvY3RW
+</span><span class='line'>Password grant client created successfully.
+</span><span class='line'>Client ID: 2
+</span><span class='line'>Client Secret: 6n4TGzdrJHYdEJwPoMsaYuCA9EaFpXiGFr4dMVc8</span></code></pre></td></tr></table></div></figure>
+
+
+<p>一つ目が、 <code>Laravel Personal Access Client</code><br/>
+二つ目が、<code>Laravel Password Grant Client</code></p>
+
+<p>二つ目はユーザ名＋パスワードを利用したアクセストークンの発行に利用出来る。<br/>
+(ユーザーとの紐付けは特に必要なし)<br/>
+(必要なければ消しておいてもよい)</p>
+
+<h3>コードに追加</h3>
+
+<h4><code>AuthServiceProvider.php</code>に追加</h4>
+
+<p><code>/app/Providers/AuthServiceProvider.php</code></p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>public function boot()
+</span><span class='line'>{
+</span><span class='line'>    $this-&gt;registerPolicies();
+</span><span class='line'>
+</span><span class='line'>    Passport::routes();
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<h4><code>auth.php</code>のdriverをpassportに変更</h4>
+
+<p><code>/config/auth.php</code></p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>'guards' =&gt; [
+</span><span class='line'>    'web' =&gt; [
+</span><span class='line'>        'driver' =&gt; 'session',
+</span><span class='line'>        'provider' =&gt; 'users',
+</span><span class='line'>    ],
+</span><span class='line'>
+</span><span class='line'>    'api' =&gt; [
+</span><span class='line'>        'driver' =&gt; 'passport',
+</span><span class='line'>        'provider' =&gt; 'users',
+</span><span class='line'>    ],
+</span><span class='line'>],</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>クライアント認証情報グラントトークン</h2>
+
+<p>冒頭の趣旨を実現するために、マシン-マシン間の認証に最適、という認証方式を採用する。</p>
+
+<h4><code>Kanel.php</code>に追加</h4>
+
+<p><code>/app/Http/Kanel.php</code></p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>protected $routeMiddleware = [
+</span><span class='line'>  ...
+</span><span class='line'>  'client' =&gt; CheckClientCredentials::class,
+</span><span class='line'>];    </span></code></pre></td></tr></table></div></figure>
+
+
+<h2>アクセストークンの取得</h2>
+
+<p>以下にアクセスして取得出来る。</p>
+
+<p>・リクエスト</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>POST : /oauth/token</span></code></pre></td></tr></table></div></figure>
+
+
+<table>
+<thead>
+<tr>
+<th></th>
+<th align="left"> 項目 </th>
+<th align="left"> 内容 </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td></td>
+<td align="left"> <code>grant_type</code> </td>
+<td align="left"> <code>client_credentials</code> |</td>
+</tr>
+<tr>
+<td></td>
+<td align="left"> <code>client_id</code> </td>
+<td align="left"> 発行したクライアントのID(数字) |</td>
+</tr>
+<tr>
+<td></td>
+<td align="left"> <code>client_secret</code> </td>
+<td align="left"> 発行したクライアントのシークレット |</td>
+</tr>
+<tr>
+<td></td>
+<td align="left"> <code>scope</code> </td>
+<td align="left"> アクセスするスコープ |</td>
+</tr>
+</tbody>
+</table>
+
+
+<p>・レスポンス</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>{
+</span><span class='line'>  "token_type": "Bearer",
+</span><span class='line'>  "expires_in": 31536000,
+</span><span class='line'>  "access_token": "YOUR-ACCESS-TOKEN-HERE"
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<p>発行されたトークンは、<code>oauth_access_tokens</code>テーブルに格納されていく。</p>
+
+<h3>有効期限</h3>
+
+<p>デフォルトではトークンの有効期限は１年間となっている。</p>
+
+<p>変更するには、<code>AuthServiceProvider</code>の<code>boot</code>メソッドから変更可能。</p>
+
+<p><code>/app/Providers/AuthServiceProvider.php</code></p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>public function boot()
+</span><span class='line'>{
+</span><span class='line'>    $this-&gt;registerPolicies();
+</span><span class='line'>
+</span><span class='line'>    Passport::routes();
+</span><span class='line'>    Passport::tokensExpireIn(Carbon::now()-&gt;addMinute(60));
+</span><span class='line'>    Passport::refreshTokensExpireIn(Carbon::now()-&gt;addHour(2));
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>APIへのアクセス</h2>
+
+<p>上記トークンを使用してアクセス制限をかけたAPIへアクセスする。</p>
+
+<h3>ルートに追加</h3>
+
+<p>追加したミドルウェアを使用して、apiのルートにこの認証で使用するエンドポイントのリクエストを追加。</p>
+
+<p><code>/routes/api.php</code></p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>Route::get('/hoge', function (){
+</span><span class='line'>    return 'OK';
+</span><span class='line'>})-&gt;middleware('client');</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>アクセス</h3>
+
+<p>apiのルーティングは、<code>/api</code>以下に作成される。<br/>
+よって、エンドポイントは以下になる</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>GET : /api/hoge</span></code></pre></td></tr></table></div></figure>
+
+
+<p>ヘッダにアクセストークンを付与してアクセスする。</p>
+
+<ul>
+<li>Authorization : <code>Bearer YOUR-ACCESS-TOKEN</code></li>
+</ul>
+
+
+<h4>エラー</h4>
+
+<p>アクセストークンが間違っているなどの場合は、<code>InvalidArgumentException</code>が発生する。</p>
+
+<h1>参考</h1>
+
+<ul>
+<li><a href="https://readouble.com/laravel/5.5/ja/passport.html">API認証(Passport) 5.5 Laravel</a></li>
+<li><a href="https://qiita.com/niiyz/items/fffff94acb6061ecc9d4">Laravel5.5でAPI認証のパッケージ(Laravel Passport)を利用する &ndash; Qiita</a></li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[Heroku] Guzzleを使用してProximo経由で接続する]]></title>
@@ -2761,182 +3092,6 @@ apex側で置換してやったほうがよさそう、ということで本エ�
 
 <ul>
 <li><a href="http://blog.higty.xyz/archives/530/">php json_encode で&#8221;/&ldquo;のエスケープ</a></li>
-</ul>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[Scotchbox]Ubuntuの環境でのphp.ini]]></title>
-    <link href="http://kayakuguri.github.io/blog/2017/01/11/scotchbox-phpini/"/>
-    <updated>2017-01-11T18:21:48+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2017/01/11/scotchbox-phpini</id>
-    <content type="html"><![CDATA[<p>ちょっとしたメモ。<br/>
-ScotchboxのデフォルトUbuntu環境での<code>php.ini</code>の場所にハマったので、そのメモ。</p>
-
-<!-- more -->
-
-
-<h2>正解</h2>
-
-<p>結論から書くと、以下のファイルでの設定が有効となっていた。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>/etc/php5/apache2/php.ini</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>間違い</h2>
-
-<p>実は以下にも<code>php.ini</code>があるのだが、これの内容を変更しても反映されなかった。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>/etc/php5/cli/php.ini  //反映されない</span></code></pre></td></tr></table></div></figure>
-
-
-<hr />
-
-<p>そもそも何を設定したかというと、<br/>
-他のUbuntu環境を知らないので、Scotchbox特有かどうかはわからないけれど、デフォルトではスーパーグローバル変数の環境変数ではる、<code>$_ENV</code> が有効となっていないため、それを有効とすべく、<code>php.ini</code>の設定を触る必要があった。</p>
-
-<ul>
-<li><a href="http://kayakuguri.github.io/blog/2015/05/26/vagrant-env/">Vagrant環境での環境変数の設定方法</a></li>
-</ul>
-
-
-<p>以上、メモ。</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Herokuで独自ドメインを指定する際に使用するターゲット名]]></title>
-    <link href="http://kayakuguri.github.io/blog/2017/01/05/heroku-custom-domain/"/>
-    <updated>2017-01-05T18:17:32+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2017/01/05/heroku-custom-domain</id>
-    <content type="html"><![CDATA[<p>Herokuで独自ドメインを指定するには、CNAMEでHeroku側のドメインを指定して設定してやる必要がある。</p>
-
-<!-- more -->
-
-
-<ul>
-<li><a href="http://kayakuguri.github.io/blog/2014/09/30/heroku-ssl-subdomain/">[heroku]herokuでのSSL設定とカスタムサブドメインの適用方法</a></li>
-</ul>
-
-
-<h1>少し前までのターゲット</h1>
-
-<p>少し前まで（具体的には<a href="https://blog.heroku.com/announcing_heroku_free_ssl_beta_and_flexible_dyno_hours">SSLの設定がHerokuの標準機能に組み込まれる</a>まで）は、以下のような設定内容で設定していた。<br/>
-（アプリ名を <code>appname</code> とし、設定するサブドメインは、<code>www.appname.com</code> とする)</p>
-
-<table>
-<thead>
-<tr>
-<th></th>
-<th align="left"> 種類 (Record) </th>
-<th align="left"> 名前 (Name) </th>
-<th align="left"> 内容 (Target) </th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td></td>
-<td align="left"> CNAME </td>
-<td align="left"> <code>www</code> </td>
-<td align="left"> <code>appname.herokuapp.com</code></td>
-</tr>
-</tbody>
-</table>
-
-
-<h1>Heroku Free SSL導入後のターゲット</h1>
-
-<h2>注意</h2>
-
-<p>ここでの説明はあくまでも独自<strong>サブドメイン</strong>の設定方法となる。<br/>
-ルートドメインをHerokuのアプリで使用したい場合は、別途PointDNSアドオンや、AWSのRoot53などのサービスを使用する必要があるが、ここでは割愛する（どれがデファクトスタンダードかまだ決まりきってない印象）。<br/>
-なので、CNAMEでの設定となり、Aレコードでの設定ではないので注意。<br/>
-(herokuは固定IPではないので、通常はAレコードは使用出来ない）</p>
-
-<h2>前提</h2>
-
-<p>今まで、Herokuに独自のSSL証明書を適用させるためには <a href="https://elements.heroku.com/addons/ssl">Heroku SSLのアドオン</a> が必要だったのだが、<br/>
-<strong>FreeDyno以外の有料アプリに限り</strong>デフォルトでSSLの設定が出来るようになった。<br/>
-しかもブラウザ上からドラッグアンドドロップでファイルをアップ出来るようになったため無料かつ便利になった。</p>
-
-<p>(無料Dynoでの利用の場合はアドオンの追加が必要になるのだが、一番安い<code>hobby dyno</code>は月$7/1dyno、で、SSLアドオン 月$20、なので、有料dynoにした方が安いため、アドオンで設定するメリットはほぼないと思われる）</p>
-
-<h2>ターゲットの変更</h2>
-
-<p>そのタイミングで、CNAMEとして設定するターゲット名も変更になった。<br/>
-今までは、 <code>hokkaido-1212.herokussl.com</code> など、都道府県が入ったようなランダムな名前だったのだが、新しく、 <code>www.appname.com.herokudns.com</code> というような名前となった。<br/>
-以下のようになるよう。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>{設定するサブドメイン}.herokudns.com</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>ターゲット名</h2>
-
-<p>よって、CNAMEでの設定も内容の部分が変更となる。<br/>
-このターゲット名だが、<strong>SSLを使用の有無、無料・有料Dynoに関わらず</strong>、一律で <code>herokudns.com</code> の指定となる。</p>
-
-<p>Herokuの設定画面から設定した場合は以下のような感じで表示がされるので、<code>DNA Target</code>の部分を使用すればよい。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2017/01/custom_domain01.jpg" alt="" /></p>
-
-<p>コマンドで確認した場合は以下のような感じになる。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>$ heroku domains -a appname
-</span><span class='line'>=== appname Heroku Domain
-</span><span class='line'>appname.herokuapp.com
-</span><span class='line'>
-</span><span class='line'>=== appname Custom Domains
-</span><span class='line'>Domain Name      DNS Target
-</span><span class='line'>───────────────  ─────────────────────────────
-</span><span class='line'>www.appname.com  www.appname.com.herokudns.com</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>CNAMEの設定</h2>
-
-<p>よって、設定内容は以下のようになる。</p>
-
-<table>
-<thead>
-<tr>
-<th></th>
-<th align="left"> 種類 (Record) </th>
-<th align="left"> 名前 (Name) </th>
-<th align="left"> 内容 (Target) </th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td></td>
-<td align="left"> CNAME </td>
-<td align="left"> <code>www</code> </td>
-<td align="left"> <code>www.appname.com.herokudns.com</code></td>
-</tr>
-</tbody>
-</table>
-
-
-<h1>参考</h1>
-
-<ul>
-<li><a href="https://devcenter.heroku.com/articles/custom-domains">Custom Domain Names for Apps | Heroku Dev Center</a></li>
-<li><a href="http://www.ucom.ne.jp/enterprise/dnsmanual/p4_4_1_4.html">DNS設定ツールマニュアルWEB</a>
-
-<ul>
-<li>CNAME設定がどんなものなのかのイメージに</li>
-</ul>
-</li>
 </ul>
 
 ]]></content>

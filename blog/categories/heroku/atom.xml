@@ -4,7 +4,7 @@
   <title><![CDATA[Category: heroku | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/heroku/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2017-10-27T15:42:56+09:00</updated>
+  <updated>2017-10-27T15:44:34+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -24,7 +24,7 @@ ELBなどのロードバランサを挟むと <code>Request</code> の <code>isS
 <!-- more -->
 
 
-<p>ブレードでリンクを生成する時に、<code>{{ Request::root() }}</code>と記述して組み立てていたのだが、ローカル環境では正しく<code>https</code>のURLで絶対パスが指定されていたのに、herokuにアップした途端に<code>http</code>で生成されるようになってしまった。</p>
+<p>ブレードでリンクを生成する時に、<code></code>と記述して組み立てていたのだが、ローカル環境では正しく<code>https</code>のURLで絶対パスが指定されていたのに、herokuにアップした途端に<code>http</code>で生成されるようになってしまった。</p>
 
 <p><code>Request</code>の<code>root()</code>がどうやって判定しているのかを辿っていくと、<code>getScheme()</code>というRequestの関数内で、以下のように判定して取得していた。</p>
 

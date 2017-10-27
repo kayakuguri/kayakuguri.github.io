@@ -4,7 +4,7 @@
   <title><![CDATA[Category: php | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/php/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2017-10-27T15:42:56+09:00</updated>
+  <updated>2017-10-27T15:44:34+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -100,7 +100,7 @@ Client Secret: 6n4TGzdrJHYdEJwPoMsaYuCA9EaFpXiGFr4dMVc8
 
 <p><code>/app/Providers/AuthServiceProvider.php</code></p>
 
-<p>```php
+<p>```
 public function boot()
 {</p>
 
@@ -116,7 +116,7 @@ Passport::routes();
 
 <p><code>/config/auth.php</code></p>
 
-<p>```php
+<p>```
 &lsquo;guards&rsquo; => [</p>
 
 <pre><code>'web' =&gt; [
@@ -141,7 +141,7 @@ Passport::routes();
 
 <p><code>/app/Http/Kanel.php</code></p>
 
-<p>```php
+<p>```
 protected $routeMiddleware = [</p>
 
 <pre><code>...
@@ -217,7 +217,7 @@ POST : /oauth/token
 
 <p><code>/app/Providers/AuthServiceProvider.php</code></p>
 
-<p>```php
+<p>```
 public function boot()
 {</p>
 
@@ -241,7 +241,7 @@ Passport::refreshTokensExpireIn(Carbon::now()-&gt;addHour(2));
 
 <p><code>/routes/api.php</code></p>
 
-<p>```php
+<p>```
 Route::get(&lsquo;/hoge&rsquo;, function (){</p>
 
 <pre><code>return 'OK';
