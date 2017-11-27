@@ -4,7 +4,7 @@
   <title><![CDATA[Category: apex | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/apex/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2017-11-27T15:04:32+09:00</updated>
+  <updated>2017-11-27T15:51:26+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -125,6 +125,34 @@ global class ResultError{
 "error": {
     "message": "エラーメッセージ"
 }
+</code></pre>
+
+<p>}
+```</p>
+
+<h1>テスト</h1>
+
+<p>テストクラスを書く際に、送信結果を取得する場合には以下のようにする。</p>
+
+<p>```
+@isTest static void your_something_test() {</p>
+
+<pre><code>String json_str = '{ "YOUR" : "JSON_DATA" }';
+
+//あらかじめ宣言が必要
+RestRequest req = new RestRequest();
+req.requestBody = Blob.valueof(json_str);
+RestContext.request = req;
+RestResponse res = new RestResponse();
+RestContext.response = res;
+
+Your_Apex_Class.something_method(); //実行
+
+System.assertEquals(res.statusCode, 400); //ステータスコード
+//返却されたJSON文字列をMapにキャストする
+Map&lt;String, Object&gt; requestBody = (Map&lt;String, Object&gt;)JSON.deserializeUntyped(res.responseBody.ToString());
+Map&lt;String, Object&gt; errorBody = (Map&lt;String, Object&gt;)requestBody.get('error');
+System.assertEquals(errorBody.get('message'), 'エラーメッセージ'); //エラーメッセージ
 </code></pre>
 
 <p>}
