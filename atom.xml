@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2017-10-30T10:35:52+09:00</updated>
+  <updated>2017-11-27T15:02:21+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,173 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Apex Rest APIで任意のステータスコードを返す]]></title>
+    <link href="http://kayakuguri.github.io/blog/2017/11/27/apex-rest-response/"/>
+    <updated>2017-11-27T14:49:52+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2017/11/27/apex-rest-response</id>
+    <content type="html"><![CDATA[<p>カスタムでApex Rest APIを作成する際にレスポンスにステータスコードを反映させる方法。</p>
+
+<!-- more -->
+
+
+<h1>概要</h1>
+
+<p>今までは、返却用するJSON用のクラスを作成し、そのクラスを返却していたのだが、<br/>
+そもそも返却の方法としてはそれが正しくなかった（お作法に則っていなかった）よう。</p>
+
+<p><a href="https://kayakuguri.github.io/blog/2015/03/27/apex-rest-tips/">[salesforce]Apex REST作成時のtips</a><br/>
+この辺の記事内で返却しているやり方。</p>
+
+<p>実際には、<code>return</code>で結果を返す必要はなく、<code>RestResponse</code>クラスに追加してやるだけでよかった。</p>
+
+<ul>
+<li><a href="https://developer.salesforce.com/docs/atlas.ja-jp.apexcode.meta/apexcode/apex_methods_system_restresponse.htm">RestResponse クラス</a></li>
+</ul>
+
+
+<h1>RestResponse</h1>
+
+<h2>ステータスコード</h2>
+
+<p>ステータスコードの指定は以下のようにする。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>RestResponse res = RestContext.response;
+</span><span class='line'>res.statusCode = 400;</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>ヘッダ情報</h2>
+
+<p>デフォルトの情報だと、<code>Content-Type</code>が<code>application/octetstream</code>になっているようなので、<code>application/json</code>に変更したい。<br/>
+ヘッダ情報の追加・変更は以下のようにする。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>RestResponse res = RestContext.response;
+</span><span class='line'>res.addHeader('Content-Type', 'application/json');</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>レスポンス内容</h2>
+
+<p>レスポンスの内容をJSONで返す場合、作成した返却用クラスをJSONにパースし、<code>Blob</code>にキャストして追加してやる。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>ResultData result = new ResultData();
+</span><span class='line'>
+</span><span class='line'>RestResponse res = RestContext.response;
+</span><span class='line'>res.responseBody = Blob.valueOf(JSON.serialize(result));</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>コード</h2>
+
+<p>上記をまとめると以下のような形になる。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>@RestResource(urlMapping='/your/api')
+</span><span class='line'>global with sharing class Your_Apex_Class  {
+</span><span class='line'>
+</span><span class='line'>  @HttpPost
+</span><span class='line'>  global static void something_method() {
+</span><span class='line'>    ResultData result = new ResultData();
+</span><span class='line'>    result.success = false;
+</span><span class='line'>    ResultError error = new ResultError();
+</span><span class='line'>    result.error = error;
+</span><span class='line'>  
+</span><span class='line'>    RestResponse res = RestContext.response;
+</span><span class='line'>    res.addHeader('Content-Type', 'application/json');
+</span><span class='line'>    // (中略)
+</span><span class='line'>  
+</span><span class='line'>    if(/* エラーの場合 */){
+</span><span class='line'>      error.message = 'エラーメッセージ';
+</span><span class='line'>      res.statusCode = 400;
+</span><span class='line'>      res.responseBody = Blob.valueOf(JSON.serialize(result));
+</span><span class='line'>      return;
+</span><span class='line'>    }
+</span><span class='line'>  
+</span><span class='line'>    // (中略)
+</span><span class='line'>    result.success = true;
+</span><span class='line'>    res.statusCode = 200;
+</span><span class='line'>    res.responseBody = Blob.valueOf(JSON.serialize(result));
+</span><span class='line'>    return;
+</span><span class='line'>  }
+</span><span class='line'>  
+</span><span class='line'>  global class ResultData{
+</span><span class='line'>    global Boolean success;
+</span><span class='line'>    global ResultError error;
+</span><span class='line'>  }
+</span><span class='line'>  
+</span><span class='line'>  global class ResultError{
+</span><span class='line'>    global String message;
+</span><span class='line'>  }
+</span><span class='line'>} </span></code></pre></td></tr></table></div></figure>
+
+
+<p>エラー発生時にはステータスコードが<code>400</code>で以下のようなJSONが返却される。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>{
+</span><span class='line'>  "success": false,
+</span><span class='line'>  "error": {
+</span><span class='line'>      "message": "エラーメッセージ"
+</span><span class='line'>  }
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>参考</h1>
+
+<ul>
+<li><a href="https://salesforce.stackexchange.com/questions/54010/apexrest-controlling-http-error-codes-on-exceptions">apexrest: controlling HTTP error codes on exceptions</a></li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[CSVのテキストからLaravelのSeeder用コードを作る]]></title>
@@ -3039,70 +3206,6 @@ unsigned アップロード、というのは、たぶん、プリセット名�
 <li><a href="http://docs.aws.amazon.com/ja_jp/AmazonS3/latest/dev/RESTAuthentication.html">REST リクエストの署名と認証</a></li>
 </ul>
 
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[開発者コンソールで表示させるデバッグログのレベルを変更する]]></title>
-    <link href="http://kayakuguri.github.io/blog/2017/04/10/change-debug-log-level/"/>
-    <updated>2017-04-10T11:45:42+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2017/04/10/change-debug-log-level</id>
-    <content type="html"><![CDATA[<p>開発者コンソールを開いていると、ログインしているユーザーのデバッグログを直接参照する事が出来る。
-このログは、ログレベルがデフォルトの設定になっているが、色んなログが大量に出てしまう。</p>
-
-<!-- more -->
-
-
-<p><code>Debug Only</code>にチェックをつければ自分で出力したログだけを表示してくれたり、<code>Filter</code>機能があるのでみたいログだけに絞って表示させることは比較的容易に出来る。<br/>
-しかし、そもそもログの内容が多すぎて、出力出来る最大サイズを越えてしまうことがたまにある。<br/>
-そんな時は余計なログは出力させないようにデバッグレベルを調整してやる必要がある。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2017/04/debug_log_level_01.jpg" alt="" /></p>
-
-<p>(匿名実行のログを表示させたところ）</p>
-
-<p>開発者コンソールじゃなくて、SFの設定からデバッグログを設定してやる場合はデバッグレベル名を必須で選択するので、レベルの調整が可能なことはわかっていたが、開発者コンソールでもこのデバッグレベルを変更出来た。</p>
-
-<h1>デバッグレベル</h1>
-
-<p>まず、予めデバッグレベルを作成しておく。<br/>
-<code>設定 -&gt; ログ -&gt; デバッグレベル</code> にアクセス。</p>
-
-<p>新規、から作成。</p>
-
-<p>名前は適当に設定し、レベルは欲しい情報に絞ったりして調整する。<br/>
-例えば、Apexで<code>System.debug()</code>で出力したものは、Apexコードで、レベルを <code>デバッグ</code> にしておけば出力される。<br/>
-(それ以外のカテゴリはなし、で問題ない）</p>
-
-<p><img src="http://kayakuguri.github.io/images/2017/04/debug_log_level_02.jpg" alt="" /></p>
-
-<h1>ログレベルの変更</h1>
-
-<p>開発者コンソールのメニューから、 <code>Debug -&gt; Change Log Levels</code> を選択。<br/>
-<img src="http://kayakuguri.github.io/images/2017/04/debug_log_level_03.jpg" alt="" /></p>
-
-<p>ログレベルの選択画面がモーダルで表示される。<br/>
-一番上の、<code>General Trace Settings for You</code>が、開発者コンソールで表示されるログのレベルの設定となる。<br/>
-現状は、デフォルトのレベルが設定されているはずなので、一番右の項目にある、 <code>Add/Change</code> をクリック。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2017/04/debug_log_level_04.jpg" alt="" /></p>
-
-<p>デフォルトのレベルと、先ほど設定したレベルが表示されるので、設定したレベルを選択し、<code>Done</code>をクリック。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2017/04/debug_log_level_05.jpg" alt="" /></p>
-
-<p>実は、予めレベルをSF側から作成しなくても、ここで、<code>Add</code>して作成する事も可能。<br/>
-さらに、各カテゴリのレベルもここから変更する事も出来る。</p>
-
-<p>これで設定は完了。先ほどの匿名実行と同じ内容でログを出力してみると、大幅に内容が減っているのが確認出来る。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2017/04/debug_log_level_07.jpg" alt="" /></p>
-
-<p>また、実はSF側のデバッグログのページを確認すると、開発者コンソールを起動させた時点で設定したデバッグレベル・ログイン中のユーザーの状態で、デバッグログが自動的にセットされている。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2017/04/debug_log_level_06.jpg" alt="" /></p>
-
-<p>以上。</p>
 ]]></content>
   </entry>
   

@@ -4,7 +4,7 @@
   <title><![CDATA[Category: apex | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/apex/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2017-10-30T10:35:52+09:00</updated>
+  <updated>2017-11-27T15:02:21+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,132 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Apex Rest APIで任意のステータスコードを返す]]></title>
+    <link href="http://kayakuguri.github.io/blog/2017/11/27/apex-rest-response/"/>
+    <updated>2017-11-27T14:49:52+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2017/11/27/apex-rest-response</id>
+    <content type="html"><![CDATA[<p>カスタムでApex Rest APIを作成する際にレスポンスにステータスコードを反映させる方法。</p>
+
+<!-- more -->
+
+
+<h1>概要</h1>
+
+<p>今までは、返却用するJSON用のクラスを作成し、そのクラスを返却していたのだが、<br/>
+そもそも返却の方法としてはそれが正しくなかった（お作法に則っていなかった）よう。</p>
+
+<p><a href="https://kayakuguri.github.io/blog/2015/03/27/apex-rest-tips/">[salesforce]Apex REST作成時のtips</a><br/>
+この辺の記事内で返却しているやり方。</p>
+
+<p>実際には、<code>return</code>で結果を返す必要はなく、<code>RestResponse</code>クラスに追加してやるだけでよかった。</p>
+
+<ul>
+<li><a href="https://developer.salesforce.com/docs/atlas.ja-jp.apexcode.meta/apexcode/apex_methods_system_restresponse.htm">RestResponse クラス</a></li>
+</ul>
+
+
+<h1>RestResponse</h1>
+
+<h2>ステータスコード</h2>
+
+<p>ステータスコードの指定は以下のようにする。</p>
+
+<p><code>
+RestResponse res = RestContext.response;
+res.statusCode = 400;
+</code></p>
+
+<h2>ヘッダ情報</h2>
+
+<p>デフォルトの情報だと、<code>Content-Type</code>が<code>application/octetstream</code>になっているようなので、<code>application/json</code>に変更したい。<br/>
+ヘッダ情報の追加・変更は以下のようにする。</p>
+
+<p><code>
+RestResponse res = RestContext.response;
+res.addHeader('Content-Type', 'application/json');
+</code></p>
+
+<h2>レスポンス内容</h2>
+
+<p>レスポンスの内容をJSONで返す場合、作成した返却用クラスをJSONにパースし、<code>Blob</code>にキャストして追加してやる。</p>
+
+<p>```
+ResultData result = new ResultData();</p>
+
+<p>RestResponse res = RestContext.response;
+res.responseBody = Blob.valueOf(JSON.serialize(result));
+```</p>
+
+<h2>コード</h2>
+
+<p>上記をまとめると以下のような形になる。</p>
+
+<p>```
+@RestResource(urlMapping=&lsquo;/your/api&rsquo;)
+global with sharing class Your_Apex_Class  {</p>
+
+<pre><code>@HttpPost
+global static void something_method() {
+  ResultData result = new ResultData();
+  result.success = false;
+  ResultError error = new ResultError();
+  result.error = error;
+
+  RestResponse res = RestContext.response;
+  res.addHeader('Content-Type', 'application/json');
+  // (中略)
+
+  if(/* エラーの場合 */){
+    error.message = 'エラーメッセージ';
+    res.statusCode = 400;
+    res.responseBody = Blob.valueOf(JSON.serialize(result));
+    return;
+  }
+
+  // (中略)
+  result.success = true;
+  res.statusCode = 200;
+  res.responseBody = Blob.valueOf(JSON.serialize(result));
+  return;
+}
+
+global class ResultData{
+  global Boolean success;
+  global ResultError error;
+}
+
+global class ResultError{
+  global String message;
+}
+</code></pre>
+
+<p>} <br/>
+```</p>
+
+<p>エラー発生時にはステータスコードが<code>400</code>で以下のようなJSONが返却される。</p>
+
+<p>```
+{</p>
+
+<pre><code>"success": false,
+"error": {
+    "message": "エラーメッセージ"
+}
+</code></pre>
+
+<p>}
+```</p>
+
+<h1>参考</h1>
+
+<ul>
+<li><a href="https://salesforce.stackexchange.com/questions/54010/apexrest-controlling-http-error-codes-on-exceptions">apexrest: controlling HTTP error codes on exceptions</a></li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[Apex]エスケープ文字を置換する]]></title>
@@ -747,174 +873,6 @@ DEBUG|REQUIRED_FIELD_MISSING
 <p>以上で一通り想定していた動作をさせることができた。<br/>
 エラー時に他をロールバックするかどうかとかは、結構忘れがちになるけれど、結構難しい問題。<br/>
 仕様策定時にきちんと考慮していきたい。</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[カスタム設定を作成して取得してみる]]></title>
-    <link href="http://kayakuguri.github.io/blog/2016/02/01/custom-setting/"/>
-    <updated>2016-02-01T15:15:19+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2016/02/01/custom-setting</id>
-    <content type="html"><![CDATA[<p>カスタム設定、というカスタムオブジェクトの一種でSOQLいらずでもっと手軽に扱える <code>カスタム設定</code> とうものを知ったので、<br/>
-作り方から使い方を調べてみた。</p>
-
-<!-- more -->
-
-
-<blockquote><p>カスタム設定はカスタムオブジェクトと類似しており、アプリケーション開発者は、カスタムデータセットの作成の他に、組織、プロファイル、または特定のユーザに対しカスタムデータを作成して関連付けることができます。<br/>
-<a href="https://help.salesforce.com/HTViewHelpDoc?id=cs_about.htm&amp;language=ja">https://help.salesforce.com/HTViewHelpDoc?id=cs_about.htm&amp;language=ja</a></p></blockquote>
-
-<p>今回は全体で使用する、環境変数、としてカスタム設定を作成してみた。</p>
-
-<h2>作成</h2>
-
-<p>[開発] → [カスタム設定] にアクセス。<br/>
-まずは新規でカスタム設定、を作る。<br/>
-オブジェクトのようなもの。</p>
-
-<p><img src="/images/2016/01/custom_setting02.jpg" alt="" /></p>
-
-<p>今回は以下のように作成した。</p>
-
-<table>
-<thead>
-<tr>
-<th></th>
-<th align="left"> 項目 </th>
-<th align="left"> 内容 </th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td></td>
-<td align="left"> 表示ラベル </td>
-<td align="left"> 環境変数</td>
-</tr>
-<tr>
-<td></td>
-<td align="left"> オブジェクト名 </td>
-<td align="left"> EnvironmentVars</td>
-</tr>
-<tr>
-<td></td>
-<td align="left"> 設定種別 </td>
-<td align="left"> リスト</td>
-</tr>
-<tr>
-<td></td>
-<td align="left"> 表示 </td>
-<td align="left"> 公開</td>
-</tr>
-<tr>
-<td></td>
-<td align="left"> 説明 </td>
-<td align="left"> </td>
-</tr>
-</tbody>
-</table>
-
-
-<p><img src="/images/2016/01/custom_setting03.jpg" alt="" /></p>
-
-<p>設定種別は、リスト、と、階層、があり、<br/>
-階層、は、ユーザーやプロファイルごとに同じ項目で違う値を設定したり出来るよう。<br/>
-どのユーザーが使用しているかによって変数の値を変更できるようになるので、<br/>
-そういうことを実現したい時に便利っぽい。 <br/>
-今回は全員同じにしたいので、リスト、にしておいた。</p>
-
-<p>また、表示、は、公開・保護、とある。<br/>
-公開、だとSOAP APIでも取得できるようになったり、とオープンな状態？になるよう。<br/>
-特に秘匿する内容でもないので、公開、にしておいた。</p>
-
-<p>次に作成したカスタム設定内にカスタム項目を追加する。<br/>
-作成したカスタム設定から、新規、をクリック。</p>
-
-<p><img src="/images/2016/01/custom_setting04.jpg" alt="" /></p>
-
-<p>通常の項目作成と同じ流れで、型を選択し、内容を埋めていく。<br/>
-今回は以下のように作成した。<br/>
-目的としては、SitesのURLを環境変数として持っておくためのもの。</p>
-
-<table>
-<thead>
-<tr>
-<th></th>
-<th align="left"> 項目 </th>
-<th align="left"> 内容 </th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td></td>
-<td align="left"> 型 </td>
-<td align="left"> テキスト</td>
-</tr>
-<tr>
-<td></td>
-<td align="left"> 項目の表示ラベル </td>
-<td align="left"> Sites</td>
-</tr>
-<tr>
-<td></td>
-<td align="left"> 文字数 </td>
-<td align="left"> 255</td>
-</tr>
-<tr>
-<td></td>
-<td align="left"> 項目名 </td>
-<td align="left"> Sites</td>
-</tr>
-<tr>
-<td></td>
-<td align="left"> 説明、など </td>
-<td align="left"> </td>
-</tr>
-</tbody>
-</table>
-
-
-<p><img src="/images/2016/01/custom_setting05.jpg" alt="" /></p>
-
-<p>ここまででオブジェクトと項目が作成出来たので、実際にデータを入れていく。<br/>
-作成したカスタム設定の<code>Manege</code>をクリック。</p>
-
-<p><img src="/images/2016/01/custom_setting06.jpg" alt="" /></p>
-
-<p>リストが表示されるので、新規、をクリック。</p>
-
-<p><img src="/images/2016/01/custom_setting07.jpg" alt="" /></p>
-
-<p>内容を記入して保存。</p>
-
-<p><img src="/images/2016/01/custom_setting08.jpg" alt="" /></p>
-
-<h2>取得</h2>
-
-<p>作成したデータをApexで取得する。</p>
-
-<p>前述の通り、取得の際にはSOQLを発行する必要がなく、以下のようにメソッドレベルで取得可能。</p>
-
-<p>```
-Map&lt;String, EnvironmentVars<strong>c> settingMap = EnvironmentVars</strong>c.getAll();</p>
-
-<p>for (String key : settingMap.keySet()) {</p>
-
-<pre><code>EnvironmentVars__c env = settingMap.get(key);
-System.debug('**DEBUG** ' key + ' / ' + env.SitesURL__c);
-</code></pre>
-
-<p>}
-```</p>
-
-<h2>まとめ</h2>
-
-<p>SOQLを発行しないので、ガバナ的にも優しく、内容はキャッシュされるので動作も高速。<br/>
-環境変数のように決まった値であれば便利に使えるかもしれない。</p>
-
-<h2>参考</h2>
-
-<p><a href="https://help.salesforce.com/HTViewHelpDoc?id=cs_accessing.htm&amp;language=ja">カスタム設定へのアクセス</a><br/>
-<a href="https://odekakeshimasyo.io/salesforce-apex-customsetting.html">Salesforce Apex カスタム設定 | odekakeshimasyo.io</a></p>
 ]]></content>
   </entry>
   

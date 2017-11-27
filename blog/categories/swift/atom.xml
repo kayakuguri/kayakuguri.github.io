@@ -4,7 +4,7 @@
   <title><![CDATA[Category: swift | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/swift/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2017-10-30T10:35:52+09:00</updated>
+  <updated>2017-11-27T15:02:21+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -632,7 +632,7 @@ let req = NSMutableURLRequest(URL: URL!)</p>
 
 <p>req.addValue(&ldquo;(self.token_type) (self.access_token)&rdquo;, forHTTPHeaderField: &ldquo;Authorization&rdquo;) //ヘッダ</p>
 
-<p>let user_email = &ldquo;<a href="&#109;&#x61;&#x69;&#108;&#116;&#x6f;&#x3a;&#120;&#x78;&#120;&#x40;&#101;&#x78;&#x61;&#109;&#112;&#108;&#x65;&#x2e;&#99;&#111;&#109;">&#120;&#120;&#120;&#x40;&#101;&#x78;&#x61;&#109;&#x70;&#x6c;&#x65;&#x2e;&#x63;&#x6f;&#109;</a>&rdquo;
+<p>let user_email = &ldquo;<a href="&#109;&#97;&#105;&#x6c;&#116;&#111;&#x3a;&#x78;&#x78;&#x78;&#x40;&#101;&#120;&#97;&#x6d;&#112;&#x6c;&#x65;&#x2e;&#99;&#111;&#x6d;">&#x78;&#120;&#120;&#x40;&#101;&#x78;&#97;&#109;&#x70;&#108;&#101;&#46;&#99;&#111;&#109;</a>&rdquo;
 let user_pass = &ldquo;xxx&rdquo;</p>
 
 <p>req.HTTPMethod = &ldquo;POST&rdquo;
