@@ -4,7 +4,7 @@
   <title><![CDATA[Category: laravel | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/laravel/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2017-11-27T15:02:21+09:00</updated>
+  <updated>2017-11-27T15:04:32+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,92 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[CSVのテキストからLaravelのSeeder用コードを作る]]></title>
+    <link href="http://kayakuguri.github.io/blog/2017/10/30/larave-csv-seeder/"/>
+    <updated>2017-10-30T10:26:29+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2017/10/30/larave-csv-seeder</id>
+    <content type="html"><![CDATA[<p>CSVのテキストをLaravelのseeder、というか、クエリビルダに変換したかったのでツールを作った。</p>
+
+<!-- more -->
+
+
+<p><a href="https://laravel-csv-seeder.herokuapp.com/">Laravel CSV Seeder</a></p>
+
+<h1>使い方</h1>
+
+<p><code>Table name</code>にはテーブル名を入れる。<br/>
+(何も入れなかった場合はダミーの文字が入る)</p>
+
+<p><code>CSV Format Text</code>にはカンマと改行区切りのCSVフォーマットのテキストを入力する。</p>
+
+<p><code>convert</code>ボタンを押すと、その下のテキストエリアに出力結果が表示される。</p>
+
+<h2>CSVの仕様</h2>
+
+<ul>
+<li>項目ごとはカンマ区切り</li>
+<li>行は改行区切り</li>
+<li>行は以下の仕様
+
+<ul>
+<li>1行目 : 日本語項目名。変換後のコードには使用されません</li>
+<li>2行目 : 項目名。キーとして使用されます</li>
+<li>3行目以降 : インサートされる内容</li>
+</ul>
+</li>
+</ul>
+
+
+<h2>Github</h2>
+
+<p>コードはGithubにあげた。</p>
+
+<p><a href="https://github.com/k-usk/laravel-csv-seeder">https://github.com/k-usk/laravel-csv-seeder</a></p>
+
+<p>無駄にHeroku Buttonも付けたので自分の環境で動かしたいという人がいたらどうぞ。</p>
+
+<h1>説明</h1>
+
+<p>CSVを読み込んで整形してるだけなんでたいしたことはしてない。<br/>
+CSVの整形には以下のライブラリを使用した。</p>
+
+<ul>
+<li><a href="http://csv.thephpleague.com/">league/csv</a></li>
+</ul>
+
+
+<h2>その他</h2>
+
+<p>同じようなツールがないか調べたりはしたのだが、CSVをそのままSeederとして使えるものはいくつかあった。</p>
+
+<ul>
+<li><a href="https://github.com/Flynsarmy/laravel-csv-seeder">Flynsarmy/laravel-csv-seeder</a></li>
+<li><a href="https://github.com/andycrockett/laravel-csv-seeder">andycrockett/laravel-csv-seeder</a></li>
+</ul>
+
+
+<p>後は、エクセルファイルをLaravelで扱うための便利パッケージとか。<br/>
+エクセルを作ったりそのまま読み込めたりするよう。これはこれでかなり有用そう。</p>
+
+<ul>
+<li><a href="https://github.com/Maatwebsite/Laravel-Excel/blob/2.1/README.md">Maatwebsite/Laravel-Excel</a></li>
+<li><a href="https://blog.motimotilab.com/?p=68">Laravel Excelの紹介（Laravel：Excelファイル入出力ライブラリ）</a></li>
+</ul>
+
+
+<p>ただし今回はそこまでのツールではなく、また、アプリ本体にそういう機能は組み込みたくなかったため、別のツールとして作成した。</p>
+
+<h1>参考</h1>
+
+<ul>
+<li><a href="https://readouble.com/laravel/5.5/ja/queries.html">Laravel 5.5 データベース：クエリビルダ</a></li>
+<li><a href="http://csv.thephpleague.com/9.0/reader/">league/csv cocument</a></li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Laravelでロードバランサを挟んだ時のisSecure判定を動作させる]]></title>
@@ -566,80 +652,6 @@ $ php artisan queue:listen --sleep=xx --delay=xx
 本体のコードをちょっとだけ追ってみたけどよくわからなかったのでもし誰かわかればお願いします。</p>
 
 <p><a href="https://github.com/laravel/framework">laravel/framework</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[Laravel] キューのsleepとtimeoutの関係]]></title>
-    <link href="http://kayakuguri.github.io/blog/2017/09/22/laravel-queue-sleep-timeout/"/>
-    <updated>2017-09-22T12:16:53+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2017/09/22/laravel-queue-sleep-timeout</id>
-    <content type="html"><![CDATA[<p>Laravelのキューを実際に使ってみた際にちょっと変な挙動だと思ったメモ。</p>
-
-<!-- more -->
-
-
-<h1>sleep</h1>
-
-<p>キューを実行するコマンドのオプションに<code>sleep</code>というものがある。<br/>
-コマンドのヘルプの説明は以下。</p>
-
-<p><code>
---sleep[=SLEEP]      Number of seconds to sleep when no job is available [default: "3"]
-</code></p>
-
-<p>ジョブがない場合に次のジョブを取得するまでにスリープする秒数の設定、とのこと。<br/>
-例えばこれをゼロにすると、常にジョブを取得するためのポーリングが実行され続けるため、ジョブの保存先をキューイングサービスなどにしている場合に、ものすごい数のキュー取得リクエストが飛んでしまう。<br/>
-なのでsleepを設定してやれば(ジョブがなくなった時に)、ポーリング間隔を空ける事が出来るので負荷が減ったりする。</p>
-
-<h1>timeout</h1>
-
-<p>処理の<code>timeout</code>オプション。</p>
-
-<p><code>
---timeout[=TIMEOUT]  The number of seconds a child process can run [default: "60"]
-</code></p>
-
-<p>処理に指定した時間以上の時間がかかった場合はタイムアウトとする設定。デフォルトは60秒。</p>
-
-<h1>sleepとtimeoutの関係</h1>
-
-<p>sleepの時間を長く設定すると、タイムアウトエラーが発生してしまう。<br/>
-例えば以下。</p>
-
-<p><code>
-php artisan queue:listen --sleep=120 --timeout=60
-</code></p>
-
-<p>というのも、次のキュー取得を実行するまでのスリープ時間もタイムアウトの対象の時間に含まれてしまう、よう。<br/>
-なので必ずsleep時間よりもtimeoutの時間を多く設定してやらないといけない。<br/>
-上記の場合だと<code>sleep</code>を120秒にしてるので、<code>timeout</code>を(少なくとも)120秒より大きく設定しないといけない。</p>
-
-<p><code>
-php artisan queue:listen --sleep=120 --timeout=125
-</code></p>
-
-<p>これだと無事、動作する。<br/>
-(処理内容に5秒以上かかると合計が125秒を越えてしまうのでタイムアウトになるが）</p>
-
-<h1>疑問</h1>
-
-<p>単にポーリングの待ち時間のはずなのに実行時間のタイムアウトの対象に含まれるのはおかしいのでは？という疑問はやはり出ていたようで、Githubのissueでやりとりがされていた。</p>
-
-<p><a href="https://github.com/laravel/framework/issues/6206">queue:listen&#39;s sleep duration contributing towards timeout · Issue #6206 · laravel/framework</a></p>
-
-<p>内容を読んでいくと、そもそものプロセスの処理に組み込まれてしまっているため、根本的な修正は難しく、timeoutの時間をsleep時間を足して設定してやる、とかしか無理じゃない？みたいなやり取りになっている。</p>
-
-<p>そしてその後、5.1の時にtimeout時間をsleep時間よりも短く設定出来ないようにする制限が組み込まれたようだが、巨大な処理を行う場合にtimeoutをなしにするためにゼロ秒にセットしたいのに出来ない、という意見が出て結局削除されている。</p>
-
-<p>結果、制約も入らず対処もされていないようなので、現状は前述のように、timeout時間をsleep時間より必ず大きく設定してやらないといけない、ということになっているよう。</p>
-
-<h1>余談</h1>
-
-<p>キューのサンプルを作っている時に事象に遭遇したのだけど、そのキューのサンプルはGitHubにあげてる。<br/>
-HerokuButtonで起動できるようにしたりしてみたので、よかったらお試しあれ。</p>
-
-<p><a href="https://github.com/k-usk/laravel-queue-sample">https://github.com/k-usk/laravel-queue-sample</a></p>
 ]]></content>
   </entry>
   
