@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2017-11-27T15:51:26+09:00</updated>
+  <updated>2017-12-06T20:54:36+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,101 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[laravel5.5でajaxでPOST通信する時のCSRFトークン]]></title>
+    <link href="http://kayakuguri.github.io/blog/2017/12/06/laravel-ajax-csrf/"/>
+    <updated>2017-12-06T20:46:06+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2017/12/06/laravel-ajax-csrf</id>
+    <content type="html"><![CDATA[<p>Laravel5.5にて、ajaxでPOST通信する際にCSRFトークンも送る方法のメモ。</p>
+
+<!-- more -->
+
+
+<h1>概要</h1>
+
+<p>LaravelではデフォルトではPOST通信には全てCSRFトークンをつけてやる必要がある。<br/>
+ajaxでの通信でも例外ではない。<br/>
+なので、そのまま何も考えずにajaxを使うとそこで引っかかってしまう。</p>
+
+<h1>方法</h1>
+
+<p>方法としては(主に)2つ。</p>
+
+<ul>
+<li>送信するURLはCSRFトークンの対象外としてやる</li>
+<li>ajax通信の際にもCSRFトークンを送る</li>
+</ul>
+
+
+<p>もちろん後者の方が安全。</p>
+
+<h1>CSRFトークンの追加</h1>
+
+<p>HTMLのmetaタグにCSRFトークンをおいてやり、それを取得して送る。<br/>
+POST送信の<code>_token</code>パラメータに入れてやるだけでよい。</p>
+
+<ul>
+<li><a href="https://laracasts.com/discuss/channels/requests/laravel-5-cant-use-ajax-post-request">Laravel 5 can&#039;t use ajax post request</a></li>
+</ul>
+
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;meta name="csrf-token" content="" /&gt;
+</span><span class='line'>
+</span><span class='line'>var CSRF_TOKEN = $('meta[name="csrf-token"]').attr('content');
+</span><span class='line'>
+</span><span class='line'>$.ajax({
+</span><span class='line'>    url: '/home/upload/',
+</span><span class='line'>    type: 'POST',
+</span><span class='line'>    data: {_token: CSRF_TOKEN},
+</span><span class='line'>    dataType: 'JSON',
+</span><span class='line'>    success: function (data) {
+</span><span class='line'>        console.log(data);
+</span><span class='line'>    }
+</span><span class='line'>});</span></code></pre></td></tr></table></div></figure>
+
+
+<p>公式のドキュメントにも方法は載っているが、これは、Axios HTTPライブラリを使った方法？のよう。<br/>
+上記でないと上手く動作しなかったが…やり方が悪いのかもしれない。</p>
+
+<ul>
+<li><a href="https://readouble.com/laravel/5.5/ja/csrf.html#csrf-x-csrf-token">X-CSRF-TOKEN | Laravel 5.5 CSRF保護</a></li>
+</ul>
+
+
+<h1>トークン対象外</h1>
+
+<p>一応、トークンの対象外とする方法も。</p>
+
+<p><code>app/http/Middleware/VerifyCsrfToken.php</code>内にて指定してやる。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>protected $except = [
+</span><span class='line'>    'ajax/post/path/*',
+</span><span class='line'>];</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li><a href="https://readouble.com/laravel/5.5/ja/csrf.html#csrf-excluding-uris">URIの除外 | Laravel5.5 CSRF通信</a></li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Apex Rest APIで任意のステータスコードを返す]]></title>
@@ -3123,130 +3218,6 @@ unsigned アップロード、というのは、たぶん、プリセット名�
 </span><span class='line'>
 </span><span class='line'>&lt;/body&gt;
 </span><span class='line'>&lt;/html&gt;</span></code></pre></td></tr></table></div></figure>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[salesforce] レコードのデータを取得し、CSVにしてS3にアップロードする]]></title>
-    <link href="http://kayakuguri.github.io/blog/2017/04/10/put-s3-csv-file/"/>
-    <updated>2017-04-10T12:31:25+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2017/04/10/put-s3-csv-file</id>
-    <content type="html"><![CDATA[<p>AWSで利用する事を想定し、レコードの内容をCSVファイルにしてS3にアップロードしてみたメモ。</p>
-
-<!-- more -->
-
-
-<p>SF内にCSVを生成して、そのファイルをS3にアップロード、すればいいかと思っていたが、直接CSVの内容をBodyに入れて送ってしまうことで、直接CSVファイルをS3に送信してしまう事が出来た。</p>
-
-<h1>参考コード</h1>
-
-<p>参考、というか、以下のコードをそのまま利用させてもらった。</p>
-
-<ul>
-<li><a href="https://github.com/darshanfarswan/haymarketCode/blob/6207a11fc072fed6dd4463b1ca4ebbbe991a232f/src/classes/S3Storage.cls">haymarketCode/src/classes/S3Storage.cls</a></li>
-</ul>
-
-
-<h1>CSV送信</h1>
-
-<p>上記サンプルはテキストファイルになるので、CSVを保存するように変更。<br/>
-具体的には、Bodyの内容をカンマ区切りにし、ファイルの拡張子を<code>csv</code>にし、Content-Typeを<code>text/csv</code>にする、だけ。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>public with sharing class SaveCSVSample {
-</span><span class='line'>  public SaveCSVSample() {
-</span><span class='line'>      String csv_body = 'テスト1,テスト2,テスト3\r\nサンプル1,サンプル2,サンプル3';
-</span><span class='line'>
-</span><span class='line'>      String fileName = 'test.csv';
-</span><span class='line'>
-</span><span class='line'>      String accessId = 'xxx';
-</span><span class='line'>      String secretKey = 'xxx';
-</span><span class='line'>      String bucketName = 'user';
-</span><span class='line'>      String S3_Domain = 's3-ap-northeast-1.amazonaws.com';
-</span><span class='line'>
-</span><span class='line'>      String dateString = Datetime.now().formatGmt('EEE, dd MMM yyyy HH:mm:ss Z');
-</span><span class='line'>      String stringToSign = 'PUT\n\ntext/csv\n' + dateString +'\n/' + bucketName + '/' + fileName;
-</span><span class='line'>      Blob mac = Crypto.generateMac('hmacSHA1',  Blob.valueOf(stringToSign), Blob.valueOf(secretKey));
-</span><span class='line'>      String signature = EncodingUtil.base64Encode(mac);
-</span><span class='line'>
-</span><span class='line'>      HttpRequest req = new HttpRequest();
-</span><span class='line'>      req.setEndPoint('https://' + bucketName + '.' + S3_Domain + '/' + fileName);
-</span><span class='line'>      req.setHeader('Content-Type', 'text/csv');
-</span><span class='line'>      req.setHeader('Content-Length', String.valueOf(csv_body.length()));
-</span><span class='line'>      req.setHeader('Host', bucketName + '.' + S3_Domain);
-</span><span class='line'>      req.setHeader('Date', dateString);
-</span><span class='line'>      req.setHeader('Authorization','AWS ' + accessId + ':' + signature);
-</span><span class='line'>      req.setBody(csv_body);
-</span><span class='line'>      req.setMethod('PUT');
-</span><span class='line'>
-</span><span class='line'>      Http httpConnection = new Http();
-</span><span class='line'>      HTTPResponse res = httpConnection.send(req);
-</span><span class='line'>
-</span><span class='line'>      System.debug(res);
-</span><span class='line'>  }
-</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
-
-
-<p>アップされたCSVは、改行コード <code>\r\n</code> 、文字コードは、<code>UTF-8</code>となった。</p>
-
-<p>これでS3側にCSVファイルを作成出来るので、あとはレコードをSOQLで取得し、Bodyをカンマ区切りで作成してやればよいだけ。</p>
-
-<h2>環境情報</h2>
-
-<p>この例では、アクセスキーなどはベタで書いてしまっているが、実際には<a href="https://kayakuguri.github.io/blog/2016/02/01/custom-setting/">カスタム設定などで作成し</a>取得するようにした方がよい。<br/>
-それだと、sandboxと本番でS3の投げ先も変更出来る。</p>
-
-<h2>エンドポイント</h2>
-
-<p>送信先に設定している、<code>S3_Domain</code>は現状、日本リージョンのもの。<br/>
-各サービスのリージョン別のエンドポイントは以下を参考。<br/>
-<a href="http://docs.aws.amazon.com/ja_jp/general/latest/gr/rande.html#s3_region">http://docs.aws.amazon.com/ja_jp/general/latest/gr/rande.html#s3_region</a></p>
-
-<h2>ガバナ制限</h2>
-
-<blockquote><p>ファイルサイズが3MBを超えるとApexの実行時ガバナ制限に抵触する<br/>
-<a href="http://www30304u.sakura.ne.jp/blog/?p=1808">http://www30304u.sakura.ne.jp/blog/?p=1808</a></p></blockquote>
-
-<h1>参考</h1>
-
-<ul>
-<li><a href="http://www.nkjmkzk.net/?p=2638">CORSサポートを利用したAWS S3へのアップロード方法 – Force.comバージョン</a></li>
-<li><a href="http://blog.livedoor.jp/volvic_beer/archives/52481242.html">【salesforce】【apex】【aws】apexでs3にアップロードでエラーがでたよ</a></li>
-<li><a href="http://dev.classmethod.jp/cloud/aws/s3-cors-upload/">WebブラウザからAmazon S3に直接ファイルをアップロードする</a></li>
-<li><a href="http://docs.aws.amazon.com/ja_jp/AmazonS3/latest/dev/RESTAuthentication.html">REST リクエストの署名と認証</a></li>
-</ul>
 
 ]]></content>
   </entry>

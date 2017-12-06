@@ -4,7 +4,7 @@
   <title><![CDATA[Category: laravel | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/laravel/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2017-11-27T15:51:26+09:00</updated>
+  <updated>2017-12-06T20:54:36+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,93 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[laravel5.5でajaxでPOST通信する時のCSRFトークン]]></title>
+    <link href="http://kayakuguri.github.io/blog/2017/12/06/laravel-ajax-csrf/"/>
+    <updated>2017-12-06T20:46:06+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2017/12/06/laravel-ajax-csrf</id>
+    <content type="html"><![CDATA[<p>Laravel5.5にて、ajaxでPOST通信する際にCSRFトークンも送る方法のメモ。</p>
+
+<!-- more -->
+
+
+<h1>概要</h1>
+
+<p>LaravelではデフォルトではPOST通信には全てCSRFトークンをつけてやる必要がある。<br/>
+ajaxでの通信でも例外ではない。<br/>
+なので、そのまま何も考えずにajaxを使うとそこで引っかかってしまう。</p>
+
+<h1>方法</h1>
+
+<p>方法としては(主に)2つ。</p>
+
+<ul>
+<li>送信するURLはCSRFトークンの対象外としてやる</li>
+<li>ajax通信の際にもCSRFトークンを送る</li>
+</ul>
+
+
+<p>もちろん後者の方が安全。</p>
+
+<h1>CSRFトークンの追加</h1>
+
+<p>HTMLのmetaタグにCSRFトークンをおいてやり、それを取得して送る。<br/>
+POST送信の<code>_token</code>パラメータに入れてやるだけでよい。</p>
+
+<ul>
+<li><a href="https://laracasts.com/discuss/channels/requests/laravel-5-cant-use-ajax-post-request">Laravel 5 can&#039;t use ajax post request</a></li>
+</ul>
+
+
+<p>```
+<meta name="csrf-token" content="" /></p>
+
+<p>var CSRF_TOKEN = $(&lsquo;meta[name=&ldquo;csrf-token&rdquo;]&rsquo;).attr(&lsquo;content&rsquo;);</p>
+
+<p>$.ajax({</p>
+
+<pre><code>url: '/home/upload/',
+type: 'POST',
+data: {_token: CSRF_TOKEN},
+dataType: 'JSON',
+success: function (data) {
+    console.log(data);
+}
+</code></pre>
+
+<p>});
+```</p>
+
+<p>公式のドキュメントにも方法は載っているが、これは、Axios HTTPライブラリを使った方法？のよう。<br/>
+上記でないと上手く動作しなかったが…やり方が悪いのかもしれない。</p>
+
+<ul>
+<li><a href="https://readouble.com/laravel/5.5/ja/csrf.html#csrf-x-csrf-token">X-CSRF-TOKEN | Laravel 5.5 CSRF保護</a></li>
+</ul>
+
+
+<h1>トークン対象外</h1>
+
+<p>一応、トークンの対象外とする方法も。</p>
+
+<p><code>app/http/Middleware/VerifyCsrfToken.php</code>内にて指定してやる。</p>
+
+<p>```
+protected $except = [</p>
+
+<pre><code>'ajax/post/path/*',
+</code></pre>
+
+<p>];
+```</p>
+
+<ul>
+<li><a href="https://readouble.com/laravel/5.5/ja/csrf.html#csrf-excluding-uris">URIの除外 | Laravel5.5 CSRF通信</a></li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[CSVのテキストからLaravelのSeeder用コードを作る]]></title>
@@ -555,103 +642,6 @@ public function testBasicTest()
 <li><a href="https://confluence.jetbrains.com/display/PhpStorm/Running+PHPUnit+tests+over+SSH+on+a+remote+server+with+PhpStorm">Running PHPUnit tests over SSH on a remote server with PhpStorm &ndash; PhpStorm &ndash; Confluence</a></li>
 </ul>
 
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[Laravel]キューのdelayとsleepオプション]]></title>
-    <link href="http://kayakuguri.github.io/blog/2017/09/22/laravel-queue-delay-sleep/"/>
-    <updated>2017-09-22T15:05:42+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2017/09/22/laravel-queue-delay-sleep</id>
-    <content type="html"><![CDATA[<p>Laravelにてキューを実行させる際に、delayとsleepオプションの関係がちょっと変だったのでメモ。</p>
-
-<!-- more -->
-
-
-<h1>sleep</h1>
-
-<p><code>
---sleep[=SLEEP]      Number of seconds to sleep when no job is available [default: "3"]
-</code></p>
-
-<p>ジョブがない場合に次のジョブを取得するまでにスリープする秒数の設定。</p>
-
-<h1>delay</h1>
-
-<p><code>
---delay[=DELAY]      The number of seconds to delay failed jobs [default: "0"]
-</code></p>
-
-<p>ジョブが失敗した場合に再試行するまでの遅延時間。</p>
-
-<h1>delayとsleep</h1>
-
-<p>両方設定した場合の動作が少し変な気がするのでそれぞれ試してみた。</p>
-
-<table>
-<thead>
-<tr>
-<th></th>
-<th align="left"> delay </th>
-<th align="left"> sleep </th>
-<th align="left"> 失敗時遅延 </th>
-<th align="left"> 待機 </th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td></td>
-<td align="left"> なし </td>
-<td align="left"> 30 </td>
-<td align="left"> 0 </td>
-<td align="left"> 30 </td>
-</tr>
-<tr>
-<td></td>
-<td align="left"> 30 </td>
-<td align="left"> なし </td>
-<td align="left"> 30 </td>
-<td align="left"> 0 </td>
-</tr>
-<tr>
-<td></td>
-<td align="left"> 5 </td>
-<td align="left"> 30 </td>
-<td align="left"> 30 </td>
-<td align="left"> 30 </td>
-</tr>
-<tr>
-<td></td>
-<td align="left"> 30 </td>
-<td align="left"> 5 </td>
-<td align="left"> 30 </td>
-<td align="left"> 5 </td>
-</tr>
-</tbody>
-</table>
-
-
-<p>実行コマンドは以下。</p>
-
-<p><code>
-$ php artisan queue:listen --sleep=xx --delay=xx
-</code></p>
-
-<p>結果は、3行目の<code>delay=5 sleep=30</code>の時だけ意図した動作と違っていた。<br/>
-本来ならば<code>delay=5</code>なので失敗時の再試行までの遅延は5秒のはずなのに、sleepに設定している30秒が適用されているようだった。</p>
-
-<h1>結論</h1>
-
-<ul>
-<li>delay > sleep の場合は意図通り動作する</li>
-<li>delay &lt; sleep の場合はsleepに設定した時間がdelayにも適用される</li>
-</ul>
-
-
-<p>これはバグだろうか…。<br/>
-本体のコードをちょっとだけ追ってみたけどよくわからなかったのでもし誰かわかればお願いします。</p>
-
-<p><a href="https://github.com/laravel/framework">laravel/framework</a></p>
 ]]></content>
   </entry>
   
