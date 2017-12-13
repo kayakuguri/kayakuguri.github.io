@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2017-12-13T11:17:49+09:00</updated>
+  <updated>2017-12-13T11:44:13+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,64 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[LaravelのEloquentモデルでupdated_atがないテーブルを使う]]></title>
+    <link href="http://kayakuguri.github.io/blog/2017/12/13/eloquent-updated-at-null/"/>
+    <updated>2017-12-13T11:37:13+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2017/12/13/eloquent-updated-at-null</id>
+    <content type="html"><![CDATA[<p>Laravelのバージョンは5.5で確認。<br/>
+Eloquentモデルは作成時に自動で<code>created_at</code>と<code>updated_at</code>を更新してくれる。<br/>
+しかし、仕様の都合上、<code>updated_at</code>カラムがないテーブルを利用したかったのでその方法。</p>
+
+<!-- more -->
+
+
+<h1>定数でのカラム指定</h1>
+
+<p>Eloquentモデル内で定数を使用することで明示的にカラム名を指定する事が可能。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>const CREATED_AT = 'date_created';
+</span><span class='line'>const UPDATED_AT = 'date_modified';</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li><a href="https://www.larajapan.com/2016/11/26/laravel-5-3-%E3%82%BF%E3%82%A4%E3%83%A0%E3%82%B9%E3%82%BF%E3%83%B3%E3%83%97%E3%81%AEdb%E9%A0%85%E7%9B%AE%E5%90%8D%E3%81%AE%E6%8C%87%E5%AE%9A/">Laravel 5.3 タイムスタンプのDB項目名の指定</a></li>
+</ul>
+
+
+<p>これを利用し、更新カラムはない事を指定してやればよい。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>const UPDATED_AT = null;</span></code></pre></td></tr></table></div></figure>
+
+
+<p>これだけ。</p>
+
+<h3>情報元</h3>
+
+<ul>
+<li><a href="https://www.neontsunami.com/posts/eloquent-model-without-updated_at-laravel-55">Eloquent model without updated_at (Laravel 5.5) &mdash; Neon Tsunami</a></li>
+</ul>
+
+
+<h2>無効化</h2>
+
+<p>ちなみに、<code>created_at</code>、<code>updated_at</code>を自動で更新させたくない場合は以下のように指定してやればよいよう。<br/>
+自動で更新しなくなるので、それらのカラムがないテーブルでもEloquentモデルを利用出来るようになる。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>public $timestamps = false;</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li><a href="http://laravel.hatenablog.com/entry/2013/10/19/004831">timestampを無効にする場合 &ndash; ふたりはララベル （Laravel PHP Framework）</a></li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[HerokuでLaravel-Mixを利用する際の環境変数]]></title>
@@ -2888,99 +2946,6 @@ Papertrailでは標準出力に出力したログは漏れなく拾ってくれ�
 
 <ul>
 <li><a href="http://qiita.com/iakio/items/86086e046f73826c9bef">Laravelのログを標準エラーに出力する &ndash; Qiita</a></li>
-</ul>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Vagrantで、Authentication failureのWarningが出た場合の対処]]></title>
-    <link href="http://kayakuguri.github.io/blog/2017/04/24/vagrant-authentication-error/"/>
-    <updated>2017-04-24T17:21:13+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2017/04/24/vagrant-authentication-error</id>
-    <content type="html"><![CDATA[<p>Vagrantを起動させた場合に、Warningが出て起動しなくなってしまった時にググった対処方のメモ。</p>
-
-<!-- more -->
-
-
-<h1>環境</h1>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>・ホスト側
-</span><span class='line'>Mac OSX 10.11.6
-</span><span class='line'>Vagrant 1.8.6
-</span><span class='line'>Virtual Box 5.1.6
-</span><span class='line'>
-</span><span class='line'>・ゲスト側
-</span><span class='line'>CentOX 6.5</span></code></pre></td></tr></table></div></figure>
-
-
-<h1>エラー内容</h1>
-
-<p>以下のエラーが出た。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>Warning: Authentication failure. Retrying...</span></code></pre></td></tr></table></div></figure>
-
-
-<p>起動途中で上記のwarningが連発し、タイムアウトで終了してしまう。</p>
-
-<h1>原因</h1>
-
-<p>vagrant 1.7以降の場合に、vagrantで使用している秘密鍵と公開鍵の不一致？によって引き起こされるエラーのよう。</p>
-
-<h1>対処法</h1>
-
-<p>以下の手順で対処した。</p>
-
-<p><code>Vagrantfile</code>に、ゲストOSの公開鍵を書き換えないように以下の設定を追記。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>config.ssh.insert_key = false</span></code></pre></td></tr></table></div></figure>
-
-
-<p><code>$ vagrant up</code>でvagrantを起動。途中、warningが出るが、<code>ctrl + c</code>で中断する。<br/>
-中断してもvagrant自体は立ち上がっているので、<code>$ vagraht ssh</code>でゲストOSにログインする。</p>
-
-<p><code>/home/vagrant/</code>以下に、<code>.ssh</code>ディレクトリがなければ作成する。<br/>
-(すでにあったので今回は作成していない)</p>
-
-<p>vagrantの作者のGithubリポジトリから公開鍵を取得し、<code>authorized_keys</code>という名前で保存する。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>$ wget --no-check-certificate https://raw.github.com/mitchellh/vagrant/master/keys/vagrant.pub -O /home/vagrant/.ssh/authorized_keys</span></code></pre></td></tr></table></div></figure>
-
-
-<p>ファイルやディレクトリのパーミッションを変更する。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>$ chmod 0700 /home/vagrant/.ssh
-</span><span class='line'>$ chmod 0600 /home/vagrant/.ssh/authorized_keys
-</span><span class='line'>$ chown -R vagrant /home/vagrant/.ssh</span></code></pre></td></tr></table></div></figure>
-
-
-<p>ホストOS側にある、<code>.vagrant</code>ディレクトリ内の<code>private_key</code>を削除する。
-<code>.vagrant/machines/default/virtualbox/private_key</code> を削除。</p>
-
-<p><code>$ vagrant halt</code>で停止する。</p>
-
-<p>これで再度、<code>$ vagrant up</code>することで起動することが出来た。</p>
-
-<h1>参考</h1>
-
-<ul>
-<li><a href="http://qiita.com/shyse/items/9ec50b868b90f847c75f">vagrant upコマンド実行時にAuthentication failure.エラーが発生する</a></li>
-<li><a href="https://github.com/NetCommons3/NetCommons3/wiki/vagrant-up-%E3%81%A7Authentication-failure.-Retrying...">vagrant up でAuthentication failure. Retrying&hellip;</a></li>
-<li><a href="http://qiita.com/megane42/items/1d8ae7444d8c1b10bbd7">Vagrant で作った VM にやってはいけない2つのこと</a></li>
-<li><a href="http://qiita.com/t_732_twit/items/2303a0c3f27c288382c5#1-4">Vagrantで自分の作成した公開鍵と秘密鍵を使う方法</a></li>
 </ul>
 
 ]]></content>

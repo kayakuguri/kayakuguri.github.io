@@ -4,7 +4,7 @@
   <title><![CDATA[Category: laravel | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/laravel/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2017-12-13T11:17:49+09:00</updated>
+  <updated>2017-12-13T11:44:13+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,63 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[LaravelのEloquentモデルでupdated_atがないテーブルを使う]]></title>
+    <link href="http://kayakuguri.github.io/blog/2017/12/13/eloquent-updated-at-null/"/>
+    <updated>2017-12-13T11:37:13+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2017/12/13/eloquent-updated-at-null</id>
+    <content type="html"><![CDATA[<p>Laravelのバージョンは5.5で確認。<br/>
+Eloquentモデルは作成時に自動で<code>created_at</code>と<code>updated_at</code>を更新してくれる。<br/>
+しかし、仕様の都合上、<code>updated_at</code>カラムがないテーブルを利用したかったのでその方法。</p>
+
+<!-- more -->
+
+
+<h1>定数でのカラム指定</h1>
+
+<p>Eloquentモデル内で定数を使用することで明示的にカラム名を指定する事が可能。</p>
+
+<p><code>
+const CREATED_AT = 'date_created';
+const UPDATED_AT = 'date_modified';
+</code></p>
+
+<ul>
+<li><a href="https://www.larajapan.com/2016/11/26/laravel-5-3-%E3%82%BF%E3%82%A4%E3%83%A0%E3%82%B9%E3%82%BF%E3%83%B3%E3%83%97%E3%81%AEdb%E9%A0%85%E7%9B%AE%E5%90%8D%E3%81%AE%E6%8C%87%E5%AE%9A/">Laravel 5.3 タイムスタンプのDB項目名の指定</a></li>
+</ul>
+
+
+<p>これを利用し、更新カラムはない事を指定してやればよい。</p>
+
+<p><code>
+const UPDATED_AT = null;
+</code></p>
+
+<p>これだけ。</p>
+
+<h3>情報元</h3>
+
+<ul>
+<li><a href="https://www.neontsunami.com/posts/eloquent-model-without-updated_at-laravel-55">Eloquent model without updated_at (Laravel 5.5) &mdash; Neon Tsunami</a></li>
+</ul>
+
+
+<h2>無効化</h2>
+
+<p>ちなみに、<code>created_at</code>、<code>updated_at</code>を自動で更新させたくない場合は以下のように指定してやればよいよう。<br/>
+自動で更新しなくなるので、それらのカラムがないテーブルでもEloquentモデルを利用出来るようになる。</p>
+
+<p><code>
+public $timestamps = false;
+</code></p>
+
+<ul>
+<li><a href="http://laravel.hatenablog.com/entry/2013/10/19/004831">timestampを無効にする場合 &ndash; ふたりはララベル （Laravel PHP Framework）</a></li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[HerokuでLaravel-Mixを利用する際の環境変数]]></title>
@@ -283,273 +340,6 @@ protected $proxies = '**';
 </code></p>
 
 <blockquote><p>Amazon AWSや他の「クラウド」ロードバランサプロバイダを使用している場合は、実際のバランサのIPアドレスは分かりません。このような場合、全プロキシを信用するために、**を使います。</p></blockquote>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Laravel Passportのクライアント認証を試してみる]]></title>
-    <link href="http://kayakuguri.github.io/blog/2017/10/20/laravel-passport-sample/"/>
-    <updated>2017-10-20T14:01:59+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2017/10/20/laravel-passport-sample</id>
-    <content type="html"><![CDATA[<p>Laravel Passportを使ってAPIからのアクセスにOAuth認証をかけたい。<br/>
-一般に公開するものではなく、特定のクライアントからのアクセスのみを想定する。<br/>
-そのため、ユーザデータは使用しない。</p>
-
-<!-- more -->
-
-
-<h2>インストール</h2>
-
-<p>Laravel Passportをインストール。</p>
-
-<p><code>
-$ composer require laravel/passport
-</code></p>
-
-<p>Package Auto-Discovery に対応しているため、プロバイダに追加してやる作業は必要ない。</p>
-
-<ul>
-<li><a href="https://laravel-news.com/package-auto-discovery">Laravel Package Auto-Discovery &ndash; Laravel News</a></li>
-</ul>
-
-
-<h2>セットアップ</h2>
-
-<p>DBに必要なテーブルを作成する。</p>
-
-<p><code>
-$ php artisan migrate
-</code></p>
-
-<p>OAuth用に以下のテーブルが作成される。</p>
-
-<ul>
-<li><code>oauth_access_tokens</code></li>
-<li><code>oauth_auth_codes</code></li>
-<li><code>oauth_clients</code></li>
-<li><code>oauth_personal_access_clients</code></li>
-<li><code>oauth_refresh_tokens</code></li>
-</ul>
-
-
-<p>トークン作成時に使用されるキーを生成する。</p>
-
-<p><code>
-$ php artisan passport:install
-</code></p>
-
-<p>キーは、<code>/storage/</code>以下に生成される。<br/>
-デフォルトでは<code>.gitignore</code>で無視する設定となっているので注意。<br/>
-また、公開リポジトリにアップしてはいけない。<br/>
-対処法などは以下参考。</p>
-
-<ul>
-<li><a href="https://qiita.com/kawax/items/59fde47056816cec52ec">Laravel Passport keyファイルの扱い &ndash; Qiita</a></li>
-</ul>
-
-
-<p>また、キーの生成とともに、DBにクライアントが作成される。</p>
-
-<p><code>
-Encryption keys generated successfully.
-Personal access client created successfully.
-Client ID: 1
-Client Secret: tR7FSAHLQ8qw1xIgEWMKQ26QK2nKUxHahSHvY3RW
-Password grant client created successfully.
-Client ID: 2
-Client Secret: 6n4TGzdrJHYdEJwPoMsaYuCA9EaFpXiGFr4dMVc8
-</code></p>
-
-<p>一つ目が、 <code>Laravel Personal Access Client</code><br/>
-二つ目が、<code>Laravel Password Grant Client</code></p>
-
-<p>二つ目はユーザ名＋パスワードを利用したアクセストークンの発行に利用出来る。<br/>
-(ユーザーとの紐付けは特に必要なし)<br/>
-(必要なければ消しておいてもよい)</p>
-
-<h3>コードに追加</h3>
-
-<h4><code>AuthServiceProvider.php</code>に追加</h4>
-
-<p><code>/app/Providers/AuthServiceProvider.php</code></p>
-
-<p>```
-public function boot()
-{</p>
-
-<pre><code>$this-&gt;registerPolicies();
-
-Passport::routes();
-</code></pre>
-
-<p>}
-```</p>
-
-<h4><code>auth.php</code>のdriverをpassportに変更</h4>
-
-<p><code>/config/auth.php</code></p>
-
-<p>```
-&lsquo;guards&rsquo; => [</p>
-
-<pre><code>'web' =&gt; [
-    'driver' =&gt; 'session',
-    'provider' =&gt; 'users',
-],
-
-'api' =&gt; [
-    'driver' =&gt; 'passport',
-    'provider' =&gt; 'users',
-],
-</code></pre>
-
-<p>],
-```</p>
-
-<h2>クライアント認証情報グラントトークン</h2>
-
-<p>冒頭の趣旨を実現するために、マシン-マシン間の認証に最適、という認証方式を採用する。</p>
-
-<h4><code>Kanel.php</code>に追加</h4>
-
-<p><code>/app/Http/Kanel.php</code></p>
-
-<p>```
-protected $routeMiddleware = [</p>
-
-<pre><code>...
-'client' =&gt; CheckClientCredentials::class,
-</code></pre>
-
-<p>];<br/>
-```</p>
-
-<h2>アクセストークンの取得</h2>
-
-<p>以下にアクセスして取得出来る。</p>
-
-<p>・リクエスト</p>
-
-<p><code>
-POST : /oauth/token
-</code></p>
-
-<table>
-<thead>
-<tr>
-<th></th>
-<th align="left"> 項目 </th>
-<th align="left"> 内容 </th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td></td>
-<td align="left"> <code>grant_type</code> </td>
-<td align="left"> <code>client_credentials</code> |</td>
-</tr>
-<tr>
-<td></td>
-<td align="left"> <code>client_id</code> </td>
-<td align="left"> 発行したクライアントのID(数字) |</td>
-</tr>
-<tr>
-<td></td>
-<td align="left"> <code>client_secret</code> </td>
-<td align="left"> 発行したクライアントのシークレット |</td>
-</tr>
-<tr>
-<td></td>
-<td align="left"> <code>scope</code> </td>
-<td align="left"> アクセスするスコープ |</td>
-</tr>
-</tbody>
-</table>
-
-
-<p>・レスポンス</p>
-
-<p>```
-{</p>
-
-<pre><code>"token_type": "Bearer",
-"expires_in": 31536000,
-"access_token": "YOUR-ACCESS-TOKEN-HERE"
-</code></pre>
-
-<p>}
-```</p>
-
-<p>発行されたトークンは、<code>oauth_access_tokens</code>テーブルに格納されていく。</p>
-
-<h3>有効期限</h3>
-
-<p>デフォルトではトークンの有効期限は１年間となっている。</p>
-
-<p>変更するには、<code>AuthServiceProvider</code>の<code>boot</code>メソッドから変更可能。</p>
-
-<p><code>/app/Providers/AuthServiceProvider.php</code></p>
-
-<p>```
-public function boot()
-{</p>
-
-<pre><code>$this-&gt;registerPolicies();
-
-Passport::routes();
-Passport::tokensExpireIn(Carbon::now()-&gt;addMinute(60));
-Passport::refreshTokensExpireIn(Carbon::now()-&gt;addHour(2));
-</code></pre>
-
-<p>}
-```</p>
-
-<h2>APIへのアクセス</h2>
-
-<p>上記トークンを使用してアクセス制限をかけたAPIへアクセスする。</p>
-
-<h3>ルートに追加</h3>
-
-<p>追加したミドルウェアを使用して、apiのルートにこの認証で使用するエンドポイントのリクエストを追加。</p>
-
-<p><code>/routes/api.php</code></p>
-
-<p>```
-Route::get(&lsquo;/hoge&rsquo;, function (){</p>
-
-<pre><code>return 'OK';
-</code></pre>
-
-<p>})&ndash;>middleware(&lsquo;client&rsquo;);
-```</p>
-
-<h3>アクセス</h3>
-
-<p>apiのルーティングは、<code>/api</code>以下に作成される。<br/>
-よって、エンドポイントは以下になる</p>
-
-<p><code>
-GET : /api/hoge
-</code></p>
-
-<p>ヘッダにアクセストークンを付与してアクセスする。</p>
-
-<ul>
-<li>Authorization : <code>Bearer YOUR-ACCESS-TOKEN</code></li>
-</ul>
-
-
-<h4>エラー</h4>
-
-<p>アクセストークンが間違っているなどの場合は、<code>InvalidArgumentException</code>が発生する。</p>
-
-<h1>参考</h1>
-
-<ul>
-<li><a href="https://readouble.com/laravel/5.5/ja/passport.html">API認証(Passport) 5.5 Laravel</a></li>
-<li><a href="https://qiita.com/niiyz/items/fffff94acb6061ecc9d4">Laravel5.5でAPI認証のパッケージ(Laravel Passport)を利用する &ndash; Qiita</a></li>
-</ul>
-
 ]]></content>
   </entry>
   
