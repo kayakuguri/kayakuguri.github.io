@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2017-12-06T20:54:36+09:00</updated>
+  <updated>2017-12-13T11:17:49+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,66 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[HerokuでLaravel-Mixを利用する際の環境変数]]></title>
+    <link href="http://kayakuguri.github.io/blog/2017/12/13/laravel-mix-heroku-env/"/>
+    <updated>2017-12-13T11:08:35+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2017/12/13/laravel-mix-heroku-env</id>
+    <content type="html"><![CDATA[<p>HerokuでLaravel Mixを使っている際に、ビルドに失敗する時があり調べた結果、環境変数を追加するだけで対策出来たのでメモ。</p>
+
+<!-- more -->
+
+
+<h1>症状</h1>
+
+<p>Herokuのビルドパックには <code>heroku/nodejs</code>と<code>heroku/php</code>を入れておき、順番はnode.jsが先。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$ heroku buildpacks -a app-name
+</span><span class='line'>=== app-name Buildpack URLs
+</span><span class='line'>1. heroku/nodejs
+</span><span class='line'>2. heroku/php</span></code></pre></td></tr></table></div></figure>
+
+
+<p>この状態でpushしてデプロイするも、npmのインストールなどは走るがLaravel Mixのコンパイルが走らない状態(たぶん）。<br/>
+ビルドログを見ると以下のようなエラーが出ている。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>Additional dependencies must be installed. This will only take a moment.
+</span><span class='line'>warning " &gt; browser-sync-webpack-plugin@1.2.0" has unmet peer dependency "webpack@^1 || ^2 || ^3".
+</span><span class='line'>Finished. Please run Mix again.</span></code></pre></td></tr></table></div></figure>
+
+
+<p>依存関係が解消出来てないとかなんとか？</p>
+
+<h1>解決策</h1>
+
+<p>ググると以下の情報。</p>
+
+<p>環境変数に、<code>YARN_PRODUCTION</code>を<code>false</code>で追加してやるだけ。</p>
+
+<ul>
+<li><a href="https://www.neontsunami.com/posts/using-laravel-mix-on-heroku">Using Laravel Mix on Heroku &mdash; Neon Tsunami</a></li>
+</ul>
+
+
+<p>環境変数を追加してやることで、<code>devDependencies</code>から依存関係を取得するように指示してやる事が出来るよう。</p>
+
+<blockquote><p>First, set <code>YARN_PRODUCTION</code> to false using the following command. This tells Heroku to install the devDependencies in your package.json, but leaves NODE_ENV as production.</p></blockquote>
+
+<p>Google翻訳</p>
+
+<blockquote><p>まず、次のコマンドを使用して<code>YARN_PRODUCTION</code>をfalseに設定します。これは、あなたのpackage.jsonにdevDependenciesをインストールするようにHerokuに指示しますが、NODE_ENVをプロダクションとして残します。</p></blockquote>
+
+<p>記事の通り、上手く行ってなかった環境に環境変数を追加してやると無事、コンパイルされるようになった。</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[laravel5.5でajaxでPOST通信する時のCSRFトークン]]></title>
@@ -2922,302 +2982,6 @@ Papertrailでは標準出力に出力したログは漏れなく拾ってくれ�
 <li><a href="http://qiita.com/megane42/items/1d8ae7444d8c1b10bbd7">Vagrant で作った VM にやってはいけない2つのこと</a></li>
 <li><a href="http://qiita.com/t_732_twit/items/2303a0c3f27c288382c5#1-4">Vagrantで自分の作成した公開鍵と秘密鍵を使う方法</a></li>
 </ul>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[jQueryを使ったCloudinaryのダイレクトアップロード]]></title>
-    <link href="http://kayakuguri.github.io/blog/2017/04/11/cloudinary-direct-upload/"/>
-    <updated>2017-04-11T18:15:35+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2017/04/11/cloudinary-direct-upload</id>
-    <content type="html"><![CDATA[<p>PHPなどのサーバーサイドのプログラムなしにクライアントのJSだけでCloudinaryにアップロードしてみた。</p>
-
-<!-- more -->
-
-
-<h1>情報</h1>
-
-<p>Cloudinaryの情報として必要なものは以下。</p>
-
-<ul>
-<li>Upload Presets Name(unsigned)</li>
-<li>Cloud Name</li>
-</ul>
-
-
-<h2>Upload Presets Name</h2>
-
-<p>Cloudinaryへアップロードする際に、サイズや形式、フィルターなどをプリセットとして登録しておける。<br/>
-unsigned アップロード、というのは、たぶん、プリセット名とCloudinaryの名前さえわかっていれば認証なしでアップロード出来る、というものっぽい。<br/>
-これは、予め設定画面から有効にしてやる必要がある。</p>
-
-<p><code>Settings</code>の、<code>Upload</code>タブを開くと、<code>Upload presets</code>という項目があるので、そこで、<code>Enable unsigned uploading</code>をクリック。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2017/04/cloudinary_setting_1.jpg" alt="" /></p>
-
-<p>有効となると情報が表示されるので、<code>Name</code>をメモっておく。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2017/04/cloudinary_setting_2.jpg" alt="" /></p>
-
-<h2>Cloud Name</h2>
-
-<p><code>Dashboard</code>に表示されているので、メモっておく。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2017/04/cloudinary_setting_3.jpg" alt="" /></p>
-
-<h1>ライブラリ</h1>
-
-<p>Cloudinaryが作成しているjQuery File Upload用のライブラリがあるのでそちらを利用する。</p>
-
-<ul>
-<li><a href="https://github.com/cloudinary/cloudinary_js">cloudinary/cloudinary_js</a></li>
-<li><a href="https://github.com/blueimp/jQuery-File-Upload">blueimp/jQuery-File-Upload</a></li>
-</ul>
-
-
-<p>先頭でもろもろ読み込む。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;script src='jquery.min.js' type='text/javascript'&gt;&lt;/script&gt;
-</span><span class='line'>&lt;script src='jquery.ui.widget.js' type='text/javascript'&gt;&lt;/script&gt;
-</span><span class='line'>&lt;script src='jquery.iframe-transport.js' type='text/javascript'&gt;&lt;/script&gt;
-</span><span class='line'>&lt;script src='jquery.fileupload.js' type='text/javascript'&gt;&lt;/script&gt;
-</span><span class='line'>&lt;script src='jquery.cloudinary.js' type='text/javascript'&gt;&lt;/script&gt;</span></code></pre></td></tr></table></div></figure>
-
-
-<p>全部CDNでやった場合は以下。<br/>
-公式にはCDNはないので本番の案件では使わない方が無難かも。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;script src='http://kayakuguri.github.io//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js' type='text/javascript'&gt;&lt;/script&gt;
-</span><span class='line'>&lt;script src="http://kayakuguri.github.io//code.jquery.com/ui/1.12.1/jquery-ui.min.js" integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU=" crossorigin="anonymous"&gt;&lt;/script&gt;
-</span><span class='line'>&lt;script src='http://kayakuguri.github.io//cdnjs.cloudflare.com/ajax/libs/jquery.iframe-transport/1.0.1/jquery.iframe-transport.min.js' type='text/javascript'&gt;&lt;/script&gt;
-</span><span class='line'>&lt;script src='http://kayakuguri.github.io//cdnjs.cloudflare.com/ajax/libs/blueimp-file-upload/9.18.0/js/jquery.fileupload.min.js' type='text/javascript'&gt;&lt;/script&gt;
-</span><span class='line'>&lt;script src='http://kayakuguri.github.io//cdnjs.cloudflare.com/ajax/libs/cloudinary-jquery-file-upload/2.3.0/cloudinary-jquery-file-upload.min.js' type='text/javascript'&gt;&lt;/script&gt;</span></code></pre></td></tr></table></div></figure>
-
-
-<p>※バージョンは記事投稿現在(2017/4/11)での最新版(jQueryは古い）</p>
-
-<h1>アップロードフォーム</h1>
-
-<h2>inputタグを自動生成</h2>
-
-<p>単純にアップロードするだけなら、自動でinputタグを挿入してくれる関数がある。</p>
-
-<p>[HTML]</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;div class="upload_form"&gt;&lt;/div&gt;</span></code></pre></td></tr></table></div></figure>
-
-
-<p>[JS]</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>$(function () {
-</span><span class='line'>  $('.upload_form').append($.cloudinary.unsigned_upload_tag("preset-name-here", { cloud_name: 'cloud-name-here' }));
-</span><span class='line'>});</span></code></pre></td></tr></table></div></figure>
-
-
-<p>ライブラリを読み込んで、これで<code>append</code>すれば、自動的に、<code>&lt;input&gt;</code>タグが挿入される。<br/>
-そこでファイルを選択すれば、アップロードが行われる。<br/>
-(選ぶだけでアップロードされる）</p>
-
-<p>以下のようなHTMLが挿入される。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;input type="file" name="file" class="cloudinary_fileupload"&gt;</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>bind</h2>
-
-<p>アップロードされた後や、アップロード中に処理をおこないたい場合は、<code>bind</code>する。<br/>
-そのために、自分で<code>&lt;input&gt;</code>タグを作っておき、そのタグにたいして<code>bind</code>する。</p>
-
-<p>[HTML]</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;input type="file" name="file" id="upload_form" /&gt;
-</span><span class='line'>&lt;div class="progress"&gt;&lt;/div&gt;
-</span><span class='line'>&lt;div class="thumbnails"&gt;&lt;/div&gt;</span></code></pre></td></tr></table></div></figure>
-
-
-<p>[JS]</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>$(function () {
-</span><span class='line'>  $.cloudinary.config({ cloud_name: 'cloud_name_here'});
-</span><span class='line'>  $('#upload_form').unsigned_cloudinary_upload('preset_name_here',
-</span><span class='line'>    { cloud_name: 'cloud_name_here', tags: 'browser_uploads' },
-</span><span class='line'>    { multiple: true }
-</span><span class='line'>  )
-</span><span class='line'>  .bind('cloudinaryprogress', function(e, data) {
-</span><span class='line'>    $('.progress').text('アップロード中...');
-</span><span class='line'>  })
-</span><span class='line'>  .bind('cloudinarydone', function(e, data) {
-</span><span class='line'>      $('.progress').text('完了');
-</span><span class='line'>      $('.thumbnails').append($.cloudinary.image(data.result.public_id,
-</span><span class='line'>        { format: 'jpg', width: 150, height: 100, crop: 'thumb' } ));
-</span><span class='line'>    }
-</span><span class='line'>  );
-</span><span class='line'>});</span></code></pre></td></tr></table></div></figure>
-
-
-<p><code>cloudinaryprogress</code>がアップロード中の処理。アップロード中、というテキストを表示しているだけ。<br/>
-<code>cloudinarydone</code>がアップロード後の処理。完了、と表示させ、サムネイルを取得して表示している。</p>
-
-<p><code>$.cloudinary.image(name, option)</code>で画像を取得して表示させることが可能。<br/>
-冒頭で<code>cloud_name</code>を設定している。
-<code>data.result.public_id</code>でアップロードしたファイルのIDが取得可能。</p>
-
-<p>ファイルのURLを直接参照したい場合は以下。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>$.cloudinary.url(data.result.public_id);</span></code></pre></td></tr></table></div></figure>
-
-
-<p>第二引数でサイズやクロップなどのオプションを指定してやることが可能。</p>
-
-<h1>注意</h1>
-
-<p>注意点としては、ファイルの選択を行っただけでアップロードが開始されてしまうところ。<br/>
-これを送信ボタンをクリックした時にアップロードを開始するようには変更出来るのだろうか…。<br/>
-ライブラリに手を入れないと無理な気もする…。</p>
-
-<h1>参考</h1>
-
-<h2>公式</h2>
-
-<ul>
-<li><a href="http://cloudinary.com/blog/direct_upload_made_easy_from_browser_or_mobile_app_to_the_cloud#direct_uploading_from_the_browser_using_jquery">Direct uploading from the browser using jQuery</a></li>
-<li><a href="http://cloudinary.com/documentation/jquery_integration">jQuery integration</a></li>
-<li><a href="http://cloudinary.com/documentation/jquery_image_manipulation">jQuery image manipulation</a></li>
-</ul>
-
-
-<h2>コードの参考</h2>
-
-<ul>
-<li><a href="http://www.nerdtutorials.com/cloudinary-image-uploader-sponsored/">Cloudinary Image Uploader (Sponsored)</a></li>
-<li><a href="http://stackoverflow.com/questions/40438882/restrict-uploading-file-size-greater-than-20-mb-cloudinary-api">restrict uploading file size greater than 20 mb [cloudinary api]</a></li>
-</ul>
-
-
-<h1>コード全文</h1>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-<span class='line-number'>39</span>
-<span class='line-number'>40</span>
-<span class='line-number'>41</span>
-<span class='line-number'>42</span>
-<span class='line-number'>43</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;!doctype html&gt;
-</span><span class='line'>
-</span><span class='line'>&lt;html lang="ja"&gt;
-</span><span class='line'>&lt;head&gt;
-</span><span class='line'>  &lt;meta charset="utf-8"&gt;
-</span><span class='line'>
-</span><span class='line'>&lt;script src='https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js' type='text/javascript'&gt;&lt;/script&gt;
-</span><span class='line'>&lt;script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js" integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU=" crossorigin="anonymous"&gt;&lt;/script&gt;
-</span><span class='line'>&lt;script src='https://cdnjs.cloudflare.com/ajax/libs/jquery.iframe-transport/1.0.1/jquery.iframe-transport.min.js' type='text/javascript'&gt;&lt;/script&gt;
-</span><span class='line'>&lt;script src='https://cdnjs.cloudflare.com/ajax/libs/blueimp-file-upload/9.18.0/js/jquery.fileupload.min.js' type='text/javascript'&gt;&lt;/script&gt;
-</span><span class='line'>&lt;script src='https://cdnjs.cloudflare.com/ajax/libs/cloudinary-jquery-file-upload/2.3.0/cloudinary-jquery-file-upload.min.js' type='text/javascript'&gt;&lt;/script&gt;
-</span><span class='line'>
-</span><span class='line'>&lt;script&gt;
-</span><span class='line'>$(function () {
-</span><span class='line'>  $.cloudinary.config({ cloud_name: 'cloud_name_here'});
-</span><span class='line'>  $('#upload_form').unsigned_cloudinary_upload('preset_name_here',
-</span><span class='line'>    { cloud_name: 'cloud_name_here', tags: 'browser_uploads' },
-</span><span class='line'>    { multiple: true }
-</span><span class='line'>  )
-</span><span class='line'>  .bind('cloudinaryprogress', function(e, data) {
-</span><span class='line'>    $('.progress').text('アップロード中...');
-</span><span class='line'>  })
-</span><span class='line'>  .bind('cloudinarydone', function(e, data) {
-</span><span class='line'>      $('.progress').text('完了');
-</span><span class='line'>      $('.thumbnails').append($.cloudinary.image(data.result.public_id,
-</span><span class='line'>        { format: 'jpg', width: 150, height: 100, crop: 'thumb' } ));
-</span><span class='line'>      var direct_url = $.cloudinary.url(data.result.public_id);
-</span><span class='line'>    }
-</span><span class='line'>  );
-</span><span class='line'>});
-</span><span class='line'>&lt;/script&gt;
-</span><span class='line'>  &lt;title&gt;Cloudinary Upload Sample&lt;/title&gt;
-</span><span class='line'>&lt;/head&gt;
-</span><span class='line'>
-</span><span class='line'>&lt;body&gt;
-</span><span class='line'>&lt;h1&gt;Cloudinary Upload Test&lt;/h1&gt;
-</span><span class='line'>
-</span><span class='line'>&lt;div&gt;&lt;input type="file" name="file" id="upload_form" /&gt;&lt;/div&gt;
-</span><span class='line'>&lt;div class="progress"&gt;&lt;/div&gt;
-</span><span class='line'>&lt;div class="thumbnails"&gt;&lt;/div&gt;
-</span><span class='line'>
-</span><span class='line'>&lt;/body&gt;
-</span><span class='line'>&lt;/html&gt;</span></code></pre></td></tr></table></div></figure>
 
 ]]></content>
   </entry>

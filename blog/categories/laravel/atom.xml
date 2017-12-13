@@ -4,7 +4,7 @@
   <title><![CDATA[Category: laravel | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/laravel/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2017-12-06T20:54:36+09:00</updated>
+  <updated>2017-12-13T11:17:49+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,61 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[HerokuでLaravel-Mixを利用する際の環境変数]]></title>
+    <link href="http://kayakuguri.github.io/blog/2017/12/13/laravel-mix-heroku-env/"/>
+    <updated>2017-12-13T11:08:35+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2017/12/13/laravel-mix-heroku-env</id>
+    <content type="html"><![CDATA[<p>HerokuでLaravel Mixを使っている際に、ビルドに失敗する時があり調べた結果、環境変数を追加するだけで対策出来たのでメモ。</p>
+
+<!-- more -->
+
+
+<h1>症状</h1>
+
+<p>Herokuのビルドパックには <code>heroku/nodejs</code>と<code>heroku/php</code>を入れておき、順番はnode.jsが先。</p>
+
+<p><code>
+$ heroku buildpacks -a app-name
+=== app-name Buildpack URLs
+1. heroku/nodejs
+2. heroku/php
+</code></p>
+
+<p>この状態でpushしてデプロイするも、npmのインストールなどは走るがLaravel Mixのコンパイルが走らない状態(たぶん）。<br/>
+ビルドログを見ると以下のようなエラーが出ている。</p>
+
+<p><code>
+Additional dependencies must be installed. This will only take a moment.
+warning " &gt; browser-sync-webpack-plugin@1.2.0" has unmet peer dependency "webpack@^1 || ^2 || ^3".
+Finished. Please run Mix again.
+</code></p>
+
+<p>依存関係が解消出来てないとかなんとか？</p>
+
+<h1>解決策</h1>
+
+<p>ググると以下の情報。</p>
+
+<p>環境変数に、<code>YARN_PRODUCTION</code>を<code>false</code>で追加してやるだけ。</p>
+
+<ul>
+<li><a href="https://www.neontsunami.com/posts/using-laravel-mix-on-heroku">Using Laravel Mix on Heroku &mdash; Neon Tsunami</a></li>
+</ul>
+
+
+<p>環境変数を追加してやることで、<code>devDependencies</code>から依存関係を取得するように指示してやる事が出来るよう。</p>
+
+<blockquote><p>First, set <code>YARN_PRODUCTION</code> to false using the following command. This tells Heroku to install the devDependencies in your package.json, but leaves NODE_ENV as production.</p></blockquote>
+
+<p>Google翻訳</p>
+
+<blockquote><p>まず、次のコマンドを使用して<code>YARN_PRODUCTION</code>をfalseに設定します。これは、あなたのpackage.jsonにdevDependenciesをインストールするようにHerokuに指示しますが、NODE_ENVをプロダクションとして残します。</p></blockquote>
+
+<p>記事の通り、上手く行ってなかった環境に環境変数を追加してやると無事、コンパイルされるようになった。</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[laravel5.5でajaxでPOST通信する時のCSRFトークン]]></title>
@@ -493,153 +548,6 @@ GET : /api/hoge
 <ul>
 <li><a href="https://readouble.com/laravel/5.5/ja/passport.html">API認証(Passport) 5.5 Laravel</a></li>
 <li><a href="https://qiita.com/niiyz/items/fffff94acb6061ecc9d4">Laravel5.5でAPI認証のパッケージ(Laravel Passport)を利用する &ndash; Qiita</a></li>
-</ul>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[PhpStormを使用してPHP UnitのテストをVagrantのリモート上で実行する]]></title>
-    <link href="http://kayakuguri.github.io/blog/2017/09/22/laravel-phpunit-vagrant-phpstorm/"/>
-    <updated>2017-09-22T19:05:58+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2017/09/22/laravel-phpunit-vagrant-phpstorm</id>
-    <content type="html"><![CDATA[<p>LaravelのUnitテストを実行すべく、ローカルのVagrant環境上でPHP Unitを実行するように設定してみた。</p>
-
-<!-- more -->
-
-
-<h1>環境</h1>
-
-<ul>
-<li>Vagrant
-
-<ul>
-<li><a href="https://box.scotch.io/">ScotchBox</a></li>
-</ul>
-</li>
-<li>Laravel 5.5.7</li>
-<li>PHP 7.0</li>
-</ul>
-
-
-<h1>PHP Unit</h1>
-
-<p>PHP UnitはCompoerにてプロジェクトディレクトリにインストールする。<br/>
-LaravelではデフォルトでComposerに入っているので特に設定はなし。<br/>
-(Linuxに入れる必要はない)</p>
-
-<p><code>
-"phpunit/phpunit": "~6.0"
-</code></p>
-
-<h1>PhpStorm</h1>
-
-<p>PhpStormでの設定方法。<br/>
-設定したいプロジェクトのルートディレクトリを開いた状態で設定する。</p>
-
-<h2>PHP Interpreter</h2>
-
-<p><code>Preference</code>を開く。<br/>
-<code>Languages &amp; Frameworks -&gt; PHP -&gt; Test Frameworks</code>を選択。<br/>
-<code>+</code>マークをクリックし、<code>PHPUnit by Remote Interpreter</code>を選択する。</p>
-
-<p><img src="/images/2017/09/phpunit_01.jpg" alt="" /></p>
-
-<p>Interpreterを選択するウインドウが開くが、interpreterがないので作成する。<br/>
-右端の<code>...</code>をクリックする。</p>
-
-<p><img src="/images/2017/09/phpunit_02.jpg" alt="" /></p>
-
-<p>ウインドウが開くので、<code>+</code>をクリックし、<code>From Docker, Vagrant, VM, Remote...</code>を選択。</p>
-
-<p><img src="/images/2017/09/phpunit_03.jpg" alt="" /></p>
-
-<p>開いたウインドウで、<code>Vagrant</code>を選択。すると自動で設定が読み込まれるのでそのままOKする。</p>
-
-<p><img src="/images/2017/09/phpunit_04.jpg" alt="" /></p>
-
-<p>OKをクリックすると、SSH接続が行われ情報が自動で読み込まれる。<br/>
-そのままでOKなのでOKをクリックする。</p>
-
-<p><img src="/images/2017/09/phpunit_05.jpg" alt="" /></p>
-
-<p>Interpreterを選択する画面に戻るので、作成したInterpreterを選択し、OKをクリック。</p>
-
-<p><img src="/images/2017/09/phpunit_06.jpg" alt="" /></p>
-
-<p>追加したInterpreterでPHPUnitのライブラリを指定するが、Composer経由でのロードになるので、デフォルトの<code>Use Composer autoloader</code>のままでよい。<br/>
-Vagrant内でのautolodのパスを指定するので、<code>...</code>をクリック。</p>
-
-<p><img src="/images/2017/09/phpunit_07.jpg" alt="" /></p>
-
-<p>Scothboxは<code>/var/www</code>がホストと共有しているディレクトリになるので、そこから<code>vendor/autoload.php</code>を選択する。</p>
-
-<p><img src="/images/2017/09/phpunit_08.jpg" alt="" /></p>
-
-<p>選択すると、追加されているPHPUnitのバージョンが表示される。</p>
-
-<p><img src="/images/2017/09/phpunit_09.jpg" alt="" /></p>
-
-<p>これでInterpreterの設定は完了。</p>
-
-<h2>Run/Debug Configurations</h2>
-
-<p>Configurationsの設定を行う。</p>
-
-<p>メニューから、<code>Run -&gt; Edit Configurations</code>を選択。</p>
-
-<p><code>+</code>をクリックし、<code>PHPUnit</code>のConfigurationを追加する。</p>
-
-<p><img src="/images/2017/09/phpunit_10.jpg" alt="" /></p>
-
-<p>Nameは適当に書く。<br/>
-Test scopeはテストしたいディレクトリを選択する。<br/>
-Laravelのtestsディレクトリを指定しておく。（どこでもよい）<br/>
-この設定の下部に、Errorと出ているのでFixをクリック。</p>
-
-<p><img src="/images/2017/09/phpunit_11.jpg" alt="" /></p>
-
-<p>PHPの設定ウインドウが開くので、<code>PHP language level</code>はVagrant環境に合わせて<code>7</code>を選択。<br/>
-<code>CLI Interpreter</code>は設定したinterpreterを選択する。</p>
-
-<p><img src="/images/2017/09/phpunit_12.jpg" alt="" /></p>
-
-<p>OKで閉じる。</p>
-
-<h2>実行</h2>
-
-<p>右上のセレクトボックスが、先ほど作成したConfigurationが選択されている状態になっているはずなので、そのまま緑の三角をクリック。</p>
-
-<p><img src="/images/2017/09/phpunit_13.jpg" alt="" /></p>
-
-<p>すると、<code>tests</code>ディレクトリ以下のテストファイルが自動で起動し、テストが実行される。<br/>
-デフォルトのサンプルテストは必ず成功するので、無事、テストが通ればOK。</p>
-
-<p><img src="/images/2017/09/phpunit_14.jpg" alt="" /></p>
-
-<p><code>ExampleTest.php</code>の<code>assertTrue</code>を<code>false</code>にしてみて失敗させてみる。</p>
-
-<p>```
-public function testBasicTest()
-{</p>
-
-<pre><code>$this-&gt;assertTrue(false);
-</code></pre>
-
-<p>}
-```</p>
-
-<p>ファイルを選択して右クリックすれば、そのファイルのみをテスト実行する事も可能。<br/>
-失敗すると以下のようになる。</p>
-
-<p><img src="/images/2017/09/phpunit_15.jpg" alt="" /></p>
-
-<p>これで無事、成功と失敗の動作が確認できた。</p>
-
-<h1>参考</h1>
-
-<ul>
-<li><a href="https://confluence.jetbrains.com/display/PhpStorm/Running+PHPUnit+tests+over+SSH+on+a+remote+server+with+PhpStorm">Running PHPUnit tests over SSH on a remote server with PhpStorm &ndash; PhpStorm &ndash; Confluence</a></li>
 </ul>
 
 ]]></content>

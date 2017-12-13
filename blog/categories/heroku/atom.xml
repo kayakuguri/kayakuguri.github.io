@@ -4,7 +4,7 @@
   <title><![CDATA[Category: heroku | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/heroku/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2017-12-06T20:54:36+09:00</updated>
+  <updated>2017-12-13T11:17:49+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,61 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[HerokuでLaravel-Mixを利用する際の環境変数]]></title>
+    <link href="http://kayakuguri.github.io/blog/2017/12/13/laravel-mix-heroku-env/"/>
+    <updated>2017-12-13T11:08:35+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2017/12/13/laravel-mix-heroku-env</id>
+    <content type="html"><![CDATA[<p>HerokuでLaravel Mixを使っている際に、ビルドに失敗する時があり調べた結果、環境変数を追加するだけで対策出来たのでメモ。</p>
+
+<!-- more -->
+
+
+<h1>症状</h1>
+
+<p>Herokuのビルドパックには <code>heroku/nodejs</code>と<code>heroku/php</code>を入れておき、順番はnode.jsが先。</p>
+
+<p><code>
+$ heroku buildpacks -a app-name
+=== app-name Buildpack URLs
+1. heroku/nodejs
+2. heroku/php
+</code></p>
+
+<p>この状態でpushしてデプロイするも、npmのインストールなどは走るがLaravel Mixのコンパイルが走らない状態(たぶん）。<br/>
+ビルドログを見ると以下のようなエラーが出ている。</p>
+
+<p><code>
+Additional dependencies must be installed. This will only take a moment.
+warning " &gt; browser-sync-webpack-plugin@1.2.0" has unmet peer dependency "webpack@^1 || ^2 || ^3".
+Finished. Please run Mix again.
+</code></p>
+
+<p>依存関係が解消出来てないとかなんとか？</p>
+
+<h1>解決策</h1>
+
+<p>ググると以下の情報。</p>
+
+<p>環境変数に、<code>YARN_PRODUCTION</code>を<code>false</code>で追加してやるだけ。</p>
+
+<ul>
+<li><a href="https://www.neontsunami.com/posts/using-laravel-mix-on-heroku">Using Laravel Mix on Heroku &mdash; Neon Tsunami</a></li>
+</ul>
+
+
+<p>環境変数を追加してやることで、<code>devDependencies</code>から依存関係を取得するように指示してやる事が出来るよう。</p>
+
+<blockquote><p>First, set <code>YARN_PRODUCTION</code> to false using the following command. This tells Heroku to install the devDependencies in your package.json, but leaves NODE_ENV as production.</p></blockquote>
+
+<p>Google翻訳</p>
+
+<blockquote><p>まず、次のコマンドを使用して<code>YARN_PRODUCTION</code>をfalseに設定します。これは、あなたのpackage.jsonにdevDependenciesをインストールするようにHerokuに指示しますが、NODE_ENVをプロダクションとして残します。</p></blockquote>
+
+<p>記事の通り、上手く行ってなかった環境に環境変数を追加してやると無事、コンパイルされるようになった。</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Laravelでロードバランサを挟んだ時のisSecure判定を動作させる]]></title>
@@ -642,134 +697,6 @@ corythosaurus-87918  (Not applicable for SNI)      ssl-sni-test.tk      2017-11-
 <li><a href="https://zenlogic.jp/user-support/knowledge/ssl/sni.html">SSL基礎知識 1つのサーバーで複数の証明書が使える、SNIって？｜Zenlogic &ndash; ファーストサーバ株式会社</a></li>
 <li><a href="https://devcenter.heroku.com/articles/ssl">Heroku SSL | Heroku Dev Center</a></li>
 <li><a href="https://devcenter.heroku.com/articles/ssl-endpoint">SSL Endpoint | Heroku Dev Center</a></li>
-</ul>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Herokuで独自ドメインを指定する際に使用するターゲット名]]></title>
-    <link href="http://kayakuguri.github.io/blog/2017/01/05/heroku-custom-domain/"/>
-    <updated>2017-01-05T18:17:32+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2017/01/05/heroku-custom-domain</id>
-    <content type="html"><![CDATA[<p>Herokuで独自ドメインを指定するには、CNAMEでHeroku側のドメインを指定して設定してやる必要がある。</p>
-
-<!-- more -->
-
-
-<ul>
-<li><a href="http://kayakuguri.github.io/blog/2014/09/30/heroku-ssl-subdomain/">[heroku]herokuでのSSL設定とカスタムサブドメインの適用方法</a></li>
-</ul>
-
-
-<h1>少し前までのターゲット</h1>
-
-<p>少し前まで（具体的には<a href="https://blog.heroku.com/announcing_heroku_free_ssl_beta_and_flexible_dyno_hours">SSLの設定がHerokuの標準機能に組み込まれる</a>まで）は、以下のような設定内容で設定していた。<br/>
-（アプリ名を <code>appname</code> とし、設定するサブドメインは、<code>www.appname.com</code> とする)</p>
-
-<table>
-<thead>
-<tr>
-<th></th>
-<th align="left"> 種類 (Record) </th>
-<th align="left"> 名前 (Name) </th>
-<th align="left"> 内容 (Target) </th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td></td>
-<td align="left"> CNAME </td>
-<td align="left"> <code>www</code> </td>
-<td align="left"> <code>appname.herokuapp.com</code></td>
-</tr>
-</tbody>
-</table>
-
-
-<h1>Heroku Free SSL導入後のターゲット</h1>
-
-<h2>注意</h2>
-
-<p>ここでの説明はあくまでも独自<strong>サブドメイン</strong>の設定方法となる。<br/>
-ルートドメインをHerokuのアプリで使用したい場合は、別途PointDNSアドオンや、AWSのRoot53などのサービスを使用する必要があるが、ここでは割愛する（どれがデファクトスタンダードかまだ決まりきってない印象）。<br/>
-なので、CNAMEでの設定となり、Aレコードでの設定ではないので注意。<br/>
-(herokuは固定IPではないので、通常はAレコードは使用出来ない）</p>
-
-<h2>前提</h2>
-
-<p>今まで、Herokuに独自のSSL証明書を適用させるためには <a href="https://elements.heroku.com/addons/ssl">Heroku SSLのアドオン</a> が必要だったのだが、<br/>
-<strong>FreeDyno以外の有料アプリに限り</strong>デフォルトでSSLの設定が出来るようになった。<br/>
-しかもブラウザ上からドラッグアンドドロップでファイルをアップ出来るようになったため無料かつ便利になった。</p>
-
-<p>(無料Dynoでの利用の場合はアドオンの追加が必要になるのだが、一番安い<code>hobby dyno</code>は月$7/1dyno、で、SSLアドオン 月$20、なので、有料dynoにした方が安いため、アドオンで設定するメリットはほぼないと思われる）</p>
-
-<h2>ターゲットの変更</h2>
-
-<p>そのタイミングで、CNAMEとして設定するターゲット名も変更になった。<br/>
-今までは、 <code>hokkaido-1212.herokussl.com</code> など、都道府県が入ったようなランダムな名前だったのだが、新しく、 <code>www.appname.com.herokudns.com</code> というような名前となった。<br/>
-以下のようになるよう。</p>
-
-<p><code>
-{設定するサブドメイン}.herokudns.com
-</code></p>
-
-<h2>ターゲット名</h2>
-
-<p>よって、CNAMEでの設定も内容の部分が変更となる。<br/>
-このターゲット名だが、<strong>SSLを使用の有無、無料・有料Dynoに関わらず</strong>、一律で <code>herokudns.com</code> の指定となる。</p>
-
-<p>Herokuの設定画面から設定した場合は以下のような感じで表示がされるので、<code>DNA Target</code>の部分を使用すればよい。</p>
-
-<p><img src="/images/2017/01/custom_domain01.jpg" alt="" /></p>
-
-<p>コマンドで確認した場合は以下のような感じになる。</p>
-
-<p>```
-$ heroku domains -a appname
-=== appname Heroku Domain
-appname.herokuapp.com</p>
-
-<p>=== appname Custom Domains
-Domain Name      DNS Target
-───────────────  ─────────────────────────────
-www.appname.com  www.appname.com.herokudns.com
-```</p>
-
-<h2>CNAMEの設定</h2>
-
-<p>よって、設定内容は以下のようになる。</p>
-
-<table>
-<thead>
-<tr>
-<th></th>
-<th align="left"> 種類 (Record) </th>
-<th align="left"> 名前 (Name) </th>
-<th align="left"> 内容 (Target) </th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td></td>
-<td align="left"> CNAME </td>
-<td align="left"> <code>www</code> </td>
-<td align="left"> <code>www.appname.com.herokudns.com</code></td>
-</tr>
-</tbody>
-</table>
-
-
-<h1>参考</h1>
-
-<ul>
-<li><a href="https://devcenter.heroku.com/articles/custom-domains">Custom Domain Names for Apps | Heroku Dev Center</a></li>
-<li><a href="http://www.ucom.ne.jp/enterprise/dnsmanual/p4_4_1_4.html">DNS設定ツールマニュアルWEB</a>
-
-<ul>
-<li>CNAME設定がどんなものなのかのイメージに</li>
-</ul>
-</li>
 </ul>
 
 ]]></content>
