@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2017-12-13T11:44:13+09:00</updated>
+  <updated>2017-12-14T13:04:32+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,220 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Apache2.4でアクセス制御の方法を調べた]]></title>
+    <link href="http://kayakuguri.github.io/blog/2017/12/14/htaccess-reuire-setting/"/>
+    <updated>2017-12-14T12:59:05+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2017/12/14/htaccess-reuire-setting</id>
+    <content type="html"><![CDATA[<p>Apache2.4からアクセス制御の方法が、<code>RequireAny</code>とかを使った方法になっているよう。<br/>
+ちょっとよくわからなかったので調べて整理してみたメモ。</p>
+
+<!-- more -->
+
+
+<h1>基本</h1>
+
+<p>基本は、以下の３つのタグで囲って条件付けしていく。</p>
+
+<ul>
+<li><code>RequireAny</code> &ndash; どれか一つでも当てはまれば許可</li>
+<li><code>RequireAll</code> &ndash; 全てに当てはまれば許可</li>
+<li><code>RequireNone</code> &ndash; どれか一つでも当てはまれば拒否</li>
+</ul>
+
+
+<p>デフォルト、何も囲わなければ <code>RequireAny</code> となるよう。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;RequireAny&gt;
+</span><span class='line'>  Require {判定する内容}
+</span><span class='line'>  Require {判定する内容}
+</span><span class='line'>&lt;/RequireAny&gt;</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>判定文基本</h1>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'># xxのとき許可
+</span><span class='line'>Require xx
+</span><span class='line'>
+</span><span class='line'># xxでないとき許可
+</span><span class='line'>Require not xx
+</span><span class='line'>
+</span><span class='line'># 全て許可
+</span><span class='line'>Require all granted
+</span><span class='line'>
+</span><span class='line'># 全て拒否
+</span><span class='line'>Require all denied</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>env</h1>
+
+<p><code>env</code>で変数的に値を設定出来る。<br/>
+以下みたいな感じ。</p>
+
+<blockquote><p>SetEnvIf {種類} {値} {変数名}</p></blockquote>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'># URI
+</span><span class='line'>SetEnvIf Request_URI /hoge/ valid-url
+</span><span class='line'>SetEnvIf Request_URI "^/hoge/*" valid-url  #正規表現
+</span><span class='line'>
+</span><span class='line'># IP
+</span><span class='line'>SetEnvIf REMOTE_ADDR 192.168.33.1 valid-ip
+</span><span class='line'>SetEnvIf X-Forwarded-For 000.00.000.000 valid-ip  #ロードバランサ使用時</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>URI表記の揺れ</h2>
+
+<p>正規表現を使わない場合は正しくかかないと無視されてしまう部分があった。<br/>
+例えば、<code>/api/</code>以下のディレクトリを許可したい場合。<br/>
+<code>SetEnvIf Request_URI xxx valid-url</code><br/>
+ここの、<code>xxx</code>に入るものを色々変えてアクセスしてみた。<br/>
+(<code>api/test.php</code>に対してのアクセス結果)</p>
+
+<ul>
+<li>◯ : <code>/api/*</code></li>
+<li>◯ : <code>/api/</code></li>
+<li>◯ : <code>/</code></li>
+<li>◯ : <code>/a</code></li>
+<li>× : <code>/test/</code></li>
+<li>◯ : <code>/test</code></li>
+<li>◯ : <code>/t</code></li>
+<li>× : <code>/t/</code></li>
+<li>◯ : <code>"^/api/*"</code></li>
+<li>◯ : <code>"^/api"</code></li>
+<li>◯ : <code>"^/a"</code></li>
+<li>× : <code>"^/test/"</code></li>
+<li>× : <code>"^/t"</code></li>
+</ul>
+
+
+<p>正規表現を利用すると意図した通り動いているが、正規表現を利用しない場合には、スラッシュの後の文字列は無視されているような挙動をしている。<code>/api</code>でも<code>/test</code>でも<code>/</code>と同じ。注意が必要。</p>
+
+<h1>ベーシック認証</h1>
+
+<p>ベーシック認証の設定などは以下。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>AuthType Basic
+</span><span class='line'>AuthName "Password Required"
+</span><span class='line'>AuthUserFile /var/www/.htpasswd</span></code></pre></td></tr></table></div></figure>
+
+
+<p>で、認証されたユーザを許可、は以下を記述。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>Require valid-user</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>組み合わせ</h1>
+
+<p>で、これらを組み合わせて設定した制御をかけていく。<br/>
+例えば…<br/>
+ベーシック認証をかけるが、特定のIPは許可。さらに特定のディレクトリは常に許可する、とかの場合</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'># Basic認証
+</span><span class='line'>AuthType Basic
+</span><span class='line'>AuthName "Password Required"
+</span><span class='line'>AuthUserFile /var/www/.htpasswd
+</span><span class='line'>
+</span><span class='line'># env
+</span><span class='line'>SetEnvIf REMOTE_ADDR 192.168.33.1 valid-ip
+</span><span class='line'>SetEnvIf Request_URI "^/hoge/*" valid-url
+</span><span class='line'>
+</span><span class='line'># 条件
+</span><span class='line'>&lt;RequireAny&gt;
+</span><span class='line'>  Require valid-user
+</span><span class='line'>  Require env valid-ip
+</span><span class='line'>  Require env valid-url
+</span><span class='line'>&lt;/RequireAny&gt;</span></code></pre></td></tr></table></div></figure>
+
+
+<p><code>RequireAny</code>の条件なのでいずれかに合致すればアクセスが許可される。<br/>
+URIの指定は正規表現を使っておいた方が確実。</p>
+
+<h1>Laravelの場合</h1>
+
+<p>Laravelで同じようにURIを利用して制御したい場合は、制御対象のURIだけを許可してやるだけではダメだった。<br/>
+理由はルーティングの仕組みにあって、Laravelの場合はアクセスされた際に一旦、<code>index.php</code>にリダイレクトさせてからLaravelを起動し、ルーティングをさせる仕組みになっている。<br/>
+よって、<code>/index.php</code>を許可しておいてやらないと認証が通らなくなってしまう。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>SetEnvIf Request_URI "^/hoge/*" valid-url
+</span><span class='line'>SetEnvIf Request_URI "^/index.php" laravel
+</span><span class='line'>
+</span><span class='line'>&lt;RequireAny&gt;
+</span><span class='line'>  Require valid-user #ベーシック認証
+</span><span class='line'>  Require env valid-url
+</span><span class='line'>  Require env laravel
+</span><span class='line'>&lt;/RequireAny&gt;</span></code></pre></td></tr></table></div></figure>
+
+
+<p>ただしこの方法だと、<code>/index.php</code>への直接のアクセス(トップページ)は許可されてしまうので注意。<br/>
+(とはいえ、読み込んでいる別ディレクトリのcssやjsや画像なんかは拒否される）<br/>
+(<code>/</code>へのアクセスは拒否される。)</p>
+
+<h1>参考</h1>
+
+<ul>
+<li><a href="http://www.nofuture.tv/diary/20130813.html">Apache 2.4のアクセス制御をもうちょっとマジメに見てみた &ndash; Days of Speed(2013-08-13)</a></li>
+<li><a href="https://celeumu.com/articles/20171124001037">Apache2.4で一部のディレクトリのみBasic認証</a></li>
+<li><a href="https://blog.e2info.co.jp/2016/09/04/aws_phpmyadmin_basic_ip_auth/">AWSに設置したphpMyAdminにBasic認証を設定/特定のIPアドレスによる制限 &ndash; ハマログ</a></li>
+<li><a href="https://serverfault.com/questions/588096/apache-setenvif-failing-to-match-request-uri">Apache SetEnvIf failing to match Request_Uri</a></li>
+<li><a href="http://3.1415.jp/kc47fh1k/">HTTPクライアントの接続元IPアドレスを知る</a></li>
+</ul>
+
+
+<p><code>SetEnvIf</code>で指定出来る要素は以下にドキュメントがあった。<br/>
+<a href="https://httpd.apache.org/docs/2.4/ja/mod/mod_setenvif.html">mod_setenvif &ndash; Apache HTTP サーバ バージョン 2.4</a><br/>
+<code>SetEnvIf ディレクティブ</code> のセクション</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[LaravelのEloquentモデルでupdated_atがないテーブルを使う]]></title>
@@ -2893,59 +3107,6 @@ SSLもLet&rsquo;s Encryptでちゃんと反映されていた。</p>
 <li><a href="https://stackoverflow.com/questions/12173990/how-can-you-debug-a-cors-request-with-curl">How can you debug a CORS request with cURL? &ndash; Stack Overflow</a></li>
 <li><a href="http://blog.toshimaru.net/s3-cloudfront-cors-setting/">AWS S3 + CloudFront のCORS設定手順 &ndash; Hack Your Design!</a></li>
 <li><a href="http://www.minimalab.com/blog/2014/12/08/curl-option/">Curl の個人的によく使うオプションまとめ</a></li>
-</ul>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Laravelで標準出力にエラーログを出力する]]></title>
-    <link href="http://kayakuguri.github.io/blog/2017/06/16/larave-std-error/"/>
-    <updated>2017-06-16T16:01:28+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2017/06/16/larave-std-error</id>
-    <content type="html"><![CDATA[<p>HerokuでWebサイトを作る場合、ログの出力はPapertrailを入れることが多い、というか必ず利用しています。<br/>
-Papertrailでは標準出力に出力したログは漏れなく拾ってくれるので、Laravelも標準出力にエラーログを出力するようにする方法を毎回ググルので備忘録。</p>
-
-<!-- more -->
-
-
-<h1>設定</h1>
-
-<p>以下の記述を、<code>bootstrap/app.php</code> に追加します。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>$app-&gt;configureMonologUsing(function ($monolog) {
-</span><span class='line'>    $monolog-&gt;pushHandler(new \Monolog\Handler\StreamHandler('php://stderr'));
-</span><span class='line'>});</span></code></pre></td></tr></table></div></figure>
-
-
-<h1>出力</h1>
-
-<p>以下のようにすると出力可能です。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>Log::error('TEST LOG');</span></code></pre></td></tr></table></div></figure>
-
-
-<h1>結果</h1>
-
-<p>すると、以下のように出力されます。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>[2017-06-16 04:02:16] dev.ERROR: TEST LOG [] [] </span></code></pre></td></tr></table></div></figure>
-
-
-<p><code>dev.ERROR</code>の<code>dev</code>の部分は、環境変数の<code>APP_ENV</code>で設定している文字列が出ます。<br/>
-なので、<code>dev.ERROR</code>とかでひっかけてPapertrailでアラートを設定してやれば自分で出力したエラーログで通知とかが出せたりします。</p>
-
-<h1>参考</h1>
-
-<p>以下、参考にしました。ありがとうございます。</p>
-
-<ul>
-<li><a href="http://qiita.com/iakio/items/86086e046f73826c9bef">Laravelのログを標準エラーに出力する &ndash; Qiita</a></li>
 </ul>
 
 ]]></content>

@@ -4,7 +4,7 @@
   <title><![CDATA[Category: vagrant | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/vagrant/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2017-12-13T11:44:13+09:00</updated>
+  <updated>2017-12-14T13:04:32+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -402,7 +402,7 @@ timezone: &ldquo;Asia/Tokyo&rdquo;
 <p>admin:
   user: admin
   password: admin
-  email: <a href="&#109;&#x61;&#105;&#108;&#x74;&#x6f;&#58;&#109;&#x61;&#x69;&#108;&#64;&#x64;&#x6f;&#x6d;&#x61;&#x69;&#x6e;&#x2e;&#x74;&#x6c;&#x64;">&#109;&#97;&#105;&#x6c;&#64;&#x64;&#111;&#109;&#97;&#x69;&#x6e;&#46;&#x74;&#108;&#100;</a>
+  email: <a href="&#x6d;&#x61;&#105;&#108;&#116;&#111;&#58;&#x6d;&#x61;&#x69;&#108;&#64;&#100;&#111;&#109;&#97;&#x69;&#x6e;&#x2e;&#x74;&#108;&#x64;">&#109;&#x61;&#105;&#x6c;&#64;&#100;&#x6f;&#109;&#x61;&#x69;&#x6e;&#46;&#x74;&#x6c;&#100;</a>
   first_name: &ldquo;&rdquo;
   last_name: &ldquo;&rdquo;
 ```</p>
