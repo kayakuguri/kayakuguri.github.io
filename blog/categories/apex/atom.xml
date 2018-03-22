@@ -4,7 +4,7 @@
   <title><![CDATA[Category: apex | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/apex/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2017-12-14T13:04:32+09:00</updated>
+  <updated>2018-03-22T16:39:30+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,71 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[apexでクッキーを扱う]]></title>
+    <link href="http://kayakuguri.github.io/blog/2018/03/22/apex-cookie/"/>
+    <updated>2018-03-22T16:34:03+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2018/03/22/apex-cookie</id>
+    <content type="html"><![CDATA[<p>Apexでクッキーは、今まで扱ったことがなく、ちょっと詰まったのでメモ。</p>
+
+<!-- more -->
+
+
+<h1>セット</h1>
+
+<p>クッキーをセットするには以下のようにする。<br/>
+ページに対してクッキーを作成する形のよう？</p>
+
+<p><code>
+Cookie hoge_val = new Cookie('hoge', 'hogehoge', null, -1, true);
+ApexPages.currentPage().setCookies(new Cookie[]{hoge});
+</code></p>
+
+<p><code>Cookie</code>クラスのコンストラクタは以下の通り。</p>
+
+<ol>
+<li>クッキーの名前</li>
+<li>セットしたい値</li>
+<li>パス</li>
+<li>保存期間(秒)</li>
+<li>セキュアか</li>
+</ol>
+
+
+<p>第４引数の秒は、<code>-1</code>を指定するとブラウザうを閉じるまで、<br/>
+<code>0</code>を指定すると削除、となる。</p>
+
+<h1>削除</h1>
+
+<p>よって、削除したい場合は以下のように同じ値で0病にセットするとよい。</p>
+
+<p><code>
+Cookie hoge_val = new Cookie('hoge', null, null, 0, true);
+ApexPages.currentPage().setCookies(new Cookie[]{hoge_val});
+</code></p>
+
+<h1>取得</h1>
+
+<p>取得は以下のように。</p>
+
+<p><code>
+Cookie get_hoge = ApexPages.currentPage().getCookies().get('hoge');
+System.debug(get_hoge.getValue());
+</code></p>
+
+<p><code>getValue()</code>でセットされている値を取得することになる。</p>
+
+<h1>参考</h1>
+
+<ul>
+<li><a href="https://developer.salesforce.com/docs/atlas.ja-jp.212.0.apexcode.meta/apexcode/apex_classes_sites_cookie.htm">Cookieクラス | Salesforce developers</a></li>
+<li><a href="https://dev.classmethod.jp/cloud/salesforce_mfcloud_oauth/">【Salesforce】(Tips) APEXからCookieを使う／プライベートメソッドのテスト／OAuth2処理まわりの話題 ｜ Developers.IO</a></li>
+<li><a href="https://salesforce.stackexchange.com/questions/4894/how-is-a-cookie-constructed">apex &ndash; How is a Cookie constructed? &ndash; Salesforce Stack Exchange</a></li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Apex Rest APIで任意のステータスコードを返す]]></title>
@@ -718,189 +783,6 @@ List&lt;Opportunity&gt; update_lists = isChanged('Opportunity', opp_records, old
 <li><a href="http://vaindespair.blogspot.jp/2012/04/blog-post_04.html">memo: Force.com&#12288;&#65306;&#12288;Apex でオブジェクト及び項目の情報を取得する</a></li>
 </ul>
 
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[salesforce] エラーが出てもエラーレコード以外は更新させる]]></title>
-    <link href="http://kayakuguri.github.io/blog/2016/05/13/database-upsert/"/>
-    <updated>2016-05-13T17:26:24+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2016/05/13/database-upsert</id>
-    <content type="html"><![CDATA[<p>salesforceでインサート・アップデートする場合、ガバナ制限の関係から都度DMLを発行せずにある程度まとめてやる事が多い。<br/>
-その際に、一件でもエラーが出てしまうと他もまきこまれてロールバックされてしまうので、エラー以外は更新させる方法。</p>
-
-<!-- more -->
-
-
-<h1>通常の方法</h1>
-
-<p>通常の方法、というか、簡易な方法としては、以下のようにインサートする。</p>
-
-<p>```
-List<Lead> lists = new List<Lead>();
-for(xx){</p>
-
-<pre><code>//Leadを作ってaddする処理
-</code></pre>
-
-<p>}
-insert lists;
-```</p>
-
-<p><code>for</code>文の中で<code>insert</code>せずに、リストにまとめておいて外で一回だけ<code>insert</code>する。<br/>
-これで、DMLは一回だけ発行したことになるので、節約が可能。<br/>
-ループの中ではSOQL、DMLはしない。これがapexの鉄則。</p>
-
-<p>しかしこれだと例えば全部で200件インサートする予定があって、そのうち150件目に不備がありエラーが出た場合、
-そこで処理がストップし、それまでにインサートした149件もすべてロールバックされインサート自体がなかったことになる。
-要件によってはこの方がいい場合もあるが、エラーが出たレコード以外は全てインサートしたい場合もある。</p>
-
-<h1>Database Class</h1>
-
-<p>そんな時は、<code>Database</code>クラスを使う。<br/>
-使い方は、<code>Database.insert()</code>とするだけ。</p>
-
-<p>このメソッドの第1引数に、インサートするオブジェクトのリストを、
-第２引数に、エラー時の挙動を入れる。</p>
-
-<ul>
-<li>trueの場合はエラー時には全てロールバック(上記の単純な<code>insert</code>と同じ)(デフォルト)</li>
-<li>falseの場合はエラーレコード以外はインサートする</li>
-</ul>
-
-
-<p>上記の例を書き換えると、以下のようになる。</p>
-
-<p>```
-List<Lead> lists = new List<Lead>();
-for(xx){</p>
-
-<pre><code>//Leadを作ってaddする処理
-</code></pre>
-
-<p>}
-Database.insert(lists, false);
-```</p>
-
-<p>これでエラーのレコード以外はインサートさせる事が出来た。<br/>
-<code>updata</code>、<code>upsert</code>、<code>delete</code> についても同じ。</p>
-
-<p><a href="https://developer.salesforce.com/docs/atlas.ja-jp.200.0.apexcode.meta/apexcode/apex_methods_system_database.htm">Database クラス</a></p>
-
-<h1>Upsert</h1>
-
-<p>upsertも上記と方法は同じだが、upsertでは外部IDの指定が可能になるが、その方法が少し簡易バージョンとは違った。</p>
-
-<p>例えば、<code>Lead</code>オブジェクトの、カスタム項目、<code>UserID__c</code>を外部IDとして指定する場合。<br/>
-簡易バージョンの場合は以下のようになる。</p>
-
-<p><code>
-List&lt;Lead&gt; lists = new List&lt;Lead&gt;();
-//処理中略
-upsert lists UserID__c;
-</code></p>
-
-<p>上記、<code>Database</code>を使ったパターンだと、ドキュメントには以下のように書かれている。</p>
-
-<p><code>
-upsert(recordToUpsert, externalIdField, allOrNone)
-</code></p>
-
-<p>この第二引数の<code>externalIdField</code>が外部IDの指定箇所になるが、型は、<code>Schema.SObjectField</code>となっていて、
-そのまま <code>Database.upsert(lists, UserID__c, false)</code>とやるとエラーが出る。</p>
-
-<p>なので以下のようにして指定したい項目の<code>Schema.SObjectField</code>を取得して指定してやる必要がある。</p>
-
-<p><code>
-List&lt;Lead&gt; lists = new List&lt;Lead&gt;();
-//処理中略
-Schema.DescribeFieldResult F = Lead. UserID__c.getDescribe();
-Schema.sObjectField T = F.getSObjectField();
-Database.upsert(lists, T, false);
-</code></p>
-
-<p>これで外部IDを指定したアップサートが可能となる。</p>
-
-<p><a href="https://developer.salesforce.com/docs/atlas.ja-jp.200.0.apexcode.meta/apexcode/apex_class_Schema_SObjectField.htm">SObjectField クラス</a></p>
-
-<h1>エラーハンドリング</h1>
-
-<p>さて、DMLでエラーが発生した場合、その内容を取得するには、<code>try..catch</code>で例外を拾っていた。</p>
-
-<p>```
-try{</p>
-
-<pre><code>insert lists;
-</code></pre>
-
-<p>}catch(DmlException e){</p>
-
-<pre><code>System.debug(e.getMessage());
-System.debug(e.getStackTraceString());
-</code></pre>
-
-<p>}
-```</p>
-
-<p><a href="https://developer.salesforce.com/docs/atlas.ja-jp.200.0.apexcode.meta/apexcode/apex_classes_exception_methods.htm">Exception クラスおよび組み込み例外</a></p>
-
-<p>しかし、<code>Database</code>を使ってinsertなどをした場合は別の方法で取得する。<br/>
-というか、エラーだけでなく、結果を一件ずつ取得することが出来るため、それらからエラー分を取得する、という形になる。</p>
-
-<p><code>SaveResult</code>クラスを使用する。</p>
-
-<p><code>
-List&lt;Database.SaveResult&gt; res_lists = Database.insert(lists, false);
-</code></p>
-
-<p>取得した結果から、成功、失敗を取得し、内容を取得したりする。</p>
-
-<p>```
-List&lt;Database.SaveResult> res_lists = Database.insert(lists, false);
-for (Database.SaveResult res : res_lists) {</p>
-
-<pre><code>if(res.isSuccess()){
-    //成功時
-}else{
-    //失敗時
-    for(Database.Error err : res.getErrors()) {
-        System.debug(err.getStatusCode());
-        System.debug(err.getMessage());
-    }
-}
-</code></pre>
-
-<p>}
-```</p>
-
-<p>例えば出力内容は以下のような感じ。</p>
-
-<p><code>
-DEBUG|REQUIRED_FIELD_MISSING
-値を入力してください: [LastName]
-</code></p>
-
-<p>この <code>SaveResult</code> は、インサート時の結果を取得するためのクラスで、
-インサート、アップサート、アップサート、デリート、それぞれのクラスが別々に用意されている。</p>
-
-<ul>
-<li>insert &ndash; SaveResult</li>
-<li>update &ndash; UndeleteResult</li>
-<li>upsert &ndash; UpsertResult</li>
-<li>delete &ndash; DeleteResult</li>
-</ul>
-
-
-<p>詳しくは、Apex 開発者ガイド、を参照。<br/>
-(直接のリンクがなぜか貼れなかった）</p>
-
-<p><a href="https://developer.salesforce.com/docs/atlas.ja-jp.apexcode.meta/apexcode/apex_namespace_Database.htm">Apex開発者ガイド &ndash; リファレンス &ndash; Database名前空間</a></p>
-
-<h1>まとめ</h1>
-
-<p>以上で一通り想定していた動作をさせることができた。<br/>
-エラー時に他をロールバックするかどうかとかは、結構忘れがちになるけれど、結構難しい問題。<br/>
-仕様策定時にきちんと考慮していきたい。</p>
 ]]></content>
   </entry>
   

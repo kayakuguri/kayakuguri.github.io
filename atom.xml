@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2017-12-14T13:04:32+09:00</updated>
+  <updated>2018-03-22T16:39:30+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,74 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[apexでクッキーを扱う]]></title>
+    <link href="http://kayakuguri.github.io/blog/2018/03/22/apex-cookie/"/>
+    <updated>2018-03-22T16:34:03+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2018/03/22/apex-cookie</id>
+    <content type="html"><![CDATA[<p>Apexでクッキーは、今まで扱ったことがなく、ちょっと詰まったのでメモ。</p>
+
+<!-- more -->
+
+
+<h1>セット</h1>
+
+<p>クッキーをセットするには以下のようにする。<br/>
+ページに対してクッキーを作成する形のよう？</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>Cookie hoge_val = new Cookie('hoge', 'hogehoge', null, -1, true);
+</span><span class='line'>ApexPages.currentPage().setCookies(new Cookie[]{hoge});</span></code></pre></td></tr></table></div></figure>
+
+
+<p><code>Cookie</code>クラスのコンストラクタは以下の通り。</p>
+
+<ol>
+<li>クッキーの名前</li>
+<li>セットしたい値</li>
+<li>パス</li>
+<li>保存期間(秒)</li>
+<li>セキュアか</li>
+</ol>
+
+
+<p>第４引数の秒は、<code>-1</code>を指定するとブラウザうを閉じるまで、<br/>
+<code>0</code>を指定すると削除、となる。</p>
+
+<h1>削除</h1>
+
+<p>よって、削除したい場合は以下のように同じ値で0病にセットするとよい。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>Cookie hoge_val = new Cookie('hoge', null, null, 0, true); 
+</span><span class='line'>ApexPages.currentPage().setCookies(new Cookie[]{hoge_val});</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>取得</h1>
+
+<p>取得は以下のように。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>Cookie get_hoge = ApexPages.currentPage().getCookies().get('hoge');
+</span><span class='line'>System.debug(get_hoge.getValue());</span></code></pre></td></tr></table></div></figure>
+
+
+<p><code>getValue()</code>でセットされている値を取得することになる。</p>
+
+<h1>参考</h1>
+
+<ul>
+<li><a href="https://developer.salesforce.com/docs/atlas.ja-jp.212.0.apexcode.meta/apexcode/apex_classes_sites_cookie.htm">Cookieクラス | Salesforce developers</a></li>
+<li><a href="https://dev.classmethod.jp/cloud/salesforce_mfcloud_oauth/">【Salesforce】(Tips) APEXからCookieを使う／プライベートメソッドのテスト／OAuth2処理まわりの話題 ｜ Developers.IO</a></li>
+<li><a href="https://salesforce.stackexchange.com/questions/4894/how-is-a-cookie-constructed">apex &ndash; How is a Cookie constructed? &ndash; Salesforce Stack Exchange</a></li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Apache2.4でアクセス制御の方法を調べた]]></title>
@@ -2921,194 +2989,6 @@ SSLもLet&rsquo;s Encryptでちゃんと反映されていた。</p>
 
 <p>Prospectの全標準項目は、以下のよう。<br/>
 <a href="http://developer.pardot.com/kb/object-field-references/#prospect">http://developer.pardot.com/kb/object-field-references/#prospect</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[LaravelでCORSに対応する]]></title>
-    <link href="http://kayakuguri.github.io/blog/2017/06/19/larave-cors/"/>
-    <updated>2017-06-19T11:45:01+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2017/06/19/larave-cors</id>
-    <content type="html"><![CDATA[<p>Laravelでクロスオリジン、CORS (Cross-Origin Resource Sharing) に対応する方法。<br/>
-対応用のLaravelライブラリがあるのでそれを利用する。</p>
-
-<!-- more -->
-
-
-<p>JSからajaxなどで通信する場合、ドメインをまたいだ通信の場合(クロスオリジン)はセキュリティ上禁止されている。<br/>
-ので、それを通信を受けるサーバーサイドで許可してやる。</p>
-
-<h1>barryvdh/laravel-cors</h1>
-
-<p>ライブラリがあるので、そちらを利用する。</p>
-
-<h2>インストール</h2>
-
-<p>Composerで導入する。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>$ composer require barryvdh/laravel-cors</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>セットアップ</h2>
-
-<p><code>config/app.php</code>の <code>providers</code>の配列に以下を追加。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>Barryvdh\Cors\ServiceProvider::class,</span></code></pre></td></tr></table></div></figure>
-
-
-<p><code>app/Http/Kernel.php</code> の <code>$middleware</code> に以下を追加。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>protected $middleware = [
-</span><span class='line'>    // ...
-</span><span class='line'>    \Barryvdh\Cors\HandleCors::class,
-</span><span class='line'>];</span></code></pre></td></tr></table></div></figure>
-
-
-<p>上記は全体に対応する場合。<br/>
-もし、APIのみに許可したい場合は以下のようにする。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>protected $middlewareGroups = [
-</span><span class='line'>    'web' =&gt; [
-</span><span class='line'>       // ...
-</span><span class='line'>    ],
-</span><span class='line'>
-</span><span class='line'>    'api' =&gt; [
-</span><span class='line'>        // ...
-</span><span class='line'>        \Barryvdh\Cors\HandleCors::class,
-</span><span class='line'>    ],
-</span><span class='line'>];</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>設定ファイル</h2>
-
-<p>設定ファイルを以下のコマンドで作成する。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>$ php artisan vendor:publish --provider="Barryvdh\Cors\ServiceProvider"</span></code></pre></td></tr></table></div></figure>
-
-
-<p>以下の内容で作成される。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>return [
-</span><span class='line'>     /*
-</span><span class='line'>     |--------------------------------------------------------------------------
-</span><span class='line'>     | Laravel CORS
-</span><span class='line'>     |--------------------------------------------------------------------------
-</span><span class='line'>     |
-</span><span class='line'>     | allowedOrigins, allowedHeaders and allowedMethods can be set to array('*')
-</span><span class='line'>     | to accept any value.
-</span><span class='line'>     |
-</span><span class='line'>     */
-</span><span class='line'>    'supportsCredentials' =&gt; false,
-</span><span class='line'>    'allowedOrigins' =&gt; ['*'],
-</span><span class='line'>    'allowedHeaders' =&gt; ['Content-Type', 'X-Requested-With'],
-</span><span class='line'>    'allowedMethods' =&gt; ['*'], // ex: ['GET', 'POST', 'PUT',  'DELETE']
-</span><span class='line'>    'exposedHeaders' =&gt; [],
-</span><span class='line'>    'maxAge' =&gt; 0,
-</span><span class='line'>]</span></code></pre></td></tr></table></div></figure>
-
-
-<ul>
-<li><code>supportsCredentials</code> : クッキーやBasic認証の許可設定</li>
-<li><code>allowedOrigins</code> : 許可するドメイン</li>
-<li><code>allowedHeaders</code> : 許可するヘッダー</li>
-<li><code>allowedMethods</code> : 許可するメソッド</li>
-<li><code>exposedHeaders</code> : レスポンスに含める内容があれば</li>
-</ul>
-
-
-<p>それぞれ、 <code>*</code> とすれば全て許可する設定となる。<br/>
-(<code>maxAge</code>はよくわからない…）</p>
-
-<p>これで完了。</p>
-
-<h1>CURLで確認</h1>
-
-<p>curlで設定されているかどうかを確認する。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>$ curl -X GET -I -H "Origin: http://sample.jp" https://your-domain.com/your/api</span></code></pre></td></tr></table></div></figure>
-
-
-<ul>
-<li><code>-I</code> : Headerのみ取得し出力</li>
-<li><code>-X</code> : アクションメソッドの指定</li>
-<li><code>-H</code> : ヘッダの指定</li>
-</ul>
-
-
-<p>ヘッダの <code>Origin</code> に送信元のURLを指定する。<br/>
-許可されているドメインの場合は、 <code>200</code> が返ってくるが、<br/>
-許可されていない場合は、 <code>403</code> が返ってくる。</p>
-
-<p>OKの場合のレスポンス</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>HTTP/1.1 200 OK
-</span><span class='line'>Connection: keep-alive
-</span><span class='line'>Date: Mon, 19 Jun 2017 02:17:21 GMT
-</span><span class='line'>Server: Apache
-</span><span class='line'>Cache-Control: no-cache, private
-</span><span class='line'>Access-Control-Allow-Origin: http://sample.jp
-</span><span class='line'>Vary: Origin
-</span><span class='line'>Transfer-Encoding: chunked
-</span><span class='line'>Content-Type: application/json
-</span><span class='line'>Via: 1.1 vegur</span></code></pre></td></tr></table></div></figure>
-
-
-<h1>参考</h1>
-
-<ul>
-<li><a href="http://qiita.com/bmf_san/items/a90255bf645890d96d0b">LaravelでCORS対応 &ndash; Qiita</a></li>
-<li><a href="https://github.com/barryvdh/laravel-cors">barryvdh/laravel-cors: Adds CORS (Cross-Origin Resource Sharing) headers support in your Laravel application</a></li>
-<li><a href="http://qiita.com/polikeiji/items/c8b79554015d75c073f8">curlでCORS設定を確認する &ndash; Qiita</a></li>
-<li><a href="https://stackoverflow.com/questions/12173990/how-can-you-debug-a-cors-request-with-curl">How can you debug a CORS request with cURL? &ndash; Stack Overflow</a></li>
-<li><a href="http://blog.toshimaru.net/s3-cloudfront-cors-setting/">AWS S3 + CloudFront のCORS設定手順 &ndash; Hack Your Design!</a></li>
-<li><a href="http://www.minimalab.com/blog/2014/12/08/curl-option/">Curl の個人的によく使うオプションまとめ</a></li>
-</ul>
-
 ]]></content>
   </entry>
   
