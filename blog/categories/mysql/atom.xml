@@ -4,7 +4,7 @@
   <title><![CDATA[Category: mysql | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/mysql/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2018-03-22T16:39:30+09:00</updated>
+  <updated>2018-03-26T12:42:09+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,74 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Laravel+mySQLでマイグレーションのやり直しのデータリストア]]></title>
+    <link href="http://kayakuguri.github.io/blog/2018/03/26/laravel-mysql-refresh/"/>
+    <updated>2018-03-26T12:29:45+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2018/03/26/laravel-mysql-refresh</id>
+    <content type="html"><![CDATA[<p>Laravelで開発をしていて、途中でDBの項目が増えたりしてマイグレーションのやり直しが発生することがちょくちょくある。<br/>
+直接<code>alter</code>してもいいけど、ちゃんとマイグレーションファイルも動くか確認したい。<br/>
+けど、今あるデータは削除したくない、って場合。</p>
+
+<!-- more -->
+
+
+<p>パッケージでよしなにバックアップ取ったりしてくれるものはあるようだけど、postgreSQLのものが多かったり、そのためにパッケージインストールするのも、、と思ってしまう。</p>
+
+<ul>
+<li><a href="https://www.lancard.com/blog/2017/11/27/laravel-5-5-%E3%81%A7%E3%83%87%E3%83%BC%E3%82%BF%E3%83%99%E3%83%BC%E3%82%B9dump%E3%82%92%E3%81%8A%E6%89%8B%E8%BB%BD%E3%81%AB%E3%81%A8%E3%81%A3%E3%81%9F%E3%82%8A%E3%82%82%E3%81%A9%E3%81%97%E3%81%9F/">Laravel 5.5 でデータベースdumpをお手軽にとったりもどしたり &laquo;  LANCARD.LAB｜ランカードコムのスタッフブログ</a></li>
+</ul>
+
+
+<p>それならコマンドで叩いたほうが早い、というわけで、備忘録。</p>
+
+<h1>エクスポート</h1>
+
+<p>テーブル情報を抜いたデータ情報のみをエクスポート。<br/>
+（作業はvagrant内に入った状態で）</p>
+
+<p><code>
+mysqldump -uroot -proot -t DATABASE_NAME &gt; all.dump
+</code></p>
+
+<p>エクスポートされたデータから、<code>migrations</code>テーブルのインサート情報の部分だけは削除しておくこと。<br/>
+(laravelのmigrateで自動作成されるので、インポート時にID重複のエラーが出る）</p>
+
+<h2>```</h2>
+
+<h2>&mdash; Dumping data for table <code>migrations</code></h2>
+
+<p>(このセクションを削除)
+```</p>
+
+<h1>再マイグレーション</h1>
+
+<p>Laravelに用意されている。</p>
+
+<p><code>
+$ php artisan migrate:fresh
+</code></p>
+
+<h1>インポート</h1>
+
+<p>あとはインポートするだけ。</p>
+
+<p><code>
+$ mysql -uroot -proot DATABASE_NAME &lt; all.dump
+</code></p>
+
+<p>完了。</p>
+
+<h1>参考</h1>
+
+<ul>
+<li><a href="https://qiita.com/rato303/items/2e614f23e5feee150ffc">MySQLのデータインポート・エクスポート &ndash; Qiita</a></li>
+<li><a href="https://www.dbonline.jp/mysql/insert/index10.html">データの削除(DELETE文) &ndash; データの追加と削除 &ndash; MySQLの使い方</a></li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[CSVデータをMySQLにインポートする]]></title>

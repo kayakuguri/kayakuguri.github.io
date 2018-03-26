@@ -4,7 +4,7 @@
   <title><![CDATA[Category: laravel | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/laravel/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2018-03-22T16:39:30+09:00</updated>
+  <updated>2018-03-26T12:42:09+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,74 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Laravel+mySQLでマイグレーションのやり直しのデータリストア]]></title>
+    <link href="http://kayakuguri.github.io/blog/2018/03/26/laravel-mysql-refresh/"/>
+    <updated>2018-03-26T12:29:45+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2018/03/26/laravel-mysql-refresh</id>
+    <content type="html"><![CDATA[<p>Laravelで開発をしていて、途中でDBの項目が増えたりしてマイグレーションのやり直しが発生することがちょくちょくある。<br/>
+直接<code>alter</code>してもいいけど、ちゃんとマイグレーションファイルも動くか確認したい。<br/>
+けど、今あるデータは削除したくない、って場合。</p>
+
+<!-- more -->
+
+
+<p>パッケージでよしなにバックアップ取ったりしてくれるものはあるようだけど、postgreSQLのものが多かったり、そのためにパッケージインストールするのも、、と思ってしまう。</p>
+
+<ul>
+<li><a href="https://www.lancard.com/blog/2017/11/27/laravel-5-5-%E3%81%A7%E3%83%87%E3%83%BC%E3%82%BF%E3%83%99%E3%83%BC%E3%82%B9dump%E3%82%92%E3%81%8A%E6%89%8B%E8%BB%BD%E3%81%AB%E3%81%A8%E3%81%A3%E3%81%9F%E3%82%8A%E3%82%82%E3%81%A9%E3%81%97%E3%81%9F/">Laravel 5.5 でデータベースdumpをお手軽にとったりもどしたり &laquo;  LANCARD.LAB｜ランカードコムのスタッフブログ</a></li>
+</ul>
+
+
+<p>それならコマンドで叩いたほうが早い、というわけで、備忘録。</p>
+
+<h1>エクスポート</h1>
+
+<p>テーブル情報を抜いたデータ情報のみをエクスポート。<br/>
+（作業はvagrant内に入った状態で）</p>
+
+<p><code>
+mysqldump -uroot -proot -t DATABASE_NAME &gt; all.dump
+</code></p>
+
+<p>エクスポートされたデータから、<code>migrations</code>テーブルのインサート情報の部分だけは削除しておくこと。<br/>
+(laravelのmigrateで自動作成されるので、インポート時にID重複のエラーが出る）</p>
+
+<h2>```</h2>
+
+<h2>&mdash; Dumping data for table <code>migrations</code></h2>
+
+<p>(このセクションを削除)
+```</p>
+
+<h1>再マイグレーション</h1>
+
+<p>Laravelに用意されている。</p>
+
+<p><code>
+$ php artisan migrate:fresh
+</code></p>
+
+<h1>インポート</h1>
+
+<p>あとはインポートするだけ。</p>
+
+<p><code>
+$ mysql -uroot -proot DATABASE_NAME &lt; all.dump
+</code></p>
+
+<p>完了。</p>
+
+<h1>参考</h1>
+
+<ul>
+<li><a href="https://qiita.com/rato303/items/2e614f23e5feee150ffc">MySQLのデータインポート・エクスポート &ndash; Qiita</a></li>
+<li><a href="https://www.dbonline.jp/mysql/insert/index10.html">データの削除(DELETE文) &ndash; データの追加と削除 &ndash; MySQLの使い方</a></li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[LaravelのEloquentモデルでupdated_atがないテーブルを使う]]></title>
@@ -295,51 +363,6 @@ CSVの整形には以下のライブラリを使用した。</p>
 <li><a href="http://csv.thephpleague.com/9.0/reader/">league/csv cocument</a></li>
 </ul>
 
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Laravelでロードバランサを挟んだ時のisSecure判定を動作させる]]></title>
-    <link href="http://kayakuguri.github.io/blog/2017/10/27/laravel-https-loadbalancer/"/>
-    <updated>2017-10-27T15:28:33+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2017/10/27/laravel-https-loadbalancer</id>
-    <content type="html"><![CDATA[<p>Laravelの小ネタ。<br/>
-ELBなどのロードバランサを挟むと <code>Request</code> の <code>isSecure</code> が正しく動作してくれなかったのでメモ。</p>
-
-<!-- more -->
-
-
-<p>ブレードでリンクを生成する時に、<code></code>と記述して組み立てていたのだが、ローカル環境では正しく<code>https</code>のURLで絶対パスが指定されていたのに、herokuにアップした途端に<code>http</code>で生成されるようになってしまった。</p>
-
-<p><code>Request</code>の<code>root()</code>がどうやって判定しているのかを辿っていくと、<code>getScheme()</code>というRequestの関数内で、以下のように判定して取得していた。</p>
-
-<p>```
-public function getScheme()
-{</p>
-
-<pre><code>return $this-&gt;isSecure() ? 'https' : 'http';
-</code></pre>
-
-<p>}
-```</p>
-
-<p>よってこの、<code>isSecure</code>が正しく動作していないと思われる。<br/>
-Herokuはロードバランサが標準で入っているため、その辺りだろうとググってみると公式ドキュメントがヒット。</p>
-
-<blockquote><p>TLS／SSL証明を行うロードバランサの裏でアプリケーションが実行されている場合、アプリケーションが時々HTTPSリンクを生成しないことに、気づくでしょう。典型的な理由は、トラフィックがロードバランサにより８０番ポートへフォワーディングされるため、セキュアなリンクを生成すべきだと判断できないからです。</p></blockquote>
-
-<ul>
-<li><a href="https://readouble.com/laravel/5.5/ja/requests.html">Laravel 5.5 HTTPリクエスト</a> 最下部の、信用するプロキシの設定</li>
-</ul>
-
-
-<p>まさにこの通りで、<code>app/Http/Middleware/TrustProxies.php</code>で全てのプロキシを信用するようにしたところ、無事、<code>https</code>で生成されるようになった。</p>
-
-<p><code>
-protected $proxies = '**';
-</code></p>
-
-<blockquote><p>Amazon AWSや他の「クラウド」ロードバランサプロバイダを使用している場合は、実際のバランサのIPアドレスは分かりません。このような場合、全プロキシを信用するために、**を使います。</p></blockquote>
 ]]></content>
   </entry>
   

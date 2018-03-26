@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2018-03-22T16:39:30+09:00</updated>
+  <updated>2018-03-26T12:42:09+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,79 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Laravel+mySQLでマイグレーションのやり直しのデータリストア]]></title>
+    <link href="http://kayakuguri.github.io/blog/2018/03/26/laravel-mysql-refresh/"/>
+    <updated>2018-03-26T12:29:45+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2018/03/26/laravel-mysql-refresh</id>
+    <content type="html"><![CDATA[<p>Laravelで開発をしていて、途中でDBの項目が増えたりしてマイグレーションのやり直しが発生することがちょくちょくある。<br/>
+直接<code>alter</code>してもいいけど、ちゃんとマイグレーションファイルも動くか確認したい。<br/>
+けど、今あるデータは削除したくない、って場合。</p>
+
+<!-- more -->
+
+
+<p>パッケージでよしなにバックアップ取ったりしてくれるものはあるようだけど、postgreSQLのものが多かったり、そのためにパッケージインストールするのも、、と思ってしまう。</p>
+
+<ul>
+<li><a href="https://www.lancard.com/blog/2017/11/27/laravel-5-5-%E3%81%A7%E3%83%87%E3%83%BC%E3%82%BF%E3%83%99%E3%83%BC%E3%82%B9dump%E3%82%92%E3%81%8A%E6%89%8B%E8%BB%BD%E3%81%AB%E3%81%A8%E3%81%A3%E3%81%9F%E3%82%8A%E3%82%82%E3%81%A9%E3%81%97%E3%81%9F/">Laravel 5.5 でデータベースdumpをお手軽にとったりもどしたり &laquo;  LANCARD.LAB｜ランカードコムのスタッフブログ</a></li>
+</ul>
+
+
+<p>それならコマンドで叩いたほうが早い、というわけで、備忘録。</p>
+
+<h1>エクスポート</h1>
+
+<p>テーブル情報を抜いたデータ情報のみをエクスポート。<br/>
+（作業はvagrant内に入った状態で）</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>mysqldump -uroot -proot -t DATABASE_NAME &gt; all.dump</span></code></pre></td></tr></table></div></figure>
+
+
+<p>エクスポートされたデータから、<code>migrations</code>テーブルのインサート情報の部分だけは削除しておくこと。<br/>
+(laravelのmigrateで自動作成されるので、インポート時にID重複のエラーが出る）</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>--
+</span><span class='line'>-- Dumping data for table `migrations`
+</span><span class='line'>--
+</span><span class='line'>
+</span><span class='line'>(このセクションを削除)</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>再マイグレーション</h1>
+
+<p>Laravelに用意されている。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$ php artisan migrate:fresh</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>インポート</h1>
+
+<p>あとはインポートするだけ。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$ mysql -uroot -proot DATABASE_NAME &lt; all.dump</span></code></pre></td></tr></table></div></figure>
+
+
+<p>完了。</p>
+
+<h1>参考</h1>
+
+<ul>
+<li><a href="https://qiita.com/rato303/items/2e614f23e5feee150ffc">MySQLのデータインポート・エクスポート &ndash; Qiita</a></li>
+<li><a href="https://www.dbonline.jp/mysql/insert/index10.html">データの削除(DELETE文) &ndash; データの追加と削除 &ndash; MySQLの使い方</a></li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[apexでクッキーを扱う]]></title>
@@ -2705,290 +2778,6 @@ SSLもLet&rsquo;s Encryptでちゃんと反映されていた。</p>
 <li><a href="https://devcenter.heroku.com/articles/ssl-endpoint">SSL Endpoint | Heroku Dev Center</a></li>
 </ul>
 
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Pardot APIでの認証と作成]]></title>
-    <link href="http://kayakuguri.github.io/blog/2017/07/31/pardot-api/"/>
-    <updated>2017-07-31T19:04:08+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2017/07/31/pardot-api</id>
-    <content type="html"><![CDATA[<p>Pardot APIを使用する事になったのでAPI送信方法のメモ。</p>
-
-<!-- more -->
-
-
-<h1>バージョン</h1>
-
-<p>APIのバージョンは、3と4が稼働中のよう。<br/>
-使い分けは以下との事。</p>
-
-<blockquote><p>同じメールアドレスで複数のプロスペクトを作成できないアカウントの場合、バージョン 3 を参照してください。<br/>
-同じメールアドレスで複数のプロスペクトを作成できるアカウントの場合、バージョン 4 を参照してください。<br/>
-<a href="http://help.pardot.com/customer/ja/portal/articles/2128635-pardot-api-%E3%82%92%E4%BD%BF%E7%94%A8%E3%81%99%E3%82%8B%E5%A0%B4%E5%90%88?b_id=11139">Pardot API を使用する場合</a></p></blockquote>
-
-<h1>Authentication</h1>
-
-<p><a href="http://developer.pardot.com/#authentication">http://developer.pardot.com/#authentication</a></p>
-
-<p>送信パラメータは、ログイン用の <code>email</code> と <code>password</code> と、そのユーザの <code>user_key</code> 。<br/>
-<code>user_key</code> は、 設定画面の MY PROFILEから確認出来る。</p>
-
-<p>curlから送信した内容は以下。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>$ curl --request POST \
-</span><span class='line'>--url https://pi.pardot.com/api/login/version/4 \
-</span><span class='line'>--header 'content-type: multipart/form-data' \
-</span><span class='line'>--form 'email=test@example.com' \
-</span><span class='line'>--form 'password=your_password' \
-</span><span class='line'>--form user_key=your_user_key</span></code></pre></td></tr></table></div></figure>
-
-
-<p>レスポンスは以下のようにXMLで返ってくる。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
-</span><span class='line'>&lt;rsp stat="ok" version="1.0"&gt;
-</span><span class='line'>  &lt;api_key&gt;you_api_key_here&lt;/api_key&gt;
-</span><span class='line'>  &lt;version&gt;4&lt;/version&gt;
-</span><span class='line'>&lt;/rsp&gt;</span></code></pre></td></tr></table></div></figure>
-
-
-<h1>Create</h1>
-
-<p><a href="http://developer.pardot.com/kb/api-version-4/prospects/#creating-prospects">http://developer.pardot.com/kb/api-version-4/prospects/#creating-prospects</a></p>
-
-<p>Prospectを作成するには以下のエンドポイントにPOSTで送信する。<br/>
-(APIの送信は認証も含めて全てPOSTで送信するよう。)</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>POST : /api/prospect/version/4/do/create/email/</span></code></pre></td></tr></table></div></figure>
-
-
-<p>パラメータの必須項目は以下。</p>
-
-<ul>
-<li><code>email</code> : 作成するプロスペクトのメールアドレス</li>
-<li><code>api_key</code> : 認証で取得したキー</li>
-<li><code>user_key</code> : ユーザのキー</li>
-</ul>
-
-
-<p>emailはパラメータにつけずに、エンドポイントの最後につけてしまってもよいよう。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>/api/prospect/version/4/do/create/email/&lt;email&gt;</span></code></pre></td></tr></table></div></figure>
-
-
-<p>curlで送信した内容は以下。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>curl --request POST \
-</span><span class='line'>  --url https://pi.pardot.com/api/prospect/version/4/do/create/email/ \
-</span><span class='line'>  --header 'content-type: multipart/form-data' \
-</span><span class='line'>  --form api_key=your_api_key \
-</span><span class='line'>  --form user_key=your_user_key \
-</span><span class='line'>  --form email=create_email@example.com</span></code></pre></td></tr></table></div></figure>
-
-
-<p>返却されるXMLは以下。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-<span class='line-number'>39</span>
-<span class='line-number'>40</span>
-<span class='line-number'>41</span>
-<span class='line-number'>42</span>
-<span class='line-number'>43</span>
-<span class='line-number'>44</span>
-<span class='line-number'>45</span>
-<span class='line-number'>46</span>
-<span class='line-number'>47</span>
-<span class='line-number'>48</span>
-<span class='line-number'>49</span>
-<span class='line-number'>50</span>
-<span class='line-number'>51</span>
-<span class='line-number'>52</span>
-<span class='line-number'>53</span>
-<span class='line-number'>54</span>
-<span class='line-number'>55</span>
-<span class='line-number'>56</span>
-<span class='line-number'>57</span>
-<span class='line-number'>58</span>
-<span class='line-number'>59</span>
-<span class='line-number'>60</span>
-<span class='line-number'>61</span>
-<span class='line-number'>62</span>
-<span class='line-number'>63</span>
-<span class='line-number'>64</span>
-<span class='line-number'>65</span>
-<span class='line-number'>66</span>
-<span class='line-number'>67</span>
-<span class='line-number'>68</span>
-<span class='line-number'>69</span>
-<span class='line-number'>70</span>
-<span class='line-number'>71</span>
-<span class='line-number'>72</span>
-<span class='line-number'>73</span>
-<span class='line-number'>74</span>
-<span class='line-number'>75</span>
-<span class='line-number'>76</span>
-<span class='line-number'>77</span>
-<span class='line-number'>78</span>
-<span class='line-number'>79</span>
-<span class='line-number'>80</span>
-<span class='line-number'>81</span>
-<span class='line-number'>82</span>
-<span class='line-number'>83</span>
-<span class='line-number'>84</span>
-<span class='line-number'>85</span>
-<span class='line-number'>86</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
-</span><span class='line'>&lt;rsp stat="ok" version="1.0"&gt;
-</span><span class='line'>  &lt;prospect&gt;
-</span><span class='line'>      &lt;id&gt;xxxxxxxx&lt;/id&gt;
-</span><span class='line'>      &lt;campaign_id&gt;xxx&lt;/campaign_id&gt;
-</span><span class='line'>      &lt;salutation/&gt;
-</span><span class='line'>      &lt;first_name/&gt;
-</span><span class='line'>      &lt;last_name/&gt;
-</span><span class='line'>      &lt;email&gt;create_email@example.com&lt;/email&gt;
-</span><span class='line'>      &lt;password/&gt;
-</span><span class='line'>      &lt;company/&gt;
-</span><span class='line'>      &lt;website/&gt;
-</span><span class='line'>      &lt;job_title/&gt;
-</span><span class='line'>      &lt;department/&gt;
-</span><span class='line'>      &lt;country/&gt;
-</span><span class='line'>      &lt;address_one/&gt;
-</span><span class='line'>      &lt;address_two/&gt;
-</span><span class='line'>      &lt;city/&gt;
-</span><span class='line'>      &lt;state/&gt;
-</span><span class='line'>      &lt;territory/&gt;
-</span><span class='line'>      &lt;zip/&gt;
-</span><span class='line'>      &lt;phone/&gt;
-</span><span class='line'>      &lt;fax/&gt;
-</span><span class='line'>      &lt;source/&gt;
-</span><span class='line'>      &lt;annual_revenue/&gt;
-</span><span class='line'>      &lt;employees/&gt;
-</span><span class='line'>      &lt;industry/&gt;
-</span><span class='line'>      &lt;years_in_business/&gt;
-</span><span class='line'>      &lt;comments/&gt;
-</span><span class='line'>      &lt;notes/&gt;
-</span><span class='line'>      &lt;score&gt;0&lt;/score&gt;
-</span><span class='line'>      &lt;grade/&gt;
-</span><span class='line'>      &lt;last_activity_at/&gt;
-</span><span class='line'>      &lt;recent_interaction&gt;Never active&lt;/recent_interaction&gt;
-</span><span class='line'>      &lt;crm_lead_fid/&gt;
-</span><span class='line'>      &lt;crm_contact_fid/&gt;
-</span><span class='line'>      &lt;crm_owner_fid/&gt;
-</span><span class='line'>      &lt;crm_account_fid/&gt;
-</span><span class='line'>      &lt;salesforce_fid/&gt;
-</span><span class='line'>      &lt;crm_last_sync/&gt;
-</span><span class='line'>      &lt;crm_url/&gt;
-</span><span class='line'>      &lt;is_do_not_email&gt;&lt;/is_do_not_email&gt;
-</span><span class='line'>      &lt;is_do_not_call&gt;&lt;/is_do_not_call&gt;
-</span><span class='line'>      &lt;opted_out&gt;&lt;/opted_out&gt;
-</span><span class='line'>      &lt;is_reviewed&gt;&lt;/is_reviewed&gt;
-</span><span class='line'>      &lt;is_starred&gt;&lt;/is_starred&gt;
-</span><span class='line'>      &lt;created_at&gt;2017-07-31 18:49:34&lt;/created_at&gt;
-</span><span class='line'>      &lt;updated_at&gt;2017-07-31 18:49:34&lt;/updated_at&gt;
-</span><span class='line'>      &lt;campaign&gt;
-</span><span class='line'>          &lt;id&gt;xxx&lt;/id&gt;
-</span><span class='line'>          &lt;name&gt;Website Tracking&lt;/name&gt;
-</span><span class='line'>      &lt;/campaign&gt;
-</span><span class='line'>      &lt;profile&gt;
-</span><span class='line'>          &lt;id&gt;xxx&lt;/id&gt;
-</span><span class='line'>          &lt;name&gt;Default&lt;/name&gt;
-</span><span class='line'>          &lt;profile_criteria&gt;
-</span><span class='line'>              &lt;id&gt;xxx&lt;/id&gt;
-</span><span class='line'>              &lt;name&gt;Company Size&lt;/name&gt;
-</span><span class='line'>              &lt;matches&gt;Unknown&lt;/matches&gt;
-</span><span class='line'>          &lt;/profile_criteria&gt;
-</span><span class='line'>          &lt;profile_criteria&gt;
-</span><span class='line'>              &lt;id&gt;xxx&lt;/id&gt;
-</span><span class='line'>              &lt;name&gt;Industry&lt;/name&gt;
-</span><span class='line'>              &lt;matches&gt;Unknown&lt;/matches&gt;
-</span><span class='line'>          &lt;/profile_criteria&gt;
-</span><span class='line'>          &lt;profile_criteria&gt;
-</span><span class='line'>              &lt;id&gt;xxx&lt;/id&gt;
-</span><span class='line'>              &lt;name&gt;Location&lt;/name&gt;
-</span><span class='line'>              &lt;matches&gt;Unknown&lt;/matches&gt;
-</span><span class='line'>          &lt;/profile_criteria&gt;
-</span><span class='line'>          &lt;profile_criteria&gt;
-</span><span class='line'>              &lt;id&gt;xxx&lt;/id&gt;
-</span><span class='line'>              &lt;name&gt;Job Title&lt;/name&gt;
-</span><span class='line'>              &lt;matches&gt;Unknown&lt;/matches&gt;
-</span><span class='line'>          &lt;/profile_criteria&gt;
-</span><span class='line'>          &lt;profile_criteria&gt;
-</span><span class='line'>              &lt;id&gt;xxx&lt;/id&gt;
-</span><span class='line'>              &lt;name&gt;Department&lt;/name&gt;
-</span><span class='line'>              &lt;matches&gt;Unknown&lt;/matches&gt;
-</span><span class='line'>          &lt;/profile_criteria&gt;
-</span><span class='line'>      &lt;/profile&gt;
-</span><span class='line'>      &lt;visitors/&gt;
-</span><span class='line'>      &lt;visitor_activities/&gt;
-</span><span class='line'>      &lt;lists/&gt;
-</span><span class='line'>  &lt;/prospect&gt;
-</span><span class='line'>&lt;/rsp&gt;</span></code></pre></td></tr></table></div></figure>
-
-
-<p>環境によってフィールドとかの増減があるのかも。<br/>
-作成されたプロスペクトは、IDからURLでアクセス出来る。</p>
-
-<blockquote><p><a href="https://pi.pardot.com/prospect/read/id/xxxxxxxx">https://pi.pardot.com/prospect/read/id/xxxxxxxx</a></p></blockquote>
-
-<p>Prospectの全標準項目は、以下のよう。<br/>
-<a href="http://developer.pardot.com/kb/object-field-references/#prospect">http://developer.pardot.com/kb/object-field-references/#prospect</a></p>
 ]]></content>
   </entry>
   

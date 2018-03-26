@@ -1,0 +1,282 @@
+
+<!DOCTYPE HTML>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Laravel+mySQLでマイグレーションのやり直しのデータリストア - KayaMemo</title>
+
+	
+	<meta name="description" content="<!-- google_ad_client = "ca-pub-0887267957680144"; /* kayakuguri top */ google_ad_slot = "1210228675"; google_ad_width = 468; google_ad_height = 60 &hellip;">
+	
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+	<link href="/atom.xml" rel="alternate" title="KayaMemo" type="application/atom+xml">
+	<link rel="canonical" href="">
+	<link href="/favicon.png" rel="shortcut icon">
+	<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+	<script async="true" src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+	
+<meta property="og:title" content="Laravel+mySQLでマイグレーションのやり直しのデータリストア - KayaMemo" />
+<meta property="og:type" content="article" />
+<meta property="og:description" content="<!-- google_ad_client = "ca-pub-0887267957680144"; /* kayakuguri top */ google_ad_slot = "1210228675"; google_ad_width = 468; google_ad_height = 60 &hellip;" />
+
+<meta property="og:url" content="" />
+<meta property="og:image" content="http://kayakuguri.github.io/images/about_me.jpg" />
+<meta property="og:author" content="kayakuguri" />
+<meta property="og:site_name" content="KayaMemo" />
+<meta property="og:locale" content="ja_JP" />
+<meta property="fb:app_id" content="509051419202319" />
+</head>
+
+
+<body>
+	<header id="header" class="inner"><h1><a href="/">KayaMemo</a></h1>
+<nav id="main-nav"><ul class="main">
+	<li><a href="/">Blog</a></li>
+	<li><a href="/blog/archives">Archives</a></li>
+</ul>
+</nav>
+<nav id="mobile-nav">
+	<div class="alignleft menu">
+		<a class="button">Menu</a>
+		<div class="container"><ul class="main">
+	<li><a href="/">Blog</a></li>
+	<li><a href="/blog/archives">Archives</a></li>
+</ul>
+</div>
+	</div>
+	<div class="alignright search">
+		<a class="button"></a>
+		<div class="container">
+			<form action="http://google.com/search" method="get">
+				<input type="text" name="q" results="0">
+				<input type="hidden" name="q" value="site:kayakuguri.github.io">
+			</form>
+		</div>
+	</div>
+</nav>
+<nav id="sub-nav" class="alignright">
+	<div class="social">
+		
+		
+		
+		<a class="twitter" href="http://twitter.com/usk" title="Twitter">Twitter</a>
+		
+		
+    
+		
+		
+		
+		
+		
+		<a class="rss" href="/atom.xml" title="RSS">RSS</a>
+		
+    
+	</div>
+	<form class="search" action="http://google.com/search" method="get">
+		<input class="alignright" type="text" name="q" results="0">
+		<input type="hidden" name="q" value="site:kayakuguri.github.io">
+	</form>
+</nav>
+
+</header>
+	
+		
+	
+	<div id="content" class="inner"><article class="post">
+	<h2 class="title">Laravel+mySQLでマイグレーションのやり直しのデータリストア</h2>
+	<div class="entry-content">
+        <div class="adArea">
+    <script type="text/javascript"><!--
+    google_ad_client = "ca-pub-0887267957680144";
+    /* kayakuguri top */
+    google_ad_slot = "1210228675";
+    google_ad_width = 468;
+    google_ad_height = 60;
+    //-->
+    </script>
+    <script type="text/javascript"
+            src="//pagead2.googlesyndication.com/pagead/show_ads.js">
+    </script>
+</div>
+        <p>Laravelで開発をしていて、途中でDBの項目が増えたりしてマイグレーションのやり直しが発生することがちょくちょくある。<br/>
+直接<code>alter</code>してもいいけど、ちゃんとマイグレーションファイルも動くか確認したい。<br/>
+けど、今あるデータは削除したくない、って場合。</p>
+
+<!-- more -->
+
+
+<p>パッケージでよしなにバックアップ取ったりしてくれるものはあるようだけど、postgreSQLのものが多かったり、そのためにパッケージインストールするのも、、と思ってしまう。</p>
+
+<ul>
+<li><a href="https://www.lancard.com/blog/2017/11/27/laravel-5-5-%E3%81%A7%E3%83%87%E3%83%BC%E3%82%BF%E3%83%99%E3%83%BC%E3%82%B9dump%E3%82%92%E3%81%8A%E6%89%8B%E8%BB%BD%E3%81%AB%E3%81%A8%E3%81%A3%E3%81%9F%E3%82%8A%E3%82%82%E3%81%A9%E3%81%97%E3%81%9F/">Laravel 5.5 でデータベースdumpをお手軽にとったりもどしたり &laquo;  LANCARD.LAB｜ランカードコムのスタッフブログ</a></li>
+</ul>
+
+
+<p>それならコマンドで叩いたほうが早い、というわけで、備忘録。</p>
+
+<h1>エクスポート</h1>
+
+<p>テーブル情報を抜いたデータ情報のみをエクスポート。<br/>
+（作業はvagrant内に入った状態で）</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>mysqldump -uroot -proot -t DATABASE_NAME &gt; all.dump</span></code></pre></td></tr></table></div></figure>
+
+
+<p>エクスポートされたデータから、<code>migrations</code>テーブルのインサート情報の部分だけは削除しておくこと。<br/>
+(laravelのmigrateで自動作成されるので、インポート時にID重複のエラーが出る）</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>--
+</span><span class='line'>-- Dumping data for table `migrations`
+</span><span class='line'>--
+</span><span class='line'>
+</span><span class='line'>(このセクションを削除)</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>再マイグレーション</h1>
+
+<p>Laravelに用意されている。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$ php artisan migrate:fresh</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>インポート</h1>
+
+<p>あとはインポートするだけ。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$ mysql -uroot -proot DATABASE_NAME &lt; all.dump</span></code></pre></td></tr></table></div></figure>
+
+
+<p>完了。</p>
+
+<h1>参考</h1>
+
+<ul>
+<li><a href="https://qiita.com/rato303/items/2e614f23e5feee150ffc">MySQLのデータインポート・エクスポート &ndash; Qiita</a></li>
+<li><a href="https://www.dbonline.jp/mysql/insert/index10.html">データの削除(DELETE文) &ndash; データの追加と削除 &ndash; MySQLの使い方</a></li>
+</ul>
+
+
+    </div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2018-03-26T12:29:45+09:00" pubdate data-updated="true">Mar 26<span>th</span>, 2018</time></div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/laravel/'>laravel</a>, <a class='category' href='/blog/categories/mysql/'>mysql</a>
+
+
+</div>
+	
+</div>
+</article>
+
+	<div class="share">
+	<div class="addthis_toolbox addthis_default_style ">
+		
+        <div id="fb-root"></div>
+<script>(function(d, s, id) {
+    var js, fjs = d.getElementsByTagName(s)[0];
+    if (d.getElementById(id)) return;
+    js = d.createElement(s); js.id = id;
+    js.src = "//connect.facebook.net/ja_JP/all.js#xfbml=1&appId=509051419202319";
+    fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+        <div class="fb-like" data-href="http://kayakuguri.github.io/blog/2018/03/26/laravel-mysql-refresh/" data-layout="button_count" data-action="like" data-show-faces="true" data-share="false"></div>
+		
+		
+        &nbsp;&nbsp;<a href="https://twitter.com/share" class="twitter-share-button" data-via="kayakuguri123" data-lang="ja" data-count="none">ツイート</a>
+<script>
+  !function(d,s,id){
+      var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';
+      if(!d.getElementById(id)){
+          js=d.createElement(s);
+          js.id=id;js.src=p+'://platform.twitter.com/widgets.js';
+          fjs.parentNode.insertBefore(js,fjs);
+      }
+  }(document, 'script', 'twitter-wjs');
+</script>
+		
+		
+		<a class="addthis_button_google_plusone" g:plusone:size="medium"></a>
+		
+		
+        
+        <a href="http://b.hatena.ne.jp/entry/http://kayakuguri.github.io/blog/2018/03/26/laravel-mysql-refresh/" class="hatena-bookmark-button" data-hatena-bookmark-title="Laravel+mySQLでマイグレーションのやり直しのデータリストア - KayaMemo" data-hatena-bookmark-layout="standard-noballoon" data-hatena-bookmark-lang="ja" title="このエントリーをはてなブックマークに追加">
+<img src="http://b.st-hatena.com/images/entry-button/button-only@2x.png" alt="このエントリーをはてなブックマークに追加" width="20" height="20" style="border: none;" /></a>
+<script type="text/javascript" src="http://b.st-hatena.com/js/bookmark_button.js" charset="utf-8" async="async"></script>
+        
+	</div>
+	
+</div>
+
+
+<div class="share">
+    <script type="text/javascript"><!--
+    google_ad_client = "ca-pub-0887267957680144";
+    /* kayakuguri git */
+    google_ad_slot = "2041160274";
+    google_ad_width = 336;
+    google_ad_height = 280;
+    //-->
+    </script>
+    <script type="text/javascript"
+            src="//pagead2.googlesyndication.com/pagead/show_ads.js">
+    </script>
+</div>
+</div>
+	<footer id="footer" class="inner">Copyright &copy; 2018
+
+    萱潜
+
+</footer>
+	<script src="/javascripts/slash.js"></script>
+<script src="/javascripts/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+	$('.fancybox').fancybox();
+})(jQuery);
+</script> <!-- Delete or comment this line to disable Fancybox -->
+
+
+
+
+	<script type="text/javascript">
+		var _gaq = _gaq || [];
+		_gaq.push(['_setAccount', 'UA-3730932-4']);
+		_gaq.push(['_trackPageview']);
+
+		(function() {
+			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+		})();
+	</script>
+
+
+
+</body>
+</html>
