@@ -4,7 +4,7 @@
   <title><![CDATA[Category: wordpress | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/wordpress/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2018-04-04T14:26:53+09:00</updated>
+  <updated>2018-04-04T14:37:54+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -95,7 +95,7 @@ timezone: &ldquo;Asia/Tokyo&rdquo;
 <p>admin:
   user: admin
   password: admin
-  email: <a href="&#x6d;&#97;&#x69;&#108;&#x74;&#111;&#58;&#x6d;&#x61;&#105;&#x6c;&#64;&#x64;&#x6f;&#x6d;&#x61;&#105;&#x6e;&#x2e;&#x74;&#x6c;&#x64;">&#109;&#97;&#105;&#x6c;&#x40;&#100;&#x6f;&#x6d;&#97;&#105;&#x6e;&#46;&#116;&#108;&#100;</a>
+  email: <a href="&#x6d;&#x61;&#105;&#x6c;&#x74;&#x6f;&#58;&#109;&#x61;&#105;&#x6c;&#x40;&#x64;&#x6f;&#109;&#x61;&#x69;&#110;&#46;&#x74;&#x6c;&#100;">&#109;&#x61;&#x69;&#x6c;&#x40;&#100;&#111;&#x6d;&#97;&#x69;&#x6e;&#46;&#116;&#108;&#x64;</a>
   first_name: &ldquo;&rdquo;
   last_name: &ldquo;&rdquo;
 ```</p>
