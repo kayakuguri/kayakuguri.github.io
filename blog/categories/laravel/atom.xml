@@ -4,7 +4,7 @@
   <title><![CDATA[Category: laravel | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/laravel/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2018-04-05T11:36:51+09:00</updated>
+  <updated>2018-04-13T16:58:53+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,188 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[s3互換のローカルストレージ環境minioにLaravelから保存する(vagrant)]]></title>
+    <link href="http://kayakuguri.github.io/blog/2018/04/13/s3-minio-laravel/"/>
+    <updated>2018-04-13T16:44:33+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2018/04/13/s3-minio-laravel</id>
+    <content type="html"><![CDATA[<p>Laravelからの保存先に実際のS3を使わずに、ローカルに疑似S3環境を作成してそこに保存させてみる。</p>
+
+<!-- more -->
+
+
+<h1>minio</h1>
+
+<p>S3互換のオブジェクトストレージ環境。今回はVagrant上のCentOS7にいれた。<br/>
+入れかたはまんま以下を参考に。</p>
+
+<ul>
+<li><a href="https://qiita.com/rerofumi/items/21f7a22b8b824859754f">S3 互換のシンプルなオブジェクトストレージ Minio を使う &ndash; Qiita</a></li>
+</ul>
+
+
+<p>インストールはダウンロードして配置するだけ。</p>
+
+<p><code>
+$ sudo curl https://dl.minio.io/server/minio/release/linux-amd64/minio -o /usr/local/bin/minio
+$ sudo chmod +x /usr/local/bin/minio
+$ sudo curl https://raw.githubusercontent.com/minio/minio-service/master/linux-systemd/minio.service -o /etc/systemd/system/minio.service
+$ sudo useradd -s /sbin/nologin minio-user
+</code></p>
+
+<p>オブジェクト保存先のディレクトリを作成してユーザを指定する。</p>
+
+<p><code>
+$ sudo mkdir -p /var/lib/minio
+$ sudo chown minio-user:minio-user /var/lib/minio
+</code></p>
+
+<p><code>/etc/default/minio</code> に設定ファイルを作成して記述。<br/>
+アクセスキーとシークレットは後でログインや接続などに使用する。適当な値を入れておく。</p>
+
+<p>```</p>
+
+<h1>Local export path.</h1>
+
+<p>MINIO_VOLUMES=&ldquo;/var/lib/minio/&rdquo;</p>
+
+<h1>Use if you want to run Minio on a custom port.</h1>
+
+<p>MINIO_OPTS=&ldquo;&mdash;address :9000&rdquo;</p>
+
+<h1>Access Key of the server.</h1>
+
+<p>MINIO_ACCESS_KEY=AKIAIOSFODNN7EXAMPLE</p>
+
+<h1>Secret key of the server.</h1>
+
+<p>MINIO_SECRET_KEY=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
+```</p>
+
+<p>自動起動設定と起動。</p>
+
+<p><code>
+$ sudo systemctl enable minio
+$ sudo systemctl start minio
+</code></p>
+
+<p>ブラウザからアクセス出来るGUIが用意されている。<br/>
+Vagrant経由でのアクセスは、Vagrantで指定しているIPに9000ポート(デフォルト。指定したポートで）でアクセスすると確認出来る。(httpなので注意）</p>
+
+<p>例) <code>http://192.168.33.33:9000/</code></p>
+
+<p>画面右下にあるプラスボタンからバケットを作成出来る。<br/>
+ここからファイルを直接アップすることも可能。<br/>
+バケットは適当に作っておく。</p>
+
+<h1>Laravel</h1>
+
+<p>以下を参考にさせてもらった。</p>
+
+<ul>
+<li><a href="https://laravel-news.com/minio-s3-compliant-storage?utm_medium=feed&amp;utm_source=facebook.com&amp;utm_campaign=Feed%3A+laravelnews">Minio： An Open-Source S3 Compliant Storage Service &ndash; Laravel News</a></li>
+</ul>
+
+
+<p>laravelから保存してみる。<br/>
+基本的には環境の設定を渡してやるだけで動作する。</p>
+
+<p>S3への保存をさせるのと、Formヘルパーを使ったのでそれぞれのパッケージを入れた。</p>
+
+<p><code>
+$ composer require "laravelcollective/html":"^5.6.0"
+$ composer require league/flysystem-aws-s3-v3
+</code></p>
+
+<p><code>filesystems.php</code>でドライバーの設定をする。<br/>
+S3の場合と微妙に違うため、<code>minio</code>用として分けておく方がよいと思われる。</p>
+
+<p><code>config/filesystems.php</code></p>
+
+<p>```
+&lsquo;minio&rsquo; => [</p>
+
+<pre><code>'driver' =&gt; 's3',
+'endpoint' =&gt; env('MINIO_ENDPOINT', 'http://127.0.0.1:9000'),
+'use_path_style_endpoint' =&gt; true,
+'key' =&gt; env('AWS_KEY'),
+'secret' =&gt; env('AWS_SECRET'),
+'region' =&gt; env('AWS_REGION'),
+'bucket' =&gt; env('AWS_BUCKET'),
+</code></pre>
+
+<p>],
+```</p>
+
+<p>デフォルトのS3用の設定は以下のようになっている。<br/>
+<a href="https://github.com/laravel/laravel/blob/master/config/filesystems.php#L58-L65">デフォルトの設定</a></p>
+
+<p><code>.env</code>ファイルで値を設定する。</p>
+
+<p><code>
+FILESYSTEM_DRIVER=minio
+MINIO_ENDPOINT="http://127.0.0.1:9000"
+AWS_KEY=AKIAIOSFODNN7EXAMPLE
+AWS_SECRET=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
+AWS_REGION=us-east-1
+AWS_BUCKET=sample-storage
+</code></p>
+
+<ul>
+<li><code>FILESYSTEM_DRIVER</code> : 設定したminioを指定</li>
+<li><code>MINIO_ENDPOINT</code> : vagrantの内部からアクセスすることになるので、ローカルホストにポート番号をつけた形で指定する</li>
+<li><code>AWS_KEY</code> : 設定した値</li>
+<li><code>AWS_SECRET</code> : 設定した値</li>
+<li><code>AWS_REGION</code> : なんでもよい</li>
+<li><code>AWS_BUCKET</code> : 作ったバケット</li>
+</ul>
+
+
+<p>これであとは普通にs3に投げる方法で実装してやるだけでOK。<br/>
+以下のような感じで作って試してみた。</p>
+
+<p>ビュー (抜粋)</p>
+
+<p>```
+</p>
+
+<pre><code>
+
+</code></pre>
+
+<p>
+```</p>
+
+<p>コントローラー (抜粋)</p>
+
+<p>```
+public function fileUpload(Request $request)
+{</p>
+
+<pre><code>$file = $request-&gt;file('file_data');
+if(!is_null($file)){
+    $filename = $file-&gt;store('hoge/fuga');
+    return redirect('/')-&gt;with('success', $filename.'を保存しました。');
+}else{
+    return redirect('/')-&gt;back();
+}
+</code></pre>
+
+<p>}
+```</p>
+
+<h1>参考</h1>
+
+<ul>
+<li><a href="https://qiita.com/rerofumi/items/21f7a22b8b824859754f">S3 互換のシンプルなオブジェクトストレージ Minio を使う &ndash; Qiita</a></li>
+<li><a href="https://laravel-news.com/minio-s3-compliant-storage?utm_medium=feed&amp;utm_source=facebook.com&amp;utm_campaign=Feed%3A+laravelnews">Minio： An Open-Source S3 Compliant Storage Service &ndash; Laravel News</a></li>
+<li><a href="https://qiita.com/makies/items/0684dad04a6008891d0d">Laravelで画像ファイルアップロードをする簡単なサンプル &ndash; Qiita</a></li>
+<li><a href="https://qiita.com/aozora0000/items/30c139164610c5799484">Laravel5からMinioObjectStorageに接続する &ndash; Qiita</a></li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Laravel+mySQLでマイグレーションのやり直しのデータリストア]]></title>
@@ -275,92 +457,6 @@ protected $except = [</p>
 
 <ul>
 <li><a href="https://readouble.com/laravel/5.5/ja/csrf.html#csrf-excluding-uris">URIの除外 | Laravel5.5 CSRF通信</a></li>
-</ul>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[CSVのテキストからLaravelのSeeder用コードを作る]]></title>
-    <link href="http://kayakuguri.github.io/blog/2017/10/30/larave-csv-seeder/"/>
-    <updated>2017-10-30T10:26:29+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2017/10/30/larave-csv-seeder</id>
-    <content type="html"><![CDATA[<p>CSVのテキストをLaravelのseeder、というか、クエリビルダに変換したかったのでツールを作った。</p>
-
-<!-- more -->
-
-
-<p><a href="https://laravel-csv-seeder.herokuapp.com/">Laravel CSV Seeder</a></p>
-
-<h1>使い方</h1>
-
-<p><code>Table name</code>にはテーブル名を入れる。<br/>
-(何も入れなかった場合はダミーの文字が入る)</p>
-
-<p><code>CSV Format Text</code>にはカンマと改行区切りのCSVフォーマットのテキストを入力する。</p>
-
-<p><code>convert</code>ボタンを押すと、その下のテキストエリアに出力結果が表示される。</p>
-
-<h2>CSVの仕様</h2>
-
-<ul>
-<li>項目ごとはカンマ区切り</li>
-<li>行は改行区切り</li>
-<li>行は以下の仕様
-
-<ul>
-<li>1行目 : 日本語項目名。変換後のコードには使用されません</li>
-<li>2行目 : 項目名。キーとして使用されます</li>
-<li>3行目以降 : インサートされる内容</li>
-</ul>
-</li>
-</ul>
-
-
-<h2>Github</h2>
-
-<p>コードはGithubにあげた。</p>
-
-<p><a href="https://github.com/k-usk/laravel-csv-seeder">https://github.com/k-usk/laravel-csv-seeder</a></p>
-
-<p>無駄にHeroku Buttonも付けたので自分の環境で動かしたいという人がいたらどうぞ。</p>
-
-<h1>説明</h1>
-
-<p>CSVを読み込んで整形してるだけなんでたいしたことはしてない。<br/>
-CSVの整形には以下のライブラリを使用した。</p>
-
-<ul>
-<li><a href="http://csv.thephpleague.com/">league/csv</a></li>
-</ul>
-
-
-<h2>その他</h2>
-
-<p>同じようなツールがないか調べたりはしたのだが、CSVをそのままSeederとして使えるものはいくつかあった。</p>
-
-<ul>
-<li><a href="https://github.com/Flynsarmy/laravel-csv-seeder">Flynsarmy/laravel-csv-seeder</a></li>
-<li><a href="https://github.com/andycrockett/laravel-csv-seeder">andycrockett/laravel-csv-seeder</a></li>
-</ul>
-
-
-<p>後は、エクセルファイルをLaravelで扱うための便利パッケージとか。<br/>
-エクセルを作ったりそのまま読み込めたりするよう。これはこれでかなり有用そう。</p>
-
-<ul>
-<li><a href="https://github.com/Maatwebsite/Laravel-Excel/blob/2.1/README.md">Maatwebsite/Laravel-Excel</a></li>
-<li><a href="https://blog.motimotilab.com/?p=68">Laravel Excelの紹介（Laravel：Excelファイル入出力ライブラリ）</a></li>
-</ul>
-
-
-<p>ただし今回はそこまでのツールではなく、また、アプリ本体にそういう機能は組み込みたくなかったため、別のツールとして作成した。</p>
-
-<h1>参考</h1>
-
-<ul>
-<li><a href="https://readouble.com/laravel/5.5/ja/queries.html">Laravel 5.5 データベース：クエリビルダ</a></li>
-<li><a href="http://csv.thephpleague.com/9.0/reader/">league/csv cocument</a></li>
 </ul>
 
 ]]></content>

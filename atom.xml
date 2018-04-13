@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2018-04-05T11:36:51+09:00</updated>
+  <updated>2018-04-13T16:58:53+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,215 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[s3互換のローカルストレージ環境minioにLaravelから保存する(vagrant)]]></title>
+    <link href="http://kayakuguri.github.io/blog/2018/04/13/s3-minio-laravel/"/>
+    <updated>2018-04-13T16:44:33+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2018/04/13/s3-minio-laravel</id>
+    <content type="html"><![CDATA[<p>Laravelからの保存先に実際のS3を使わずに、ローカルに疑似S3環境を作成してそこに保存させてみる。</p>
+
+<!-- more -->
+
+
+<h1>minio</h1>
+
+<p>S3互換のオブジェクトストレージ環境。今回はVagrant上のCentOS7にいれた。<br/>
+入れかたはまんま以下を参考に。</p>
+
+<ul>
+<li><a href="https://qiita.com/rerofumi/items/21f7a22b8b824859754f">S3 互換のシンプルなオブジェクトストレージ Minio を使う &ndash; Qiita</a></li>
+</ul>
+
+
+<p>インストールはダウンロードして配置するだけ。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$ sudo curl https://dl.minio.io/server/minio/release/linux-amd64/minio -o /usr/local/bin/minio
+</span><span class='line'>$ sudo chmod +x /usr/local/bin/minio
+</span><span class='line'>$ sudo curl https://raw.githubusercontent.com/minio/minio-service/master/linux-systemd/minio.service -o /etc/systemd/system/minio.service
+</span><span class='line'>$ sudo useradd -s /sbin/nologin minio-user</span></code></pre></td></tr></table></div></figure>
+
+
+<p>オブジェクト保存先のディレクトリを作成してユーザを指定する。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$ sudo mkdir -p /var/lib/minio
+</span><span class='line'>$ sudo chown minio-user:minio-user /var/lib/minio</span></code></pre></td></tr></table></div></figure>
+
+
+<p><code>/etc/default/minio</code> に設定ファイルを作成して記述。<br/>
+アクセスキーとシークレットは後でログインや接続などに使用する。適当な値を入れておく。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'># Local export path.
+</span><span class='line'>MINIO_VOLUMES="/var/lib/minio/"
+</span><span class='line'>
+</span><span class='line'># Use if you want to run Minio on a custom port.
+</span><span class='line'>MINIO_OPTS="--address :9000"
+</span><span class='line'>
+</span><span class='line'># Access Key of the server.
+</span><span class='line'>MINIO_ACCESS_KEY=AKIAIOSFODNN7EXAMPLE
+</span><span class='line'>
+</span><span class='line'># Secret key of the server.
+</span><span class='line'>MINIO_SECRET_KEY=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY</span></code></pre></td></tr></table></div></figure>
+
+
+<p>自動起動設定と起動。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$ sudo systemctl enable minio
+</span><span class='line'>$ sudo systemctl start minio</span></code></pre></td></tr></table></div></figure>
+
+
+<p>ブラウザからアクセス出来るGUIが用意されている。<br/>
+Vagrant経由でのアクセスは、Vagrantで指定しているIPに9000ポート(デフォルト。指定したポートで）でアクセスすると確認出来る。(httpなので注意）</p>
+
+<p>例) <code>http://192.168.33.33:9000/</code></p>
+
+<p>画面右下にあるプラスボタンからバケットを作成出来る。<br/>
+ここからファイルを直接アップすることも可能。<br/>
+バケットは適当に作っておく。</p>
+
+<h1>Laravel</h1>
+
+<p>以下を参考にさせてもらった。</p>
+
+<ul>
+<li><a href="https://laravel-news.com/minio-s3-compliant-storage?utm_medium=feed&amp;utm_source=facebook.com&amp;utm_campaign=Feed%3A+laravelnews">Minio： An Open-Source S3 Compliant Storage Service &ndash; Laravel News</a></li>
+</ul>
+
+
+<p>laravelから保存してみる。<br/>
+基本的には環境の設定を渡してやるだけで動作する。</p>
+
+<p>S3への保存をさせるのと、Formヘルパーを使ったのでそれぞれのパッケージを入れた。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$ composer require "laravelcollective/html":"^5.6.0"
+</span><span class='line'>$ composer require league/flysystem-aws-s3-v3</span></code></pre></td></tr></table></div></figure>
+
+
+<p><code>filesystems.php</code>でドライバーの設定をする。<br/>
+S3の場合と微妙に違うため、<code>minio</code>用として分けておく方がよいと思われる。</p>
+
+<p><code>config/filesystems.php</code></p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>'minio' =&gt; [
+</span><span class='line'>    'driver' =&gt; 's3',
+</span><span class='line'>    'endpoint' =&gt; env('MINIO_ENDPOINT', 'http://127.0.0.1:9000'),
+</span><span class='line'>    'use_path_style_endpoint' =&gt; true,
+</span><span class='line'>    'key' =&gt; env('AWS_KEY'),
+</span><span class='line'>    'secret' =&gt; env('AWS_SECRET'),
+</span><span class='line'>    'region' =&gt; env('AWS_REGION'),
+</span><span class='line'>    'bucket' =&gt; env('AWS_BUCKET'),
+</span><span class='line'>],</span></code></pre></td></tr></table></div></figure>
+
+
+<p>デフォルトのS3用の設定は以下のようになっている。<br/>
+<a href="https://github.com/laravel/laravel/blob/master/config/filesystems.php#L58-L65">デフォルトの設定</a></p>
+
+<p><code>.env</code>ファイルで値を設定する。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>FILESYSTEM_DRIVER=minio
+</span><span class='line'>MINIO_ENDPOINT="http://127.0.0.1:9000"
+</span><span class='line'>AWS_KEY=AKIAIOSFODNN7EXAMPLE
+</span><span class='line'>AWS_SECRET=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
+</span><span class='line'>AWS_REGION=us-east-1
+</span><span class='line'>AWS_BUCKET=sample-storage</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li><code>FILESYSTEM_DRIVER</code> : 設定したminioを指定</li>
+<li><code>MINIO_ENDPOINT</code> : vagrantの内部からアクセスすることになるので、ローカルホストにポート番号をつけた形で指定する</li>
+<li><code>AWS_KEY</code> : 設定した値</li>
+<li><code>AWS_SECRET</code> : 設定した値</li>
+<li><code>AWS_REGION</code> : なんでもよい</li>
+<li><code>AWS_BUCKET</code> : 作ったバケット</li>
+</ul>
+
+
+<p>これであとは普通にs3に投げる方法で実装してやるだけでOK。<br/>
+以下のような感じで作って試してみた。</p>
+
+<p>ビュー (抜粋)</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>
+</span><span class='line'>    
+</span><span class='line'>    
+</span><span class='line'></span></code></pre></td></tr></table></div></figure>
+
+
+<p>コントローラー (抜粋)</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>public function fileUpload(Request $request)
+</span><span class='line'>{
+</span><span class='line'>    $file = $request-&gt;file('file_data');
+</span><span class='line'>    if(!is_null($file)){
+</span><span class='line'>        $filename = $file-&gt;store('hoge/fuga');
+</span><span class='line'>        return redirect('/')-&gt;with('success', $filename.'を保存しました。');
+</span><span class='line'>    }else{
+</span><span class='line'>        return redirect('/')-&gt;back();
+</span><span class='line'>    }
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>参考</h1>
+
+<ul>
+<li><a href="https://qiita.com/rerofumi/items/21f7a22b8b824859754f">S3 互換のシンプルなオブジェクトストレージ Minio を使う &ndash; Qiita</a></li>
+<li><a href="https://laravel-news.com/minio-s3-compliant-storage?utm_medium=feed&amp;utm_source=facebook.com&amp;utm_campaign=Feed%3A+laravelnews">Minio： An Open-Source S3 Compliant Storage Service &ndash; Laravel News</a></li>
+<li><a href="https://qiita.com/makies/items/0684dad04a6008891d0d">Laravelで画像ファイルアップロードをする簡単なサンプル &ndash; Qiita</a></li>
+<li><a href="https://qiita.com/aozora0000/items/30c139164610c5799484">Laravel5からMinioObjectStorageに接続する &ndash; Qiita</a></li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Laravel+mySQLでマイグレーションのやり直しのデータリストア]]></title>
@@ -2274,508 +2483,6 @@ Herokuでは標準のadd-onとして<a href="https://elements.heroku.com/addons/
 <ul>
 <li><a href="https://developer.salesforce.com/forums/?id=906F000000095xFIAQ">How do I alter dimensions of inputField Text and TextArea fields ? &ndash; Salesforce Developer Community</a></li>
 <li><a href="https://salesforce.stackexchange.com/questions/5462/required-field-mark-red-vertical-bar-not-coming">visualforce &ndash; Required field mark (Red Vertical Bar) not coming &ndash; Salesforce Stack Exchange</a></li>
-</ul>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[カスタムドメイン取得とLet's Encrypt証明書とHeroku SSLと]]></title>
-    <link href="http://kayakuguri.github.io/blog/2017/08/04/customdomain-letsencrypt-herokussl/"/>
-    <updated>2017-08-04T17:06:28+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2017/08/04/customdomain-letsencrypt-herokussl</id>
-    <content type="html"><![CDATA[<p>Herokuへの証明書アップロード手順の確認のために、カスタムドメイン・証明書の取得から試してみた。<br/>
-長い記事になりますが、備忘録として。</p>
-
-<!-- more -->
-
-
-<h1>ドメインの取得</h1>
-
-<p>無料で独自ドメインを取得出来るという、 <a href="http://www.freenom.com/ja/index.html">freenom</a>を使用する。<br/>
-(やはり無料だけあって色々とデメリットがあげられたりしているので、ご利用は自己責任で)<br/>
-取得できるドメインは5種類で、 <code>.tk/.ml/.ga/.cf/.gq</code> となっている。</p>
-
-<p>詳しい登録方法などは以下を参考にさせてもらいました。</p>
-
-<ul>
-<li><a href="http://qiita.com/teekay/items/135dc67e39f24997019e">無料のドメインを取得する（2016年10月） &ndash; Qiita</a></li>
-</ul>
-
-
-<p>今回は <code>.tk</code> のドメインで取得した。<br/>
-ちなみに、<code>.tk</code>のドメインは90日間で25アクセス以下だった場合には登録が削除されるらしいので運用の際は注意。</p>
-
-<p>以下のドメインで取得してみた。(もうドメイン登録はキャンセル済み）</p>
-
-<blockquote><p>ssl-sni-test.tk</p></blockquote>
-
-<p>ユーザー登録はメールアドレスからの登録にしたが、住所や名前などは必須となっていた。<br/>
-以下が必須だった項目。</p>
-
-<ul>
-<li>first name</li>
-<li>last name</li>
-<li>address1</li>
-<li>city</li>
-<li>state</li>
-<li>postcode</li>
-<li>phone number</li>
-<li>password</li>
-</ul>
-
-
-<p>登録すれば同時にドメインの申請も完了。</p>
-
-<h2>ネームサーバとDNS</h2>
-
-<p>freenomには無料で利用できるDNSサーバが用意されているのでそれを利用する。</p>
-
-<p>上部メニューから <code>Services -&gt; My Domains</code> を選択。<br/>
-編集したいドメインの、 <code>Manage Domain</code>をクリック。</p>
-
-<p>タブメニューの <code>Management Tools -&gt; Nameservers</code>を選択。<br/>
-<code>Use default nameservers</code>を選択して、<code>Change Nameservers</code>をクリック。<br/>
-これで、freenomのネームサーバを使う設定に変更できた。<br/>
-（デフォルトではfreenomのネームサーバを使うように設定されていないため、DNSの設定が出来なかった。）</p>
-
-<p>あとは、タブメニューの <code>Manage Freenom DNS</code>を選択。<br/>
-ここで、DNSの設定が可能となる。</p>
-
-<h1>証明書の取得</h1>
-
-<p>証明書は無料で発行出来る、 <code>Let</code>s Encrypt`を利用する。<br/>
-証明書の発行には、ブラウザ上で発行出来るサービスがあるのでそちらを利用させてもらう。<br/>
-以下に作者さんの詳しい説明があるので、そちらから。</p>
-
-<ul>
-<li><a href="http://qiita.com/tappie/items/76881fdf7996c57a105a">Let&#39;s Encrypt の証明書をブラウザ上で簡単取得 (dns-01 / ECDSA もあるよ) &ndash; Qiita</a></li>
-</ul>
-
-
-<p>基本、そのまま進めて問題ないが、１点だけ、秘密鍵はブラウザ上では作らずにローカルPC上で作成したものをアップした方がよさそう。<br/>
-ブラウザ上で作ったものをHerokuにアップするとパスフレーズを解除しろ、と言われ、パスフレーズを解除しようとコマンドを入れるとエラーが出たりしたため、最初からパスフレーズがかかっていないものを作成し、アップロードした方が確実と思われる。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>$ openssl genrsa 2048 &gt; key.pem</span></code></pre></td></tr></table></div></figure>
-
-
-<p>ドメインの所有証明は、<code>dns-01</code>の方法を使用した。<br/>
-取得したチャレンジトークンをTXTレコードとしてDNSに登録する。</p>
-
-<p>登録例</p>
-
-<table>
-<thead>
-<tr>
-<th></th>
-<th align="left"> Name </th>
-<th align="left"> Type </th>
-<th align="left"> TTL </th>
-<th align="left"> Target </th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td></td>
-<td align="left"> <code>_acme-challenge.ssl-sni-test.tk.</code> </td>
-<td align="left"> TXT </td>
-<td align="left"> 14440 </td>
-<td align="left"> <code>"L9Dlzt3Kzfu2mLYbmW2RTUdEzNBuNPiyyBt6yQyEjKk"</code> |</td>
-</tr>
-</tbody>
-</table>
-
-
-<p>結構すぐに反映された。<br/>
-あとは証明書を発行するのみ。</p>
-
-<h1>Herokuへアップロード</h1>
-
-<p>Herokuのアプリに証明書を適用させるには2種類の方法がある。</p>
-
-<ul>
-<li><code>SSL Endpoint</code> : SSLアドオンを利用した方法 ($20/month)
-
-<ul>
-<li>Typeは <code>sni</code></li>
-</ul>
-</li>
-<li><code>Heroku SSL</code> : Heroku標準の機能 (無料)
-
-<ul>
-<li>Typeは <code>endpoint</code></li>
-</ul>
-</li>
-</ul>
-
-
-<p><code>SSL Endpoint</code>は従来からの方法で、2016年末ごろに<code>Heroku SSL</code>が追加された。<br/>
-なので、今後追加する場合には<code>Heroku SSL</code>を利用する方がよい。</p>
-
-<p>ただし、<code>Heroku SSL</code>はFree Dynoで利用しているアプリには使用出来ないので注意。<br/>
-今回は <code>Heroku SSL</code>を利用する。</p>
-
-<h2>アップロード方法</h2>
-
-<p>アップロード方法は管理画面からGUI操作で行うか、Heroku CLI経由でコマンドラインから行うかの2種類がある。</p>
-
-<h3>管理画面からアップロードする</h3>
-
-<p><code>Setting</code>から、<code>Domains and certificates</code>セクションにある、<code>Configure SSL</code>をクリック。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2017/08/ssl01.jpg" alt="" /></p>
-
-<p>更新方法を聞かれるので、今回は<code>Manually</code>を選択。<br/>
-<code>Automatically</code>はLet&rsquo;s Encryptの場合にのみ使える自動更新のオプションで、今回はLet&rsquo;s Enctyptなので利用出来るのだが、普通はマニュアルになるため今回もマニュアルにした。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2017/08/ssl02.jpg" alt="" /></p>
-
-<p>アップロードするウインドウが表示されるので、ファイルをドラッグ。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2017/08/ssl03.jpg" alt="" /></p>
-
-<p>アップするものは以下。</p>
-
-<ul>
-<li>証明書 (+中間証明書)</li>
-<li>秘密鍵</li>
-</ul>
-
-
-<p>中間証明書は、Let&rsquo;s Encryptの場合だけなのかは不明だが、今回はなしでもアップすることが出来た。<br/>
-通常は必要だと思われる（証明書発行会社のページには一緒にアップして下さい、とある）ので末尾に追加しておく。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2017/08/ssl04.jpg" alt="" /></p>
-
-<p>無事、アップされると以下のようになる。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2017/08/ssl06.jpg" alt="" /></p>
-
-<h3>コマンドからのアップロード</h3>
-
-<p><code>certs:add</code>でアップ可能。コマンドのヘルプは以下。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>$ heroku certs:add -h
-</span><span class='line'>Usage: heroku certs:add CRT KEY [flags]
-</span><span class='line'>
-</span><span class='line'>add an SSL certificate to an app
-</span><span class='line'>
-</span><span class='line'>Flags:
-</span><span class='line'> -a, --app     (required) app to run command against
-</span><span class='line'> -r, --remote  git remote of app to use
-</span><span class='line'> --bypass      bypass the trust chain completion step
-</span><span class='line'> --domains     domains to create after certificate upload
-</span><span class='line'> --type        type to create, either 'sni' or 'endpoint'
-</span><span class='line'>
-</span><span class='line'>Note: certificates with PEM encoding are also valid
-</span><span class='line'>
-</span><span class='line'>Example:
-</span><span class='line'>
-</span><span class='line'>    $ heroku certs:add example.com.crt example.com.key
-</span><span class='line'>
-</span><span class='line'>Example (Certificate Intermediary):
-</span><span class='line'>
-</span><span class='line'>     $ heroku certs:add intermediary.crt example.com.crt example.com.key</span></code></pre></td></tr></table></div></figure>
-
-
-<p>アップする。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>$ heroku certs:add ssl-sni-test-cert.pem ssl-sni-test-server-nopass.key -a sni-test
-</span><span class='line'>Resolving trust chain... done
-</span><span class='line'>Adding SSL certificate to ⬢ sni-test... done
-</span><span class='line'>Certificate details:
-</span><span class='line'>Common Name(s): ssl-sni-test.tk
-</span><span class='line'>Expires At:     2017-11-02 02:12 UTC
-</span><span class='line'>Issuer:         /C=US/O=Let's Encrypt/CN=Let's Encrypt Authority X3
-</span><span class='line'>Starts At:      2017-08-04 02:12 UTC
-</span><span class='line'>Subject:        /CN=ssl-sni-test.tk
-</span><span class='line'>SSL certificate is verified by a root authority.
-</span><span class='line'>? Select domains you would like to add
-</span><span class='line'>
-</span><span class='line'>=== Your certificate has been added successfully.  Add a custom domain to your app by running ⬢ heroku domains:add &lt;yourdomain.com&gt;</span></code></pre></td></tr></table></div></figure>
-
-
-<p>途中、ドメインの選択する箇所があったが、一つしかないしそのままエンターでいけた。</p>
-
-<p>コマンドからアップ状況を確認する。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>$ heroku certs -a sni-test
-</span><span class='line'>Name              Common Name(s)   Expires               Trusted  Type
-</span><span class='line'>────────────────  ───────────────  ────────────────────  ───────  ────
-</span><span class='line'>pteranodon-48202  ssl-sni-test.tk  2017-11-02 02:12 UTC  True     SNI</span></code></pre></td></tr></table></div></figure>
-
-
-<h1>ドメインの設定</h1>
-
-<p>Herokuへのドメイン追加、と、DNSの設定、の２つが必要。</p>
-
-<h2>Herokuへのドメイン追加</h2>
-
-<p>証明書をアップした時と同じく、<code>Setting</code>画面から追加する。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2017/08/ssl07.jpg" alt="" /></p>
-
-<p>追加したいドメインを登録。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2017/08/ssl08.jpg" alt="" /></p>
-
-<p>登録すると以下のようになる。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2017/08/ssl09.jpg" alt="" /></p>
-
-<p>もちろん、コマンドからも登録可能。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>$ heroku domains:add ssl-sni-test.tk -a sni-test
-</span><span class='line'>Adding ssl-sni-test.tk to ⬢ sni-test... done
-</span><span class='line'> ▸    Configure your app's DNS provider to point to the DNS Target ssl-sni-test.tk.herokudns.com.
-</span><span class='line'> ▸    For help, see https://devcenter.heroku.com/articles/custom-domains
-</span><span class='line'>
-</span><span class='line'>The domain ssl-sni-test.tk has been enqueued for addition
-</span><span class='line'> ▸    Run heroku domains:wait 'ssl-sni-test.tk' to wait for completion</span></code></pre></td></tr></table></div></figure>
-
-
-<p>コマンドから確認すると以下のようになる。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>$ heroku domains -a sni-test
-</span><span class='line'>=== sni-test Heroku Domain
-</span><span class='line'>sni-test.herokuapp.com
-</span><span class='line'>
-</span><span class='line'>=== sni-test Custom Domains
-</span><span class='line'>Domain Name      DNS Target
-</span><span class='line'>───────────────  ─────────────────────────────
-</span><span class='line'>ssl-sni-test.tk  ssl-sni-test.tk.herokudns.com</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>DNSの設定</h2>
-
-<p>freenomからDNSの設定を行う。<br/>
-Heroku側のドメイン追加で取得したDNS TargetをCNAMEとして登録する。以下のような形で追加した。</p>
-
-<table>
-<thead>
-<tr>
-<th></th>
-<th align="left"> Name </th>
-<th align="left"> Type </th>
-<th align="left"> TTL </th>
-<th align="left"> Target </th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td></td>
-<td align="left">  </td>
-<td align="left"> CNAME </td>
-<td align="left"> 14440 </td>
-<td align="left"> <code>ssl-sni-test.tk.herokudns.com</code> |</td>
-</tr>
-</tbody>
-</table>
-
-
-<h1>アクセス</h1>
-
-<p><code>https</code>でアクセスすると、無事、アクセス出来た。<br/>
-SSLもLet&rsquo;s Encryptでちゃんと反映されていた。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2017/08/ssl10.jpg" alt="" /></p>
-
-<h1>2つの証明書と2つのドメイン</h1>
-
-<p>ここからは応用検証。<br/>
-一つのHerokuアプリに2つのドメインを適用させ、それぞれに別々の証明書を適用させてみる。</p>
-
-<h2>サブドメインの証明書</h2>
-
-<p>先ほどと同じようにサブドメインの証明書を取得した。以下で取得する。</p>
-
-<blockquote><p>add.ssl-sni-test.tk</p></blockquote>
-
-<p>チャレンジトークンも変わるので、DNSレコードに2つ目のTXTレコードを追加する。</p>
-
-<h2>Herokuへアップ</h2>
-
-<p>管理画面から同じようにアップしてみたが、すでにアップされているものを置き換える事になるようで、複数の証明書をアップすることは出来なかった。<br/>
-次にコマンドから追加してみるも、以下のようにエラーが出た。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>$ heroku certs:add cert.pem server.key -a sni-test
-</span><span class='line'>Resolving trust chain... done
-</span><span class='line'>Adding SSL certificate to ⬢ sni-test... !
-</span><span class='line'> ▸    Only one SNI endpoint is allowed per app (try certs:update instead).</span></code></pre></td></tr></table></div></figure>
-
-
-<p>どうやら証明書は一つしかアップ出来ないよう。<br/>
-しかし、<code>Only one SNI endpoint</code>とあるように、<code>sni</code>のタイプには証明書は一つしかアップできない、とのことのよう。</p>
-
-<h3>SSL Endpoint</h3>
-
-<p>というわけで、SSL Endpointのアドオンを追加し、試してみた。<br/>
-アドオンを追加する。(有料なので注意)</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>$ heroku addons:create ssl:endpoint</span></code></pre></td></tr></table></div></figure>
-
-
-<p>証明書をアップする。その際、typeに<code>endpoint</code>を指定する。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>$ heroku certs:add cert.pem server.key --type endpoint -a sni-test
-</span><span class='line'>Resolving trust chain... done
-</span><span class='line'>Adding SSL certificate to ⬢ sni-test... done
-</span><span class='line'>⬢ sni-test now served by kanagawa-69051.herokussl.com
-</span><span class='line'>Certificate details:
-</span><span class='line'>Common Name(s): add.ssl-sni-test.tk
-</span><span class='line'>Expires At:     2017-11-02 02:49 UTC
-</span><span class='line'>Issuer:         /C=US/O=Let's Encrypt/CN=Let's Encrypt Authority X3
-</span><span class='line'>Starts At:      2017-08-04 02:49 UTC
-</span><span class='line'>Subject:        /CN=add.ssl-sni-test.tk
-</span><span class='line'>SSL certificate is verified by a root authority.
-</span><span class='line'>? Select domains you would like to add
-</span><span class='line'>
-</span><span class='line'>=== Your certificate has been added successfully.  Update your application's DNS settings as follows
-</span><span class='line'>Domain           Record Type  DNS Target
-</span><span class='line'>───────────────  ───────────  ─────────────────────────────
-</span><span class='line'>ssl-sni-test.tk  ALIAS/ANAME  ssl-sni-test.tk.herokudns.com</span></code></pre></td></tr></table></div></figure>
-
-
-<p>やはりtypeが違うのでアップすることが出来た。<br/>
-証明書のアップ状況を確認してみる。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>$ heroku certs -a sni-test
-</span><span class='line'>Name                 Endpoint                      Common Name(s)       Expires               Trusted  Type
-</span><span class='line'>───────────────────  ────────────────────────────  ───────────────────  ────────────────────  ───────  ────────
-</span><span class='line'>kanagawa-69051       kanagawa-69051.herokussl.com  add.ssl-sni-test.tk  2017-11-02 02:49 UTC  True     Endpoint
-</span><span class='line'>corythosaurus-87918  (Not applicable for SNI)      ssl-sni-test.tk      2017-11-02 02:12 UTC  True     SNI</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>ドメインの追加</h2>
-
-<p>同じく、Herokuへドメインを追加する。<br/>
-登録するTarget Nameは、<code>herokudns.com</code>のものでもよいし、<code>kanagawa-69051.herokussl.com</code>のSSL Endpointで設定されているものでもどちらでもよい。</p>
-
-<p>DNSには以下のように追加した。</p>
-
-<table>
-<thead>
-<tr>
-<th></th>
-<th align="left"> Name </th>
-<th align="left"> Type </th>
-<th align="left"> TTL </th>
-<th align="left"> Target </th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td></td>
-<td align="left"> <code>add</code> </td>
-<td align="left"> CNAME </td>
-<td align="left"> 14440 </td>
-<td align="left"> <code>kanagawa-69051.herokussl.com</code> |</td>
-</tr>
-</tbody>
-</table>
-
-
-<h2>アクセス</h2>
-
-<p>これで無事、 <code>ssl-sni-test.tk</code> と、 <code>add.ssl-sni-test.tk</code> の両方へアクセス出来るようになった。<br/>
-さらに、どちらにも別々の証明書を適用させる事が出来た。</p>
-
-<h1>感想</h1>
-
-<p>無料ドメインと無料証明書はかなり便利そう。ドメインの方は運用に不安が残るが、全く無料で独自ドメインのHTTPSのサイトが持てるというのはちょっと驚き。(Herokuは無料では不可能）</p>
-
-<p>Herokuの場合はアプリを気軽に作る事が出来るため、一つのサーバ(アプリ)での運用、というのはあまりすることがないと思われる。<br/>
-そのため、<code>sni</code> <code>endpoint</code> それぞれのタイプで一つしか証明書がアップ出来ないようになっているのだと思う。それだったらアプリを分ければいいよ、との考え方だと思うので、複数アップロードの出番はまずないと思われる。</p>
-
-<h1>参考</h1>
-
-<ul>
-<li><a href="http://qiita.com/teekay/items/135dc67e39f24997019e">無料のドメインを取得する（2016年10月） &ndash; Qiita</a></li>
-<li><a href="http://qiita.com/tappie/items/76881fdf7996c57a105a">Let&#39;s Encrypt の証明書をブラウザ上で簡単取得 (dns-01 / ECDSA もあるよ) &ndash; Qiita</a></li>
-<li><a href="https://zenlogic.jp/user-support/knowledge/ssl/sni.html">SSL基礎知識 1つのサーバーで複数の証明書が使える、SNIって？｜Zenlogic &ndash; ファーストサーバ株式会社</a></li>
-<li><a href="https://devcenter.heroku.com/articles/ssl">Heroku SSL | Heroku Dev Center</a></li>
-<li><a href="https://devcenter.heroku.com/articles/ssl-endpoint">SSL Endpoint | Heroku Dev Center</a></li>
 </ul>
 
 ]]></content>

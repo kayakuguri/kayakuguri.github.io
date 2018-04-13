@@ -4,7 +4,7 @@
   <title><![CDATA[Category: vagrant | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/vagrant/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2018-04-05T11:36:51+09:00</updated>
+  <updated>2018-04-13T16:58:53+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,188 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[s3互換のローカルストレージ環境minioにLaravelから保存する(vagrant)]]></title>
+    <link href="http://kayakuguri.github.io/blog/2018/04/13/s3-minio-laravel/"/>
+    <updated>2018-04-13T16:44:33+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2018/04/13/s3-minio-laravel</id>
+    <content type="html"><![CDATA[<p>Laravelからの保存先に実際のS3を使わずに、ローカルに疑似S3環境を作成してそこに保存させてみる。</p>
+
+<!-- more -->
+
+
+<h1>minio</h1>
+
+<p>S3互換のオブジェクトストレージ環境。今回はVagrant上のCentOS7にいれた。<br/>
+入れかたはまんま以下を参考に。</p>
+
+<ul>
+<li><a href="https://qiita.com/rerofumi/items/21f7a22b8b824859754f">S3 互換のシンプルなオブジェクトストレージ Minio を使う &ndash; Qiita</a></li>
+</ul>
+
+
+<p>インストールはダウンロードして配置するだけ。</p>
+
+<p><code>
+$ sudo curl https://dl.minio.io/server/minio/release/linux-amd64/minio -o /usr/local/bin/minio
+$ sudo chmod +x /usr/local/bin/minio
+$ sudo curl https://raw.githubusercontent.com/minio/minio-service/master/linux-systemd/minio.service -o /etc/systemd/system/minio.service
+$ sudo useradd -s /sbin/nologin minio-user
+</code></p>
+
+<p>オブジェクト保存先のディレクトリを作成してユーザを指定する。</p>
+
+<p><code>
+$ sudo mkdir -p /var/lib/minio
+$ sudo chown minio-user:minio-user /var/lib/minio
+</code></p>
+
+<p><code>/etc/default/minio</code> に設定ファイルを作成して記述。<br/>
+アクセスキーとシークレットは後でログインや接続などに使用する。適当な値を入れておく。</p>
+
+<p>```</p>
+
+<h1>Local export path.</h1>
+
+<p>MINIO_VOLUMES=&ldquo;/var/lib/minio/&rdquo;</p>
+
+<h1>Use if you want to run Minio on a custom port.</h1>
+
+<p>MINIO_OPTS=&ldquo;&mdash;address :9000&rdquo;</p>
+
+<h1>Access Key of the server.</h1>
+
+<p>MINIO_ACCESS_KEY=AKIAIOSFODNN7EXAMPLE</p>
+
+<h1>Secret key of the server.</h1>
+
+<p>MINIO_SECRET_KEY=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
+```</p>
+
+<p>自動起動設定と起動。</p>
+
+<p><code>
+$ sudo systemctl enable minio
+$ sudo systemctl start minio
+</code></p>
+
+<p>ブラウザからアクセス出来るGUIが用意されている。<br/>
+Vagrant経由でのアクセスは、Vagrantで指定しているIPに9000ポート(デフォルト。指定したポートで）でアクセスすると確認出来る。(httpなので注意）</p>
+
+<p>例) <code>http://192.168.33.33:9000/</code></p>
+
+<p>画面右下にあるプラスボタンからバケットを作成出来る。<br/>
+ここからファイルを直接アップすることも可能。<br/>
+バケットは適当に作っておく。</p>
+
+<h1>Laravel</h1>
+
+<p>以下を参考にさせてもらった。</p>
+
+<ul>
+<li><a href="https://laravel-news.com/minio-s3-compliant-storage?utm_medium=feed&amp;utm_source=facebook.com&amp;utm_campaign=Feed%3A+laravelnews">Minio： An Open-Source S3 Compliant Storage Service &ndash; Laravel News</a></li>
+</ul>
+
+
+<p>laravelから保存してみる。<br/>
+基本的には環境の設定を渡してやるだけで動作する。</p>
+
+<p>S3への保存をさせるのと、Formヘルパーを使ったのでそれぞれのパッケージを入れた。</p>
+
+<p><code>
+$ composer require "laravelcollective/html":"^5.6.0"
+$ composer require league/flysystem-aws-s3-v3
+</code></p>
+
+<p><code>filesystems.php</code>でドライバーの設定をする。<br/>
+S3の場合と微妙に違うため、<code>minio</code>用として分けておく方がよいと思われる。</p>
+
+<p><code>config/filesystems.php</code></p>
+
+<p>```
+&lsquo;minio&rsquo; => [</p>
+
+<pre><code>'driver' =&gt; 's3',
+'endpoint' =&gt; env('MINIO_ENDPOINT', 'http://127.0.0.1:9000'),
+'use_path_style_endpoint' =&gt; true,
+'key' =&gt; env('AWS_KEY'),
+'secret' =&gt; env('AWS_SECRET'),
+'region' =&gt; env('AWS_REGION'),
+'bucket' =&gt; env('AWS_BUCKET'),
+</code></pre>
+
+<p>],
+```</p>
+
+<p>デフォルトのS3用の設定は以下のようになっている。<br/>
+<a href="https://github.com/laravel/laravel/blob/master/config/filesystems.php#L58-L65">デフォルトの設定</a></p>
+
+<p><code>.env</code>ファイルで値を設定する。</p>
+
+<p><code>
+FILESYSTEM_DRIVER=minio
+MINIO_ENDPOINT="http://127.0.0.1:9000"
+AWS_KEY=AKIAIOSFODNN7EXAMPLE
+AWS_SECRET=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
+AWS_REGION=us-east-1
+AWS_BUCKET=sample-storage
+</code></p>
+
+<ul>
+<li><code>FILESYSTEM_DRIVER</code> : 設定したminioを指定</li>
+<li><code>MINIO_ENDPOINT</code> : vagrantの内部からアクセスすることになるので、ローカルホストにポート番号をつけた形で指定する</li>
+<li><code>AWS_KEY</code> : 設定した値</li>
+<li><code>AWS_SECRET</code> : 設定した値</li>
+<li><code>AWS_REGION</code> : なんでもよい</li>
+<li><code>AWS_BUCKET</code> : 作ったバケット</li>
+</ul>
+
+
+<p>これであとは普通にs3に投げる方法で実装してやるだけでOK。<br/>
+以下のような感じで作って試してみた。</p>
+
+<p>ビュー (抜粋)</p>
+
+<p>```
+</p>
+
+<pre><code>
+
+</code></pre>
+
+<p>
+```</p>
+
+<p>コントローラー (抜粋)</p>
+
+<p>```
+public function fileUpload(Request $request)
+{</p>
+
+<pre><code>$file = $request-&gt;file('file_data');
+if(!is_null($file)){
+    $filename = $file-&gt;store('hoge/fuga');
+    return redirect('/')-&gt;with('success', $filename.'を保存しました。');
+}else{
+    return redirect('/')-&gt;back();
+}
+</code></pre>
+
+<p>}
+```</p>
+
+<h1>参考</h1>
+
+<ul>
+<li><a href="https://qiita.com/rerofumi/items/21f7a22b8b824859754f">S3 互換のシンプルなオブジェクトストレージ Minio を使う &ndash; Qiita</a></li>
+<li><a href="https://laravel-news.com/minio-s3-compliant-storage?utm_medium=feed&amp;utm_source=facebook.com&amp;utm_campaign=Feed%3A+laravelnews">Minio： An Open-Source S3 Compliant Storage Service &ndash; Laravel News</a></li>
+<li><a href="https://qiita.com/makies/items/0684dad04a6008891d0d">Laravelで画像ファイルアップロードをする簡単なサンプル &ndash; Qiita</a></li>
+<li><a href="https://qiita.com/aozora0000/items/30c139164610c5799484">Laravel5からMinioObjectStorageに接続する &ndash; Qiita</a></li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[PhpStormを使用してPHP UnitのテストをVagrantのリモート上で実行する]]></title>
@@ -402,7 +584,7 @@ timezone: &ldquo;Asia/Tokyo&rdquo;
 <p>admin:
   user: admin
   password: admin
-  email: <a href="&#x6d;&#x61;&#105;&#108;&#116;&#x6f;&#58;&#109;&#x61;&#x69;&#x6c;&#64;&#x64;&#111;&#x6d;&#97;&#x69;&#110;&#x2e;&#x74;&#108;&#x64;">&#x6d;&#97;&#x69;&#108;&#64;&#x64;&#x6f;&#x6d;&#97;&#105;&#x6e;&#46;&#x74;&#x6c;&#x64;</a>
+  email: <a href="&#x6d;&#x61;&#x69;&#108;&#116;&#x6f;&#58;&#109;&#97;&#x69;&#x6c;&#64;&#x64;&#x6f;&#109;&#x61;&#105;&#110;&#46;&#116;&#x6c;&#100;">&#x6d;&#x61;&#x69;&#108;&#x40;&#100;&#x6f;&#109;&#97;&#x69;&#x6e;&#46;&#x74;&#x6c;&#x64;</a>
   first_name: &ldquo;&rdquo;
   last_name: &ldquo;&rdquo;
 ```</p>
@@ -633,111 +815,6 @@ themes: false
 <ul>
 <li><a href="https://box.scotch.io/">Scotch Box ♥ A Vagrant LAMP Stack That Just Works</a></li>
 <li><a href="https://github.com/flurinduerst/WPDistillery#setup">flurinduerst/WPDistillery: WordPress Setup runner for Scotch Box</a></li>
-</ul>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Vagrant (Ubuntu) 環境でhttps接続する]]></title>
-    <link href="http://kayakuguri.github.io/blog/2016/08/10/vagrant-ubuntu-ssl/"/>
-    <updated>2016-08-10T15:18:45+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2016/08/10/vagrant-ubuntu-ssl</id>
-    <content type="html"><![CDATA[<p>本番がhttpsの開発でローカル環境だけhttpで接続していると色々面倒があるため、ローカルのvagrant環境でもhttps接続出来るように調整してみたメモ。</p>
-
-<!-- more -->
-
-
-<h1>前提</h1>
-
-<p>OSはubuntu。というか、いつものように、vagrantの環境はscotchbox。</p>
-
-<p><a href="https://box.scotch.io/">https://box.scotch.io/</a></p>
-
-<h1>参考</h1>
-
-<p>主に以下を参考にそのまま作業した。ありがとうございます。</p>
-
-<p><a href="http://hidex7777.hatenablog.com/entry/2014/03/18/220943">VagrantでUbuntuサーバ/Apache2のSSL(https) &ndash; orangeProse別館</a></p>
-
-<h1>テスト用の証明書を作成</h1>
-
-<p>まずはモジュールを有効に。</p>
-
-<p><code>
-$ sudo a2enmod ssl
-$ sudo service apache2 reload
-</code></p>
-
-<p>で、テスト用の証明書を作成。</p>
-
-<p><code>
-$ sudo make-ssl-cert generate-default-snakeoil --force-ovarwrite
-$ sudo make-ssl-cert /usr/share/ssl-cert/ssleay.cnf /etc/apache2/apache.pem
-</code></p>
-
-<p>二つ目を実行すると、コンソールの画面全体で設定画面が表示されて証明書の内容を聞かれる。
-ひとつ目はコモンネーム。
-hostsで指定しているURLを指定しておく。</p>
-
-<p><img src="/images/2016/08/vagrant_ssl_01.jpg" alt="" /></p>
-
-<p>二つ目は、 <code>Subject Alternative Names</code> (サブジェクトの別名)。<br/>
-<a href="https://knowledge.geotrust.com/jp/support/knowledge-base/index?vproductcat=G&amp;vdomain=GEOTRUST_JP&amp;page=content&amp;id=SO24206&amp;actp=LIST&amp;viewlocale=ja_JP&amp;locale=ja_JP&amp;redirected=true">「Subject Alternative Names（サブジェクトの別名）」とは何ですか  | GeoTrust<br/>
-</a></p>
-
-<p>今回は特に使用しないので空白のままとしておく。</p>
-
-<p><img src="/images/2016/08/vagrant_ssl_02.jpg" alt="" /></p>
-
-<p>apacheを再起動。</p>
-
-<h1>設定ファイル</h1>
-
-<p>このままだとSSL用の設定ファイルがないようなので、<code>default-ssl.conf</code>というファイルをコピーして使用する。</p>
-
-<p><code>
-$ cd /etc/apache2/sites-available
-$ sudo cp default-ssl.conf ssl.conf
-$ sudo a2ensite ssl
-$ sudo service apache2 reload
-</code></p>
-
-<p>参考サイトでは<code>.conf</code>の拡張子が指定されていなかったのだが、指定されていないとエラーとなってしまう。<br/>
-<a href="http://qiita.com/mzmttks/items/85c69313693cb1df4949">Apache2 on ubuntu で a2ensite すると does not exist と言われるときの対処法 &ndash; Qiita</a></p>
-
-<p>最後はapacheを再起動。</p>
-
-<p>この状態で、httpsでアクセスをすると、プライバシーが保護されていない、というような警告が出るが、無視してアクセスすると無事、接続できた。</p>
-
-<p><img src="/images/2016/08/vagrant_ssl_03.jpg" alt="" /></p>
-
-<h1>ドキュメントルート</h1>
-
-<p>しかしhttpでアクセスしていたファイルにアクセスが出来ない。
-どうやら、httpsで指定されているドキュメントルートが違っているよう。
-先程コピーした、<code>ssl.conf</code>ファイルを見てみる。</p>
-
-<p>すると、以下のようにドキュメントルートが設定されている。</p>
-
-<p><code>
-DocumentRoot /var/www/html
-</code></p>
-
-<p>今回は、<code>public</code>をドキュメントルートとしているので、そちらに変更する。</p>
-
-<p><code>
-DocumentRoot /var/www/public
-</code></p>
-
-<p>例によって、apacheを再起動して接続確認。無事、接続出来た。</p>
-
-<h1>参考</h1>
-
-<ul>
-<li><a href="https://www.k4750.net/2013/10/13/self-signed-cert/">（正しい）オレオレ証明書の作り方 |  K4750.net</a></li>
-<li><a href="http://takuya-1st.hatenablog.jp/entry/20100730/1280474385">超簡単・オレオレ証明書の作り方 &ndash; それマグで！</a></li>
-<li><a href="http://blog.inouetakuya.info/entry/20110605/1307261417">それ etckeeper でできるよ &ndash; /etc 以下を Git で自動的にバージョン管理 &ndash; 彼女からは、おいちゃんと呼ばれています</a></li>
 </ul>
 
 ]]></content>
