@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2018-04-13T17:03:10+09:00</updated>
+  <updated>2018-04-13T17:07:30+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -182,10 +182,10 @@ S3の場合と微妙に違うため、<code>minio</code>用として分けてお
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
 <span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>\{\{ Form::open(['files' =&gt; true]) \}\}
-</span><span class='line'>    \{\{ Form::file('file_data') \}\}
-</span><span class='line'>    \{\{ Form::submit('送信') \}\}
-</span><span class='line'>\{\{ Form::close() \}\}</span></code></pre></td></tr></table></div></figure>
+</pre></td><td class='code'><pre><code class=''><span class='line'>{!! Form::open(['files' =&gt; true]) !!}
+</span><span class='line'>    {!! Form::file('file_data') !!}
+</span><span class='line'>    {!! Form::submit('送信') !!}
+</span><span class='line'>{!! Form::close() !!}</span></code></pre></td></tr></table></div></figure>
 
 
 <p>コントローラー (抜粋)</p>
@@ -211,6 +211,11 @@ S3の場合と微妙に違うため、<code>minio</code>用として分けてお
 </span><span class='line'>    }
 </span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
 
+
+<h1>感想</h1>
+
+<p>アップしたものがGUIで確認出来たり、s3互換ということで、aws-cliが使えたりするらしく、がっつりテストしたりするなら便利かもしれない。<br/>
+とはいえ、Laravelでの開発となると、ストレージにlocalを指定してやっても処理部分は全く同じ書き方で対応が出来るため、わざわざストレージを立ち上げてまでやる必要はないかもしれない…。</p>
 
 <h1>参考</h1>
 
