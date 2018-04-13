@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2018-04-13T16:58:53+09:00</updated>
+  <updated>2018-04-13T17:00:51+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -24,6 +24,8 @@
 
 
 <h1>minio</h1>
+
+<p><a href="https://www.minio.io/">Minio： Private cloud storage</a></p>
 
 <p>S3互換のオブジェクトストレージ環境。今回はVagrant上のCentOS7にいれた。<br/>
 入れかたはまんま以下を参考に。</p>
