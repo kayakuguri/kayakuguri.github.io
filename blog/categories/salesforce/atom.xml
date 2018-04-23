@@ -4,7 +4,7 @@
   <title><![CDATA[Category: salesforce | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/salesforce/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2018-04-13T17:07:30+09:00</updated>
+  <updated>2018-04-23T15:21:38+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,144 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Illuminated Cloud 2を使ってみる]]></title>
+    <link href="http://kayakuguri.github.io/blog/2018/04/23/illuminated-cloud-2/"/>
+    <updated>2018-04-23T15:19:26+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2018/04/23/illuminated-cloud-2</id>
+    <content type="html"><![CDATA[<p>MavensMateが開発終了、ということで、Illuminated Cloudを使ってみる。</p>
+
+<!-- more -->
+
+
+<h1>概要</h1>
+
+<p><a href="http://www.illuminatedcloud.com/">Illuminated Cloud</a></p>
+
+<p>Salesforce公式が出している、JetBrainsのエディタのプラグイン。<br/>
+<a href="https://plugins.jetbrains.com/plugin/10253-illuminated-cloud-2">Illuminated Cloud 2 ：： JetBrains Plugin Repository</a></p>
+
+<p>補完もちゃんと出るし、テストやdeployも可能っぽい。<br/>
+以下、英語だけどデモ動画。</p>
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/7kzZrCoNWN8?rel=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+
+
+<p>以下の２つのエディタで利用可能</p>
+
+<ul>
+<li>IntelliJ IDEA
+
+<ul>
+<li><a href="https://www.jetbrains.com/idea/">IntelliJ IDEA： The Java IDE for Professional Developers by JetBrains</a></li>
+</ul>
+</li>
+<li>WebStorm IDEs
+
+<ul>
+<li><a href="https://www.jetbrains.com/webstorm/">WebStorm： The Smartest JavaScript IDE by JetBrains</a></li>
+</ul>
+</li>
+</ul>
+
+
+<p>IntelliJ IDEAのCommunity Editionなら無料で使用可能。</p>
+
+<p>30日間は無料トライアルがあるが、それ以降は、$125/年、のサブスクリプションプランとなっている。</p>
+
+<h1>インストール</h1>
+
+<p>Preferencesから、Pluginsを選択し、Browse repositories&hellip;を選択。<br/>
+検索に、<code>Illu</code>などと入力して、結果の、<code>Illuminated Cloud 2</code>を選択してインストールする。<br/>
+(<code>Illuminated Cloud</code>無印の方は古い方なので間違えないように）</p>
+
+<h1>プロジェクトの作成</h1>
+
+<p>New Projectを選択し、Illuminated Cloudを選択。</p>
+
+<p><img src="/images/2018/04/illuminated01.png" alt="" /></p>
+
+<p>Connectionの部分で接続するSalesforceのアカウントを選択する。<br/>
+まずはアカウントの設定が必要なので、鉛筆マークからアカウント情報を追加すする。</p>
+
+<p><img src="/images/2018/04/illuminated02.png" alt="" /></p>
+
+<p>入力して、Testボタンで接続テストが可能。Connection configuration is valid.と表示されればOK。<br/>
+(TestせずにOKをクリックすると接続確認してからでないと接続出来ない、等の警告が出た）<br/>
+OKをクリックすると、メタデータが取得され、どれを同期するかのリストが表示されるので、ApexやVFなど必要なものを選択してNextをクリック。</p>
+
+<p><img src="/images/2018/04/illuminated03.jpg" alt="" /></p>
+
+<p>プロジェクトの保存先を聞かれるので選択。</p>
+
+<p>作成されると、以下のアラートが表示された。</p>
+
+<p><img src="/images/2018/04/illuminated04.jpg" alt="" /></p>
+
+<p>MavensMateなんかと同じく、保存アクション(コマンド+S)時にSFへDeployするかどうか、のよう。<br/>
+ファイルの保存自体は自動で行われるので、deployしたい場合にのみ、コマンド+Sする、という流れになりそう。<br/>
+Yesで有効化しておく。</p>
+
+<h2>使用する</h2>
+
+<p>FAQとして、メニューのショートカットの一覧？が載っていた。<br/>
+<a href="http://www.illuminatedcloud.com/support/faq">FAQ &ndash; Illuminated Cloud</a></p>
+
+<h3>新規作成</h3>
+
+<p>新規作成はFile→Newで作成可能。<br/>
+<code>src/classes</code>を選択した状態では<code>Apex Class</code>が、<code>src/pages</code>を選択した状態だと、<code>Visualforce Page</code>が選択肢に表示される。</p>
+
+<p><img src="/images/2018/04/illuminated05.png" alt="" /></p>
+
+<p>SF側の更新を聞かれるので、Yesで。</p>
+
+<p><img src="/images/2018/04/illuminated06.png" alt="" /></p>
+
+<p>作成するとSFの方にもそのまま作成される。</p>
+
+<h3>削除</h3>
+
+<p>ファイルを右クリックでDeleteを選択。いくつか聞かれるが、Yesを選んでいけば、SF上のファイルも削除される。</p>
+
+<h3>同期</h3>
+
+<p>SF側で作成や削除したファイルがあれば、Retrievalから同期が可能。</p>
+
+<p><img src="/images/2018/04/illuminated07.jpg" alt="" /></p>
+
+<p>新しく追加したい時は、Searver Onlyにチェックし、 <code>Retrieve for Merge</code>をクリックする。</p>
+
+<p><img src="/images/2018/04/illuminated08.jpg" alt="" /></p>
+
+<p>すると、マージするファイルの選択画面となるので、選択し、緑の三角をクリックして選択しているファイルをマージさせる。<br/>
+(この場合は2ファイル追加）</p>
+
+<p><img src="/images/2018/04/illuminated09.jpg" alt="" /></p>
+
+<h3>テスト</h3>
+
+<p>Run → Runを選択。(Ctrl + Opt + R)<br/>
+Edit Configurations..というウインドウが出るのでそのままクリック。<br/>
+左のツリーから、Apex Unit Testsを選択。<br/>
+Test Classesからテストしたいクラスを選択。</p>
+
+<p><img src="/images/2018/04/illuminated10.png" alt="" /></p>
+
+<p>そのままRunをクリックすればテストが実行される。<br/>
+結果は以下のような感じ。</p>
+
+<p><img src="/images/2018/04/illuminated11.jpg" alt="" /></p>
+
+<h1>まとめ</h1>
+
+<p>Eclipseの時と違って特に悩むようなところはなかった。<br/>
+ただ、この機能ってどこにあるんだろう？となった時に探す手段がない。<br/>
+公式のドキュメントもそれらしいものがほぼないし。<br/>
+とはいえ、公式で有料のものなので今後のサポートなどは安心感がある。Salesforce DXも対応しており、今後はこれ一択、とかになりそうな気配。</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Apex Rest APIで任意のステータスコードを返す]]></title>
@@ -579,102 +717,6 @@ return options;
 <ul>
 <li><a href="https://developer.salesforce.com/forums/?id=906F000000095xFIAQ">How do I alter dimensions of inputField Text and TextArea fields ? &ndash; Salesforce Developer Community</a></li>
 <li><a href="https://salesforce.stackexchange.com/questions/5462/required-field-mark-red-vertical-bar-not-coming">visualforce &ndash; Required field mark (Red Vertical Bar) not coming &ndash; Salesforce Stack Exchange</a></li>
-</ul>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[salesforce] レコードのデータを取得し、CSVにしてS3にアップロードする]]></title>
-    <link href="http://kayakuguri.github.io/blog/2017/04/10/put-s3-csv-file/"/>
-    <updated>2017-04-10T12:31:25+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2017/04/10/put-s3-csv-file</id>
-    <content type="html"><![CDATA[<p>AWSで利用する事を想定し、レコードの内容をCSVファイルにしてS3にアップロードしてみたメモ。</p>
-
-<!-- more -->
-
-
-<p>SF内にCSVを生成して、そのファイルをS3にアップロード、すればいいかと思っていたが、直接CSVの内容をBodyに入れて送ってしまうことで、直接CSVファイルをS3に送信してしまう事が出来た。</p>
-
-<h1>参考コード</h1>
-
-<p>参考、というか、以下のコードをそのまま利用させてもらった。</p>
-
-<ul>
-<li><a href="https://github.com/darshanfarswan/haymarketCode/blob/6207a11fc072fed6dd4463b1ca4ebbbe991a232f/src/classes/S3Storage.cls">haymarketCode/src/classes/S3Storage.cls</a></li>
-</ul>
-
-
-<h1>CSV送信</h1>
-
-<p>上記サンプルはテキストファイルになるので、CSVを保存するように変更。<br/>
-具体的には、Bodyの内容をカンマ区切りにし、ファイルの拡張子を<code>csv</code>にし、Content-Typeを<code>text/csv</code>にする、だけ。</p>
-
-<p>```
-public with sharing class SaveCSVSample {</p>
-
-<pre><code>public SaveCSVSample() {
-    String csv_body = 'テスト1,テスト2,テスト3\r\nサンプル1,サンプル2,サンプル3';
-
-    String fileName = 'test.csv';
-
-    String accessId = 'xxx';
-    String secretKey = 'xxx';
-    String bucketName = 'user';
-    String S3_Domain = 's3-ap-northeast-1.amazonaws.com';
-
-    String dateString = Datetime.now().formatGmt('EEE, dd MMM yyyy HH:mm:ss Z');
-    String stringToSign = 'PUT\n\ntext/csv\n' + dateString +'\n/' + bucketName + '/' + fileName;
-    Blob mac = Crypto.generateMac('hmacSHA1',  Blob.valueOf(stringToSign), Blob.valueOf(secretKey));
-    String signature = EncodingUtil.base64Encode(mac);
-
-    HttpRequest req = new HttpRequest();
-    req.setEndPoint('https://' + bucketName + '.' + S3_Domain + '/' + fileName);
-    req.setHeader('Content-Type', 'text/csv');
-    req.setHeader('Content-Length', String.valueOf(csv_body.length()));
-    req.setHeader('Host', bucketName + '.' + S3_Domain);
-    req.setHeader('Date', dateString);
-    req.setHeader('Authorization','AWS ' + accessId + ':' + signature);
-    req.setBody(csv_body);
-    req.setMethod('PUT');
-
-    Http httpConnection = new Http();
-    HTTPResponse res = httpConnection.send(req);
-
-    System.debug(res);
-}
-</code></pre>
-
-<p>}
-```</p>
-
-<p>アップされたCSVは、改行コード <code>\r\n</code> 、文字コードは、<code>UTF-8</code>となった。</p>
-
-<p>これでS3側にCSVファイルを作成出来るので、あとはレコードをSOQLで取得し、Bodyをカンマ区切りで作成してやればよいだけ。</p>
-
-<h2>環境情報</h2>
-
-<p>この例では、アクセスキーなどはベタで書いてしまっているが、実際には<a href="https://kayakuguri.github.io/blog/2016/02/01/custom-setting/">カスタム設定などで作成し</a>取得するようにした方がよい。<br/>
-それだと、sandboxと本番でS3の投げ先も変更出来る。</p>
-
-<h2>エンドポイント</h2>
-
-<p>送信先に設定している、<code>S3_Domain</code>は現状、日本リージョンのもの。<br/>
-各サービスのリージョン別のエンドポイントは以下を参考。<br/>
-<a href="http://docs.aws.amazon.com/ja_jp/general/latest/gr/rande.html#s3_region">http://docs.aws.amazon.com/ja_jp/general/latest/gr/rande.html#s3_region</a></p>
-
-<h2>ガバナ制限</h2>
-
-<blockquote><p>ファイルサイズが3MBを超えるとApexの実行時ガバナ制限に抵触する<br/>
-<a href="http://www30304u.sakura.ne.jp/blog/?p=1808">http://www30304u.sakura.ne.jp/blog/?p=1808</a></p></blockquote>
-
-<h1>参考</h1>
-
-<ul>
-<li><a href="http://www.nkjmkzk.net/?p=2638">CORSサポートを利用したAWS S3へのアップロード方法 – Force.comバージョン</a></li>
-<li><a href="http://blog.livedoor.jp/volvic_beer/archives/52481242.html">【salesforce】【apex】【aws】apexでs3にアップロードでエラーがでたよ</a></li>
-<li><a href="http://dev.classmethod.jp/cloud/aws/s3-cors-upload/">WebブラウザからAmazon S3に直接ファイルをアップロードする</a></li>
-<li><a href="http://docs.aws.amazon.com/ja_jp/AmazonS3/latest/dev/RESTAuthentication.html">REST リクエストの署名と認証</a></li>
 </ul>
 
 ]]></content>

@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2018-04-13T17:07:30+09:00</updated>
+  <updated>2018-04-23T15:21:38+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,144 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Illuminated Cloud 2を使ってみる]]></title>
+    <link href="http://kayakuguri.github.io/blog/2018/04/23/illuminated-cloud-2/"/>
+    <updated>2018-04-23T15:19:26+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2018/04/23/illuminated-cloud-2</id>
+    <content type="html"><![CDATA[<p>MavensMateが開発終了、ということで、Illuminated Cloudを使ってみる。</p>
+
+<!-- more -->
+
+
+<h1>概要</h1>
+
+<p><a href="http://www.illuminatedcloud.com/">Illuminated Cloud</a></p>
+
+<p>Salesforce公式が出している、JetBrainsのエディタのプラグイン。<br/>
+<a href="https://plugins.jetbrains.com/plugin/10253-illuminated-cloud-2">Illuminated Cloud 2 ：： JetBrains Plugin Repository</a></p>
+
+<p>補完もちゃんと出るし、テストやdeployも可能っぽい。<br/>
+以下、英語だけどデモ動画。</p>
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/7kzZrCoNWN8?rel=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+
+
+<p>以下の２つのエディタで利用可能</p>
+
+<ul>
+<li>IntelliJ IDEA
+
+<ul>
+<li><a href="https://www.jetbrains.com/idea/">IntelliJ IDEA： The Java IDE for Professional Developers by JetBrains</a></li>
+</ul>
+</li>
+<li>WebStorm IDEs
+
+<ul>
+<li><a href="https://www.jetbrains.com/webstorm/">WebStorm： The Smartest JavaScript IDE by JetBrains</a></li>
+</ul>
+</li>
+</ul>
+
+
+<p>IntelliJ IDEAのCommunity Editionなら無料で使用可能。</p>
+
+<p>30日間は無料トライアルがあるが、それ以降は、$125/年、のサブスクリプションプランとなっている。</p>
+
+<h1>インストール</h1>
+
+<p>Preferencesから、Pluginsを選択し、Browse repositories&hellip;を選択。<br/>
+検索に、<code>Illu</code>などと入力して、結果の、<code>Illuminated Cloud 2</code>を選択してインストールする。<br/>
+(<code>Illuminated Cloud</code>無印の方は古い方なので間違えないように）</p>
+
+<h1>プロジェクトの作成</h1>
+
+<p>New Projectを選択し、Illuminated Cloudを選択。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2018/04/illuminated01.png" alt="" /></p>
+
+<p>Connectionの部分で接続するSalesforceのアカウントを選択する。<br/>
+まずはアカウントの設定が必要なので、鉛筆マークからアカウント情報を追加すする。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2018/04/illuminated02.png" alt="" /></p>
+
+<p>入力して、Testボタンで接続テストが可能。Connection configuration is valid.と表示されればOK。<br/>
+(TestせずにOKをクリックすると接続確認してからでないと接続出来ない、等の警告が出た）<br/>
+OKをクリックすると、メタデータが取得され、どれを同期するかのリストが表示されるので、ApexやVFなど必要なものを選択してNextをクリック。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2018/04/illuminated03.jpg" alt="" /></p>
+
+<p>プロジェクトの保存先を聞かれるので選択。</p>
+
+<p>作成されると、以下のアラートが表示された。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2018/04/illuminated04.jpg" alt="" /></p>
+
+<p>MavensMateなんかと同じく、保存アクション(コマンド+S)時にSFへDeployするかどうか、のよう。<br/>
+ファイルの保存自体は自動で行われるので、deployしたい場合にのみ、コマンド+Sする、という流れになりそう。<br/>
+Yesで有効化しておく。</p>
+
+<h2>使用する</h2>
+
+<p>FAQとして、メニューのショートカットの一覧？が載っていた。<br/>
+<a href="http://www.illuminatedcloud.com/support/faq">FAQ &ndash; Illuminated Cloud</a></p>
+
+<h3>新規作成</h3>
+
+<p>新規作成はFile→Newで作成可能。<br/>
+<code>src/classes</code>を選択した状態では<code>Apex Class</code>が、<code>src/pages</code>を選択した状態だと、<code>Visualforce Page</code>が選択肢に表示される。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2018/04/illuminated05.png" alt="" /></p>
+
+<p>SF側の更新を聞かれるので、Yesで。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2018/04/illuminated06.png" alt="" /></p>
+
+<p>作成するとSFの方にもそのまま作成される。</p>
+
+<h3>削除</h3>
+
+<p>ファイルを右クリックでDeleteを選択。いくつか聞かれるが、Yesを選んでいけば、SF上のファイルも削除される。</p>
+
+<h3>同期</h3>
+
+<p>SF側で作成や削除したファイルがあれば、Retrievalから同期が可能。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2018/04/illuminated07.jpg" alt="" /></p>
+
+<p>新しく追加したい時は、Searver Onlyにチェックし、 <code>Retrieve for Merge</code>をクリックする。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2018/04/illuminated08.jpg" alt="" /></p>
+
+<p>すると、マージするファイルの選択画面となるので、選択し、緑の三角をクリックして選択しているファイルをマージさせる。<br/>
+(この場合は2ファイル追加）</p>
+
+<p><img src="http://kayakuguri.github.io/images/2018/04/illuminated09.jpg" alt="" /></p>
+
+<h3>テスト</h3>
+
+<p>Run → Runを選択。(Ctrl + Opt + R)<br/>
+Edit Configurations..というウインドウが出るのでそのままクリック。<br/>
+左のツリーから、Apex Unit Testsを選択。<br/>
+Test Classesからテストしたいクラスを選択。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2018/04/illuminated10.png" alt="" /></p>
+
+<p>そのままRunをクリックすればテストが実行される。<br/>
+結果は以下のような感じ。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2018/04/illuminated11.jpg" alt="" /></p>
+
+<h1>まとめ</h1>
+
+<p>Eclipseの時と違って特に悩むようなところはなかった。<br/>
+ただ、この機能ってどこにあるんだろう？となった時に探す手段がない。<br/>
+公式のドキュメントもそれらしいものがほぼないし。<br/>
+とはいえ、公式で有料のものなので今後のサポートなどは安心感がある。Salesforce DXも対応しており、今後はこれ一択、とかになりそうな気配。</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[s3互換のローカルストレージ環境minioにLaravelから保存する(vagrant)]]></title>
@@ -2386,110 +2524,6 @@ Herokuでは標準のadd-onとして<a href="https://elements.heroku.com/addons/
 <li><a href="http://vaindespair.blogspot.jp/2011/04/blog-post_733.html">memo: Force.com&#12288;&#65306;&#12288;任意の選択リストを作成したい&#65339;Visualforceタグ&#65341;</a></li>
 <li><a href="http://kayakuguri.github.io/blog/2016/02/01/custom-setting/">カスタム設定を作成して取得してみる &ndash; KayaMemo</a></li>
 <li><a href="http://blog.jeffdouglas.com/2008/11/16/displaying-the-required-red-bar-for-a-control/">Displaying the Required Red Bar for a Control</a></li>
-</ul>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[Visualforce] テキストエリア入力欄の表示]]></title>
-    <link href="http://kayakuguri.github.io/blog/2017/08/17/vf-textarea/"/>
-    <updated>2017-08-17T15:16:25+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2017/08/17/vf-textarea</id>
-    <content type="html"><![CDATA[<p>Visualforceページにて、テキストエリアの入力欄を表示する際に、大きさを指定したりした時の表示のされ方などのまとめ。</p>
-
-<!-- more -->
-
-
-<h2>apex:inputField</h2>
-
-<p>一番基本となる、<code>apex:inputField</code>の場合。<br/>
-<code>value</code>で指定した項目の型を読み取って自動で入力フォームのタイプを変更してくれるので、普通はこちらを使っておけばよい。</p>
-
-<p>ただし、テキストエリア項目の場合は以下のように入力欄がすごく小さい。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;apex:inputField value="{!項目名}" required="true" label="inputFieldサンプル" /&gt;</span></code></pre></td></tr></table></div></figure>
-
-
-<p><img src="http://kayakuguri.github.io/images/2017/08/vf_textarea01.jpg" alt="" /></p>
-
-<p>なので、サイズを調整したいが、<code>apex:inputField</code>には<code>rows</code>や<code>cols</code>などのオプションがない。<br/>
-よって、スタイスを直接書いてやるしかなさそう。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;apex:inputField value="{!項目名}" required="true" style="width:315px; height:70px;" label="inputFieldサンプル サイズ変更" /&gt;</span></code></pre></td></tr></table></div></figure>
-
-
-<p><img src="http://kayakuguri.github.io/images/2017/08/vf_textarea02.jpg" alt="" /></p>
-
-<p>これで、サイズを任意に変更しつつ必須表示にも対応。</p>
-
-<h3>エラー</h3>
-
-<p><code>apex:inputField</code>を使った場合はそのままエラーの表示にも対応している。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2017/08/vf_textarea06.jpg" alt="" /></p>
-
-<h2>apex:inputtextArea</h2>
-
-<p><code>apex:inputtextArea</code>を利用すると、<code>rows</code> <code>cols</code>でのサイズ指定が可能。<br/>
-<code>apex:outputlabel</code>も使うと標準の表示を同じようにラベルを配置してやれる。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;apex:pageblocksectionItem&gt;
-</span><span class='line'>  &lt;apex:outputlabel value = "outputlabelサンプル"/&gt;
-</span><span class='line'>  &lt;apex:inputtextArea value = "{!項目名}" cols = "50" rows = "5" required="true" /&gt;
-</span><span class='line'>&lt;/apex:pageblocksectionItem&gt;</span></code></pre></td></tr></table></div></figure>
-
-
-<p><img src="http://kayakuguri.github.io/images/2017/08/vf_textarea03.jpg" alt="" /></p>
-
-<p>しかし、この場合だと <code>required="true"</code> を指定していても赤い線が表示されない。<br/>
-その赤い線を再現してやるには、divでクラスをつけて構造を再現してやる必要があるよう。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;apex:pageBlockSectionItem&gt;
-</span><span class='line'>  &lt;apex:outputlabel value = "outputlabelサンプル 必須再現"/&gt;
-</span><span class='line'>  &lt;apex:outputPanel&gt;
-</span><span class='line'>      &lt;div class="requiredInput"&gt;
-</span><span class='line'>      &lt;div class="requiredBlock"&gt;&lt;/div&gt;
-</span><span class='line'>      &lt;apex:inputtextArea value="{!項目名}" cols = "50" rows = "5" required="true" /&gt;
-</span><span class='line'>  &lt;/div&gt;
-</span><span class='line'>  &lt;/apex:outputPanel&gt;
-</span><span class='line'>&lt;/apex:pageBlockSectionItem&gt;</span></code></pre></td></tr></table></div></figure>
-
-
-<p><img src="http://kayakuguri.github.io/images/2017/08/vf_textarea04.jpg" alt="" /></p>
-
-<p>これで任意のサイズを指定しつつ、必須表示も出来るようになった。</p>
-
-<p>これらを並べてやると以下のような感じ。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2017/08/vf_textarea05.jpg" alt="" /></p>
-
-<h3>エラー</h3>
-
-<p>エラー表示はそのままだと対応していないため、以下のような方法で自前で実装してやる必要がある。</p>
-
-<p><a href="https://developer.salesforce.com/forums/?id=906F0000000AhwaIAC">&#12456;&#12521;&#12540;&#12513;&#12483;&#12475;&#12540;&#12472;&#12395;&#12388;&#12356;&#12390; &ndash; Salesforce Developer Community</a></p>
-
-<h2>参考</h2>
-
-<ul>
-<li><a href="https://developer.salesforce.com/forums/?id=906F000000095xFIAQ">How do I alter dimensions of inputField Text and TextArea fields ? &ndash; Salesforce Developer Community</a></li>
-<li><a href="https://salesforce.stackexchange.com/questions/5462/required-field-mark-red-vertical-bar-not-coming">visualforce &ndash; Required field mark (Red Vertical Bar) not coming &ndash; Salesforce Stack Exchange</a></li>
 </ul>
 
 ]]></content>
