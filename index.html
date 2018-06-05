@@ -6,7 +6,7 @@
 	<title>KayaMemo</title>
 
 	
-	<meta name="description" content=" Wordpressにて、記事を更新した時に、更新前と更新後の内容を比較したくて調べたのだけど、案外なかなか情報にたどり着けなかったのでメモしておく。 続きを読む May 9th, 2018 wordpress ">
+	<meta name="description" content="日付時間( datetime )型のデータをVisualforceに表示する時に、apex:outputtextを使用すればフォーマットさせて表示することが出来るのだが、GMTで表示されてしまうため9時間ずれてしまう。 これはオプションでは用意されていないようで、 &hellip;">
 	
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
@@ -85,6 +85,108 @@
 		
 	
 	<div id="content" class="inner">
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2018/06/05/vf-datetime-timezone/">
+		
+			Visualforceに日付時間を表示する時にタイムゾーンを設定する</a>
+	</h2>
+	<div class="entry-content">
+		<p>日付時間( <code>datetime</code> )型のデータをVisualforceに表示する時に、<code>apex:outputtext</code>を使用すればフォーマットさせて表示することが出来るのだが、GMTで表示されてしまうため9時間ずれてしまう。</p>
+
+<p>これはオプションでは用意されていないようで、apex側でずらす時間を指定してそれを足してやる、という方法でタイムゾーンを指定してやる必要があるよう。<br/>
+apexで使用アカウントでセットされているタイムゾーンを取得してずれている時間のミリ秒を取得してそれを足す、という方法。</p>
+
+<h3>apex</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>//表示する日付
+</span><span class='line'>datetime_test = Datetime.newInstance(2018, 6, 5, 0, 0, 0);
+</span><span class='line'>
+</span><span class='line'>public Double timezoneOffset{get{
+</span><span class='line'>    TimeZone tz = UserInfo.getTimeZone();
+</span><span class='line'>    //Milliseconds to Day
+</span><span class='line'>    return tz.getOffset(DateTime.now()) / (1000 * 3600 * 24.0);
+</span><span class='line'>}}</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>VF</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>{!datetime_test}
+</span><span class='line'>// Mon Jun 04 15:00:00 GMT
+</span><span class='line'>
+</span><span class='line'>&lt;apex:outputtext value="{0, date, yyyy/MM/dd HH:mm:ss}"&gt;
+</span><span class='line'>    &lt;apex:param value="{!datetime_test}" /&gt;
+</span><span class='line'>&lt;/apex:outputtext&gt;
+</span><span class='line'>// 2018 2018/06/04 15:00:00
+</span><span class='line'>
+</span><span class='line'>&lt;apex:outputtext value="{0, date, yyyy/MM/dd HH:mm:ss}"&gt;
+</span><span class='line'>    &lt;apex:param value="{!datetime_test + timezoneOffset}" /&gt;
+</span><span class='line'>&lt;/apex:outputtext&gt;
+</span><span class='line'>// 2018/06/05 00:00:00</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>参考</h2>
+
+<ul>
+<li><a href="http://blog.flect.co.jp/salesforce/2010/08/visualforce-16a.html">セールスフォースの豆知識： Visualforceで数値や日付のフォーマットを指定して表示するには？</a></li>
+<li><a href="https://success.salesforce.com/ideaView?id=08730000000i6AaAAI">apex：outputtext should support formatting of date/time in local time zone &ndash; Ideas &ndash; Salesforce Trailblazer Community</a></li>
+<li><a href="https://salesforce.stackexchange.com/questions/15944/timezone-issue-with-datetime-field-again">visualforce &ndash; Timezone issue with Datetime Field ［again ;&ndash;)］ &ndash; Salesforce Stack Exchange</a></li>
+<li><a href="https://www.xgeek.net/ja/salesforce/display-datetime-with-timezone-in-visualforce-page/">Visualforce Pageでタイムゾーン時間の出力 | Xgeek</a></li>
+</ul>
+
+
+		
+		
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2018-06-05T11:57:08+09:00" pubdate data-updated="true">Jun 5<span>th</span>, 2018</time></div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/salesforce/'>salesforce</a>
+
+
+</div>
+	
+</div>
+</article>
 
 
     <article class="post">
@@ -462,48 +564,6 @@ Eloquentモデルは作成時に自動で<code>created_at</code>と<code>updated
 
 
 	<a class='category' href='/blog/categories/laravel/'>laravel</a>
-
-
-</div>
-	
-</div>
-</article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2017/11/27/apex-rest-response/">
-		
-			Apex Rest APIで任意のステータスコードを返す</a>
-	</h2>
-	<div class="entry-content">
-		<p>カスタムでApex Rest APIを作成する際にレスポンスにステータスコードを反映させる方法。</p>
-
-
-		
-		<a href="/blog/2017/11/27/apex-rest-response/" class="more-link">続きを読む</a>
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2017-11-27T14:49:52+09:00" pubdate data-updated="true">Nov 27<span>th</span>, 2017</time></div>
-	<div class="tags">
-
-
-	<a class='category' href='/blog/categories/apex/'>apex</a>, <a class='category' href='/blog/categories/salesforce/'>salesforce</a>
 
 
 </div>

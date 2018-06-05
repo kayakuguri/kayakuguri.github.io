@@ -4,7 +4,7 @@
   <title><![CDATA[Category: salesforce | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/salesforce/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2018-05-09T12:48:30+09:00</updated>
+  <updated>2018-06-05T12:04:56+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,67 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Visualforceに日付時間を表示する時にタイムゾーンを設定する]]></title>
+    <link href="http://kayakuguri.github.io/blog/2018/06/05/vf-datetime-timezone/"/>
+    <updated>2018-06-05T11:57:08+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2018/06/05/vf-datetime-timezone</id>
+    <content type="html"><![CDATA[<p>日付時間( <code>datetime</code> )型のデータをVisualforceに表示する時に、<code>apex:outputtext</code>を使用すればフォーマットさせて表示することが出来るのだが、GMTで表示されてしまうため9時間ずれてしまう。</p>
+
+<p>これはオプションでは用意されていないようで、apex側でずらす時間を指定してそれを足してやる、という方法でタイムゾーンを指定してやる必要があるよう。<br/>
+apexで使用アカウントでセットされているタイムゾーンを取得してずれている時間のミリ秒を取得してそれを足す、という方法。</p>
+
+<h3>apex</h3>
+
+<p>```
+//表示する日付
+datetime_test = Datetime.newInstance(2018, 6, 5, 0, 0, 0);</p>
+
+<p>public Double timezoneOffset{get{</p>
+
+<pre><code>TimeZone tz = UserInfo.getTimeZone();
+//Milliseconds to Day
+return tz.getOffset(DateTime.now()) / (1000 * 3600 * 24.0);
+</code></pre>
+
+<p>}}
+```</p>
+
+<h3>VF</h3>
+
+<p>```
+{!datetime_test}
+// Mon Jun 04 15:00:00 GMT</p>
+
+<p>&lt;apex:outputtext value=&ldquo;{0, date, yyyy/MM/dd HH:mm:ss}&rdquo;></p>
+
+<pre><code>&lt;apex:param value="{!datetime_test}" /&gt;
+</code></pre>
+
+<p>&lt;/apex:outputtext>
+// 2018 2018/06/04 15:00:00</p>
+
+<p>&lt;apex:outputtext value=&ldquo;{0, date, yyyy/MM/dd HH:mm:ss}&rdquo;></p>
+
+<pre><code>&lt;apex:param value="{!datetime_test + timezoneOffset}" /&gt;
+</code></pre>
+
+<p>&lt;/apex:outputtext>
+// 2018/06/05 00:00:00
+```</p>
+
+<h2>参考</h2>
+
+<ul>
+<li><a href="http://blog.flect.co.jp/salesforce/2010/08/visualforce-16a.html">セールスフォースの豆知識： Visualforceで数値や日付のフォーマットを指定して表示するには？</a></li>
+<li><a href="https://success.salesforce.com/ideaView?id=08730000000i6AaAAI">apex：outputtext should support formatting of date/time in local time zone &ndash; Ideas &ndash; Salesforce Trailblazer Community</a></li>
+<li><a href="https://salesforce.stackexchange.com/questions/15944/timezone-issue-with-datetime-field-again">visualforce &ndash; Timezone issue with Datetime Field ［again ;&ndash;)］ &ndash; Salesforce Stack Exchange</a></li>
+<li><a href="https://www.xgeek.net/ja/salesforce/display-datetime-with-timezone-in-visualforce-page/">Visualforce Pageでタイムゾーン時間の出力 | Xgeek</a></li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Illuminated Cloud 2を使ってみる]]></title>
@@ -618,105 +679,6 @@ return options;
 <li><a href="http://vaindespair.blogspot.jp/2011/04/blog-post_733.html">memo: Force.com&#12288;&#65306;&#12288;任意の選択リストを作成したい&#65339;Visualforceタグ&#65341;</a></li>
 <li><a href="http://kayakuguri.github.io/blog/2016/02/01/custom-setting/">カスタム設定を作成して取得してみる &ndash; KayaMemo</a></li>
 <li><a href="http://blog.jeffdouglas.com/2008/11/16/displaying-the-required-red-bar-for-a-control/">Displaying the Required Red Bar for a Control</a></li>
-</ul>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[Visualforce] テキストエリア入力欄の表示]]></title>
-    <link href="http://kayakuguri.github.io/blog/2017/08/17/vf-textarea/"/>
-    <updated>2017-08-17T15:16:25+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2017/08/17/vf-textarea</id>
-    <content type="html"><![CDATA[<p>Visualforceページにて、テキストエリアの入力欄を表示する際に、大きさを指定したりした時の表示のされ方などのまとめ。</p>
-
-<!-- more -->
-
-
-<h2>apex:inputField</h2>
-
-<p>一番基本となる、<code>apex:inputField</code>の場合。<br/>
-<code>value</code>で指定した項目の型を読み取って自動で入力フォームのタイプを変更してくれるので、普通はこちらを使っておけばよい。</p>
-
-<p>ただし、テキストエリア項目の場合は以下のように入力欄がすごく小さい。</p>
-
-<p><code>
-&lt;apex:inputField value="{!項目名}" required="true" label="inputFieldサンプル" /&gt;
-</code></p>
-
-<p><img src="/images/2017/08/vf_textarea01.jpg" alt="" /></p>
-
-<p>なので、サイズを調整したいが、<code>apex:inputField</code>には<code>rows</code>や<code>cols</code>などのオプションがない。<br/>
-よって、スタイスを直接書いてやるしかなさそう。</p>
-
-<p><code>
-&lt;apex:inputField value="{!項目名}" required="true" style="width:315px; height:70px;" label="inputFieldサンプル サイズ変更" /&gt;
-</code></p>
-
-<p><img src="/images/2017/08/vf_textarea02.jpg" alt="" /></p>
-
-<p>これで、サイズを任意に変更しつつ必須表示にも対応。</p>
-
-<h3>エラー</h3>
-
-<p><code>apex:inputField</code>を使った場合はそのままエラーの表示にも対応している。</p>
-
-<p><img src="/images/2017/08/vf_textarea06.jpg" alt="" /></p>
-
-<h2>apex:inputtextArea</h2>
-
-<p><code>apex:inputtextArea</code>を利用すると、<code>rows</code> <code>cols</code>でのサイズ指定が可能。<br/>
-<code>apex:outputlabel</code>も使うと標準の表示を同じようにラベルを配置してやれる。</p>
-
-<p>```
-&lt;apex:pageblocksectionItem></p>
-
-<pre><code>&lt;apex:outputlabel value = "outputlabelサンプル"/&gt;
-&lt;apex:inputtextArea value = "{!項目名}" cols = "50" rows = "5" required="true" /&gt;
-</code></pre>
-
-<p>&lt;/apex:pageblocksectionItem>
-```</p>
-
-<p><img src="/images/2017/08/vf_textarea03.jpg" alt="" /></p>
-
-<p>しかし、この場合だと <code>required="true"</code> を指定していても赤い線が表示されない。<br/>
-その赤い線を再現してやるには、divでクラスをつけて構造を再現してやる必要があるよう。</p>
-
-<p>```
-&lt;apex:pageBlockSectionItem></p>
-
-<pre><code>&lt;apex:outputlabel value = "outputlabelサンプル 必須再現"/&gt;
-&lt;apex:outputPanel&gt;
-    &lt;div class="requiredInput"&gt;
-    &lt;div class="requiredBlock"&gt;&lt;/div&gt;
-    &lt;apex:inputtextArea value="{!項目名}" cols = "50" rows = "5" required="true" /&gt;
-&lt;/div&gt;
-&lt;/apex:outputPanel&gt;
-</code></pre>
-
-<p>&lt;/apex:pageBlockSectionItem>
-```</p>
-
-<p><img src="/images/2017/08/vf_textarea04.jpg" alt="" /></p>
-
-<p>これで任意のサイズを指定しつつ、必須表示も出来るようになった。</p>
-
-<p>これらを並べてやると以下のような感じ。</p>
-
-<p><img src="/images/2017/08/vf_textarea05.jpg" alt="" /></p>
-
-<h3>エラー</h3>
-
-<p>エラー表示はそのままだと対応していないため、以下のような方法で自前で実装してやる必要がある。</p>
-
-<p><a href="https://developer.salesforce.com/forums/?id=906F0000000AhwaIAC">&#12456;&#12521;&#12540;&#12513;&#12483;&#12475;&#12540;&#12472;&#12395;&#12388;&#12356;&#12390; &ndash; Salesforce Developer Community</a></p>
-
-<h2>参考</h2>
-
-<ul>
-<li><a href="https://developer.salesforce.com/forums/?id=906F000000095xFIAQ">How do I alter dimensions of inputField Text and TextArea fields ? &ndash; Salesforce Developer Community</a></li>
-<li><a href="https://salesforce.stackexchange.com/questions/5462/required-field-mark-red-vertical-bar-not-coming">visualforce &ndash; Required field mark (Red Vertical Bar) not coming &ndash; Salesforce Stack Exchange</a></li>
 </ul>
 
 ]]></content>

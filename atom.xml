@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2018-05-09T12:48:30+09:00</updated>
+  <updated>2018-06-05T12:04:56+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,76 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Visualforceに日付時間を表示する時にタイムゾーンを設定する]]></title>
+    <link href="http://kayakuguri.github.io/blog/2018/06/05/vf-datetime-timezone/"/>
+    <updated>2018-06-05T11:57:08+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2018/06/05/vf-datetime-timezone</id>
+    <content type="html"><![CDATA[<p>日付時間( <code>datetime</code> )型のデータをVisualforceに表示する時に、<code>apex:outputtext</code>を使用すればフォーマットさせて表示することが出来るのだが、GMTで表示されてしまうため9時間ずれてしまう。</p>
+
+<p>これはオプションでは用意されていないようで、apex側でずらす時間を指定してそれを足してやる、という方法でタイムゾーンを指定してやる必要があるよう。<br/>
+apexで使用アカウントでセットされているタイムゾーンを取得してずれている時間のミリ秒を取得してそれを足す、という方法。</p>
+
+<h3>apex</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>//表示する日付
+</span><span class='line'>datetime_test = Datetime.newInstance(2018, 6, 5, 0, 0, 0);
+</span><span class='line'>
+</span><span class='line'>public Double timezoneOffset{get{
+</span><span class='line'>    TimeZone tz = UserInfo.getTimeZone();
+</span><span class='line'>    //Milliseconds to Day
+</span><span class='line'>    return tz.getOffset(DateTime.now()) / (1000 * 3600 * 24.0);
+</span><span class='line'>}}</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>VF</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>{!datetime_test}
+</span><span class='line'>// Mon Jun 04 15:00:00 GMT
+</span><span class='line'>
+</span><span class='line'>&lt;apex:outputtext value="{0, date, yyyy/MM/dd HH:mm:ss}"&gt;
+</span><span class='line'>    &lt;apex:param value="{!datetime_test}" /&gt;
+</span><span class='line'>&lt;/apex:outputtext&gt;
+</span><span class='line'>// 2018 2018/06/04 15:00:00
+</span><span class='line'>
+</span><span class='line'>&lt;apex:outputtext value="{0, date, yyyy/MM/dd HH:mm:ss}"&gt;
+</span><span class='line'>    &lt;apex:param value="{!datetime_test + timezoneOffset}" /&gt;
+</span><span class='line'>&lt;/apex:outputtext&gt;
+</span><span class='line'>// 2018/06/05 00:00:00</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>参考</h2>
+
+<ul>
+<li><a href="http://blog.flect.co.jp/salesforce/2010/08/visualforce-16a.html">セールスフォースの豆知識： Visualforceで数値や日付のフォーマットを指定して表示するには？</a></li>
+<li><a href="https://success.salesforce.com/ideaView?id=08730000000i6AaAAI">apex：outputtext should support formatting of date/time in local time zone &ndash; Ideas &ndash; Salesforce Trailblazer Community</a></li>
+<li><a href="https://salesforce.stackexchange.com/questions/15944/timezone-issue-with-datetime-field-again">visualforce &ndash; Timezone issue with Datetime Field ［again ;&ndash;)］ &ndash; Salesforce Stack Exchange</a></li>
+<li><a href="https://www.xgeek.net/ja/salesforce/display-datetime-with-timezone-in-visualforce-page/">Visualforce Pageでタイムゾーン時間の出力 | Xgeek</a></li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[Wordpress] 記事更新前後の内容を取得したい]]></title>
@@ -2177,277 +2247,6 @@ Herokuでは標準のadd-onとして<a href="https://elements.heroku.com/addons/
 </span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
 
 
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[Visualforce] 必須チェックのエラー文言をカスタマイズする]]></title>
-    <link href="http://kayakuguri.github.io/blog/2017/08/22/custom-vf-error/"/>
-    <updated>2017-08-22T15:11:17+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2017/08/22/custom-vf-error</id>
-    <content type="html"><![CDATA[<p>前記事の続きで、<code>apex:inputField</code> を使わない場合のバリデーションエラーの表示方法を調べたメモ。<br/>
-結局標準の表示では対応してくれないようなので、自前で実装することになった。</p>
-
-<!-- more -->
-
-
-<p><a href="http://kayakuguri.github.io/blog/2017/08/18/custom-selectlist-req/">前回</a>までで作成した状態はこちら。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;apex:pageBlockSectionItem &gt;
-</span><span class='line'>  &lt;apex:outputLabel value="都道府県" for="prefcbx"/&gt;
-</span><span class='line'>  &lt;apex:outputPanel styleClass="requiredInput" layout="block"&gt;
-</span><span class='line'>      &lt;apex:outputPanel styleClass="requiredBlock" layout="block"/&gt;
-</span><span class='line'>      &lt;apex:selectList value="{!pref__c}" id="prefcbx" size="1" required="true"&gt;
-</span><span class='line'>          &lt;apex:selectOptions value="{!options}"/&gt;
-</span><span class='line'>      &lt;/apex:selectList&gt;
-</span><span class='line'>  &lt;/apex:outputPanel&gt;
-</span><span class='line'>&lt;/apex:pageBlockSectionItem&gt;</span></code></pre></td></tr></table></div></figure>
-
-
-<p><img src="http://kayakuguri.github.io/images/2017/08/custom_selectlist02.jpg" alt="" /></p>
-
-<h1>apex:message</h1>
-
-<p>このまま空で送信しても内部的にはエラーとなり送信出来ないのだが、エラーの内容が表示されない。<br/>
-そこで、<code>&lt;apex:message&gt;</code>を追加するとエラーは出るようになった。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;apex:message for="prefcbx" styleClass="errorMsg" /&gt;</span></code></pre></td></tr></table></div></figure>
-
-
-<p>表示は以下。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2017/08/custom_error01.jpg" alt="" /></p>
-
-<p>問題点は以下。</p>
-
-<ul>
-<li>エラー文言が英語</li>
-<li>選択リストのボックスがエラー表示になってない(赤枠がない）</li>
-</ul>
-
-
-<h1>required=true</h1>
-
-<p>この英語のエラーをローカライズして表示させる方法がわからなかった。(<code>lang</code>オプションを設定しても違うようだった）<br/>
-なので、apex内で指定したエラー文言を表示させてやることに。</p>
-
-<p><code>&lt;apex:inputField&gt;</code>タグなどに、<code>required=true</code>をつけると必須のチェックを自動で行ってくれるようになるのだが、このチェックは<code>form</code>の<code>action</code>で指定したメソッドなどの送信処理が走る前にチェックがされてしまうよう。<br/>
-そのため、入力が空だった場合にはこのエラー文言を表示する、などカスタマイズしようにもすることが出来なかった。</p>
-
-<p>よって、<code>required</code>を外してやる。<br/>
-そうすると、必須のエラーも自分で検知してやらないといけなくなる。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>if(String.isBlank(pref__c)){
-</span><span class='line'>  //必須エラー
-</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
-
-
-<p>そして<code>required=true</code>を外してしまうと、必須の赤い線が<code>apex:inputField</code>タグで表示されなくなってしまうため、全ての項目の必須表示を自前で実装してやる必要がある。</p>
-
-<h1>addError()</h1>
-
-<p>ちなみに、sObjectに<code>addError()</code>メソッドでエラーを追加してやると追加した文言がエラーとして表示されるようになる。<br/>
-ただしこれも上記<code>required=true</code>が入っているとapexの処理が通らないため、<code>required</code>オプションは外しておく。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>pref__c.addError('入力して下さい。');</span></code></pre></td></tr></table></div></figure>
-
-
-<p>上記のように追加すると、以下のように表示がされる。</p>
-
-<blockquote><p><strong>エラー:</strong> 入力して下さい。</p></blockquote>
-
-<h1>apex:outputText</h1>
-
-<p>よって、普通のテキスト表示である、<code>apex:outputText</code>を利用してエラーの有無で出し分けをしてやる。<br/>
-さらに、選択リストの部分には、<code>error</code>クラスをつけてやることでエラー表示の赤枠を出してやることが出来るため、エラー時のみ、クラスを<code>error</code>としてやることにする。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>public String errorMessage{get;set;}
-</span><span class='line'>public String errorClass{get;set;}
-</span><span class='line'>
-</span><span class='line'>public PageReference save(){
-</span><span class='line'>  if(String.isBlank(town.addr1_1name__c)){
-</span><span class='line'>      errorMessage = '都道府県を入力して下さい';
-</span><span class='line'>      errorClass = 'error';
-</span><span class='line'>  }
-</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
-
-
-<p>これでようやく以下のように目的通りの表示が出来た。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2017/08/custom_error02.jpg" alt="" /></p>
-
-<h1>結果</h1>
-
-<p>最終的に標準と全く同じように必須のエラーを表示してやるように調整した場合、以下のようになった。</p>
-
-<h3>apex</h3>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>public with sharing class CusotmSelectList_Sample {
-</span><span class='line'>  public CustomObject__c object{get;set;}
-</span><span class='line'>  public String errorMessage{get;set;}
-</span><span class='line'>  public String errorClass{get;set;}
-</span><span class='line'>  
-</span><span class='line'>  public CusotmSelectList_Sample(ApexPages.StandardController controller) {
-</span><span class='line'>      object = new CustomObject__c();
-</span><span class='line'>  }
-</span><span class='line'>  
-</span><span class='line'>  /**
-</span><span class='line'>   * カスタム設定から都道府県のリストを取得する
-</span><span class='line'>   * @type List&lt;SelectOption&gt;
-</span><span class='line'>   */
-</span><span class='line'>  public List&lt;SelectOption&gt; getOptions() {
-</span><span class='line'>    Map&lt;String, Prefectures__c&gt; prefs = Prefectures__c.getAll();
-</span><span class='line'>    List&lt;SelectOption&gt; options = new List&lt;SelectOption&gt;();
-</span><span class='line'>    options.add(new SelectOption('', '--なし--'));
-</span><span class='line'>    for(String key : prefs.keySet()){
-</span><span class='line'>        Prefectures__c pref_obj = prefs.get(key);
-</span><span class='line'>        options.add(new SelectOption(pref_obj.Label__c, pref_obj.Label__c));
-</span><span class='line'>    }
-</span><span class='line'>    return options;
-</span><span class='line'>  }
-</span><span class='line'>  
-</span><span class='line'>  public PageReference save(){
-</span><span class='line'>      if(String.isBlank(object.pref__c)){
-</span><span class='line'>          errorMessage = '&lt;strong&gt;エラー:&lt;/strong&gt; 値を入力してください';
-</span><span class='line'>          errorClass = 'error';
-</span><span class='line'>          return null;
-</span><span class='line'>      }
-</span><span class='line'>      
-</span><span class='line'>      insert object; //エラーがなければ保存
-</span><span class='line'>      return null; //完了画面とかに遷移させる
-</span><span class='line'>  }
-</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
-
-
-<h3>VF Page</h3>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;apex:page showHeader="true" sidebar="true" title="作成" standardController="CustomObject__c" extensions="CusotmSelectList_Sample"&gt;
-</span><span class='line'>  &lt;apex:sectionHeader title="レコードの作成" /&gt;
-</span><span class='line'>  &lt;apex:form&gt;
-</span><span class='line'>      &lt;apex:pageBlock title="" mode="edit"&gt;
-</span><span class='line'>      
-</span><span class='line'>          &lt;apex:pageBlockButtons&gt;
-</span><span class='line'>              &lt;apex:commandButton action="{!save}" value="保存"/&gt;
-</span><span class='line'>          &lt;/apex:pageBlockButtons&gt;
-</span><span class='line'>          
-</span><span class='line'>          &lt;apex:pageBlockSection title="内容" columns="1"&gt;
-</span><span class='line'>              &lt;apex:pageBlockSectionItem &gt;
-</span><span class='line'>              &lt;apex:outputLabel value="都道府県" for="prefcbx"/&gt;
-</span><span class='line'>              &lt;apex:outputPanel styleClass="requiredInput" layout="block"&gt;
-</span><span class='line'>                  &lt;apex:outputPanel styleClass="requiredBlock" layout="block"/&gt;
-</span><span class='line'>                  &lt;apex:selectList value="{!object.pref__c}" id="prefcbx" size="1" styleClass="{!errorClass}"&gt;
-</span><span class='line'>                  &lt;apex:selectOptions value="{!options}"/&gt;
-</span><span class='line'>                  &lt;/apex:selectList&gt;
-</span><span class='line'>                      &lt;br /&gt;
-</span><span class='line'>                      &lt;apex:outputText value="{!errorMessage}" styleClass="errorMsg" rendered="{!LEN(errorMessage)&gt;0}" escape="false"/&gt;
-</span><span class='line'>              &lt;/apex:outputPanel&gt;
-</span><span class='line'>              &lt;/apex:pageBlockSectionItem&gt;
-</span><span class='line'>          &lt;/apex:pageBlockSection&gt;
-</span><span class='line'>      
-</span><span class='line'>      &lt;/apex:pageBlock&gt;
-</span><span class='line'>  &lt;/apex:form&gt;
-</span><span class='line'>&lt;/apex:page&gt;</span></code></pre></td></tr></table></div></figure>
-
-
-<h1>結果</h1>
-
-<p>とりあえずこれで一つの項目で、必須表示〜エラー表示まで実装してやることが出来た。<br/>
-ただし、複数項目で実現するためには項目の数だけエラー表示用の変数が必要になるため、クラスにするなど何かしら工夫しないとコードが冗長になりそう。<br/>
-また、バリデーション用のコードもヘルパークラスに分けるなどした方がよいかもしれない。</p>
-
-<h1>参考</h1>
-
-<ul>
-<li><a href="https://developer.salesforce.com/forums/?id=906F0000000AhwaIAC">&#12456;&#12521;&#12540;&#12513;&#12483;&#12475;&#12540;&#12472;&#12395;&#12388;&#12356;&#12390; &ndash; Salesforce Developer Community</a></li>
-<li><a href="https://blog.freedom-man.com/forcecom_apexmessage/">apex:Messageの挙動について調べてみる</a></li>
-<li><a href="https://developer.salesforce.com/docs/atlas.ja-jp.pages.meta/pages/pages_compref_message.htm">apex:message</a></li>
-<li><a href="https://help.salesforce.com/articleView?id=000006300&amp;language=ja&amp;type=1">Visualforce 上のテキストボックスの下に、カスタムエラーメッセージを表示する方法</a></li>
-</ul>
 
 ]]></content>
   </entry>
