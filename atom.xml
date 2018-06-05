@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2018-06-05T12:04:56+09:00</updated>
+  <updated>2018-06-05T12:06:37+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -19,6 +19,9 @@
     <updated>2018-06-05T11:57:08+09:00</updated>
     <id>http://kayakuguri.github.io/blog/2018/06/05/vf-datetime-timezone</id>
     <content type="html"><![CDATA[<p>日付時間( <code>datetime</code> )型のデータをVisualforceに表示する時に、<code>apex:outputtext</code>を使用すればフォーマットさせて表示することが出来るのだが、GMTで表示されてしまうため9時間ずれてしまう。</p>
+
+<!-- more -->
+
 
 <p>これはオプションでは用意されていないようで、apex側でずらす時間を指定してそれを足してやる、という方法でタイムゾーンを指定してやる必要があるよう。<br/>
 apexで使用アカウントでセットされているタイムゾーンを取得してずれている時間のミリ秒を取得してそれを足す、という方法。</p>
