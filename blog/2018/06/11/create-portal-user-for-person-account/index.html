@@ -1,0 +1,332 @@
+
+<!DOCTYPE HTML>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>テスト内での個人取引先有効時のポータルユーザの作成方法 - KayaMemo</title>
+
+	
+	<meta name="description" content="<!-- google_ad_client = "ca-pub-0887267957680144"; /* kayakuguri top */ google_ad_slot = "1210228675"; google_ad_width = 468; google_ad_height = 60 &hellip;">
+	
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+	<link href="/atom.xml" rel="alternate" title="KayaMemo" type="application/atom+xml">
+	<link rel="canonical" href="">
+	<link href="/favicon.png" rel="shortcut icon">
+	<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+	<script async="true" src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+	
+<meta property="og:title" content="テスト内での個人取引先有効時のポータルユーザの作成方法 - KayaMemo" />
+<meta property="og:type" content="article" />
+<meta property="og:description" content="<!-- google_ad_client = "ca-pub-0887267957680144"; /* kayakuguri top */ google_ad_slot = "1210228675"; google_ad_width = 468; google_ad_height = 60 &hellip;" />
+
+<meta property="og:url" content="" />
+<meta property="og:image" content="http://kayakuguri.github.io/images/about_me.jpg" />
+<meta property="og:author" content="kayakuguri" />
+<meta property="og:site_name" content="KayaMemo" />
+<meta property="og:locale" content="ja_JP" />
+<meta property="fb:app_id" content="509051419202319" />
+</head>
+
+
+<body>
+	<header id="header" class="inner"><h1><a href="/">KayaMemo</a></h1>
+<nav id="main-nav"><ul class="main">
+	<li><a href="/">Blog</a></li>
+	<li><a href="/blog/archives">Archives</a></li>
+</ul>
+</nav>
+<nav id="mobile-nav">
+	<div class="alignleft menu">
+		<a class="button">Menu</a>
+		<div class="container"><ul class="main">
+	<li><a href="/">Blog</a></li>
+	<li><a href="/blog/archives">Archives</a></li>
+</ul>
+</div>
+	</div>
+	<div class="alignright search">
+		<a class="button"></a>
+		<div class="container">
+			<form action="http://google.com/search" method="get">
+				<input type="text" name="q" results="0">
+				<input type="hidden" name="q" value="site:kayakuguri.github.io">
+			</form>
+		</div>
+	</div>
+</nav>
+<nav id="sub-nav" class="alignright">
+	<div class="social">
+		
+		
+		
+		<a class="twitter" href="http://twitter.com/usk" title="Twitter">Twitter</a>
+		
+		
+    
+		
+		
+		
+		
+		
+		<a class="rss" href="/atom.xml" title="RSS">RSS</a>
+		
+    
+	</div>
+	<form class="search" action="http://google.com/search" method="get">
+		<input class="alignright" type="text" name="q" results="0">
+		<input type="hidden" name="q" value="site:kayakuguri.github.io">
+	</form>
+</nav>
+
+</header>
+	
+		
+	
+	<div id="content" class="inner"><article class="post">
+	<h2 class="title">テスト内での個人取引先有効時のポータルユーザの作成方法</h2>
+	<div class="entry-content">
+        <div class="adArea">
+    <script type="text/javascript"><!--
+    google_ad_client = "ca-pub-0887267957680144";
+    /* kayakuguri top */
+    google_ad_slot = "1210228675";
+    google_ad_width = 468;
+    google_ad_height = 60;
+    //-->
+    </script>
+    <script type="text/javascript"
+            src="//pagead2.googlesyndication.com/pagead/show_ads.js">
+    </script>
+</div>
+        <p>テストコード内にて、取引先をポータルユーザとして作成したいのだが、個人取引先が有効になっている場合に少しハマったのでメモ。</p>
+
+<!-- more -->
+
+
+<p>ポータルユーザとして登録しようとすると、対象のユーザには<strong>必ず</strong>取引先責任者が紐付いていなければならないよう。 <br/>
+指定せずに有効化しようとすると以下のようにエラーが出てしまう。</p>
+
+<blockquote><p>取引先責任者のないポータルユーザは作成できません</p></blockquote>
+
+<p>しかし個人取引先が有効になっている場合には取引先責任者は使用しないのでどれを指定すればいいのかわからず迷ってしまった。</p>
+
+<p>個人取引先を有効にしている組織の場合、取引先(<code>Account</code>)を作成すると取引先責任者(<code>Contact</code>)が自動的に作成されるよう。<br/>
+SF上では取引先しか見えていないのだが、<code>Contact</code>でクエリを実行して検索すると、同じ名前のレコードがヒットする。</p>
+
+<p>よって、取引先を作成し、同時に作成される取引先責任者を検索しそれをユーザと紐付けてから、ポータルユーザとして登録してやることで無事、作成することが出来た。<br/>
+手順としては以下。</p>
+
+<ol>
+<li>取引先(<code>Account</code>)を作成</li>
+<li>取引先責任者(<code>Contact</code>)を取得</li>
+<li>ユーザ(<code>User</code>)を作成</li>
+<li>ポータルユーザとして登録</li>
+</ol>
+
+
+<p>実際のコードは以下。<br/>
+ユーザを作成する際のプロフィールは作成済のポータルユーザ用のプロフィールを指定すること。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>@isTest
+</span><span class='line'>public with sharing class CreatePortalUserTest {
+</span><span class='line'>  static testMethod void create() {
+</span><span class='line'>      // 1. 取引先を作成
+</span><span class='line'>      Account account = new Account(
+</span><span class='line'>                FirstName = '名',
+</span><span class='line'>                LastName = '姓'
+</span><span class='line'>        );
+</span><span class='line'>        insert account;
+</span><span class='line'>        
+</span><span class='line'>        // 2. 取引先責任者を取得
+</span><span class='line'>        Contact contact = [SELECT id,accountId FROM Contact LIMIT 1];
+</span><span class='line'>        
+</span><span class='line'>        // 3. ユーザを作成
+</span><span class='line'>        List&lt;Profile&gt; profiles = [SELECT Id FROM Profile WHERE Name IN ('プロフィール名')];
+</span><span class='line'>        User user = New User(
+</span><span class='line'>                Username = 'for_apex_test@example.com',
+</span><span class='line'>                Email = 'for_apex_test@example.com',
+</span><span class='line'>                LastName = '姓',
+</span><span class='line'>                Alias = '姓',
+</span><span class='line'>                TimeZoneSidKey = 'Asia/Tokyo',
+</span><span class='line'>                LocaleSidKey = 'ja_JP',
+</span><span class='line'>                EmailEncodingKey = 'ISO-2022-JP',
+</span><span class='line'>                ProfileId = profiles.get(0).Id,
+</span><span class='line'>                LanguageLocaleKey = 'ja',
+</span><span class='line'>                ContactId = contact.Id
+</span><span class='line'>        );
+</span><span class='line'>        insert user;
+</span><span class='line'>        
+</span><span class='line'>        // 4. ポータルユーザとして登録
+</span><span class='line'>        Site.createPortalUser(user, account.Id, 'password');
+</span><span class='line'>        
+</span><span class='line'>        
+</span><span class='line'>        // 確認
+</span><span class='line'>        Account acc = [SELECT id,IsCustomerPortal FROM Account LIMIT 1];
+</span><span class='line'>        System.assertEquals(acc.IsCustomerPortal, true);
+</span><span class='line'>  }
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>参考</h2>
+
+<ul>
+<li><a href="https://developer.salesforce.com/docs/atlas.ja-jp.apexcode.meta/apexcode/apex_classes_sites.htm">Site クラス | Apex 開発者ガイド | Salesforce Developers</a></li>
+<li><a href="https://developer.salesforce.com/forums/?id=906F00000008qL2IAI">How to create person account in Test class &ndash; Salesforce Developer Community</a></li>
+<li><a href="https://qiita.com/shinsaka/items/b69467656a73b4ac0173">ユーザを作成するテストコードではUserNameに注意 &ndash; Qiita</a></li>
+</ul>
+
+
+    </div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2018-06-11T18:51:31+09:00" pubdate data-updated="true">Jun 11<span>th</span>, 2018</time></div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/salesforce/'>salesforce</a>
+
+
+</div>
+	
+</div>
+</article>
+
+	<div class="share">
+	<div class="addthis_toolbox addthis_default_style ">
+		
+        <div id="fb-root"></div>
+<script>(function(d, s, id) {
+    var js, fjs = d.getElementsByTagName(s)[0];
+    if (d.getElementById(id)) return;
+    js = d.createElement(s); js.id = id;
+    js.src = "//connect.facebook.net/ja_JP/all.js#xfbml=1&appId=509051419202319";
+    fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+        <div class="fb-like" data-href="http://kayakuguri.github.io/blog/2018/06/11/create-portal-user-for-person-account/" data-layout="button_count" data-action="like" data-show-faces="true" data-share="false"></div>
+		
+		
+        &nbsp;&nbsp;<a href="https://twitter.com/share" class="twitter-share-button" data-via="kayakuguri123" data-lang="ja" data-count="none">ツイート</a>
+<script>
+  !function(d,s,id){
+      var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';
+      if(!d.getElementById(id)){
+          js=d.createElement(s);
+          js.id=id;js.src=p+'://platform.twitter.com/widgets.js';
+          fjs.parentNode.insertBefore(js,fjs);
+      }
+  }(document, 'script', 'twitter-wjs');
+</script>
+		
+		
+		<a class="addthis_button_google_plusone" g:plusone:size="medium"></a>
+		
+		
+        
+        <a href="http://b.hatena.ne.jp/entry/http://kayakuguri.github.io/blog/2018/06/11/create-portal-user-for-person-account/" class="hatena-bookmark-button" data-hatena-bookmark-title="テスト内での個人取引先有効時のポータルユーザの作成方法 - KayaMemo" data-hatena-bookmark-layout="standard-noballoon" data-hatena-bookmark-lang="ja" title="このエントリーをはてなブックマークに追加">
+<img src="http://b.st-hatena.com/images/entry-button/button-only@2x.png" alt="このエントリーをはてなブックマークに追加" width="20" height="20" style="border: none;" /></a>
+<script type="text/javascript" src="http://b.st-hatena.com/js/bookmark_button.js" charset="utf-8" async="async"></script>
+        
+	</div>
+	
+</div>
+
+
+<div class="share">
+    <script type="text/javascript"><!--
+    google_ad_client = "ca-pub-0887267957680144";
+    /* kayakuguri git */
+    google_ad_slot = "2041160274";
+    google_ad_width = 336;
+    google_ad_height = 280;
+    //-->
+    </script>
+    <script type="text/javascript"
+            src="//pagead2.googlesyndication.com/pagead/show_ads.js">
+    </script>
+</div>
+</div>
+	<footer id="footer" class="inner">Copyright &copy; 2018
+
+    萱潜
+
+</footer>
+	<script src="/javascripts/slash.js"></script>
+<script src="/javascripts/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+	$('.fancybox').fancybox();
+})(jQuery);
+</script> <!-- Delete or comment this line to disable Fancybox -->
+
+
+
+
+	<script type="text/javascript">
+		var _gaq = _gaq || [];
+		_gaq.push(['_setAccount', 'UA-3730932-4']);
+		_gaq.push(['_trackPageview']);
+
+		(function() {
+			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+		})();
+	</script>
+
+
+
+</body>
+</html>

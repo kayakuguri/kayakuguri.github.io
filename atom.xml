@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2018-06-05T12:06:37+09:00</updated>
+  <updated>2018-06-11T18:52:25+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,129 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[テスト内での個人取引先有効時のポータルユーザの作成方法]]></title>
+    <link href="http://kayakuguri.github.io/blog/2018/06/11/create-portal-user-for-person-account/"/>
+    <updated>2018-06-11T18:51:31+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2018/06/11/create-portal-user-for-person-account</id>
+    <content type="html"><![CDATA[<p>テストコード内にて、取引先をポータルユーザとして作成したいのだが、個人取引先が有効になっている場合に少しハマったのでメモ。</p>
+
+<!-- more -->
+
+
+<p>ポータルユーザとして登録しようとすると、対象のユーザには<strong>必ず</strong>取引先責任者が紐付いていなければならないよう。 <br/>
+指定せずに有効化しようとすると以下のようにエラーが出てしまう。</p>
+
+<blockquote><p>取引先責任者のないポータルユーザは作成できません</p></blockquote>
+
+<p>しかし個人取引先が有効になっている場合には取引先責任者は使用しないのでどれを指定すればいいのかわからず迷ってしまった。</p>
+
+<p>個人取引先を有効にしている組織の場合、取引先(<code>Account</code>)を作成すると取引先責任者(<code>Contact</code>)が自動的に作成されるよう。<br/>
+SF上では取引先しか見えていないのだが、<code>Contact</code>でクエリを実行して検索すると、同じ名前のレコードがヒットする。</p>
+
+<p>よって、取引先を作成し、同時に作成される取引先責任者を検索しそれをユーザと紐付けてから、ポータルユーザとして登録してやることで無事、作成することが出来た。<br/>
+手順としては以下。</p>
+
+<ol>
+<li>取引先(<code>Account</code>)を作成</li>
+<li>取引先責任者(<code>Contact</code>)を取得</li>
+<li>ユーザ(<code>User</code>)を作成</li>
+<li>ポータルユーザとして登録</li>
+</ol>
+
+
+<p>実際のコードは以下。<br/>
+ユーザを作成する際のプロフィールは作成済のポータルユーザ用のプロフィールを指定すること。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>@isTest
+</span><span class='line'>public with sharing class CreatePortalUserTest {
+</span><span class='line'>  static testMethod void create() {
+</span><span class='line'>      // 1. 取引先を作成
+</span><span class='line'>      Account account = new Account(
+</span><span class='line'>                FirstName = '名',
+</span><span class='line'>                LastName = '姓'
+</span><span class='line'>        );
+</span><span class='line'>        insert account;
+</span><span class='line'>        
+</span><span class='line'>        // 2. 取引先責任者を取得
+</span><span class='line'>        Contact contact = [SELECT id,accountId FROM Contact LIMIT 1];
+</span><span class='line'>        
+</span><span class='line'>        // 3. ユーザを作成
+</span><span class='line'>        List&lt;Profile&gt; profiles = [SELECT Id FROM Profile WHERE Name IN ('プロフィール名')];
+</span><span class='line'>        User user = New User(
+</span><span class='line'>                Username = 'for_apex_test@example.com',
+</span><span class='line'>                Email = 'for_apex_test@example.com',
+</span><span class='line'>                LastName = '姓',
+</span><span class='line'>                Alias = '姓',
+</span><span class='line'>                TimeZoneSidKey = 'Asia/Tokyo',
+</span><span class='line'>                LocaleSidKey = 'ja_JP',
+</span><span class='line'>                EmailEncodingKey = 'ISO-2022-JP',
+</span><span class='line'>                ProfileId = profiles.get(0).Id,
+</span><span class='line'>                LanguageLocaleKey = 'ja',
+</span><span class='line'>                ContactId = contact.Id
+</span><span class='line'>        );
+</span><span class='line'>        insert user;
+</span><span class='line'>        
+</span><span class='line'>        // 4. ポータルユーザとして登録
+</span><span class='line'>        Site.createPortalUser(user, account.Id, 'password');
+</span><span class='line'>        
+</span><span class='line'>        
+</span><span class='line'>        // 確認
+</span><span class='line'>        Account acc = [SELECT id,IsCustomerPortal FROM Account LIMIT 1];
+</span><span class='line'>        System.assertEquals(acc.IsCustomerPortal, true);
+</span><span class='line'>  }
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>参考</h2>
+
+<ul>
+<li><a href="https://developer.salesforce.com/docs/atlas.ja-jp.apexcode.meta/apexcode/apex_classes_sites.htm">Site クラス | Apex 開発者ガイド | Salesforce Developers</a></li>
+<li><a href="https://developer.salesforce.com/forums/?id=906F00000008qL2IAI">How to create person account in Test class &ndash; Salesforce Developer Community</a></li>
+<li><a href="https://qiita.com/shinsaka/items/b69467656a73b4ac0173">ユーザを作成するテストコードではUserNameに注意 &ndash; Qiita</a></li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Visualforceに日付時間を表示する時にタイムゾーンを設定する]]></title>
@@ -2172,85 +2295,6 @@ Laravelのtestsディレクトリを指定しておく。（どこでもよい�
 HerokuButtonで起動できるようにしたりしてみたので、よかったらお試しあれ。</p>
 
 <p><a href="https://github.com/k-usk/laravel-queue-sample">https://github.com/k-usk/laravel-queue-sample</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[heroku]PostgresとRedisの環境設定]]></title>
-    <link href="http://kayakuguri.github.io/blog/2017/09/21/heroku-postgres-redis/"/>
-    <updated>2017-09-21T15:16:32+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2017/09/21/heroku-postgres-redis</id>
-    <content type="html"><![CDATA[<p>LaravelをHerokuで使用する際に、Heroku PostgresとHeroku Redisの接続情報を環境変数から取得する設定のメモ。</p>
-
-<!-- more -->
-
-
-<h1>概要</h1>
-
-<p>改めて。<br/>
-Herokuでは標準のadd-onとして<a href="https://elements.heroku.com/addons/heroku-postgresql">Heroku Postgres</a>と<a href="https://elements.heroku.com/addons/heroku-redis">Heroku Redis</a>が用意されている。<br/>
-クレジットカードさえ登録していれば無料で使えるので便利。</p>
-
-<p>この接続情報はアドオンを登録した際に自動的に以下のような変数で登録がされる。</p>
-
-<p><strong>Postgres</strong><br/>
-<code>DATABASE_URL</code> = <code>postgres://username:password@hostname.amazonaws.com:5432/database</code></p>
-
-<p><strong>Redis</strong><br/>
-<code>REDIS_URL</code> = <code>redis://h:password@hostname.amazonaws.com:port_no</code></p>
-
-<p>各種情報がURL形式で組み込まれているのだが、間違ってもこれを自分でバラしてそれぞれ個別に環境変数に入れる、などとしてはいけない。<br/>
-というのも、この接続情報はPostgresやRedisにメンテナンスが入った際に前の接続情報は破棄され、新しい情報が同じ環境変数で設定されるため、<br/>
-自前でバラして作ってしまうとその変更した情報に対応できなくなり、接続エラーとなってしまう。</p>
-
-<p>よって、必ず自動でセットされる、<code>DATABASE_URL</code>や<code>REDIS_URL</code>を使うこと。<br/>
-これはHerokuを使う際には常識として覚えておくこと。</p>
-
-<h1>取得</h1>
-
-<p>というわけで、それぞれの値を取得したURLからパースしてLaravel用に環境変数にセットする。<br/>
-以下のように環境変数があればそれをパースして環境変数としてセットしてやるようにするのがスマートっぽい。<br/>
-これだとローカルでは個別に<code>.env</code>ファイルで設定した値を使用してやることが出来る。</p>
-
-<p><code>/config/database.php</code> の冒頭に書く。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>//Postgres
-</span><span class='line'>if (getenv('DATABASE_URL')) {
-</span><span class='line'>    $url = parse_url(getenv('DATABASE_URL'));
-</span><span class='line'>    putenv('DB_HOST='.$url['host']);
-</span><span class='line'>    putenv('DB_PORT='.$url['port']);
-</span><span class='line'>    putenv('DB_DATABASE='.substr($url["path"], 1));
-</span><span class='line'>    putenv('DB_USERNAME='.$url["user"]);
-</span><span class='line'>    putenv('DB_PASSWORD='.$url['pass']);
-</span><span class='line'>}
-</span><span class='line'>
-</span><span class='line'>//Redis
-</span><span class='line'>if (getenv('REDIS_URL')) {
-</span><span class='line'>    $url = parse_url(getenv('REDIS_URL'));
-</span><span class='line'>    putenv('REDIS_HOST='.$url['host']);
-</span><span class='line'>    putenv('REDIS_PORT='.$url['port']);
-</span><span class='line'>    putenv('REDIS_PASSWORD='.$url['pass']);
-</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
-
-
-
 ]]></content>
   </entry>
   

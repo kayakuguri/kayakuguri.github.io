@@ -4,7 +4,7 @@
   <title><![CDATA[Category: salesforce | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/salesforce/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2018-06-05T12:06:37+09:00</updated>
+  <updated>2018-06-11T18:52:25+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,95 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[テスト内での個人取引先有効時のポータルユーザの作成方法]]></title>
+    <link href="http://kayakuguri.github.io/blog/2018/06/11/create-portal-user-for-person-account/"/>
+    <updated>2018-06-11T18:51:31+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2018/06/11/create-portal-user-for-person-account</id>
+    <content type="html"><![CDATA[<p>テストコード内にて、取引先をポータルユーザとして作成したいのだが、個人取引先が有効になっている場合に少しハマったのでメモ。</p>
+
+<!-- more -->
+
+
+<p>ポータルユーザとして登録しようとすると、対象のユーザには<strong>必ず</strong>取引先責任者が紐付いていなければならないよう。 <br/>
+指定せずに有効化しようとすると以下のようにエラーが出てしまう。</p>
+
+<blockquote><p>取引先責任者のないポータルユーザは作成できません</p></blockquote>
+
+<p>しかし個人取引先が有効になっている場合には取引先責任者は使用しないのでどれを指定すればいいのかわからず迷ってしまった。</p>
+
+<p>個人取引先を有効にしている組織の場合、取引先(<code>Account</code>)を作成すると取引先責任者(<code>Contact</code>)が自動的に作成されるよう。<br/>
+SF上では取引先しか見えていないのだが、<code>Contact</code>でクエリを実行して検索すると、同じ名前のレコードがヒットする。</p>
+
+<p>よって、取引先を作成し、同時に作成される取引先責任者を検索しそれをユーザと紐付けてから、ポータルユーザとして登録してやることで無事、作成することが出来た。<br/>
+手順としては以下。</p>
+
+<ol>
+<li>取引先(<code>Account</code>)を作成</li>
+<li>取引先責任者(<code>Contact</code>)を取得</li>
+<li>ユーザ(<code>User</code>)を作成</li>
+<li>ポータルユーザとして登録</li>
+</ol>
+
+
+<p>実際のコードは以下。<br/>
+ユーザを作成する際のプロフィールは作成済のポータルユーザ用のプロフィールを指定すること。</p>
+
+<p>```
+@isTest
+public with sharing class CreatePortalUserTest {</p>
+
+<pre><code>static testMethod void create() {
+    // 1. 取引先を作成
+    Account account = new Account(
+            FirstName = '名',
+            LastName = '姓'
+    );
+    insert account;
+
+    // 2. 取引先責任者を取得
+    Contact contact = [SELECT id,accountId FROM Contact LIMIT 1];
+
+    // 3. ユーザを作成
+    List&lt;Profile&gt; profiles = [SELECT Id FROM Profile WHERE Name IN ('プロフィール名')];
+    User user = New User(
+            Username = 'for_apex_test@example.com',
+            Email = 'for_apex_test@example.com',
+            LastName = '姓',
+            Alias = '姓',
+            TimeZoneSidKey = 'Asia/Tokyo',
+            LocaleSidKey = 'ja_JP',
+            EmailEncodingKey = 'ISO-2022-JP',
+            ProfileId = profiles.get(0).Id,
+            LanguageLocaleKey = 'ja',
+            ContactId = contact.Id
+    );
+    insert user;
+
+    // 4. ポータルユーザとして登録
+    Site.createPortalUser(user, account.Id, 'password');
+
+
+    // 確認
+    Account acc = [SELECT id,IsCustomerPortal FROM Account LIMIT 1];
+    System.assertEquals(acc.IsCustomerPortal, true);
+}
+</code></pre>
+
+<p>}
+```</p>
+
+<h2>参考</h2>
+
+<ul>
+<li><a href="https://developer.salesforce.com/docs/atlas.ja-jp.apexcode.meta/apexcode/apex_classes_sites.htm">Site クラス | Apex 開発者ガイド | Salesforce Developers</a></li>
+<li><a href="https://developer.salesforce.com/forums/?id=906F00000008qL2IAI">How to create person account in Test class &ndash; Salesforce Developer Community</a></li>
+<li><a href="https://qiita.com/shinsaka/items/b69467656a73b4ac0173">ユーザを作成するテストコードではUserNameに注意 &ndash; Qiita</a></li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Visualforceに日付時間を表示する時にタイムゾーンを設定する]]></title>
@@ -573,115 +662,6 @@ public PageReference save(){
 <li><a href="https://blog.freedom-man.com/forcecom_apexmessage/">apex:Messageの挙動について調べてみる</a></li>
 <li><a href="https://developer.salesforce.com/docs/atlas.ja-jp.pages.meta/pages/pages_compref_message.htm">apex:message</a></li>
 <li><a href="https://help.salesforce.com/articleView?id=000006300&amp;language=ja&amp;type=1">Visualforce 上のテキストボックスの下に、カスタムエラーメッセージを表示する方法</a></li>
-</ul>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[Visualforce] カスタム設定から選択肢を設定し必須表示する]]></title>
-    <link href="http://kayakuguri.github.io/blog/2017/08/18/custom-selectlist-req/"/>
-    <updated>2017-08-18T18:25:33+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2017/08/18/custom-selectlist-req</id>
-    <content type="html"><![CDATA[<p>Visualforceページにて、選択リストをカスタム設定のリストから取得し、必須の赤いバーを表示させる方法。</p>
-
-<!-- more -->
-
-
-<p>今回は都道府県の設定をカスタム設定で設定しているとする。</p>
-
-<ul>
-<li>カスタム設定のAPI参照名 : <code>Prefectures__c</code></li>
-<li>都道府県名を保存している項目名 : <code>Label__c</code></li>
-<li>入力先の項目名 : <code>pref__c</code></li>
-</ul>
-
-
-<h1>カスタム設定の取得</h1>
-
-<p>これは別で記事を書いているのでそちらをどうぞ。</p>
-
-<p><a href="http://kayakuguri.github.io/blog/2016/02/01/custom-setting/">カスタム設定を作成して取得してみる &ndash; KayaMemo</a></p>
-
-<p>こんな感じ。<br/>
-これでVFページからは、 <code>{!options}</code>で呼び出せる。</p>
-
-<p>```
-public List<SelectOption> getOptions() {</p>
-
-<pre><code>Map&lt;String, Prefectures__c&gt; prefs = Prefectures__c.getAll();
-List&lt;SelectOption&gt; options = new List&lt;SelectOption&gt;();
-options.add(new SelectOption('', '--なし--'));
-for(String key : prefs.keySet()){
-    Prefectures__c pref_obj = prefs.get(key);
-    options.add(new SelectOption(pref_obj.Label__c, pref_obj.Label__c));
-}
-return options;
-</code></pre>
-
-<p>}
-```</p>
-
-<h1>選択リストに任意の値を設定</h1>
-
-<p><code>apex:inputField</code>を使うと楽だが、それではその項目に設定されている選択肢しか表示できない。<br/>
-(そもそも選択リスト型でないと選択リストにならない)</p>
-
-<p>よって、<code>apex:selectList</code>を使うと設定可能。</p>
-
-<p>```
-&lt;apex:selectList value=&ldquo;{!pref__c}&rdquo; size=&ldquo;1&rdquo; multiselect=&ldquo;false&rdquo; required=&ldquo;true&rdquo;></p>
-
-<pre><code>&lt;apex:selectOptions value="{!options}"/&gt;
-</code></pre>
-
-<p>&lt;/apex:selectList>
-```</p>
-
-<p>表示は以下のようになる。</p>
-
-<p><img src="/images/2017/08/custom_selectlist01.jpg" alt="" /></p>
-
-<h1>必須の表示</h1>
-
-<p>上記画像からわかるように、<code>required="true"</code>を指定しているにも関わらず、SF標準の赤い線が出てくれない。<br/>
-これは、<code>apex:inputField</code>を利用している時にしか自動で表示してくれないため、自分で設定してやる必要がある。<br/>
-以下のようになる。</p>
-
-<p>```
-&lt;apex:pageBlockSectionItem ></p>
-
-<pre><code>&lt;apex:outputLabel value="都道府県" for="prefcbx"/&gt;
-&lt;apex:outputPanel styleClass="requiredInput" layout="block"&gt;
-    &lt;apex:outputPanel styleClass="requiredBlock" layout="block"/&gt;
-    &lt;apex:selectList value="{!pref__c}" id="prefcbx" size="1" required="true"&gt;
-        &lt;apex:selectOptions value="{!options}"/&gt;
-    &lt;/apex:selectList&gt;
-&lt;/apex:outputPanel&gt;
-</code></pre>
-
-<p>&lt;/apex:pageBlockSectionItem>
-```</p>
-
-<p>これで以下のような表示となる。</p>
-
-<p><img src="/images/2017/08/custom_selectlist02.jpg" alt="" /></p>
-
-<h1>エラー表示</h1>
-
-<p>さらに同じく空だった場合のエラーの表示も自動で挿入してくれなくなるため、これも自分で表示してやる必要がある。<br/>
-が、このエラー表示がかなり難航してるため、解決したら別ポストで。</p>
-
-<p>以下に書きました。<br/>
-↓↓<br/>
-<a href="http://kayakuguri.github.io/blog/2017/08/22/custom-vf-error/">[Visualforce] 必須チェックのエラー文言をカスタマイズする</a></p>
-
-<h1>参考</h1>
-
-<ul>
-<li><a href="http://vaindespair.blogspot.jp/2011/04/blog-post_733.html">memo: Force.com&#12288;&#65306;&#12288;任意の選択リストを作成したい&#65339;Visualforceタグ&#65341;</a></li>
-<li><a href="http://kayakuguri.github.io/blog/2016/02/01/custom-setting/">カスタム設定を作成して取得してみる &ndash; KayaMemo</a></li>
-<li><a href="http://blog.jeffdouglas.com/2008/11/16/displaying-the-required-red-bar-for-a-control/">Displaying the Required Red Bar for a Control</a></li>
 </ul>
 
 ]]></content>
