@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2018-06-11T18:52:25+09:00</updated>
+  <updated>2018-10-22T18:41:36+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,60 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[sites_dml_not_allowed]]></title>
+    <link href="http://kayakuguri.github.io/blog/2018/10/22/sites-dml-not-allowed/"/>
+    <updated>2018-10-22T18:25:25+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2018/10/22/sites-dml-not-allowed</id>
+    <content type="html"><![CDATA[<p>Salesforceにて、サイトで公開しているページでオブジェクトにデータを挿入出来ずにハマったのでメモ。</p>
+
+<!-- more -->
+
+
+<h1>権限</h1>
+
+<p>サイトで使用される権限は、設定した各サイト別にユーザが作られ、そのプロファイルで変更が可能。<br/>
+作成したカスタムオブジェクトはデフォルトでは作成権限はないため、権限を与えてやる必要がある。</p>
+
+<p><a href="https://help.salesforce.com/articleView?id=000006778&amp;language=ja&amp;type=1">Force.com サイトのゲストユーザラインセンス</a></p>
+
+<p>そのプロファイルへアクセスするには…、</p>
+
+<p>設定から、クイック検索に <code>サイト</code> と入力。<br/>
+表示されるメニューから、<code>サイト</code> をクリック。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2018/10/sites_permission_01.jpg" alt="" /></p>
+
+<p>サイト一覧から変更したいサイトの「表示ラベル」をクリック。<br/>
+詳細が表示されるので、「公開アクセス設定」をクリック。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2018/10/sites_permission_02.jpg" alt="" /></p>
+
+<p>ここから通常のプロファイルと同じように権限を変更してやることが可能。<br/>
+オブジェクトへのアクセス権限を編集したい場合は、「オブジェクト設定」から変更してやる。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2018/10/sites_permission_03.jpg" alt="" /></p>
+
+<p>ここから設定したいオブジェクトを選択し、オブジェクト権限、や、項目権限、を与えてやればよい。</p>
+
+<h1>エラー</h1>
+
+<p>しかし、上記の手順で、作成、権限を与えているにも関わらず、下記のエラーが出た。</p>
+
+<blockquote><p>DML operation INSERT not allowed on YOUROBJECT__c</p></blockquote>
+
+<h1>オブジェクトの設定</h1>
+
+<p>色々確認していると、オブジェクトを公開していなかったから、だった。</p>
+
+<p>カスタムオブジェクトの項目で、オブジェクトの<code>リリース状況</code>という設定があるのだが、これが<code>開発中</code>になっていたため、外部扱いとなるサイトからはインサートが出来なかったよう。</p>
+
+<p><img src="http://kayakuguri.github.io/images/2018/10/sites_permission_04.jpg" alt="" /></p>
+
+<p>これを<code>リリース済み</code>に変更すると、無事、インサートが可能となった。</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[テスト内での個人取引先有効時のポータルユーザの作成方法]]></title>
@@ -2221,80 +2275,6 @@ Laravelのtestsディレクトリを指定しておく。（どこでもよい�
 本体のコードをちょっとだけ追ってみたけどよくわからなかったのでもし誰かわかればお願いします。</p>
 
 <p><a href="https://github.com/laravel/framework">laravel/framework</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[Laravel] キューのsleepとtimeoutの関係]]></title>
-    <link href="http://kayakuguri.github.io/blog/2017/09/22/laravel-queue-sleep-timeout/"/>
-    <updated>2017-09-22T12:16:53+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2017/09/22/laravel-queue-sleep-timeout</id>
-    <content type="html"><![CDATA[<p>Laravelのキューを実際に使ってみた際にちょっと変な挙動だと思ったメモ。</p>
-
-<!-- more -->
-
-
-<h1>sleep</h1>
-
-<p>キューを実行するコマンドのオプションに<code>sleep</code>というものがある。<br/>
-コマンドのヘルプの説明は以下。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>--sleep[=SLEEP]      Number of seconds to sleep when no job is available [default: "3"]</span></code></pre></td></tr></table></div></figure>
-
-
-<p>ジョブがない場合に次のジョブを取得するまでにスリープする秒数の設定、とのこと。<br/>
-例えばこれをゼロにすると、常にジョブを取得するためのポーリングが実行され続けるため、ジョブの保存先をキューイングサービスなどにしている場合に、ものすごい数のキュー取得リクエストが飛んでしまう。<br/>
-なのでsleepを設定してやれば(ジョブがなくなった時に)、ポーリング間隔を空ける事が出来るので負荷が減ったりする。</p>
-
-<h1>timeout</h1>
-
-<p>処理の<code>timeout</code>オプション。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>--timeout[=TIMEOUT]  The number of seconds a child process can run [default: "60"]</span></code></pre></td></tr></table></div></figure>
-
-
-<p>処理に指定した時間以上の時間がかかった場合はタイムアウトとする設定。デフォルトは60秒。</p>
-
-<h1>sleepとtimeoutの関係</h1>
-
-<p>sleepの時間を長く設定すると、タイムアウトエラーが発生してしまう。<br/>
-例えば以下。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>php artisan queue:listen --sleep=120 --timeout=60</span></code></pre></td></tr></table></div></figure>
-
-
-<p>というのも、次のキュー取得を実行するまでのスリープ時間もタイムアウトの対象の時間に含まれてしまう、よう。<br/>
-なので必ずsleep時間よりもtimeoutの時間を多く設定してやらないといけない。<br/>
-上記の場合だと<code>sleep</code>を120秒にしてるので、<code>timeout</code>を(少なくとも)120秒より大きく設定しないといけない。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>php artisan queue:listen --sleep=120 --timeout=125</span></code></pre></td></tr></table></div></figure>
-
-
-<p>これだと無事、動作する。<br/>
-(処理内容に5秒以上かかると合計が125秒を越えてしまうのでタイムアウトになるが）</p>
-
-<h1>疑問</h1>
-
-<p>単にポーリングの待ち時間のはずなのに実行時間のタイムアウトの対象に含まれるのはおかしいのでは？という疑問はやはり出ていたようで、Githubのissueでやりとりがされていた。</p>
-
-<p><a href="https://github.com/laravel/framework/issues/6206">queue:listen&#39;s sleep duration contributing towards timeout · Issue #6206 · laravel/framework</a></p>
-
-<p>内容を読んでいくと、そもそものプロセスの処理に組み込まれてしまっているため、根本的な修正は難しく、timeoutの時間をsleep時間を足して設定してやる、とかしか無理じゃない？みたいなやり取りになっている。</p>
-
-<p>そしてその後、5.1の時にtimeout時間をsleep時間よりも短く設定出来ないようにする制限が組み込まれたようだが、巨大な処理を行う場合にtimeoutをなしにするためにゼロ秒にセットしたいのに出来ない、という意見が出て結局削除されている。</p>
-
-<p>結果、制約も入らず対処もされていないようなので、現状は前述のように、timeout時間をsleep時間より必ず大きく設定してやらないといけない、ということになっているよう。</p>
-
-<h1>余談</h1>
-
-<p>キューのサンプルを作っている時に事象に遭遇したのだけど、そのキューのサンプルはGitHubにあげてる。<br/>
-HerokuButtonで起動できるようにしたりしてみたので、よかったらお試しあれ。</p>
-
-<p><a href="https://github.com/k-usk/laravel-queue-sample">https://github.com/k-usk/laravel-queue-sample</a></p>
 ]]></content>
   </entry>
   
