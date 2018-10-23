@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2018-10-22T18:43:40+09:00</updated>
+  <updated>2018-10-23T10:08:35+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -14,7 +14,7 @@
 
   
   <entry>
-    <title type="html"><![CDATA[sites_dml_not_allowed]]></title>
+    <title type="html"><![CDATA[[SF] サイトでレコードを保存する際にハマったメモ]]></title>
     <link href="http://kayakuguri.github.io/blog/2018/10/22/sites-dml-not-allowed/"/>
     <updated>2018-10-22T18:25:25+09:00</updated>
     <id>http://kayakuguri.github.io/blog/2018/10/22/sites-dml-not-allowed</id>
