@@ -4,7 +4,7 @@
   <title><![CDATA[Category: salesforce | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/salesforce/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2018-10-23T10:08:35+09:00</updated>
+  <updated>2018-10-30T15:00:55+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,47 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Salesforce CLIのコマンドをzshで補完する]]></title>
+    <link href="http://kayakuguri.github.io/blog/2018/10/30/sfdx-cli-completion/"/>
+    <updated>2018-10-30T14:55:15+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2018/10/30/sfdx-cli-completion</id>
+    <content type="html"><![CDATA[<p>Salesforce CLIを使ってDX周りのコマンドを叩こうとするとコマンドが結構長い。<br/>
+なので、それを補完するzsh用のライブラリが、SFの中の人によって公開されているので設定する。</p>
+
+<p><a href="https://github.com/wadewegner/salesforce-cli-zsh-completion">wadewegner/salesforce-cli-zsh-completion： A Zsh completion file for the Salesforce CLI (and script for updating it)</a></p>
+
+<!-- more -->
+
+
+<p>入れ方は公式の通り。</p>
+
+<p>どこか適切な場所にリポジトリをクローンし、それを読み込んで利用する。</p>
+
+<p><code>
+$ git clone git@github.com:wadewegner/salesforce-cli-zsh-completion.git
+</code></p>
+
+<p><code>.zshrc</code> ファイルに以下の設定を追記する。</p>
+
+<p>```</p>
+
+<h1>add custom completion scripts</h1>
+
+<p>fpath=({YOURPATH}/salesforce-cli-zsh-completion $fpath)</p>
+
+<h1>compsys initialization</h1>
+
+<p>autoload -U compinit
+compinit
+```</p>
+
+<p>ターミナルを再起動。</p>
+
+<p><code>$ sfdx forc</code>などと打って、タブを押すと<code>force</code>、<code>sfdx force:</code>の後にタブを打つと設定されているコマンドの一覧がリストで表示されたりするようになる。</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[SF] サイトでレコードを保存する際にハマったメモ]]></title>
@@ -355,160 +396,6 @@ Test Classesからテストしたいクラスを選択。</p>
 ただ、この機能ってどこにあるんだろう？となった時に探す手段がない。<br/>
 公式のドキュメントもそれらしいものがほぼないし。<br/>
 とはいえ、公式で有料のものなので今後のサポートなどは安心感がある。Salesforce DXも対応しており、今後はこれ一択、とかになりそうな気配。</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Apex Rest APIで任意のステータスコードを返す]]></title>
-    <link href="http://kayakuguri.github.io/blog/2017/11/27/apex-rest-response/"/>
-    <updated>2017-11-27T14:49:52+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2017/11/27/apex-rest-response</id>
-    <content type="html"><![CDATA[<p>カスタムでApex Rest APIを作成する際にレスポンスにステータスコードを反映させる方法。</p>
-
-<!-- more -->
-
-
-<h1>概要</h1>
-
-<p>今までは、返却用するJSON用のクラスを作成し、そのクラスを返却していたのだが、<br/>
-そもそも返却の方法としてはそれが正しくなかった（お作法に則っていなかった）よう。</p>
-
-<p><a href="https://kayakuguri.github.io/blog/2015/03/27/apex-rest-tips/">[salesforce]Apex REST作成時のtips</a><br/>
-この辺の記事内で返却しているやり方。</p>
-
-<p>実際には、<code>return</code>で結果を返す必要はなく、<code>RestResponse</code>クラスに追加してやるだけでよかった。</p>
-
-<ul>
-<li><a href="https://developer.salesforce.com/docs/atlas.ja-jp.apexcode.meta/apexcode/apex_methods_system_restresponse.htm">RestResponse クラス</a></li>
-</ul>
-
-
-<h1>RestResponse</h1>
-
-<h2>ステータスコード</h2>
-
-<p>ステータスコードの指定は以下のようにする。</p>
-
-<p><code>
-RestResponse res = RestContext.response;
-res.statusCode = 400;
-</code></p>
-
-<h2>ヘッダ情報</h2>
-
-<p>デフォルトの情報だと、<code>Content-Type</code>が<code>application/octetstream</code>になっているようなので、<code>application/json</code>に変更したい。<br/>
-ヘッダ情報の追加・変更は以下のようにする。</p>
-
-<p><code>
-RestResponse res = RestContext.response;
-res.addHeader('Content-Type', 'application/json');
-</code></p>
-
-<h2>レスポンス内容</h2>
-
-<p>レスポンスの内容をJSONで返す場合、作成した返却用クラスをJSONにパースし、<code>Blob</code>にキャストして追加してやる。</p>
-
-<p>```
-ResultData result = new ResultData();</p>
-
-<p>RestResponse res = RestContext.response;
-res.responseBody = Blob.valueOf(JSON.serialize(result));
-```</p>
-
-<h2>コード</h2>
-
-<p>上記をまとめると以下のような形になる。</p>
-
-<p>```
-@RestResource(urlMapping=&lsquo;/your/api&rsquo;)
-global with sharing class Your_Apex_Class  {</p>
-
-<pre><code>@HttpPost
-global static void something_method() {
-  ResultData result = new ResultData();
-  result.success = false;
-  ResultError error = new ResultError();
-  result.error = error;
-
-  RestResponse res = RestContext.response;
-  res.addHeader('Content-Type', 'application/json');
-  // (中略)
-
-  if(/* エラーの場合 */){
-    error.message = 'エラーメッセージ';
-    res.statusCode = 400;
-    res.responseBody = Blob.valueOf(JSON.serialize(result));
-    return;
-  }
-
-  // (中略)
-  result.success = true;
-  res.statusCode = 200;
-  res.responseBody = Blob.valueOf(JSON.serialize(result));
-  return;
-}
-
-global class ResultData{
-  global Boolean success;
-  global ResultError error;
-}
-
-global class ResultError{
-  global String message;
-}
-</code></pre>
-
-<p>} <br/>
-```</p>
-
-<p>エラー発生時にはステータスコードが<code>400</code>で以下のようなJSONが返却される。</p>
-
-<p>```
-{</p>
-
-<pre><code>"success": false,
-"error": {
-    "message": "エラーメッセージ"
-}
-</code></pre>
-
-<p>}
-```</p>
-
-<h1>テスト</h1>
-
-<p>テストクラスを書く際に、送信結果を取得する場合には以下のようにする。</p>
-
-<p>```
-@isTest static void your_something_test() {</p>
-
-<pre><code>String json_str = '{ "YOUR" : "JSON_DATA" }';
-
-//あらかじめ宣言が必要
-RestRequest req = new RestRequest();
-req.requestBody = Blob.valueof(json_str);
-RestContext.request = req;
-RestResponse res = new RestResponse();
-RestContext.response = res;
-
-Your_Apex_Class.something_method(); //実行
-
-System.assertEquals(res.statusCode, 400); //ステータスコード
-//返却されたJSON文字列をMapにキャストする
-Map&lt;String, Object&gt; requestBody = (Map&lt;String, Object&gt;)JSON.deserializeUntyped(res.responseBody.ToString());
-Map&lt;String, Object&gt; errorBody = (Map&lt;String, Object&gt;)requestBody.get('error');
-System.assertEquals(errorBody.get('message'), 'エラーメッセージ'); //エラーメッセージ
-</code></pre>
-
-<p>}
-```</p>
-
-<h1>参考</h1>
-
-<ul>
-<li><a href="https://salesforce.stackexchange.com/questions/54010/apexrest-controlling-http-error-codes-on-exceptions">apexrest: controlling HTTP error codes on exceptions</a></li>
-</ul>
-
 ]]></content>
   </entry>
   

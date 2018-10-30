@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2018-10-23T10:08:35+09:00</updated>
+  <updated>2018-10-30T15:00:55+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,49 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Salesforce CLIのコマンドをzshで補完する]]></title>
+    <link href="http://kayakuguri.github.io/blog/2018/10/30/sfdx-cli-completion/"/>
+    <updated>2018-10-30T14:55:15+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2018/10/30/sfdx-cli-completion</id>
+    <content type="html"><![CDATA[<p>Salesforce CLIを使ってDX周りのコマンドを叩こうとするとコマンドが結構長い。<br/>
+なので、それを補完するzsh用のライブラリが、SFの中の人によって公開されているので設定する。</p>
+
+<p><a href="https://github.com/wadewegner/salesforce-cli-zsh-completion">wadewegner/salesforce-cli-zsh-completion： A Zsh completion file for the Salesforce CLI (and script for updating it)</a></p>
+
+<!-- more -->
+
+
+<p>入れ方は公式の通り。</p>
+
+<p>どこか適切な場所にリポジトリをクローンし、それを読み込んで利用する。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$ git clone git@github.com:wadewegner/salesforce-cli-zsh-completion.git</span></code></pre></td></tr></table></div></figure>
+
+
+<p><code>.zshrc</code> ファイルに以下の設定を追記する。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'># add custom completion scripts
+</span><span class='line'>fpath=({YOURPATH}/salesforce-cli-zsh-completion $fpath)
+</span><span class='line'>
+</span><span class='line'># compsys initialization
+</span><span class='line'>autoload -U compinit
+</span><span class='line'>compinit</span></code></pre></td></tr></table></div></figure>
+
+
+<p>ターミナルを再起動。</p>
+
+<p><code>$ sfdx forc</code>などと打って、タブを押すと<code>force</code>、<code>sfdx force:</code>の後にタブを打つと設定されているコマンドの一覧がリストで表示されたりするようになる。</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[SF] サイトでレコードを保存する際にハマったメモ]]></title>
@@ -2178,103 +2221,6 @@ Laravelのtestsディレクトリを指定しておく。（どこでもよい�
 <li><a href="https://confluence.jetbrains.com/display/PhpStorm/Running+PHPUnit+tests+over+SSH+on+a+remote+server+with+PhpStorm">Running PHPUnit tests over SSH on a remote server with PhpStorm &ndash; PhpStorm &ndash; Confluence</a></li>
 </ul>
 
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[Laravel]キューのdelayとsleepオプション]]></title>
-    <link href="http://kayakuguri.github.io/blog/2017/09/22/laravel-queue-delay-sleep/"/>
-    <updated>2017-09-22T15:05:42+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2017/09/22/laravel-queue-delay-sleep</id>
-    <content type="html"><![CDATA[<p>Laravelにてキューを実行させる際に、delayとsleepオプションの関係がちょっと変だったのでメモ。</p>
-
-<!-- more -->
-
-
-<h1>sleep</h1>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>--sleep[=SLEEP]      Number of seconds to sleep when no job is available [default: "3"]</span></code></pre></td></tr></table></div></figure>
-
-
-<p>ジョブがない場合に次のジョブを取得するまでにスリープする秒数の設定。</p>
-
-<h1>delay</h1>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>--delay[=DELAY]      The number of seconds to delay failed jobs [default: "0"]</span></code></pre></td></tr></table></div></figure>
-
-
-<p>ジョブが失敗した場合に再試行するまでの遅延時間。</p>
-
-<h1>delayとsleep</h1>
-
-<p>両方設定した場合の動作が少し変な気がするのでそれぞれ試してみた。</p>
-
-<table>
-<thead>
-<tr>
-<th></th>
-<th align="left"> delay </th>
-<th align="left"> sleep </th>
-<th align="left"> 失敗時遅延 </th>
-<th align="left"> 待機 </th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td></td>
-<td align="left"> なし </td>
-<td align="left"> 30 </td>
-<td align="left"> 0 </td>
-<td align="left"> 30 </td>
-</tr>
-<tr>
-<td></td>
-<td align="left"> 30 </td>
-<td align="left"> なし </td>
-<td align="left"> 30 </td>
-<td align="left"> 0 </td>
-</tr>
-<tr>
-<td></td>
-<td align="left"> 5 </td>
-<td align="left"> 30 </td>
-<td align="left"> 30 </td>
-<td align="left"> 30 </td>
-</tr>
-<tr>
-<td></td>
-<td align="left"> 30 </td>
-<td align="left"> 5 </td>
-<td align="left"> 30 </td>
-<td align="left"> 5 </td>
-</tr>
-</tbody>
-</table>
-
-
-<p>実行コマンドは以下。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>$ php artisan queue:listen --sleep=xx --delay=xx</span></code></pre></td></tr></table></div></figure>
-
-
-<p>結果は、3行目の<code>delay=5 sleep=30</code>の時だけ意図した動作と違っていた。<br/>
-本来ならば<code>delay=5</code>なので失敗時の再試行までの遅延は5秒のはずなのに、sleepに設定している30秒が適用されているようだった。</p>
-
-<h1>結論</h1>
-
-<ul>
-<li>delay > sleep の場合は意図通り動作する</li>
-<li>delay &lt; sleep の場合はsleepに設定した時間がdelayにも適用される</li>
-</ul>
-
-
-<p>これはバグだろうか…。<br/>
-本体のコードをちょっとだけ追ってみたけどよくわからなかったのでもし誰かわかればお願いします。</p>
-
-<p><a href="https://github.com/laravel/framework">laravel/framework</a></p>
 ]]></content>
   </entry>
   
