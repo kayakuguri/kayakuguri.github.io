@@ -4,7 +4,7 @@
   <title><![CDATA[Category: salesforce | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/salesforce/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2018-10-30T15:00:55+09:00</updated>
+  <updated>2018-12-13T21:44:34+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,56 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[SF] Lightning Experienceの詳細ページのボタンアクションの上書き]]></title>
+    <link href="http://kayakuguri.github.io/blog/2018/12/13/lightning-button-action-override/"/>
+    <updated>2018-12-13T21:38:50+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2018/12/13/lightning-button-action-override</id>
+    <content type="html"><![CDATA[<p>Lightning Experienceにて、詳細ページからのボタンの遷移先を自作のコンポーネントにするやり方。</p>
+
+<!-- more -->
+
+
+<h1>Lightningコンポーネント</h1>
+
+<p>遷移先として設定したいLightningコンポーネントの、<code>aura:component</code>タグの<code>implements</code>に<code>lightning:actionOverride</code>をつける。</p>
+
+<p><code>
+&lt;aura:component implements="lightning:actionOverride" /&gt;
+</code></p>
+
+<p>こうすれば、コンポーネントの選択肢として現れるようになる。<br/>
+ただし上書きされたアクションは、モーダル表示ではなく、常にページ遷移となる。</p>
+
+<p>さらに、編集ボタンを押下した際にはそのレコードのIDを持った状態で遷移するが、それを取得するには、<code>implements</code>に、<code>force:hasRecordId</code>を付与し、さらに、<code>force:recordData</code>タグを使用してIDを渡してやる必要がある。</p>
+
+<p><code>
+&lt;aura:component implements="lightning:actionOverride,force:hasRecordId" /&gt;
+&lt;force:recordData aura:id="recordEditor" layoutType="FULL" recordId="{!v.recordId}"/&gt;
+</code></p>
+
+<p>すると、JSコントローラの中で以下のようにIDを取得することが可能。</p>
+
+<p><code>js
+component.get("v.recordId");
+</code></p>
+
+<h1>設定変更</h1>
+
+<p>オブジェクトマネージャから、設定したいオブジェクトの、「ボタン、リンク、およびアクション」を開き、設定したいボタンを編集することで変更可能。</p>
+
+<h1>参考</h1>
+
+<ul>
+<li><a href="https://help.salesforce.com/articleView?id=links_customize_override.htm&amp;type=5">標準ボタンとタブのホームページの上書き</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.ja-jp.lightning.meta/lightning/components_using_lex_s1_action_overrides_markup.htm">アクション上書きとして使用する Lightning コンポーネントの作成 | Lightning コンポーネント開発者ガイド | Salesforce Developers</a></li>
+<li><a href="https://trailhead.salesforce.com/ja/content/learn/modules/lightning_data_service/lightning_data_service_manipulate_records">force：recordData を使用したレコードの操作 単元 | Salesforce Trailhead</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.ja-jp.lightning.meta/lightning/data_service_load_record.htm">レコードの読み込み | Lightning コンポーネント開発者ガイド | Salesforce Developers</a></li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Salesforce CLIのコマンドをzshで補完する]]></title>
@@ -258,144 +308,6 @@ return tz.getOffset(DateTime.now()) / (1000 * 3600 * 24.0);
 <li><a href="https://www.xgeek.net/ja/salesforce/display-datetime-with-timezone-in-visualforce-page/">Visualforce Pageでタイムゾーン時間の出力 | Xgeek</a></li>
 </ul>
 
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Illuminated Cloud 2を使ってみる]]></title>
-    <link href="http://kayakuguri.github.io/blog/2018/04/23/illuminated-cloud-2/"/>
-    <updated>2018-04-23T15:19:26+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2018/04/23/illuminated-cloud-2</id>
-    <content type="html"><![CDATA[<p>MavensMateが開発終了、ということで、Illuminated Cloudを使ってみる。</p>
-
-<!-- more -->
-
-
-<h1>概要</h1>
-
-<p><a href="http://www.illuminatedcloud.com/">Illuminated Cloud</a></p>
-
-<p>Salesforce公式が出している、JetBrainsのエディタのプラグイン。<br/>
-<a href="https://plugins.jetbrains.com/plugin/10253-illuminated-cloud-2">Illuminated Cloud 2 ：： JetBrains Plugin Repository</a></p>
-
-<p>補完もちゃんと出るし、テストやdeployも可能っぽい。<br/>
-以下、英語だけどデモ動画。</p>
-
-<iframe width="560" height="315" src="https://www.youtube.com/embed/7kzZrCoNWN8?rel=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
-
-
-<p>以下の２つのエディタで利用可能</p>
-
-<ul>
-<li>IntelliJ IDEA
-
-<ul>
-<li><a href="https://www.jetbrains.com/idea/">IntelliJ IDEA： The Java IDE for Professional Developers by JetBrains</a></li>
-</ul>
-</li>
-<li>WebStorm IDEs
-
-<ul>
-<li><a href="https://www.jetbrains.com/webstorm/">WebStorm： The Smartest JavaScript IDE by JetBrains</a></li>
-</ul>
-</li>
-</ul>
-
-
-<p>IntelliJ IDEAのCommunity Editionなら無料で使用可能。</p>
-
-<p>30日間は無料トライアルがあるが、それ以降は、$125/年、のサブスクリプションプランとなっている。</p>
-
-<h1>インストール</h1>
-
-<p>Preferencesから、Pluginsを選択し、Browse repositories&hellip;を選択。<br/>
-検索に、<code>Illu</code>などと入力して、結果の、<code>Illuminated Cloud 2</code>を選択してインストールする。<br/>
-(<code>Illuminated Cloud</code>無印の方は古い方なので間違えないように）</p>
-
-<h1>プロジェクトの作成</h1>
-
-<p>New Projectを選択し、Illuminated Cloudを選択。</p>
-
-<p><img src="/images/2018/04/illuminated01.png" alt="" /></p>
-
-<p>Connectionの部分で接続するSalesforceのアカウントを選択する。<br/>
-まずはアカウントの設定が必要なので、鉛筆マークからアカウント情報を追加すする。</p>
-
-<p><img src="/images/2018/04/illuminated02.png" alt="" /></p>
-
-<p>入力して、Testボタンで接続テストが可能。Connection configuration is valid.と表示されればOK。<br/>
-(TestせずにOKをクリックすると接続確認してからでないと接続出来ない、等の警告が出た）<br/>
-OKをクリックすると、メタデータが取得され、どれを同期するかのリストが表示されるので、ApexやVFなど必要なものを選択してNextをクリック。</p>
-
-<p><img src="/images/2018/04/illuminated03.jpg" alt="" /></p>
-
-<p>プロジェクトの保存先を聞かれるので選択。</p>
-
-<p>作成されると、以下のアラートが表示された。</p>
-
-<p><img src="/images/2018/04/illuminated04.jpg" alt="" /></p>
-
-<p>MavensMateなんかと同じく、保存アクション(コマンド+S)時にSFへDeployするかどうか、のよう。<br/>
-ファイルの保存自体は自動で行われるので、deployしたい場合にのみ、コマンド+Sする、という流れになりそう。<br/>
-Yesで有効化しておく。</p>
-
-<h2>使用する</h2>
-
-<p>FAQとして、メニューのショートカットの一覧？が載っていた。<br/>
-<a href="http://www.illuminatedcloud.com/support/faq">FAQ &ndash; Illuminated Cloud</a></p>
-
-<h3>新規作成</h3>
-
-<p>新規作成はFile→Newで作成可能。<br/>
-<code>src/classes</code>を選択した状態では<code>Apex Class</code>が、<code>src/pages</code>を選択した状態だと、<code>Visualforce Page</code>が選択肢に表示される。</p>
-
-<p><img src="/images/2018/04/illuminated05.png" alt="" /></p>
-
-<p>SF側の更新を聞かれるので、Yesで。</p>
-
-<p><img src="/images/2018/04/illuminated06.png" alt="" /></p>
-
-<p>作成するとSFの方にもそのまま作成される。</p>
-
-<h3>削除</h3>
-
-<p>ファイルを右クリックでDeleteを選択。いくつか聞かれるが、Yesを選んでいけば、SF上のファイルも削除される。</p>
-
-<h3>同期</h3>
-
-<p>SF側で作成や削除したファイルがあれば、Retrievalから同期が可能。</p>
-
-<p><img src="/images/2018/04/illuminated07.jpg" alt="" /></p>
-
-<p>新しく追加したい時は、Searver Onlyにチェックし、 <code>Retrieve for Merge</code>をクリックする。</p>
-
-<p><img src="/images/2018/04/illuminated08.jpg" alt="" /></p>
-
-<p>すると、マージするファイルの選択画面となるので、選択し、緑の三角をクリックして選択しているファイルをマージさせる。<br/>
-(この場合は2ファイル追加）</p>
-
-<p><img src="/images/2018/04/illuminated09.jpg" alt="" /></p>
-
-<h3>テスト</h3>
-
-<p>Run → Runを選択。(Ctrl + Opt + R)<br/>
-Edit Configurations..というウインドウが出るのでそのままクリック。<br/>
-左のツリーから、Apex Unit Testsを選択。<br/>
-Test Classesからテストしたいクラスを選択。</p>
-
-<p><img src="/images/2018/04/illuminated10.png" alt="" /></p>
-
-<p>そのままRunをクリックすればテストが実行される。<br/>
-結果は以下のような感じ。</p>
-
-<p><img src="/images/2018/04/illuminated11.jpg" alt="" /></p>
-
-<h1>まとめ</h1>
-
-<p>Eclipseの時と違って特に悩むようなところはなかった。<br/>
-ただ、この機能ってどこにあるんだろう？となった時に探す手段がない。<br/>
-公式のドキュメントもそれらしいものがほぼないし。<br/>
-とはいえ、公式で有料のものなので今後のサポートなどは安心感がある。Salesforce DXも対応しており、今後はこれ一択、とかになりそうな気配。</p>
 ]]></content>
   </entry>
   
