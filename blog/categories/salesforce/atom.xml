@@ -4,7 +4,7 @@
   <title><![CDATA[Category: salesforce | KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/blog/categories/salesforce/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2018-12-13T21:44:34+09:00</updated>
+  <updated>2018-12-13T21:46:30+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -43,7 +43,7 @@
 
 <p>すると、JSコントローラの中で以下のようにIDを取得することが可能。</p>
 
-<p><code>js
+<p><code>
 component.get("v.recordId");
 </code></p>
 

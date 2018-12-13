@@ -4,7 +4,7 @@
   <title><![CDATA[KayaMemo]]></title>
   <link href="http://kayakuguri.github.io/atom.xml" rel="self"/>
   <link href="http://kayakuguri.github.io/"/>
-  <updated>2018-10-30T15:00:55+09:00</updated>
+  <updated>2018-12-13T21:46:30+09:00</updated>
   <id>http://kayakuguri.github.io/</id>
   <author>
     <name><![CDATA[萱潜]]></name>
@@ -12,6 +12,57 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[SF] Lightning Experienceの詳細ページのボタンアクションの上書き]]></title>
+    <link href="http://kayakuguri.github.io/blog/2018/12/13/lightning-button-action-override/"/>
+    <updated>2018-12-13T21:38:50+09:00</updated>
+    <id>http://kayakuguri.github.io/blog/2018/12/13/lightning-button-action-override</id>
+    <content type="html"><![CDATA[<p>Lightning Experienceにて、詳細ページからのボタンの遷移先を自作のコンポーネントにするやり方。</p>
+
+<!-- more -->
+
+
+<h1>Lightningコンポーネント</h1>
+
+<p>遷移先として設定したいLightningコンポーネントの、<code>aura:component</code>タグの<code>implements</code>に<code>lightning:actionOverride</code>をつける。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;aura:component implements="lightning:actionOverride" /&gt;</span></code></pre></td></tr></table></div></figure>
+
+
+<p>こうすれば、コンポーネントの選択肢として現れるようになる。<br/>
+ただし上書きされたアクションは、モーダル表示ではなく、常にページ遷移となる。</p>
+
+<p>さらに、編集ボタンを押下した際にはそのレコードのIDを持った状態で遷移するが、それを取得するには、<code>implements</code>に、<code>force:hasRecordId</code>を付与し、さらに、<code>force:recordData</code>タグを使用してIDを渡してやる必要がある。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;aura:component implements="lightning:actionOverride,force:hasRecordId" /&gt;
+</span><span class='line'>&lt;force:recordData aura:id="recordEditor" layoutType="FULL" recordId="{!v.recordId}"/&gt;</span></code></pre></td></tr></table></div></figure>
+
+
+<p>すると、JSコントローラの中で以下のようにIDを取得することが可能。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>component.get("v.recordId");</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>設定変更</h1>
+
+<p>オブジェクトマネージャから、設定したいオブジェクトの、「ボタン、リンク、およびアクション」を開き、設定したいボタンを編集することで変更可能。</p>
+
+<h1>参考</h1>
+
+<ul>
+<li><a href="https://help.salesforce.com/articleView?id=links_customize_override.htm&amp;type=5">標準ボタンとタブのホームページの上書き</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.ja-jp.lightning.meta/lightning/components_using_lex_s1_action_overrides_markup.htm">アクション上書きとして使用する Lightning コンポーネントの作成 | Lightning コンポーネント開発者ガイド | Salesforce Developers</a></li>
+<li><a href="https://trailhead.salesforce.com/ja/content/learn/modules/lightning_data_service/lightning_data_service_manipulate_records">force：recordData を使用したレコードの操作 単元 | Salesforce Trailhead</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.ja-jp.lightning.meta/lightning/data_service_load_record.htm">レコードの読み込み | Lightning コンポーネント開発者ガイド | Salesforce Developers</a></li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Salesforce CLIのコマンドをzshで補完する]]></title>
@@ -2072,153 +2123,6 @@ ProximoだとURLをパースしたりとかが必要なのか…など悩んで�
 <li><a href="https://qiita.com/kumita_ryusuke/items/377428f4d8219608bdbd">【AWS】ロードバランサー+ApacheでHTTPSリダイレクトをしてみる &ndash; Qiita</a></li>
 <li><a href="https://qiita.com/kawaz/items/5e96dae9686e3ac402fe">httpsへ強制リダイレクトするコピペ用RewriteRule（ELBやCloudFront対応） &ndash; Qiita</a></li>
 <li><a href="http://furyu.hatenablog.com/entry/20150410/1428674881">さくらのレンタルサーバ・共有SSLで .htaccess によりSSLのみのアクセス許可を設定する方法 &ndash; 風柳メモ</a></li>
-</ul>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[PhpStormを使用してPHP UnitのテストをVagrantのリモート上で実行する]]></title>
-    <link href="http://kayakuguri.github.io/blog/2017/09/22/laravel-phpunit-vagrant-phpstorm/"/>
-    <updated>2017-09-22T19:05:58+09:00</updated>
-    <id>http://kayakuguri.github.io/blog/2017/09/22/laravel-phpunit-vagrant-phpstorm</id>
-    <content type="html"><![CDATA[<p>LaravelのUnitテストを実行すべく、ローカルのVagrant環境上でPHP Unitを実行するように設定してみた。</p>
-
-<!-- more -->
-
-
-<h1>環境</h1>
-
-<ul>
-<li>Vagrant
-
-<ul>
-<li><a href="https://box.scotch.io/">ScotchBox</a></li>
-</ul>
-</li>
-<li>Laravel 5.5.7</li>
-<li>PHP 7.0</li>
-</ul>
-
-
-<h1>PHP Unit</h1>
-
-<p>PHP UnitはCompoerにてプロジェクトディレクトリにインストールする。<br/>
-LaravelではデフォルトでComposerに入っているので特に設定はなし。<br/>
-(Linuxに入れる必要はない)</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>"phpunit/phpunit": "~6.0"</span></code></pre></td></tr></table></div></figure>
-
-
-<h1>PhpStorm</h1>
-
-<p>PhpStormでの設定方法。<br/>
-設定したいプロジェクトのルートディレクトリを開いた状態で設定する。</p>
-
-<h2>PHP Interpreter</h2>
-
-<p><code>Preference</code>を開く。<br/>
-<code>Languages &amp; Frameworks -&gt; PHP -&gt; Test Frameworks</code>を選択。<br/>
-<code>+</code>マークをクリックし、<code>PHPUnit by Remote Interpreter</code>を選択する。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2017/09/phpunit_01.jpg" alt="" /></p>
-
-<p>Interpreterを選択するウインドウが開くが、interpreterがないので作成する。<br/>
-右端の<code>...</code>をクリックする。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2017/09/phpunit_02.jpg" alt="" /></p>
-
-<p>ウインドウが開くので、<code>+</code>をクリックし、<code>From Docker, Vagrant, VM, Remote...</code>を選択。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2017/09/phpunit_03.jpg" alt="" /></p>
-
-<p>開いたウインドウで、<code>Vagrant</code>を選択。すると自動で設定が読み込まれるのでそのままOKする。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2017/09/phpunit_04.jpg" alt="" /></p>
-
-<p>OKをクリックすると、SSH接続が行われ情報が自動で読み込まれる。<br/>
-そのままでOKなのでOKをクリックする。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2017/09/phpunit_05.jpg" alt="" /></p>
-
-<p>Interpreterを選択する画面に戻るので、作成したInterpreterを選択し、OKをクリック。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2017/09/phpunit_06.jpg" alt="" /></p>
-
-<p>追加したInterpreterでPHPUnitのライブラリを指定するが、Composer経由でのロードになるので、デフォルトの<code>Use Composer autoloader</code>のままでよい。<br/>
-Vagrant内でのautolodのパスを指定するので、<code>...</code>をクリック。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2017/09/phpunit_07.jpg" alt="" /></p>
-
-<p>Scothboxは<code>/var/www</code>がホストと共有しているディレクトリになるので、そこから<code>vendor/autoload.php</code>を選択する。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2017/09/phpunit_08.jpg" alt="" /></p>
-
-<p>選択すると、追加されているPHPUnitのバージョンが表示される。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2017/09/phpunit_09.jpg" alt="" /></p>
-
-<p>これでInterpreterの設定は完了。</p>
-
-<h2>Run/Debug Configurations</h2>
-
-<p>Configurationsの設定を行う。</p>
-
-<p>メニューから、<code>Run -&gt; Edit Configurations</code>を選択。</p>
-
-<p><code>+</code>をクリックし、<code>PHPUnit</code>のConfigurationを追加する。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2017/09/phpunit_10.jpg" alt="" /></p>
-
-<p>Nameは適当に書く。<br/>
-Test scopeはテストしたいディレクトリを選択する。<br/>
-Laravelのtestsディレクトリを指定しておく。（どこでもよい）<br/>
-この設定の下部に、Errorと出ているのでFixをクリック。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2017/09/phpunit_11.jpg" alt="" /></p>
-
-<p>PHPの設定ウインドウが開くので、<code>PHP language level</code>はVagrant環境に合わせて<code>7</code>を選択。<br/>
-<code>CLI Interpreter</code>は設定したinterpreterを選択する。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2017/09/phpunit_12.jpg" alt="" /></p>
-
-<p>OKで閉じる。</p>
-
-<h2>実行</h2>
-
-<p>右上のセレクトボックスが、先ほど作成したConfigurationが選択されている状態になっているはずなので、そのまま緑の三角をクリック。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2017/09/phpunit_13.jpg" alt="" /></p>
-
-<p>すると、<code>tests</code>ディレクトリ以下のテストファイルが自動で起動し、テストが実行される。<br/>
-デフォルトのサンプルテストは必ず成功するので、無事、テストが通ればOK。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2017/09/phpunit_14.jpg" alt="" /></p>
-
-<p><code>ExampleTest.php</code>の<code>assertTrue</code>を<code>false</code>にしてみて失敗させてみる。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>public function testBasicTest()
-</span><span class='line'>{
-</span><span class='line'>    $this-&gt;assertTrue(false);
-</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
-
-
-<p>ファイルを選択して右クリックすれば、そのファイルのみをテスト実行する事も可能。<br/>
-失敗すると以下のようになる。</p>
-
-<p><img src="http://kayakuguri.github.io/images/2017/09/phpunit_15.jpg" alt="" /></p>
-
-<p>これで無事、成功と失敗の動作が確認できた。</p>
-
-<h1>参考</h1>
-
-<ul>
-<li><a href="https://confluence.jetbrains.com/display/PhpStorm/Running+PHPUnit+tests+over+SSH+on+a+remote+server+with+PhpStorm">Running PHPUnit tests over SSH on a remote server with PhpStorm &ndash; PhpStorm &ndash; Confluence</a></li>
 </ul>
 
 ]]></content>
